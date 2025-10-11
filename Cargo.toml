@@ -1,0 +1,22 @@
+[package]
+name = "noobwerkz-ng"
+version = "0.0.1"
+edition = "2024"
+
+[lib]
+name = "noobwerkz"
+path = "src/lib.rs"
+
+[dependencies]
+ozz-animation-rs = "0.10.2"
+smartcore = "0.4.3"
+rerecast = "0.2.0"
+dodgy_3d = "0.5.2"
+dodgy_2d = "0.5.5"
+sampled-dmc = "0.1.2"
+glam = "0.30.8"
+rapier3d = "0.30.0"
+wgpu = "27.0.1"
+winit = "0.30.12"
+pollster = "0.4.0"
+env_logger = "0.11.8"
