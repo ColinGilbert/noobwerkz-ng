@@ -8,7 +8,7 @@ use winit::{
     window::{Window, WindowId},
 };
 use crate::graphics::*;
-
+use crate::mesh::*;
 
 pub struct State {
     window: Arc<Window>,
@@ -17,6 +17,7 @@ pub struct State {
     size: winit::dpi::PhysicalSize<u32>,
     surface: wgpu::Surface<'static>,
     surface_format: wgpu::TextureFormat,
+    graphics_context: GraphicsContext
 }
 
 impl State {
@@ -36,7 +37,7 @@ impl State {
         let surface = instance.create_surface(window.clone()).unwrap();
         let cap = surface.get_capabilities(&adapter);
         let surface_format = cap.formats[0];
-
+        let graphics_context = GraphicsContext {meshes: Mesh3dMap::<Mesh3d>::new()};
         let state = State {
             window,
             device,
@@ -44,6 +45,7 @@ impl State {
             size,
             surface,
             surface_format,
+            graphics_context
         };
 
         // Configure surface for the first time
@@ -113,7 +115,7 @@ impl State {
         });
 
         // If you wanted to call any drawing commands, they would go here.
-        crate::graphics::render(&mut self.device);
+        crate::graphics::render(&mut self.device, &self.graphics_context);
         // End the renderpass.
         drop(renderpass);
 
