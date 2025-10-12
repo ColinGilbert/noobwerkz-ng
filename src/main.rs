@@ -1,10 +1,7 @@
 use std::time::Duration;
-use dmc::{octree::*, duals::*};
-use ozz_animation_rs::math::f32_cos;
-use ozz_animation_rs::*;
-use std::collections::*;
 use winit::event_loop::*;
 use noobwerkz::windowing::*;
+
 fn main() {
     // wgpu uses `log` for all of our logging, so we initialize a logger with the `env_logger` crate.
     //
@@ -26,6 +23,6 @@ fn main() {
     // the background.
     // event_loop.set_control_flow(ControlFlow::Wait);
 
-    let mut app = App::default();
+    let mut app = noobwerkz::windowing::App::default();
     event_loop.run_app(&mut app).unwrap();
 }

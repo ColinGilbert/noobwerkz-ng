@@ -1,3 +1,5 @@
+//use glam::{Mat4, Quat, Vec3A};
+
 use std::sync::Arc;
 use winit::{
     application::ApplicationHandler,
@@ -5,6 +7,8 @@ use winit::{
     event_loop::{ActiveEventLoop, ControlFlow, EventLoop},
     window::{Window, WindowId},
 };
+use crate::graphics::*;
+
 
 pub struct State {
     window: Arc<Window>,
@@ -99,7 +103,7 @@ impl State {
                 depth_slice: None,
                 resolve_target: None,
                 ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(wgpu::Color::GREEN),
+                    load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
                     store: wgpu::StoreOp::Store,
                 },
             })],
@@ -109,7 +113,7 @@ impl State {
         });
 
         // If you wanted to call any drawing commands, they would go here.
-
+        crate::graphics::render(&mut self.device);
         // End the renderpass.
         drop(renderpass);
 
