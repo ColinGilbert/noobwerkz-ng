@@ -37,7 +37,7 @@ impl State {
         let surface = instance.create_surface(window.clone()).unwrap();
         let cap = surface.get_capabilities(&adapter);
         let surface_format = cap.formats[0];
-        let graphics_context = GraphicsContext {meshes: Mesh3dMap::<Mesh3d>::new()};
+        let graphics_context = GraphicsContext::new();
         let state = State {
             window,
             device,

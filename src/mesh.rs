@@ -1,14 +1,15 @@
 use std::collections::*;
 use glam::*;
 use safe_index::*;
+use crate::types::*;
 
 safe_index::new! {
   Mesh3dHandle,
-  map: Mesh3dMap
+  map: Meshes3d
 }
 
 pub struct Mesh3d {
-  verts: Vec<glam::Vec3>,
-  normals: Vec<glam::Vec3>,
+  verts: Vec<NoobVec3f32>,
+  normals: Vec<NoobVec3f32>,
   uvs: Vec<glam::Vec2>,
 }
