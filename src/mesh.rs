@@ -9,7 +9,8 @@ safe_index::new! {
 }
 
 pub struct Mesh3d {
-  verts: Vec<NoobVec3f32>,
-  normals: Vec<NoobVec3f32>,
+  verts: Vec<NoobVec3>,
+  normals: Vec<NoobVec3>,
   uvs: Vec<glam::Vec2>,
 }
+
