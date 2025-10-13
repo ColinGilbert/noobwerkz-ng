@@ -23,7 +23,7 @@ pub struct GraphicsContext {
 }
 
 impl GraphicsContext {
-  pub fn new(height: f32, width: f32) -> Self {
+  pub fn new(height: u32, width: u32) -> Self {
     GraphicsContext {
         meshes: Meshes3d::<Mesh3d>::new(),
         pipelines: Pipelines::<wgpu::RenderPipeline>::new(),
@@ -39,6 +39,21 @@ pub struct GPUMesh {
   pub name: String,
   pub vertex_buffer: wgpu::Buffer,
   pub index_buffer: wgpu::Buffer,
+}
+
+
+pub struct CameraUniform {
+    pub view_position: glam::Vec4,
+    pub view_projection: glam::Mat4
+}
+
+impl CameraUniform {
+    pub fn new() -> Self {
+        Self {
+            view_position: glam::Vec4::from_array([0.0, 0.0, 0.0, 0.0]),
+            view_projection: glam::Mat4::IDENTITY,
+        }
+    }
 }
 
 // This is the main rendering loop

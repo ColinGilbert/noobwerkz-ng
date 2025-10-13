@@ -1659,6 +1659,7 @@ dependencies = [
  "dodgy_2d",
  "env_logger",
  "glam 0.30.8",
+ "libm",
  "ozz-animation-rs",
  "pollster",
  "rapier3d",
