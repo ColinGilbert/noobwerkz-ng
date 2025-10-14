@@ -18,6 +18,18 @@ pub struct ModelVertex {
     pub bitangent: [f32; 3],
 }
 
+impl ModelVertex {
+    pub fn new() -> Self {
+       Self{
+           position: [0.0;3],
+           tex_coords: [0.0;2],
+           normal: [0.0;3],
+           tangent: [0.0;3],
+           bitangent: [0.0;3],
+        }
+    }
+}
+
 impl Vertex for ModelVertex {
     fn desc() -> wgpu::VertexBufferLayout<'static> {
         use std::mem;
@@ -106,32 +118,50 @@ impl Material {
     }
 }
 
-pub struct Mesh {
+safe_index::new! {
+  TexturedMeshIndex,
+  map: TexturedMeshes
+}
+
+safe_index::new! {
+  MaterialIndex,
+  map: Materials
+}
+
+pub struct TexturedMesh {
     #[allow(unused)]
     pub name: String,
     pub vertex_buffer: wgpu::Buffer,
     pub index_buffer: wgpu::Buffer,
     pub num_elements: u32,
-    pub material: usize,
+    pub material: MaterialIndex,
 }
+
 
 pub struct Model {
-    pub meshes: Vec<Mesh>,
-    pub materials: Vec<Material>,
+    pub meshes: TexturedMeshes<TexturedMesh>,
+    pub materials: Materials<Material>,
 }
-
+impl Model {
+    pub fn new() -> Self {
+        Self {
+            meshes: TexturedMeshes::new(),
+            materials: Materials::new(),
+        }
+    }
+}
 pub trait DrawModel<'a> {
     #[allow(unused)]
     fn draw_mesh(
         &mut self,
-        mesh: &'a Mesh,
+        mesh: &'a TexturedMesh,
         material: &'a Material,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_mesh_instanced(
         &mut self,
-        mesh: &'a Mesh,
+        mesh: &'a TexturedMesh,
         material: &'a Material,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
@@ -169,7 +199,7 @@ where
 {
     fn draw_mesh(
         &mut self,
-        mesh: &'b Mesh,
+        mesh: &'b TexturedMesh,
         material: &'b Material,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
@@ -179,7 +209,7 @@ where
 
     fn draw_mesh_instanced(
         &mut self,
-        mesh: &'b Mesh,
+        mesh: &'b TexturedMesh,
         material: &'b Material,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
@@ -245,13 +275,13 @@ pub trait DrawLight<'a> {
     #[allow(unused)]
     fn draw_light_mesh(
         &mut self,
-        mesh: &'a Mesh,
+        mesh: &'a TexturedMesh,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_light_mesh_instanced(
         &mut self,
-        mesh: &'a Mesh,
+        mesh: &'a TexturedMesh,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -278,7 +308,7 @@ where
 {
     fn draw_light_mesh(
         &mut self,
-        mesh: &'b Mesh,
+        mesh: &'b TexturedMesh,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
     ) {
@@ -287,7 +317,7 @@ where
 
     fn draw_light_mesh_instanced(
         &mut self,
-        mesh: &'b Mesh,
+        mesh: &'b TexturedMesh,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
