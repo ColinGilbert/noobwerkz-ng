@@ -1,12 +1,12 @@
-use std::f32::consts::FRAC_PI_2;
+use core::f32::consts::FRAC_PI_2;
 
-pub const OPENGL_TO_WGPU_MATRIX: glam::Mat4 = glam::Mat4::from_cols(
-    glam::Vec4::from_array([1.0, 0.0, 0.0, 0.0]),
-    glam::Vec4::from_array([0.0, 1.0, 0.0, 0.0]),
-    glam::Vec4::from_array([0.0, 0.0, 0.5, 0.0]),
-    glam::Vec4::from_array([0.0, 0.0, 0.5, 1.0]),
-);
-//const FRAC_PI = 3.14
+// pub const OPENGL_TO_WGPU_MATRIX: glam::Mat4 = glam::Mat4::from_cols(
+//     glam::Vec4::from_array([1.0, 0.0, 0.0, 0.0]),
+//     glam::Vec4::from_array([0.0, 1.0, 0.0, 0.0]),
+//     glam::Vec4::from_array([0.0, 0.0, 0.5, 0.0]),
+//     glam::Vec4::from_array([0.0, 0.0, 0.5, 1.0]),
+// );
+
 const SAFE_FRAC_PI_2: f32 = FRAC_PI_2 - 0.0001;
 
 pub struct Camera {
@@ -33,16 +33,16 @@ impl Camera {
     }
 }
 
-pub struct CameraProjection {
+pub struct Projection {
     pub aspect_ratio: f32,
     pub fovy_rad: f32,
     pub znear: f32,
     pub zfar: f32,
 }
 
-impl CameraProjection {
+impl Projection {
     pub fn new(height: u32, width: u32) -> Self {
-        CameraProjection {
+        Projection {
            aspect_ratio: width as f32 / height as f32,
            fovy_rad: 0.0,
            znear: 0.0001,
@@ -62,6 +62,7 @@ impl CameraProjection {
 
 }
 
+// This represents the camera uniform that lives on the GPU
 pub struct CameraUniform {
     pub view_position: glam::Vec4,
     pub view_projection: glam::Mat4

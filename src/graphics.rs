@@ -1,22 +1,23 @@
+// THis file defines our graphics context and the render loop.
+
 use crate::mesh::*;
 use crate::camera::*;
+use crate::texture::*;
 
+
+// Here are the typesafe indices that we need
 safe_index::new! {
-  Pipeline,
+  PipelineIndex,
   map: Pipelines
 }
 
-safe_index::new! {
-    VertexBufferObject,
-    map: VBOs
-}
-
+// This is the graphics context used by the windowing subsystem 
 pub struct GraphicsContext {
     pub meshes: Meshes3d<Mesh3d>,
     //pub pipeline: wgpu::RenderPipeline,
     pub pipelines: Pipelines<wgpu::RenderPipeline>,
     pub camera: Camera,
-    pub projection: CameraProjection,
+    pub projection: Projection,
     // pub camera_controller: CameraController,
     pub camera_uniform: CameraUniform,
     
@@ -28,38 +29,17 @@ impl GraphicsContext {
         meshes: Meshes3d::<Mesh3d>::new(),
         pipelines: Pipelines::<wgpu::RenderPipeline>::new(),
         camera: Camera::new(),
-        projection: CameraProjection::new(height, width),
+        projection: Projection::new(height, width),
         camera_uniform: CameraUniform::new(),
-        //vbos: VBOs::<wgpu::Buffer>::new()
     } 
   }
 }
 
-pub struct GPUMesh {
-  pub name: String,
-  pub vertex_buffer: wgpu::Buffer,
-  pub index_buffer: wgpu::Buffer,
-}
 
 
-pub struct CameraUniform {
-    pub view_position: glam::Vec4,
-    pub view_projection: glam::Mat4
-}
-
-impl CameraUniform {
-    pub fn new() -> Self {
-        Self {
-            view_position: glam::Vec4::from_array([0.0, 0.0, 0.0, 0.0]),
-            view_projection: glam::Mat4::IDENTITY,
-        }
-    }
-}
 
 // This is the main rendering loop
 pub fn render(wgpu_backend: &mut wgpu::Device, graphics_context: &GraphicsContext) {
 
 
 }
-
-// Here are helper functions
