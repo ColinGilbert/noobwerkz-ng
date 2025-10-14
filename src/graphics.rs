@@ -1,6 +1,5 @@
 // THis file defines our graphics context and the render loop.
 
-use crate::mesh::*;
 use crate::camera::*;
 use crate::texture::*;
 
@@ -13,7 +12,6 @@ safe_index::new! {
 
 // This is the graphics context used by the windowing subsystem 
 pub struct GraphicsContext {
-    pub meshes: Meshes3d<Mesh3d>,
     //pub pipeline: wgpu::RenderPipeline,
     pub pipelines: Pipelines<wgpu::RenderPipeline>,
     pub camera: Camera,
@@ -26,7 +24,6 @@ pub struct GraphicsContext {
 impl GraphicsContext {
   pub fn new(height: u32, width: u32) -> Self {
     GraphicsContext {
-        meshes: Meshes3d::<Mesh3d>::new(),
         pipelines: Pipelines::<wgpu::RenderPipeline>::new(),
         camera: Camera::new(),
         projection: Projection::new(height, width),

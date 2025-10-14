@@ -8,7 +8,6 @@ use winit::{
     window::{Window, WindowId},
 };
 use crate::graphics::*;
-use crate::mesh::*;
 
 pub struct State {
     window: Arc<Window>,

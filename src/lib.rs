@@ -1,7 +1,6 @@
 
 pub mod windowing;
 pub mod graphics;
-pub mod mesh;
 pub mod types;
 pub mod camera;
 pub mod texture;
