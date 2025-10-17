@@ -1,32 +1,26 @@
 use capnp::message::*;
 use capnp::*;
-use rapier3d::parry::query::sat::cuboid_support_map_compute_separation_wrt_local_line;
 use std::fs;
-use std::path::Path;
-use wgpu::MemoryBudgetThresholds;
 use wgpu::util::DeviceExt;
 
-use crate::graphics::GraphicsContext;
 use crate::model::{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
-use crate::model3d_schema_capnp::*;
-use crate::scene;
 use crate::texture;
 use std::fmt;
 
 mod model3d_schema_capnp {
     include!("model3d_schema_capnp.rs");
 }
-#[derive(Debug, Clone)]
-struct MeshError;
-impl fmt::Display for MeshError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Bad mesh")
-    }
-}
+// #[derive(Debug, Clone)]
+// struct MeshError;
+// impl fmt::Display for MeshError {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         write!(f, "Bad mesh")
+//     }
+// }
 pub async fn load_model_from_serialized(filepath: String, device: &mut wgpu::Device, queue: &mut wgpu::Queue, texture_layout: &wgpu::BindGroupLayout) -> Result<Model> {
     let data: Vec<u8> = fs::read(filepath.clone()).unwrap();
     println!("Data length {}", data.len());
-    use model3d_schema_capnp::{array2f, array3f, array4f, array4u, mesh, material, model};
+    use model3d_schema_capnp::model;
     let options: ReaderOptions = ReaderOptions {
         traversal_limit_in_words: Some(4000 as usize * 1024 as usize * 1024 as usize),
         nesting_limit: 8,

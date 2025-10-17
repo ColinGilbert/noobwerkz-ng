@@ -1,7 +1,6 @@
 // THis file defines our graphics context and the render loop.
 
 use crate::camera::*;
-use crate::texture::*;
 
 
 // Here are the typesafe indices that we need

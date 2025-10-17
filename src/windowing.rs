@@ -4,7 +4,7 @@ use std::sync::Arc;
 use winit::{
     application::ApplicationHandler,
     event::WindowEvent,
-    event_loop::{ActiveEventLoop, ControlFlow, EventLoop},
+    event_loop::ActiveEventLoop,
     window::{Window, WindowId},
 };
 use crate::graphics::*;
