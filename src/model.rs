@@ -84,7 +84,7 @@ impl Material {
         name: &str,
         diffuse_texture: texture::Texture,
         normal_texture: texture::Texture,
-        layout: &wgpu::BindGroupLayout,
+       layout: &wgpu::BindGroupLayout,
     ) -> Self {
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout,

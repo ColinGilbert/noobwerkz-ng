@@ -1,12 +1,13 @@
 use capnp::message::*;
 use capnp::*;
+use rapier3d::parry::query::sat::cuboid_support_map_compute_separation_wrt_local_line;
 use std::fs;
 use std::path::Path;
 use wgpu::MemoryBudgetThresholds;
 use wgpu::util::DeviceExt;
 
 use crate::graphics::GraphicsContext;
-use crate::model::{MaterialIndex, Model, ModelVertex, TexturedMesh};
+use crate::model::{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
 use crate::model3d_schema_capnp::*;
 use crate::scene;
 use crate::texture;
@@ -22,10 +23,10 @@ impl fmt::Display for MeshError {
         write!(f, "Bad mesh")
     }
 }
-pub fn load_model_from_serialized(filepath: String, device: &mut wgpu::Device) -> Result<Model> {
+pub async fn load_model_from_serialized(filepath: String, device: &mut wgpu::Device, queue: &mut wgpu::Queue, texture_layout: &wgpu::BindGroupLayout) -> Result<Model> {
     let data: Vec<u8> = fs::read(filepath.clone()).unwrap();
     println!("Data length {}", data.len());
-    use model3d_schema_capnp::{array2f, array3f, array4f, array4u, mesh, model};
+    use model3d_schema_capnp::{array2f, array3f, array4f, array4u, mesh, material, model};
     let options: ReaderOptions = ReaderOptions {
         traversal_limit_in_words: Some(4000 as usize * 1024 as usize * 1024 as usize),
         nesting_limit: 8,
@@ -33,7 +34,8 @@ pub fn load_model_from_serialized(filepath: String, device: &mut wgpu::Device) -
     let message_reader =
         capnp::serialize_packed::read_message(&mut data.as_slice(), options).unwrap();
     let message = message_reader.get_root::<model::Reader>(); //::<model3d_capnp::Reader>();
-    let meshes_serialized = message.unwrap().get_meshes().unwrap();
+    let meshes_serialized = message.as_ref().unwrap().get_meshes().unwrap();
+    let materials_serialized = message.as_ref().unwrap().get_materials().unwrap();
     let mut verts = Vec::<ModelVertex>::new();
     let mut indices = Vec::<u32>::new();
     let mut result = Model::new();
@@ -93,44 +95,14 @@ pub fn load_model_from_serialized(filepath: String, device: &mut wgpu::Device) -
         }
 
         calculate_tangents_and_bitangents(&mut verts, &indices);
-        // println!(
-        //     "Translation: {} {} {} ",
-        //     mesh_serialized.get_translation_x(),
-        //     mesh_serialized.get_translation_y(),
-        //     mesh_serialized.get_translation_z()
-        // );
-        // println!(
-        //     "Rotation: {} {} {} ",
-        //     mesh_serialized.get_rotation_x(),
-        //     mesh_serialized.get_rotation_y(),
-        //     mesh_serialized.get_rotation_z()
-        // );
-        // println!(
-        //     "Scale: {} {} {} ",
-        //     mesh_serialized.get_scale_x(),
-        //     mesh_serialized.get_scale_y(),
-        //     mesh_serialized.get_scale_z()
-        // );
-        // println!(
-        //     "Dimensions: {} {} {} ",
-        //     mesh_serialized.get_dimensions_x(),
-        //     mesh_serialized.get_dimensions_y(),
-        //     mesh_serialized.get_dimensions_z()
-        // );
+
         let name: String;
         if mesh_serialized.has_name() {
             name = mesh_serialized.get_name().unwrap().to_string().unwrap();
         } else {
             name = filepath.clone();
         }
-        // if mesh_serialized.has_bone_names() {
-        //     print!("Bones: ");
-        //     let bones = mesh_serialized.get_bone_names().unwrap();
-        //     for b in bones {
-        //         print!("{} ", b.unwrap().to_string().unwrap());
-        //     }
-        //     println!();
-        // }
+
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some(&format!("{:?} Vertex Buffer", name)),
             contents: bytemuck::cast_slice(&verts),
@@ -142,13 +114,26 @@ pub fn load_model_from_serialized(filepath: String, device: &mut wgpu::Device) -
             usage: wgpu::BufferUsages::INDEX,
         });
 
+        let material_index = mesh_serialized.get_material_index();
         result.meshes.push(TexturedMesh {
             name,
             vertex_buffer,
             index_buffer,
             num_elements: indices.len() as u32,
-            material: MaterialIndex::new(0), // TODO: FIX m.mesh.material_id.unwrap_or(0),
+            material: MaterialIndex::new(material_index as usize), // TODO: FIX m.mesh.material_id.unwrap_or(0),
         });
+    }
+
+    for material_serialized in materials_serialized {
+        let diffuse_path = material_serialized.get_diffuse_texture_path().unwrap().to_string().unwrap();
+        let normals_path = material_serialized.get_normals_texture_path().unwrap().to_string().unwrap();
+        let name = material_serialized.get_name().unwrap().to_string().unwrap();
+
+        let diffuse_texture = load_texture(&diffuse_path, false, device, queue).await.unwrap();
+        let normals_texture = load_texture(&normals_path, true, device, queue).await.unwrap();
+
+        let material = Material::new(device, &name, diffuse_texture, normals_texture, texture_layout);
+        result.materials.push(material);
     }
     Ok(result)
 }
