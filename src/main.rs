@@ -1,6 +1,4 @@
-use std::time::Duration;
 use winit::event_loop::*;
-use noobwerkz::windowing::*;
 
 fn main() {
     // wgpu uses `log` for all of our logging, so we initialize a logger with the `env_logger` crate.
