@@ -10,15 +10,22 @@ use crate::model::{MaterialIndex, Model, ModelVertex, TexturedMesh};
 use crate::model3d_schema_capnp::*;
 use crate::scene;
 use crate::texture;
+use std::fmt;
 
 mod model3d_schema_capnp {
     include!("model3d_schema_capnp.rs");
 }
-
-pub fn load_model_from_serialized(filepath: String, device: &mut wgpu::Device) -> Model {
+#[derive(Debug, Clone)]
+struct MeshError;
+impl fmt::Display for MeshError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Bad mesh")
+    }
+}
+pub fn load_model_from_serialized(filepath: String, device: &mut wgpu::Device) -> Result<Model> {
     let data: Vec<u8> = fs::read(filepath.clone()).unwrap();
     println!("Data length {}", data.len());
-    use model3d_schema_capnp::{mesh, mesh_vertex, model};
+    use model3d_schema_capnp::{array2f, array3f, array4f, array4u, mesh, model};
     let options: ReaderOptions = ReaderOptions {
         traversal_limit_in_words: Some(4000 as usize * 1024 as usize * 1024 as usize),
         nesting_limit: 8,
@@ -31,24 +38,55 @@ pub fn load_model_from_serialized(filepath: String, device: &mut wgpu::Device) -
     let mut indices = Vec::<u32>::new();
     let mut result = Model::new();
     for mesh_serialized in meshes_serialized {
-        if mesh_serialized.has_vertices() {
-            let vertices_serialized = mesh_serialized.get_vertices().unwrap();
-            for vv in vertices_serialized {
+        if mesh_serialized.has_positions() {
+            //let vertices_serialized = mesh_serialized.get_vertices().unwrap();
+            if !mesh_serialized.has_normals() {
+                ()
+            }
+            if !mesh_serialized.has_uvs() {
+                ()
+            }
+            let positions = mesh_serialized.get_positions().unwrap();
+            let normals = mesh_serialized.get_normals().unwrap();
+            let tex_coords = mesh_serialized.get_uvs().unwrap();
+            if positions.len() != normals.len() {
+                ()
+            }
+            if positions.len() != tex_coords.len() {
+                ()
+            }
+
+            let mut i  = 0;
+            while i < positions.len() {
                 let mut v = ModelVertex::new();
-                v.position[0] = vv.get_position_x();
-                v.position[1] = vv.get_position_y();
-                v.position[2] = vv.get_position_z();
-                v.normal[0] = vv.get_normal_x();
-                v.normal[1] = vv.get_normal_y();
-                v.normal[2] = vv.get_normal_z();
-                v.tex_coords[0] = vv.get_uv_x();
-                v.tex_coords[1] = vv.get_uv_y();
+                v.position[0] = positions.get(i).get_array3f_x();
+                v.position[1] = positions.get(i).get_array3f_y();
+                v.position[2] = positions.get(i).get_array3f_y();
                 verts.push(v);
+                i += 1;
+            }
+            i = 0;
+            while i < normals.len() {
+                let mut v: ModelVertex = verts[i as usize];
+                v.normal[0] = normals.get(i).get_array3f_x();
+                v.normal[1] = normals.get(i).get_array3f_y();
+                v.normal[2] = normals.get(i).get_array3f_y();
+                verts[i as usize] = v;
+                i += 1;
+            }
+            i = 0;
+            while i < tex_coords.len() {
+                let mut v = verts[i as usize];
+                v.tex_coords[0] = tex_coords.get(i).get_array2f_x();
+                v.tex_coords[1] = tex_coords.get(i).get_array2f_y();
+                verts[i as usize] = v;
+                i += 1;
             }
         }
 
         if mesh_serialized.has_indices() {
             let indices_serialized = mesh_serialized.get_indices().unwrap();
+            println!("{}", indices_serialized.len());
             for i in indices_serialized {
                 indices.push(i as u32);
             }
@@ -112,7 +150,7 @@ pub fn load_model_from_serialized(filepath: String, device: &mut wgpu::Device) -
             material: MaterialIndex::new(0), // TODO: FIX m.mesh.material_id.unwrap_or(0),
         });
     }
-    result
+    Ok(result)
 }
 
 fn calculate_tangents_and_bitangents(verts: &mut Vec<ModelVertex>, indices: &Vec<u32>) -> () {
@@ -178,17 +216,6 @@ fn calculate_tangents_and_bitangents(verts: &mut Vec<ModelVertex>, indices: &Vec
         let v = &mut verts[i];
         v.tangent = (glam::Vec3::from(v.tangent) * denom).into();
         v.bitangent = (glam::Vec3::from(v.bitangent) * denom).into();
-
-        // let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-        //     label: Some(&format!("{:?} Vertex Buffer", file_name)),
-        //     contents: bytemuck::cast_slice(&vertices),
-        //     usage: wgpu::BufferUsages::VERTEX,
-        // });
-        // let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-        //     label: Some(&format!("{:?} Index Buffer", file_name)),
-        //     contents: bytemuck::cast_slice(&m.mesh.indices),
-        //     usage: wgpu::BufferUsages::INDEX,
-        // });
     }
 }
 
