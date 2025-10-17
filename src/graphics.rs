@@ -35,7 +35,7 @@ impl GraphicsContext {
 
 
 // This is the main rendering loop
-pub fn render(wgpu_backend: &mut wgpu::Device, graphics_context: &GraphicsContext) {
+pub fn render(_wgpu_backend: &mut wgpu::Device, _graphics_context: &GraphicsContext) {
 
 
 }

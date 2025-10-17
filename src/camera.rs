@@ -7,7 +7,7 @@ use core::f32::consts::FRAC_PI_2;
 //     glam::Vec4::from_array([0.0, 0.0, 0.5, 1.0]),
 // );
 
-const SAFE_FRAC_PI_2: f32 = FRAC_PI_2 - 0.0001;
+const _SAFE_FRAC_PI_2: f32 = FRAC_PI_2 - 0.0001;
 
 pub struct Camera {
     pub position: glam::Vec3,

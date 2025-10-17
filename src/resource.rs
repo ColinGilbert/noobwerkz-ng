@@ -5,7 +5,6 @@ use wgpu::util::DeviceExt;
 
 use crate::model::{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
 use crate::texture;
-use std::fmt;
 
 mod model3d_schema_capnp {
     include!("model3d_schema_capnp.rs");
