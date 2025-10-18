@@ -503,6 +503,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bitmask-enum"
+version = "2.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e6cbbb8f56245b5a479b30a62cdc86d26e2f35c2b9f594bc4671654b03851380"
+dependencies = [
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
 name = "bitstream-io"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2003,6 +2013,7 @@ version = "0.0.1"
 dependencies = [
  "anyhow",
  "bevy_ecs",
+ "bitmask-enum",
  "bytemuck",
  "capnp",
  "dodgy_2d",

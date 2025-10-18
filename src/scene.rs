@@ -29,7 +29,7 @@
 
 // pub struct Scene {
 //   meshes: model::TexturedMeshes<model::TexturedMesh>,
-//   materials: model::Materials<model::Material>,
+//   materials: Materials<Material>,
 //   root: SceneNode,
 // }
 
@@ -37,7 +37,7 @@
 //   pub fn new() -> Self {
 //     Self {
 //       meshes: model::TexturedMeshes::new(),
-//       materials: model::Materials::new(),
+//       materials: Materials::new(),
 //       root: SceneNode::new(),
 //     }
 //   }

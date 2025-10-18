@@ -1,5 +1,6 @@
 use capnp::message::*;
 use capnp::*;
+use model3d_schema_capnp::model;
 use std::fs;
 use wgpu::util::DeviceExt;
 
@@ -9,17 +10,19 @@ use crate::texture;
 mod model3d_schema_capnp {
     include!("model3d_schema_capnp.rs");
 }
-// #[derive(Debug, Clone)]
-// struct MeshError;
-// impl fmt::Display for MeshError {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "Bad mesh")
-//     }
-// }
-pub async fn load_model_from_serialized(filepath: String, device: &mut wgpu::Device, queue: &mut wgpu::Queue, texture_layout: &wgpu::BindGroupLayout) -> Result<Model> {
-    let data: Vec<u8> = fs::read(filepath.clone()).unwrap();
-    println!("Data length {}", data.len());
-    use model3d_schema_capnp::model;
+
+// TODO: Robustify
+pub async fn load_model_from_serialized(
+    filepath: String,
+    filename: String,
+    device: &mut wgpu::Device,
+    queue: &mut wgpu::Queue,
+    texture_layout: &wgpu::BindGroupLayout,
+) -> Result<Model> {
+    let full_path = filepath.clone() + "/" + &filename;
+    // println!("Full path: {}", full_path);
+    let data = fs::read(full_path).unwrap();
+    // println!("Data length {}", data.len());
     let options: ReaderOptions = ReaderOptions {
         traversal_limit_in_words: Some(4000 as usize * 1024 as usize * 1024 as usize),
         nesting_limit: 8,
@@ -51,7 +54,7 @@ pub async fn load_model_from_serialized(filepath: String, device: &mut wgpu::Dev
                 ()
             }
 
-            let mut i  = 0;
+            let mut i = 0;
             while i < positions.len() {
                 let mut v = ModelVertex::new();
                 v.position[0] = positions.get(i).get_array3f_x();
@@ -93,7 +96,7 @@ pub async fn load_model_from_serialized(filepath: String, device: &mut wgpu::Dev
         if mesh_serialized.has_name() {
             name = mesh_serialized.get_name().unwrap().to_string().unwrap();
         } else {
-            name = filepath.clone();
+            name = filename.clone();
         }
 
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -118,14 +121,40 @@ pub async fn load_model_from_serialized(filepath: String, device: &mut wgpu::Dev
     }
 
     for material_serialized in materials_serialized {
-        let diffuse_path = material_serialized.get_diffuse_texture_path().unwrap().to_string().unwrap();
-        let normals_path = material_serialized.get_normals_texture_path().unwrap().to_string().unwrap();
         let name = material_serialized.get_name().unwrap().to_string().unwrap();
+        let diffuse_path = filepath.clone()
+            + "/"
+            + &material_serialized
+                .get_diffuse_texture_path()
+                .unwrap()
+                .to_string()
+                .unwrap();
+        let normals_path = filepath.clone()
+            + "/"
+            + &material_serialized
+                .get_normals_texture_path()
+                .unwrap()
+                .to_string()
+                .unwrap();
+        // println!(
+        //     "Diffuse path: {}, Normals path: {}",
+        //     diffuse_path.clone(),
+        //     normals_path.clone(),
+        // );
+        let diffuse_texture = load_texture(&diffuse_path, false, device, queue)
+            .await
+            .unwrap();
+        let normals_texture = load_texture(&normals_path, true, device, queue)
+            .await
+            .unwrap();
 
-        let diffuse_texture = load_texture(&diffuse_path, false, device, queue).await.unwrap();
-        let normals_texture = load_texture(&normals_path, true, device, queue).await.unwrap();
-
-        let material = Material::new(device, &name, diffuse_texture, normals_texture, texture_layout);
+        let material = Material::new(
+            device,
+            &name,
+            diffuse_texture,
+            normals_texture,
+            texture_layout,
+        );
         result.materials.push(material);
     }
     Ok(result)
