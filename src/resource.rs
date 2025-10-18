@@ -25,7 +25,7 @@ pub async fn load_model_from_serialized(
     // println!("Data length {}", data.len());
     let options: ReaderOptions = ReaderOptions {
         traversal_limit_in_words: Some(4000 as usize * 1024 as usize * 1024 as usize),
-        nesting_limit: 8,
+        nesting_limit: 4,
     };
     let message_reader =
         capnp::serialize_packed::read_message(&mut data.as_slice(), options).unwrap();
@@ -37,7 +37,7 @@ pub async fn load_model_from_serialized(
     let mut result = Model::new();
     for mesh_serialized in meshes_serialized {
         if mesh_serialized.has_positions() {
-            //let vertices_serialized = mesh_serialized.get_vertices().unwrap();
+
             if !mesh_serialized.has_normals() {
                 ()
             }
@@ -59,7 +59,7 @@ pub async fn load_model_from_serialized(
                 let mut v = ModelVertex::new();
                 v.position[0] = positions.get(i).get_array3f_x();
                 v.position[1] = positions.get(i).get_array3f_y();
-                v.position[2] = positions.get(i).get_array3f_y();
+                v.position[2] = positions.get(i).get_array3f_z();
                 verts.push(v);
                 i += 1;
             }
@@ -68,7 +68,7 @@ pub async fn load_model_from_serialized(
                 let mut v: ModelVertex = verts[i as usize];
                 v.normal[0] = normals.get(i).get_array3f_x();
                 v.normal[1] = normals.get(i).get_array3f_y();
-                v.normal[2] = normals.get(i).get_array3f_y();
+                v.normal[2] = normals.get(i).get_array3f_z();
                 verts[i as usize] = v;
                 i += 1;
             }
@@ -76,7 +76,7 @@ pub async fn load_model_from_serialized(
             while i < tex_coords.len() {
                 let mut v = verts[i as usize];
                 v.tex_coords[0] = tex_coords.get(i).get_array2f_x();
-                v.tex_coords[1] = tex_coords.get(i).get_array2f_y();
+                v.tex_coords[1] = 1.0 - tex_coords.get(i).get_array2f_y();
                 verts[i as usize] = v;
                 i += 1;
             }
@@ -116,7 +116,7 @@ pub async fn load_model_from_serialized(
             vertex_buffer,
             index_buffer,
             num_elements: indices.len() as u32,
-            material: MaterialIndex::new(material_index as usize), // TODO: FIX m.mesh.material_id.unwrap_or(0),
+            material: MaterialIndex::new(material_index as usize),
         });
     }
 

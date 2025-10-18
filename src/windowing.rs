@@ -159,14 +159,14 @@ impl State {
         let camera = Camera::new(
             glam::Vec3 {
                 x: 0.0,
-                y: 5.0,
-                z: 10.0,
+                y: 0.5,
+                z: 0.5,
             },
             -90.0,
             -20.0,
         );
         let projection = Projection::new(config.width, config.height, 45.0, 0.1, 100.0);
-        let camera_controller = CameraController::new(4.0, 0.4);
+        let camera_controller = CameraController::new(8.0, 0.8);
 
         let mut camera_uniform = CameraUniform::new();
         camera_uniform.update_view_proj(&camera, &projection);
