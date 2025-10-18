@@ -139,11 +139,7 @@ pub async fn load_model_from_serialized(
                 .unwrap()
                 .to_string()
                 .unwrap();
-        // println!(
-        //     "Diffuse path: {}, Normals path: {}",
-        //     diffuse_path.clone(),
-        //     normals_path.clone(),
-        // );
+  
         let diffuse_texture = load_texture(&diffuse_path, false, device, queue)
             .await
             .unwrap();

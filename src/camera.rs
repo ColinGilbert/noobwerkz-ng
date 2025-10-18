@@ -38,36 +38,7 @@ impl Camera {
             y: sin_pitch,
             z: cos_pitch * sin_yaw,
         };
-        let results = glam::Mat4::look_at_lh(self.position, focal_point.normalize(), glam::Vec3::Y);
-        results
-    }
-}
-
-pub struct Projection {
-    pub aspect_ratio: f32,
-    pub fovy_rad: f32,
-    pub znear: f32,
-    pub zfar: f32,
-}
-
-impl Projection {
-    pub fn new(height: u32, width: u32, fovy_rad: f32, znear: f32, zfar: f32) -> Self {
-        Self {
-            aspect_ratio: width as f32 / height as f32,
-            fovy_rad,
-            znear,
-            zfar
-        }
-    }
-
-    pub fn resize(&mut self, height: u32, width: u32) -> () {
-        self.aspect_ratio = width as f32 / height as f32;
-    }
-
-    pub fn calc_matrix(&self) -> glam::Mat4 {
-        //OPENGL_TO_WGPU_MATRIX * glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
-        let results =
-            glam::Mat4::perspective_lh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
+        let results = glam::Mat4::look_at_rh(self.position, focal_point.normalize(), glam::Vec3::Y);
         results
     }
 }
@@ -94,6 +65,35 @@ impl CameraUniform {
         self.view_projection = (projection.calc_matrix() * camera.calc_matrix()).to_cols_array_2d();
     }
 }
+pub struct Projection {
+    pub aspect_ratio: f32,
+    pub fovy_rad: f32,
+    pub znear: f32,
+    pub zfar: f32,
+}
+
+impl Projection {
+    pub fn new(height: u32, width: u32, fovy_rad: f32, znear: f32, zfar: f32) -> Self {
+        Self {
+            aspect_ratio: width as f32 / height as f32,
+            fovy_rad,
+            znear,
+            zfar
+        }
+    }
+
+    pub fn resize(&mut self, height: u32, width: u32) -> () {
+        self.aspect_ratio = width as f32 / height as f32;
+    }
+
+    pub fn calc_matrix(&self) -> glam::Mat4 {
+        //OPENGL_TO_WGPU_MATRIX * glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
+        let results =
+            glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
+        results
+    }
+}
+
 
 pub struct CameraController {
     amount_left: f32,

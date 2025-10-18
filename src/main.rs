@@ -1,4 +1,4 @@
-use noobwerkz::window::run;
+use noobwerkz::app::run;
 
 fn main() {
 
