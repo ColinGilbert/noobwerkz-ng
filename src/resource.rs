@@ -39,19 +39,19 @@ pub async fn load_model_from_serialized(
         if mesh_serialized.has_positions() {
 
             if !mesh_serialized.has_normals() {
-                ()
+                () // TODO: Generate normals
             }
             if !mesh_serialized.has_uvs() {
-                ()
+                () // TODO: Handle
             }
             let positions = mesh_serialized.get_positions().unwrap();
             let normals = mesh_serialized.get_normals().unwrap();
             let tex_coords = mesh_serialized.get_uvs().unwrap();
             if positions.len() != normals.len() {
-                ()
+                () // TODO: Return error
             }
             if positions.len() != tex_coords.len() {
-                ()
+                () // TODO: Handle
             }
 
             let mut i = 0;
@@ -84,7 +84,7 @@ pub async fn load_model_from_serialized(
 
         if mesh_serialized.has_indices() {
             let indices_serialized = mesh_serialized.get_indices().unwrap();
-            println!("{}", indices_serialized.len());
+            //println!("{}", indices_serialized.len());
             for i in indices_serialized {
                 indices.push(i as u32);
             }

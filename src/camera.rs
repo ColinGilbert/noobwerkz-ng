@@ -12,6 +12,9 @@ pub const OPENGL_TO_WGPU_MATRIX: glam::Mat4 = glam::Mat4::from_cols(
 
 const SAFE_FRAC_PI_2: f32 = FRAC_PI_2 - 0.0001;
 
+pub fn degrees_to_radians(degrees: f32) -> f32 {
+    degrees * std::f32::consts::PI / 180.0
+}
 pub struct Camera {
     pub position: glam::Vec3,
     pub yaw_rad: f32,
@@ -35,7 +38,7 @@ impl Camera {
             y: sin_pitch,
             z: cos_pitch * sin_yaw,
         };
-        let results = glam::Mat4::look_at_rh(self.position, focal_point.normalize(), glam::Vec3::Y);
+        let results = glam::Mat4::look_at_lh(self.position, focal_point.normalize(), glam::Vec3::Y);
         results
     }
 }
@@ -64,7 +67,7 @@ impl Projection {
     pub fn calc_matrix(&self) -> glam::Mat4 {
         //OPENGL_TO_WGPU_MATRIX * glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
         let results =
-            glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
+            glam::Mat4::perspective_lh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
         results
     }
 }
@@ -166,7 +169,7 @@ impl CameraController {
     pub fn handle_scroll(&mut self, delta: &MouseScrollDelta) {
         self.scroll = match delta {
             // I'm assuming a line is about 100 pixels
-            MouseScrollDelta::LineDelta(_, scroll) => -scroll * 0.5,
+            MouseScrollDelta::LineDelta(_, scroll) => -scroll*100.0,// * 0.5,
             MouseScrollDelta::PixelDelta(PhysicalPosition { y: scroll, .. }) => -*scroll as f32,
         };
     }

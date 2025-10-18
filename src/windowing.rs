@@ -162,11 +162,11 @@ impl State {
                 y: 0.5,
                 z: 0.5,
             },
-            -90.0,
-            -20.0,
+            degrees_to_radians(-90.0),
+            degrees_to_radians(-20.0),
         );
-        let projection = Projection::new(config.width, config.height, 45.0, 0.1, 100.0);
-        let camera_controller = CameraController::new(8.0, 0.8);
+        let projection = Projection::new(config.width, config.height, degrees_to_radians(45.0), 0.1, 1000.0);
+        let camera_controller = CameraController::new(4.0, 0.4);
 
         let mut camera_uniform = CameraUniform::new();
         camera_uniform.update_view_proj(&camera, &projection);
@@ -177,7 +177,7 @@ impl State {
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
 
-        const SPACE_BETWEEN: f32 = 3.0;
+        const SPACE_BETWEEN: f32 = 1.0;
         let instances = (0..NUM_INSTANCES_PER_ROW)
             .flat_map(|z| {
                 (0..NUM_INSTANCES_PER_ROW).map(move |x| {
