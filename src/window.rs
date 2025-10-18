@@ -16,7 +16,7 @@ use winit::{
     event::{DeviceEvent, DeviceId, KeyEvent, WindowEvent, MouseScrollDelta, MouseButton},
     event_loop::{ActiveEventLoop, EventLoop},
     keyboard::{PhysicalKey, KeyCode},
-    window::{Window, WindowId},
+    window::{Window},
 };
 
 const NUM_INSTANCES_PER_ROW: u32 = 10;
@@ -40,6 +40,7 @@ pub struct State {
     instance_buffer: wgpu::Buffer,
     depth_texture: Texture,
     is_surface_configured: bool,
+    #[allow(unused)]
     surface_format: wgpu::TextureFormat,
     light_uniform: LightUniform,
     light_buffer: wgpu::Buffer,
@@ -373,7 +374,7 @@ impl State {
             mouse_pressed: false,
         })
     }
-
+    #[allow(unused)]
     fn get_window(&self) -> &Window {
         &self.window
     }

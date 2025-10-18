@@ -1,4 +1,4 @@
-// THis file defines our graphics context and the render loop.
+// This file defines our graphics context and the render loop.
 
 use crate::model::*;
 
@@ -7,28 +7,6 @@ safe_index::new! {
   PipelineIndex,
   map: Pipelines
 }
-
-// This is the graphics context that can be passed around to functions that'll do drawing
-// pub struct GraphicsContext {
-//     //pub pipeline: wgpu::RenderPipeline,
-//     pub pipelines: Pipelines<wgpu::RenderPipeline>,
-//     pub camera: Camera,
-//     pub projection: Projection,
-//     // pub camera_controller: CameraController,
-//     pub camera_uniform: CameraUniform,
-    
-// }
-
-// impl GraphicsContext {
-//   pub fn new(height: u32, width: u32) -> Self {
-//     GraphicsContext {
-//         pipelines: Pipelines::<wgpu::RenderPipeline>::new(),
-//         camera: Camera::new(),
-//         projection: Projection::new(height, width),
-//         camera_uniform: CameraUniform::new(),
-//     } 
-//   }
-// }
 
 pub struct Instance {
     pub position: glam::Vec3,
@@ -115,11 +93,3 @@ pub struct LightUniform {
     pub color: [f32; 3],
     pub _padding2: u32,
 }
-
-
-
-// This is the main rendering loop
-// pub fn render(_wgpu_backend: &mut wgpu::Device, _graphics_context: &GraphicsContext) {
-
-
-// }

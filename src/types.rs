@@ -1,1 +1,0 @@
-pub type NoobVec3 = glam::Vec3A;

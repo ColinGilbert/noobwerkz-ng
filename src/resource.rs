@@ -57,26 +57,29 @@ pub async fn load_model_from_serialized(
             let mut i = 0;
             while i < positions.len() {
                 let mut v = ModelVertex::new();
-                v.position[0] = positions.get(i).get_array3f_x();
-                v.position[1] = positions.get(i).get_array3f_y();
-                v.position[2] = positions.get(i).get_array3f_z();
+                let p = positions.get(i);
+                v.position[0] = p.get_array3f_x();
+                v.position[1] = p.get_array3f_y();
+                v.position[2] = p.get_array3f_z();
                 verts.push(v);
                 i += 1;
             }
             i = 0;
             while i < normals.len() {
                 let mut v: ModelVertex = verts[i as usize];
-                v.normal[0] = normals.get(i).get_array3f_x();
-                v.normal[1] = normals.get(i).get_array3f_y();
-                v.normal[2] = normals.get(i).get_array3f_z();
+                let n = normals.get(i);
+                v.normal[0] = n.get_array3f_x();
+                v.normal[1] = n.get_array3f_y();
+                v.normal[2] = n.get_array3f_z();
                 verts[i as usize] = v;
                 i += 1;
             }
             i = 0;
             while i < tex_coords.len() {
                 let mut v = verts[i as usize];
-                v.tex_coords[0] = tex_coords.get(i).get_array2f_x();
-                v.tex_coords[1] = 1.0 - tex_coords.get(i).get_array2f_y();
+                let t = tex_coords.get(i);
+                v.tex_coords[0] = t.get_array2f_x();
+                v.tex_coords[1] = 1.0 - t.get_array2f_y();
                 verts[i as usize] = v;
                 i += 1;
             }
