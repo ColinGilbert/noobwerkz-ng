@@ -4,9 +4,9 @@ use crate::state::State;
 use instant::*;
 use winit::{
     application::ApplicationHandler,
-    event::{DeviceEvent, DeviceId, KeyEvent, WindowEvent, MouseScrollDelta, MouseButton},
+    event::{DeviceEvent, DeviceId, KeyEvent, WindowEvent},
     event_loop::{ActiveEventLoop, EventLoop},
-    keyboard::{PhysicalKey, KeyCode},
+    keyboard::{PhysicalKey},
     window::{Window},
 };
 use std::sync::Arc;
