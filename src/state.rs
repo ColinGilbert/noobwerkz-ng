@@ -10,10 +10,9 @@ use std::sync::Arc;
 use std::iter;
 use std::f32::consts::PI;
 use winit::{
-    application::ApplicationHandler,
-    event::{DeviceEvent, DeviceId, KeyEvent, WindowEvent, MouseScrollDelta, MouseButton},
-    event_loop::{ActiveEventLoop, EventLoop},
-    keyboard::{PhysicalKey, KeyCode},
+    event::{MouseScrollDelta, MouseButton},
+    event_loop::{ActiveEventLoop},
+    keyboard::{KeyCode},
     window::{Window},
 };
 
