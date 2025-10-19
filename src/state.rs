@@ -6,9 +6,8 @@ use crate::model::*;
 use crate::resource::*;
 use crate::texture::*;
 use wgpu::util::DeviceExt;
-
-use std::iter;
 use std::sync::Arc;
+use std::iter;
 use std::f32::consts::PI;
 use winit::{
     application::ApplicationHandler,
@@ -159,8 +158,8 @@ impl State {
         let camera = Camera::new(
             glam::Vec3 {
                 x: 0.0,
-                y: 0.5,
-                z: 0.5,
+                y: 10.0,
+                z: 10.0,
             },
             degrees_to_radians(45.0),
             degrees_to_radians(20.0),
@@ -373,6 +372,7 @@ impl State {
             mouse_pressed: false,
         })
     }
+
     #[allow(unused)]
     pub fn get_window(&self) -> &Window {
         &self.window

@@ -1,5 +1,6 @@
 
-use crate::state::*;
+use crate::state::State;
+
 use instant::*;
 use winit::{
     application::ApplicationHandler,
