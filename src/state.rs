@@ -5,6 +5,7 @@ use crate::graphics::*;
 use crate::model::*;
 use crate::resource::*;
 use crate::texture::*;
+use crate::instance::*;
 use std::f32::consts::PI;
 use std::iter;
 use std::sync::Arc;
