@@ -7,6 +7,78 @@ safe_index::new! {
   PipelineIndex,
   map: Pipelines
 }
+pub struct GraphicsContext {
+    pub device: wgpu::Device,
+    pub queue: wgpu::Queue,
+    pub config: wgpu::SurfaceConfiguration,
+    pub surface_format: wgpu::TextureFormat,
+}
+
+impl GraphicsContext {
+    pub async fn new(
+        window: &winit::window::Window,
+        surface: &wgpu::Surface<'_>,
+        instance: &wgpu::Instance,
+    ) -> Self {
+        let size = window.inner_size();
+
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
+                power_preference: wgpu::PowerPreference::default(),
+                compatible_surface: Some(surface),
+                force_fallback_adapter: false,
+            })
+            .await
+            .unwrap();
+
+        let (mut device, mut queue) = adapter
+            .request_device(&wgpu::DeviceDescriptor {
+                label: None,
+                required_features: wgpu::Features::empty(),
+                experimental_features: wgpu::ExperimentalFeatures::disabled(),
+                // WebGL doesn't support all of wgpu's features, so if
+                // we're building for the web we'll have to disable some.
+                required_limits: if cfg!(target_arch = "wasm32") {
+                    wgpu::Limits::downlevel_webgl2_defaults()
+                } else {
+                    wgpu::Limits::default()
+                },
+                memory_hints: Default::default(),
+                trace: wgpu::Trace::Off, // Trace path
+            })
+            .await
+            .unwrap();
+
+        let surface_caps = surface.get_capabilities(&adapter);
+        // Shader code in this tutorial assumes an Srgb surface texture. Using a different
+        // one will result all the colors comming out darker. If you want to support non
+        // Srgb surfaces, you'll need to account for that when drawing to the frame.
+        let surface_format = surface_caps
+            .formats
+            .iter()
+            .copied()
+            .find(|f| f.is_srgb())
+            .unwrap_or(surface_caps.formats[0]);
+
+        let config = wgpu::SurfaceConfiguration {
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            format: surface_format,
+            width: size.width,
+            height: size.height,
+            present_mode: surface_caps.present_modes[0],
+            alpha_mode: surface_caps.alpha_modes[0],
+            view_formats: vec![],
+            desired_maximum_frame_latency: 2,
+        };
+
+        Self {
+            device,
+            config,
+            queue,
+            surface_format,
+        }
+    }
+}
 
 pub struct Instance {
     pub position: glam::Vec3,
@@ -16,7 +88,9 @@ pub struct Instance {
 impl Instance {
     pub fn to_raw(&self) -> InstanceRaw {
         InstanceRaw {
-            model: (glam::Mat4::from_translation(self.position) * glam::Mat4::from_quat(self.rotation)).to_cols_array_2d(),
+            model: (glam::Mat4::from_translation(self.position)
+                * glam::Mat4::from_quat(self.rotation))
+            .to_cols_array_2d(),
             normal: glam::Mat3::from_quat(self.rotation).to_cols_array_2d(),
         }
     }
@@ -93,7 +167,6 @@ pub struct LightUniform {
     pub color: [f32; 3],
     pub _padding2: u32,
 }
-
 
 pub fn create_render_pipeline(
     device: &wgpu::Device,
