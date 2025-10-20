@@ -4,6 +4,7 @@ use crate::camera::*;
 use crate::graphics::*;
 use crate::instance::*;
 use crate::model::*;
+use crate::model_node::*;
 use crate::resource::*;
 use crate::texture::*;
 use std::f32::consts::PI;
@@ -24,14 +25,13 @@ pub struct State {
     pub surface: wgpu::Surface<'static>,
     pub ctx: GraphicsContext,
     pub render_pipeline: wgpu::RenderPipeline,
-    pub obj_model: Model,
+    pub model_nodes: Vec<ModelNode>,
     pub camera: Camera,                      // UPDATED!
     pub projection: Projection,              // NEW!
     pub camera_controller: CameraController, // UPDATED!
     pub camera_uniform: CameraUniform,
     pub camera_buffer: wgpu::Buffer,
     pub camera_bind_group: wgpu::BindGroup,
-    pub instances: Vec<Instance>,
     #[allow(dead_code)]
     pub instance_buffer: wgpu::Buffer,
     pub depth_texture: Texture,
@@ -135,45 +135,6 @@ impl State {
                 usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             });
 
-        const SPACE_BETWEEN: f32 = 1.0;
-        let instances = (0..NUM_INSTANCES_PER_ROW)
-            .flat_map(|z| {
-                (0..NUM_INSTANCES_PER_ROW).map(move |x| {
-                    let x = SPACE_BETWEEN * (x as f32 - NUM_INSTANCES_PER_ROW as f32 / 10.0);
-                    let z = SPACE_BETWEEN * (z as f32 - NUM_INSTANCES_PER_ROW as f32 / 10.0);
-
-                    let position: glam::Vec3A = glam::Vec3 { x, y: 0.0, z }.into();
-
-                    let rotation = if position == glam::Vec3A::ZERO {
-                        glam::Quat::from_axis_angle(glam::Vec3::Z, 0.0)
-                    } else {
-                        let pos : glam::Vec3 = position.into();
-                        glam::Quat::from_axis_angle(pos.normalize(), 45.0)
-                    };
-                    let scale: glam::Vec3A = glam::Vec3 {
-                        x: 10.0,
-                        y: 10.0,
-                        z: 10.0,
-                    }
-                    .into();
-                    Instance {
-                        position,
-                        rotation,
-                        scale,
-                    }
-                })
-            })
-            .collect::<Vec<_>>();
-
-        let instance_data = instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
-        let instance_buffer = ctx
-            .device
-            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Instance Buffer"),
-                contents: bytemuck::cast_slice(&instance_data),
-                usage: wgpu::BufferUsages::VERTEX,
-            });
-
         let camera_bind_group_layout =
             ctx.device
                 .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -199,15 +160,63 @@ impl State {
             label: Some("camera_bind_group"),
         });
 
-        let obj_model = load_model_from_serialized(
-            "res".to_owned(),
-            "model.bin".to_owned(),
-            &mut ctx.device,
-            &mut ctx.queue,
-            &texture_bind_group_layout,
-        )
-        .await
-        .unwrap();
+        let mut model_nodes = Vec::<ModelNode>::new();
+
+        // let mut node = ModelNode::new(obj_model);
+
+        const SPACE_BETWEEN: f32 = 1.0;
+        model_nodes.push(ModelNode {
+            model: load_model_from_serialized(
+                "res".to_owned(),
+                "model.bin".to_owned(),
+                &mut ctx.device,
+                &mut ctx.queue,
+                &texture_bind_group_layout,
+            )
+            .await
+            .unwrap(),
+            instances: (0..NUM_INSTANCES_PER_ROW)
+                .flat_map(|z| {
+                    (0..NUM_INSTANCES_PER_ROW).map(move |x| {
+                        let x = SPACE_BETWEEN * (x as f32 - NUM_INSTANCES_PER_ROW as f32 / 10.0);
+                        let z = SPACE_BETWEEN * (z as f32 - NUM_INSTANCES_PER_ROW as f32 / 10.0);
+
+                        let position: glam::Vec3A = glam::Vec3 { x, y: 0.0, z }.into();
+
+                        let rotation = if position == glam::Vec3A::ZERO {
+                            glam::Quat::from_axis_angle(glam::Vec3::Z, 0.0)
+                        } else {
+                            let pos: glam::Vec3 = position.into();
+                            glam::Quat::from_axis_angle(pos.normalize(), 45.0)
+                        };
+                        let scale: glam::Vec3A = glam::Vec3 {
+                            x: 10.0,
+                            y: 10.0,
+                            z: 10.0,
+                        }
+                        .into();
+                        Instance {
+                            position,
+                            rotation,
+                            scale,
+                        }
+                    })
+                })
+                .collect::<Vec<_>>(),
+        });
+
+        let instance_data = model_nodes[0]
+            .instances
+            .iter()
+            .map(Instance::to_raw)
+            .collect::<Vec<_>>();
+        let instance_buffer = ctx
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Instance Buffer"),
+                contents: bytemuck::cast_slice(&instance_data),
+                usage: wgpu::BufferUsages::VERTEX,
+            });
 
         let light_uniform = LightUniform {
             position: [2.0, 2.0, 2.0],
@@ -337,14 +346,13 @@ impl State {
             surface,
             ctx,
             render_pipeline,
-            obj_model,
+            model_nodes,
             camera,
             projection,
             camera_controller,
             camera_buffer,
             camera_bind_group,
             camera_uniform,
-            instances,
             instance_buffer,
             depth_texture,
             is_surface_configured: false,
@@ -471,22 +479,23 @@ impl State {
                 occlusion_query_set: None,
                 timestamp_writes: None,
             });
+            for m in &mut self.model_nodes {
+                render_pass.set_vertex_buffer(1, self.instance_buffer.slice(..));
+                render_pass.set_pipeline(&self.light_render_pipeline);
+                render_pass.draw_light_model(
+                    &m.model,
+                    &self.camera_bind_group,
+                    &self.light_bind_group,
+                );
 
-            render_pass.set_vertex_buffer(1, self.instance_buffer.slice(..));
-            render_pass.set_pipeline(&self.light_render_pipeline);
-            render_pass.draw_light_model(
-                &self.obj_model,
-                &self.camera_bind_group,
-                &self.light_bind_group,
-            );
-
-            render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.draw_model_instanced(
-                &self.obj_model,
-                0..self.instances.len() as u32,
-                &self.camera_bind_group,
-                &self.light_bind_group,
-            );
+                render_pass.set_pipeline(&self.render_pipeline);
+                render_pass.draw_model_instanced(
+                    &m.model,
+                    0..m.instances.len() as u32,
+                    &self.camera_bind_group,
+                    &self.light_bind_group,
+                );
+            }
         }
         self.ctx.queue.submit(iter::once(encoder.finish()));
         output.present();
