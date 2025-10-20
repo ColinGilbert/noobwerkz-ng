@@ -7,6 +7,7 @@ use crate::model::*;
 use crate::model_node::*;
 use crate::resource::*;
 use crate::texture::*;
+use crate::light_uniform::*;
 use std::f32::consts::PI;
 use std::iter;
 use std::sync::Arc;
@@ -162,11 +163,9 @@ impl State {
 
         let mut model_nodes = Vec::<ModelNode>::new();
 
-        // let mut node = ModelNode::new(obj_model);
-
         const SPACE_BETWEEN: f32 = 1.0;
-        model_nodes.push(ModelNode {
-            model: load_model_from_serialized(
+        model_nodes.push(ModelNode::new(
+            load_model_from_serialized(
                 "res".to_owned(),
                 "model.bin".to_owned(),
                 &mut ctx.device,
@@ -175,7 +174,7 @@ impl State {
             )
             .await
             .unwrap(),
-            instances: (0..NUM_INSTANCES_PER_ROW)
+             (0..NUM_INSTANCES_PER_ROW)
                 .flat_map(|z| {
                     (0..NUM_INSTANCES_PER_ROW).map(move |x| {
                         let x = SPACE_BETWEEN * (x as f32 - NUM_INSTANCES_PER_ROW as f32 / 10.0);
@@ -200,10 +199,11 @@ impl State {
                             rotation,
                             scale,
                         }
-                    })
+                    }
+                    )
                 })
-                .collect::<Vec<_>>(),
-        });
+                .collect::<Vec<_>>()
+        ));
 
         let instance_data = model_nodes[0]
             .instances
