@@ -35,7 +35,6 @@ pub struct State {
     pub camera_bind_group: wgpu::BindGroup,
     #[allow(dead_code)]
     pub instance_buffer: wgpu::Buffer,
-    pub depth_texture: Texture,
     pub is_surface_configured: bool,
     #[allow(unused)]
     pub light_uniform: LightUniform,
@@ -258,9 +257,6 @@ impl State {
             label: None,
         });
 
-        let depth_texture =
-            Texture::create_depth_texture(&ctx.device, &ctx.config, "depth_texture");
-
         let render_pipeline_layout =
             ctx.device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -354,7 +350,6 @@ impl State {
             camera_bind_group,
             camera_uniform,
             instance_buffer,
-            depth_texture,
             is_surface_configured: false,
             light_uniform,
             light_buffer,
@@ -380,7 +375,7 @@ impl State {
             self.ctx.config.width = width;
             self.ctx.config.height = height;
             self.surface.configure(&self.ctx.device, &self.ctx.config);
-            self.depth_texture =
+            self.ctx.depth_texture =
                 Texture::create_depth_texture(&self.ctx.device, &self.ctx.config, "depth_texture");
         }
     }
@@ -469,7 +464,7 @@ impl State {
                     depth_slice: None,
                 })],
                 depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-                    view: &self.depth_texture.view,
+                    view: &self.ctx.depth_texture.view,
                     depth_ops: Some(wgpu::Operations {
                         load: wgpu::LoadOp::Clear(1.0),
                         store: wgpu::StoreOp::Store,

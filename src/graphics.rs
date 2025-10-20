@@ -2,12 +2,14 @@ safe_index::new! {
   PipelineIndex,
   map: Pipelines
 }
+use crate::texture::*;
 
 pub struct GraphicsContext {
     pub device: wgpu::Device,
     pub queue: wgpu::Queue,
     pub config: wgpu::SurfaceConfiguration,
     pub surface_format: wgpu::TextureFormat,
+    pub depth_texture: Texture,
 }
 
 impl GraphicsContext {
@@ -67,16 +69,17 @@ impl GraphicsContext {
             desired_maximum_frame_latency: 2,
         };
 
+        let depth_texture = Texture::create_depth_texture(&device, &config, "depth_texture");
+
         Self {
             device,
             config,
             queue,
             surface_format,
+            depth_texture,
         }
     }
 }
-
-
 
 pub fn create_render_pipeline(
     device: &wgpu::Device,
