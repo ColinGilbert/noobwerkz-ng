@@ -2,10 +2,10 @@
 
 use crate::camera::*;
 use crate::graphics::*;
+use crate::instance::*;
 use crate::model::*;
 use crate::resource::*;
 use crate::texture::*;
-use crate::instance::*;
 use std::f32::consts::PI;
 use std::iter;
 use std::sync::Arc;
@@ -61,13 +61,13 @@ impl State {
 
         let surface = instance.create_surface(window.clone()).unwrap();
 
-        let mut ctx = GraphicsContext::new(&window, &surface, &instance)
-            .await;
+        let mut ctx = GraphicsContext::new(&window, &surface, &instance).await;
 
         let texture_bind_group_layout =
             ctx.device
                 .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                     entries: &[
+                        // diffuse map
                         wgpu::BindGroupLayoutEntry {
                             binding: 0,
                             visibility: wgpu::ShaderStages::FRAGMENT,
@@ -142,15 +142,25 @@ impl State {
                     let x = SPACE_BETWEEN * (x as f32 - NUM_INSTANCES_PER_ROW as f32 / 10.0);
                     let z = SPACE_BETWEEN * (z as f32 - NUM_INSTANCES_PER_ROW as f32 / 10.0);
 
-                    let position = glam::Vec3 { x, y: 0.0, z };
+                    let position: glam::Vec3A = glam::Vec3 { x, y: 0.0, z }.into();
 
-                    let rotation = if position == glam::Vec3::ZERO {
+                    let rotation = if position == glam::Vec3A::ZERO {
                         glam::Quat::from_axis_angle(glam::Vec3::Z, 0.0)
                     } else {
-                        glam::Quat::from_axis_angle(position.normalize(), 45.0)
+                        let pos : glam::Vec3 = position.into();
+                        glam::Quat::from_axis_angle(pos.normalize(), 45.0)
                     };
-
-                    Instance { position, rotation }
+                    let scale: glam::Vec3A = glam::Vec3 {
+                        x: 10.0,
+                        y: 10.0,
+                        z: 10.0,
+                    }
+                    .into();
+                    Instance {
+                        position,
+                        rotation,
+                        scale,
+                    }
                 })
             })
             .collect::<Vec<_>>();
@@ -270,11 +280,13 @@ impl State {
         };
 
         let light_render_pipeline = {
-            let layout = ctx.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                label: Some("Light Pipeline Layout"),
-                bind_group_layouts: &[&camera_bind_group_layout, &light_bind_group_layout],
-                push_constant_ranges: &[],
-            });
+            let layout = ctx
+                .device
+                .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                    label: Some("Light Pipeline Layout"),
+                    bind_group_layouts: &[&camera_bind_group_layout, &light_bind_group_layout],
+                    push_constant_ranges: &[],
+                });
             let shader = wgpu::ShaderModuleDescriptor {
                 label: Some("Light Shader"),
                 source: wgpu::ShaderSource::Wgsl(include_str!("light.wgsl").into()),
@@ -425,7 +437,8 @@ impl State {
             .create_view(&wgpu::TextureViewDescriptor::default());
 
         let mut encoder = self
-            .ctx.device
+            .ctx
+            .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("Render Encoder"),
             });

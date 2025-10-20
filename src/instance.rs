@@ -1,15 +1,16 @@
 use crate::model::*;
 
 pub struct Instance {
-    pub position: glam::Vec3,
+    pub position: glam::Vec3A,
     pub rotation: glam::Quat,
+    pub scale: glam::Vec3A,
 }
 
 impl Instance {
     pub fn to_raw(&self) -> InstanceRaw {
         InstanceRaw {
-            model: (glam::Mat4::from_translation(self.position)
-                * glam::Mat4::from_quat(self.rotation))
+            model: (glam::Mat4::from_translation(self.position.into())
+                * glam::Mat4::from_quat(self.rotation)* glam::Mat4::from_scale(self.scale.into()))
             .to_cols_array_2d(),
             normal: glam::Mat3::from_quat(self.rotation).to_cols_array_2d(),
         }
