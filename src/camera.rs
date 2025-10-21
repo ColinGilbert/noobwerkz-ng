@@ -94,7 +94,6 @@ impl Projection {
     }
 }
 
-
 pub struct CameraController {
     amount_left: f32,
     amount_right: f32,

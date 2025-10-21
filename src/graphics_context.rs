@@ -34,8 +34,7 @@ impl GraphicsContext {
                 label: None,
                 required_features: wgpu::Features::empty(),
                 experimental_features: wgpu::ExperimentalFeatures::disabled(),
-                // WebGL doesn't support all of wgpu's features, so if
-                // we're building for the web we'll have to disable some.
+                // WebGL doesn't support all of wgpu's features, so if we're building for the web we'll have to disable some.
                 required_limits: if cfg!(target_arch = "wasm32") {
                     wgpu::Limits::downlevel_webgl2_defaults()
                 } else {
@@ -48,10 +47,8 @@ impl GraphicsContext {
             .unwrap();
 
         let surface_caps = surface.get_capabilities(&adapter);
-        // Shader code in this tutorial assumes an Srgb surface texture. Using a different
-        // one will result all the colors comming out darker. If you want to support non
-        // Srgb surfaces, you'll need to account for that when drawing to the frame.
-        let surface_format = surface_caps
+        // Shader code assumes an Srgb surface texture. Using a different one will result all the colors comming out darker. If you want to support non Srgb surfaces, you'll need to account for that when drawing to the frame.
+            let surface_format = surface_caps
             .formats
             .iter()
             .copied()

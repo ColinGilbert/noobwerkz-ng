@@ -1,7 +1,7 @@
 
 pub mod state;
 pub mod app;
-pub mod graphics;
+pub mod graphics_context;
 pub mod camera;
 pub mod texture;
 pub mod model;

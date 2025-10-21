@@ -1,7 +1,7 @@
 //use glam::{Mat4, Quat, Vec3A};
 
 use crate::camera::*;
-use crate::graphics::*;
+use crate::graphics_context::*;
 use crate::instance::*;
 use crate::model::*;
 use crate::model_node::*;
@@ -9,8 +9,10 @@ use crate::resource::*;
 use crate::texture::*;
 use crate::light_uniform::*;
 use std::f32::consts::PI;
+
 use std::iter;
 use std::sync::Arc;
+
 use wgpu::util::DeviceExt;
 use winit::{
     event::{MouseButton, MouseScrollDelta},
@@ -26,9 +28,9 @@ pub struct State {
     pub surface: wgpu::Surface<'static>,
     pub gfx_ctx: GraphicsContext,
     pub model_nodes: Vec<ModelNode>,
-    pub camera: Camera,                      // UPDATED!
-    pub projection: Projection,              // NEW!
-    pub camera_controller: CameraController, // UPDATED!
+    pub camera: Camera,
+    pub projection: Projection,
+    pub camera_controller: CameraController,
     pub camera_uniform: CameraUniform,
     pub camera_buffer: wgpu::Buffer,
     pub camera_bind_group: wgpu::BindGroup,
@@ -105,7 +107,6 @@ impl State {
                     label: Some("texture_bind_group_layout"),
                 });
 
-        // UPDATED!
         let camera = Camera::new(
             glam::Vec3 {
                 x: 0.0,
@@ -122,9 +123,11 @@ impl State {
             0.1,
             1000.0,
         );
+
         let camera_controller = CameraController::new(4.0, 0.4);
 
         let mut camera_uniform = CameraUniform::new();
+        
         camera_uniform.update_view_proj(&camera, &projection);
 
         let camera_buffer = gfx_ctx
