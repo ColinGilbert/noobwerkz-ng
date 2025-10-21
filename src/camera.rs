@@ -233,7 +233,7 @@ impl Camera {
 
             let q_pitch = glam::Quat::from_axis_angle(
                 glam::Vec3::from_slice(&[self.rgt[0], self.rgt[1], self.rgt[2]]),
-                cam_yaw,
+                cam_pitch,
             );
             self.quaternion = q_pitch * self.quaternion;
 
@@ -249,7 +249,7 @@ impl Camera {
 
             let q_pitch = glam::Quat::from_axis_angle(
                 glam::Vec3::from_slice(&[self.rgt[0], self.rgt[1], self.rgt[2]]),
-                cam_yaw,
+                cam_pitch,
             );
             self.quaternion = q_pitch * self.quaternion;
 
