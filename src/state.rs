@@ -6,8 +6,7 @@ use crate::instance::*;
 use crate::light::*;
 use crate::model::*;
 use crate::model_node::*;
-use crate::passes::Pass;
-use crate::passes::phong::*;
+use crate::passes::{Pass, phong::*};
 use crate::resource::*;
 use crate::texture::*;
 
