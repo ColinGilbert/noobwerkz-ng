@@ -25,7 +25,6 @@ pub struct State {
     pub window: Arc<Window>,
     pub surface: wgpu::Surface<'static>,
     pub ctx: GraphicsContext,
-    pub render_pipeline: wgpu::RenderPipeline,
     pub model_nodes: Vec<ModelNode>,
     pub camera: Camera,                      // UPDATED!
     pub projection: Projection,              // NEW!
@@ -40,6 +39,7 @@ pub struct State {
     pub light_uniform: LightUniform,
     pub light_buffer: wgpu::Buffer,
     pub light_bind_group: wgpu::BindGroup,
+    pub render_pipeline: wgpu::RenderPipeline,
     pub light_render_pipeline: wgpu::RenderPipeline,
     #[allow(dead_code)]
     pub debug_material: Material,

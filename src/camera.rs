@@ -55,7 +55,7 @@ pub struct CameraUniform {
 impl CameraUniform {
     pub fn new() -> Self {
         Self {
-            view_position: [0.0, 0.0, 0.0, 0.0],
+            view_position: [0.0, 0.0, 0.0, 1.0],
             view_projection: glam::Mat4::IDENTITY.to_cols_array_2d(),
         }
     }

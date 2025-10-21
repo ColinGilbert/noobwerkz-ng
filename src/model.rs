@@ -20,12 +20,12 @@ pub struct ModelVertex {
 
 impl ModelVertex {
     pub fn new() -> Self {
-       Self{
-           position: [0.0;3],
-           tex_coords: [0.0;2],
-           normal: [0.0;3],
-           tangent: [0.0;3],
-           bitangent: [0.0;3],
+        Self {
+            position: [0.0; 3],
+            tex_coords: [0.0; 2],
+            normal: [0.0; 3],
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
         }
     }
 }
@@ -87,7 +87,7 @@ impl Material {
         name: &str,
         diffuse_texture: texture::Texture,
         normal_texture: texture::Texture,
-       layout: &wgpu::BindGroupLayout,
+        layout: &wgpu::BindGroupLayout,
     ) -> Self {
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout,
@@ -138,8 +138,11 @@ pub struct TexturedMesh {
     pub index_buffer: wgpu::Buffer,
     pub num_elements: u32,
     pub material: MaterialIndex,
+    pub translation: glam::Vec3,
+    pub rotation: glam::Quat,
+    pub scale: glam::Vec3,
+    pub dimensions: glam::Vec3,
 }
-
 
 pub struct Model {
     pub meshes: TexturedMeshes<TexturedMesh>,

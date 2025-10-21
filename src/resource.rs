@@ -37,7 +37,6 @@ pub async fn load_model_from_serialized(
     let mut result = Model::new();
     for mesh_serialized in meshes_serialized {
         if mesh_serialized.has_positions() {
-
             if !mesh_serialized.has_normals() {
                 () // TODO: Generate normals
             }
@@ -114,12 +113,33 @@ pub async fn load_model_from_serialized(
         });
 
         let material_index = mesh_serialized.get_material_index();
+
+        let translation = glam::Vec3::new(
+            mesh_serialized.get_translation_x(),
+            mesh_serialized.get_translation_y(),
+            mesh_serialized.get_translation_z(),
+        );
+        let rotation = glam::Quat::from_xyzw(
+            mesh_serialized.get_rotation_x(),
+            mesh_serialized.get_rotation_y(),
+            mesh_serialized.get_rotation_z(),
+            mesh_serialized.get_rotation_w(),
+        );
+
+        let scale= glam::Vec3::new(mesh_serialized.get_scale_x(), mesh_serialized.get_scale_y(), mesh_serialized.get_scale_z());
+
+        let dimensions = glam::Vec3::new(mesh_serialized.get_dimensions_x(), mesh_serialized.get_dimensions_y(), mesh_serialized.get_dimensions_z());
+        
         result.meshes.push(TexturedMesh {
             name,
             vertex_buffer,
             index_buffer,
             num_elements: indices.len() as u32,
             material: MaterialIndex::new(material_index as usize),
+            translation,
+            rotation,
+            scale,
+            dimensions,
         });
     }
 
@@ -139,7 +159,7 @@ pub async fn load_model_from_serialized(
                 .unwrap()
                 .to_string()
                 .unwrap();
-  
+
         let diffuse_texture = load_texture(&diffuse_path, false, device, queue)
             .await
             .unwrap();
