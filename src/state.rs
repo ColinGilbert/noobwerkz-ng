@@ -24,7 +24,7 @@ const NUM_INSTANCES_PER_ROW: u32 = 10;
 pub struct State {
     pub window: Arc<Window>,
     pub surface: wgpu::Surface<'static>,
-    pub ctx: GraphicsContext,
+    pub gfx_ctx: GraphicsContext,
     pub model_nodes: Vec<ModelNode>,
     pub camera: Camera,                      // UPDATED!
     pub projection: Projection,              // NEW!
@@ -61,10 +61,10 @@ impl State {
 
         let surface = instance.create_surface(window.clone()).unwrap();
 
-        let mut ctx = GraphicsContext::new(&window, &surface, &instance).await;
+        let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
 
         let texture_bind_group_layout =
-            ctx.device
+            gfx_ctx.device
                 .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                     entries: &[
                         // diffuse map
@@ -116,8 +116,8 @@ impl State {
             degrees_to_radians(20.0),
         );
         let projection = Projection::new(
-            ctx.config.width,
-            ctx.config.height,
+            gfx_ctx.config.width,
+            gfx_ctx.config.height,
             degrees_to_radians(45.0),
             0.1,
             1000.0,
@@ -127,7 +127,7 @@ impl State {
         let mut camera_uniform = CameraUniform::new();
         camera_uniform.update_view_proj(&camera, &projection);
 
-        let camera_buffer = ctx
+        let camera_buffer = gfx_ctx
             .device
             .create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("Camera Buffer"),
@@ -136,7 +136,7 @@ impl State {
             });
 
         let camera_bind_group_layout =
-            ctx.device
+            gfx_ctx.device
                 .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                     entries: &[wgpu::BindGroupLayoutEntry {
                         binding: 0,
@@ -151,7 +151,7 @@ impl State {
                     label: Some("camera_bind_group_layout"),
                 });
 
-        let camera_bind_group = ctx.device.create_bind_group(&wgpu::BindGroupDescriptor {
+        let camera_bind_group = gfx_ctx.device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: &camera_bind_group_layout,
             entries: &[wgpu::BindGroupEntry {
                 binding: 0,
@@ -167,8 +167,8 @@ impl State {
             load_model_from_serialized(
                 "res".to_owned(),
                 "model.bin".to_owned(),
-                &mut ctx.device,
-                &mut ctx.queue,
+                &mut gfx_ctx.device,
+                &mut gfx_ctx.queue,
                 &texture_bind_group_layout,
             )
             .await
@@ -209,7 +209,7 @@ impl State {
             .iter()
             .map(Instance::to_raw)
             .collect::<Vec<_>>();
-        let instance_buffer = ctx
+        let instance_buffer = gfx_ctx
             .device
             .create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("Instance Buffer"),
@@ -224,7 +224,7 @@ impl State {
             _padding2: 0,
         };
 
-        let light_buffer = ctx
+        let light_buffer = gfx_ctx
             .device
             .create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("Light VB"),
@@ -233,7 +233,7 @@ impl State {
             });
 
         let light_bind_group_layout =
-            ctx.device
+            gfx_ctx.device
                 .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                     entries: &[wgpu::BindGroupLayoutEntry {
                         binding: 0,
@@ -248,7 +248,7 @@ impl State {
                     label: None,
                 });
 
-        let light_bind_group = ctx.device.create_bind_group(&wgpu::BindGroupDescriptor {
+        let light_bind_group = gfx_ctx.device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: &light_bind_group_layout,
             entries: &[wgpu::BindGroupEntry {
                 binding: 0,
@@ -258,7 +258,7 @@ impl State {
         });
 
         let render_pipeline_layout =
-            ctx.device
+            gfx_ctx.device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                     label: Some("Render Pipeline Layout"),
                     bind_group_layouts: &[
@@ -275,9 +275,9 @@ impl State {
                 source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
             };
             create_render_pipeline(
-                &ctx.device,
+                &gfx_ctx.device,
                 &render_pipeline_layout,
-                ctx.config.format,
+                gfx_ctx.config.format,
                 Some(Texture::DEPTH_FORMAT),
                 &[ModelVertex::desc(), InstanceRaw::desc()],
                 shader,
@@ -285,7 +285,7 @@ impl State {
         };
 
         let light_render_pipeline = {
-            let layout = ctx
+            let layout = gfx_ctx
                 .device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                     label: Some("Light Pipeline Layout"),
@@ -298,9 +298,9 @@ impl State {
             };
 
             create_render_pipeline(
-                &ctx.device,
+                &gfx_ctx.device,
                 &layout,
-                ctx.config.format,
+                gfx_ctx.config.format,
                 Some(Texture::DEPTH_FORMAT),
                 &[ModelVertex::desc()],
                 shader,
@@ -312,16 +312,16 @@ impl State {
             let normal_bytes = include_bytes!("../res/cobble-normal.png");
 
             let diffuse_texture = Texture::from_bytes(
-                &ctx.device,
-                &ctx.queue,
+                &gfx_ctx.device,
+                &gfx_ctx.queue,
                 diffuse_bytes,
                 "res/alt-diffuse.png",
                 false,
             )
             .unwrap();
             let normal_texture = Texture::from_bytes(
-                &ctx.device,
-                &ctx.queue,
+                &gfx_ctx.device,
+                &gfx_ctx.queue,
                 normal_bytes,
                 "res/alt-normal.png",
                 true,
@@ -329,7 +329,7 @@ impl State {
             .unwrap();
 
             Material::new(
-                &ctx.device,
+                &gfx_ctx.device,
                 "alt-material",
                 diffuse_texture,
                 normal_texture,
@@ -340,7 +340,7 @@ impl State {
         Ok(Self {
             window,
             surface,
-            ctx,
+            gfx_ctx,
             render_pipeline,
             model_nodes,
             camera,
@@ -372,11 +372,11 @@ impl State {
         if width > 0 && height > 0 {
             self.projection.resize(width, height);
             self.is_surface_configured = true;
-            self.ctx.config.width = width;
-            self.ctx.config.height = height;
-            self.surface.configure(&self.ctx.device, &self.ctx.config);
-            self.ctx.depth_texture =
-                Texture::create_depth_texture(&self.ctx.device, &self.ctx.config, "depth_texture");
+            self.gfx_ctx.config.width = width;
+            self.gfx_ctx.config.height = height;
+            self.surface.configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
+            self.gfx_ctx.depth_texture =
+                Texture::create_depth_texture(&self.gfx_ctx.device, &self.gfx_ctx.config, "depth_texture");
         }
     }
 
@@ -408,7 +408,7 @@ impl State {
         self.camera_controller.update_camera(&mut self.camera, dt);
         self.camera_uniform
             .update_view_proj(&self.camera, &self.projection);
-        self.ctx.queue.write_buffer(
+        self.gfx_ctx.queue.write_buffer(
             &self.camera_buffer,
             0,
             bytemuck::cast_slice(&[self.camera_uniform]),
@@ -419,7 +419,7 @@ impl State {
         self.light_uniform.position =
             (glam::Quat::from_axis_angle(glam::Vec3::Y, PI * dt.as_secs_f32()) * old_position)
                 .into();
-        self.ctx.queue.write_buffer(
+        self.gfx_ctx.queue.write_buffer(
             &self.light_buffer,
             0,
             bytemuck::cast_slice(&[self.light_uniform]),
@@ -440,7 +440,7 @@ impl State {
             .create_view(&wgpu::TextureViewDescriptor::default());
 
         let mut encoder = self
-            .ctx
+            .gfx_ctx
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("Render Encoder"),
@@ -464,7 +464,7 @@ impl State {
                     depth_slice: None,
                 })],
                 depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-                    view: &self.ctx.depth_texture.view,
+                    view: &self.gfx_ctx.depth_texture.view,
                     depth_ops: Some(wgpu::Operations {
                         load: wgpu::LoadOp::Clear(1.0),
                         store: wgpu::StoreOp::Store,
@@ -492,7 +492,7 @@ impl State {
                 );
             }
         }
-        self.ctx.queue.submit(iter::once(encoder.finish()));
+        self.gfx_ctx.queue.submit(iter::once(encoder.finish()));
         output.present();
 
         Ok(())
