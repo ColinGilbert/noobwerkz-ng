@@ -1,12 +1,13 @@
 use super::ModelNode;
-use super::Pass;
 use crate::graphics_context::create_render_pipeline;
 use crate::instance::*;
 use crate::model::*;
+use crate::passes::Pass;
 use crate::texture::*;
 use std::iter::once;
+use wgpu::util::DeviceExt;
 
-struct Phong {
+pub struct Phong {
     pub render_pipeline_layout: wgpu::PipelineLayout,
     pub light_bind_group: wgpu::BindGroup,
     pub camera_bind_group: wgpu::BindGroup,
@@ -17,12 +18,10 @@ struct Phong {
 impl Pass for Phong {
     fn draw(
         &mut self,
-        surface: &wgpu::Surface,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         model_nodes: &Vec<ModelNode>,
         depth_texture_view: &wgpu::TextureView,
-        instance_buffers: &Vec<wgpu::Buffer>,
         view: &wgpu::TextureView,
     ) {
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -57,8 +56,17 @@ impl Pass for Phong {
                 timestamp_writes: None,
             });
 
-            for (i, m) in model_nodes.iter().enumerate() {
-                render_pass.set_vertex_buffer(1, instance_buffers[i].slice(..));
+            for (_i, m) in model_nodes.iter().enumerate() {
+                let instance_data = m.instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
+
+                let instance_buffer =
+                    device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                        label: Some("Instance Buffer"),
+                        contents: bytemuck::cast_slice(&instance_data),
+                        usage: wgpu::BufferUsages::VERTEX,
+                    });
+
+                render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
                 render_pass.set_pipeline(&self.light_render_pipeline);
                 render_pass.draw_light_model(
                     &m.model,
@@ -87,7 +95,7 @@ impl Phong {
         texture_bind_group_layout: &wgpu::BindGroupLayout,
         camera_bind_group_layout: &wgpu::BindGroupLayout,
         light_bind_group_layout: &wgpu::BindGroupLayout,
-        config: wgpu::SurfaceConfiguration,
+        config: &wgpu::SurfaceConfiguration,
     ) -> Self {
         let light_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: &light_bind_group_layout,

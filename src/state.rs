@@ -8,9 +8,11 @@ use crate::model_node::*;
 use crate::resource::*;
 use crate::texture::*;
 use crate::light_uniform::*;
+use crate::passes::phong::*;
+use crate::passes::Pass;
+
 use std::f32::consts::PI;
 
-use std::iter;
 use std::sync::Arc;
 
 use wgpu::util::DeviceExt;
@@ -27,6 +29,7 @@ pub struct State {
     pub window: Arc<Window>,
     pub surface: wgpu::Surface<'static>,
     pub gfx_ctx: GraphicsContext,
+    pub phong: Phong,
     pub model_nodes: Vec<ModelNode>,
     pub camera: Camera,
     pub projection: Projection,
@@ -35,14 +38,11 @@ pub struct State {
     pub camera_buffer: wgpu::Buffer,
     pub camera_bind_group: wgpu::BindGroup,
     #[allow(dead_code)]
-    pub instance_buffer: wgpu::Buffer,
     pub is_surface_configured: bool,
     #[allow(unused)]
     pub light_uniform: LightUniform,
     pub light_buffer: wgpu::Buffer,
     pub light_bind_group: wgpu::BindGroup,
-    pub render_pipeline: wgpu::RenderPipeline,
-    pub light_render_pipeline: wgpu::RenderPipeline,
     #[allow(dead_code)]
     pub debug_material: Material,
     // NEW!
@@ -130,17 +130,18 @@ impl State {
         
         camera_uniform.update_view_proj(&camera, &projection);
 
+        
         let camera_buffer = gfx_ctx
-            .device
-            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Camera Buffer"),
+        .device
+        .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Camera Buffer"),
                 contents: bytemuck::cast_slice(&[camera_uniform]),
                 usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             });
-
-        let camera_bind_group_layout =
+            
+            let camera_bind_group_layout =
             gfx_ctx.device
-                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                     entries: &[wgpu::BindGroupLayoutEntry {
                         binding: 0,
                         visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
@@ -162,7 +163,7 @@ impl State {
             }],
             label: Some("camera_bind_group"),
         });
-
+  
         let mut model_nodes = Vec::<ModelNode>::new();
 
         const SPACE_BETWEEN: f32 = 1.0;
@@ -207,19 +208,7 @@ impl State {
                 .collect::<Vec<_>>()
         ));
 
-        let instance_data = model_nodes[0]
-            .instances
-            .iter()
-            .map(Instance::to_raw)
-            .collect::<Vec<_>>();
-        let instance_buffer = gfx_ctx
-            .device
-            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Instance Buffer"),
-                contents: bytemuck::cast_slice(&instance_data),
-                usage: wgpu::BufferUsages::VERTEX,
-            });
-
+  
         let light_uniform = LightUniform {
             position: [2.0, 2.0, 2.0],
             _padding: 0,
@@ -260,55 +249,15 @@ impl State {
             label: None,
         });
 
-        let render_pipeline_layout =
-            gfx_ctx.device
-                .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                    label: Some("Render Pipeline Layout"),
-                    bind_group_layouts: &[
-                        &texture_bind_group_layout,
-                        &camera_bind_group_layout,
-                        &light_bind_group_layout,
-                    ],
-                    push_constant_ranges: &[],
-                });
-
-        let render_pipeline = {
-            let shader = wgpu::ShaderModuleDescriptor {
-                label: Some("Normal Shader"),
-                source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
-            };
-            create_render_pipeline(
-                &gfx_ctx.device,
-                &render_pipeline_layout,
-                gfx_ctx.config.format,
-                Some(Texture::DEPTH_FORMAT),
-                &[ModelVertex::desc(), InstanceRaw::desc()],
-                shader,
-            )
-        };
-
-        let light_render_pipeline = {
-            let layout = gfx_ctx
-                .device
-                .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                    label: Some("Light Pipeline Layout"),
-                    bind_group_layouts: &[&camera_bind_group_layout, &light_bind_group_layout],
-                    push_constant_ranges: &[],
-                });
-            let shader = wgpu::ShaderModuleDescriptor {
-                label: Some("Light Shader"),
-                source: wgpu::ShaderSource::Wgsl(include_str!("light.wgsl").into()),
-            };
-
-            create_render_pipeline(
-                &gfx_ctx.device,
-                &layout,
-                gfx_ctx.config.format,
-                Some(Texture::DEPTH_FORMAT),
-                &[ModelVertex::desc()],
-                shader,
-            )
-        };
+      let phong = Phong::new(
+            &gfx_ctx.device,
+            &light_buffer,
+            &camera_buffer,
+            &texture_bind_group_layout,
+            &camera_bind_group_layout,
+            &light_bind_group_layout,
+            &gfx_ctx.config,
+        );
 
         let debug_material = {
             let diffuse_bytes = include_bytes!("../res/cobble-diffuse.png");
@@ -344,7 +293,7 @@ impl State {
             window,
             surface,
             gfx_ctx,
-            render_pipeline,
+            phong,
             model_nodes,
             camera,
             projection,
@@ -352,12 +301,10 @@ impl State {
             camera_buffer,
             camera_bind_group,
             camera_uniform,
-            instance_buffer,
             is_surface_configured: false,
             light_uniform,
             light_buffer,
             light_bind_group,
-            light_render_pipeline,
             #[allow(dead_code)]
             debug_material,
             // NEW!
@@ -442,60 +389,15 @@ impl State {
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
 
-        let mut encoder = self
-            .gfx_ctx
-            .device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("Render Encoder"),
-            });
+            self.phong.draw(
+        &self.gfx_ctx.device,
+        &self.gfx_ctx.queue,
+        &self.model_nodes,
+        &self.gfx_ctx.depth_texture.view,
+        &view
 
-        {
-            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("Render Pass"),
-                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: &view,
-                    resolve_target: None,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.1,
-                            g: 0.2,
-                            b: 0.3,
-                            a: 1.0,
-                        }),
-                        store: wgpu::StoreOp::Store,
-                    },
-                    depth_slice: None,
-                })],
-                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-                    view: &self.gfx_ctx.depth_texture.view,
-                    depth_ops: Some(wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(1.0),
-                        store: wgpu::StoreOp::Store,
-                    }),
-                    stencil_ops: None,
-                }),
-                occlusion_query_set: None,
-                timestamp_writes: None,
-            });
-            for m in &mut self.model_nodes {
-                render_pass.set_vertex_buffer(1, self.instance_buffer.slice(..));
-                render_pass.set_pipeline(&self.light_render_pipeline);
-                render_pass.draw_light_model(
-                    &m.model,
-                    &self.camera_bind_group,
-                    &self.light_bind_group,
-                );
+            );
 
-                render_pass.set_pipeline(&self.render_pipeline);
-                render_pass.draw_model_instanced(
-                    &m.model,
-                    0..m.instances.len() as u32,
-                    &self.camera_bind_group,
-                    &self.light_bind_group,
-                );
-            }
-        }
-        self.gfx_ctx.queue.submit(iter::once(encoder.finish()));
         output.present();
 
         Ok(())
