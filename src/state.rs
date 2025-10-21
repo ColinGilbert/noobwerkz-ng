@@ -155,7 +155,7 @@ impl State {
 
     // UPDATED!
     pub fn handle_key(&mut self, event_loop: &ActiveEventLoop, key: KeyCode, pressed: bool) {
-        if !self.cam_ctx.controller.handle_key(key, pressed) {
+        if !self.cam_ctx.controller.handle_key(key) {
             match (key, pressed) {
                 (KeyCode::Escape, true) => event_loop.exit(),
                 _ => {}
@@ -178,9 +178,9 @@ impl State {
 
     pub fn update(&mut self, dt: std::time::Duration) {
         // UPDATED!
-        self.cam_ctx.controller.update_camera(&mut self.cam_ctx.camera, dt);
+        self.cam_ctx.controller.update_camera(dt);
         self.cam_ctx.uniform
-            .update_view_proj(&self.cam_ctx.camera, &self.cam_ctx.projection);
+            .update_view_proj(&self.cam_ctx.controller.camera, &self.cam_ctx.projection);
         self.gfx_ctx.queue.write_buffer(
             &self.cam_ctx.buffer,
             0,
