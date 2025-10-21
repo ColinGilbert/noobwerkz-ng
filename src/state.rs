@@ -29,15 +29,10 @@ pub struct State {
     pub window: Arc<Window>,
     pub surface: wgpu::Surface<'static>,
     pub gfx_ctx: GraphicsContext,
+    pub light_ctx: LightContext,
+    pub cam_ctx: CameraContext,
     pub phong: Phong,
     pub model_nodes: Vec<ModelNode>,
-    pub camera: Camera,
-    pub projection: Projection,
-    pub camera_controller: CameraController,
-    pub camera_uniform: CameraUniform,
-    pub camera_buffer: wgpu::Buffer,
-    pub camera_bind_group: wgpu::BindGroup,
-    pub light_ctx: LightContext,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
     #[allow(unused)]
@@ -63,65 +58,7 @@ impl State {
 
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
 
-        let camera = Camera::new(
-            glam::Vec3 {
-                x: 0.0,
-                y: 10.0,
-                z: 10.0,
-            },
-            degrees_to_radians(45.0),
-            degrees_to_radians(20.0),
-        );
-        let projection = Projection::new(
-            gfx_ctx.config.width,
-            gfx_ctx.config.height,
-            degrees_to_radians(45.0),
-            0.1,
-            1000.0,
-        );
-
-        let camera_controller = CameraController::new(4.0, 0.4);
-
-        let mut camera_uniform = CameraUniform::new();
-
-        camera_uniform.update_view_proj(&camera, &projection);
-
-        let camera_buffer = gfx_ctx
-            .device
-            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Camera Buffer"),
-                contents: bytemuck::cast_slice(&[camera_uniform]),
-                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-            });
-
-        let camera_bind_group_layout =
-            gfx_ctx
-                .device
-                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                    entries: &[wgpu::BindGroupLayoutEntry {
-                        binding: 0,
-                        visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
-                        ty: wgpu::BindingType::Buffer {
-                            ty: wgpu::BufferBindingType::Uniform,
-                            has_dynamic_offset: false,
-                            min_binding_size: None,
-                        },
-                        count: None,
-                    }],
-                    label: Some("camera_bind_group_layout"),
-                });
-
-        let camera_bind_group = gfx_ctx
-            .device
-            .create_bind_group(&wgpu::BindGroupDescriptor {
-                layout: &camera_bind_group_layout,
-                entries: &[wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: camera_buffer.as_entire_binding(),
-                }],
-                label: Some("camera_bind_group"),
-            });
-
+        let cam_ctx = CameraContext::new(&gfx_ctx.device, &gfx_ctx.config);
         let mut model_nodes = Vec::<ModelNode>::new();
 
         const SPACE_BETWEEN: f32 = 1.0;
@@ -164,21 +101,24 @@ impl State {
                 })
                 .collect::<Vec<_>>(),
         ));
+
         let mut lights = Vec::<LightUniform>::new();
+
         lights.push(LightUniform {
             position: [2.0, 2.0, 2.0],
             _padding: 0,
             color: [1.0, 1.0, 1.0],
             _padding2: 0,
         });
+
         let light_ctx = LightContext::new(&gfx_ctx.device, lights);
 
         let phong = Phong::new(
             &gfx_ctx.device,
             &light_ctx.light_buffer,
-            &camera_buffer,
+            &cam_ctx.buffer,
             &gfx_ctx.texture_bind_group_layout,
-            &camera_bind_group_layout,
+            &cam_ctx.bind_group_layout,
             &light_ctx.light_bind_group_layout,
             &gfx_ctx.config,
         );
@@ -218,14 +158,9 @@ impl State {
             surface,
             gfx_ctx,
             light_ctx,
+            cam_ctx,
             phong,
             model_nodes,
-            camera,
-            projection,
-            camera_controller,
-            camera_buffer,
-            camera_bind_group,
-            camera_uniform,
             is_surface_configured: false,
             #[allow(dead_code)]
             debug_material,
@@ -242,7 +177,7 @@ impl State {
     pub fn resize(&mut self, width: u32, height: u32) {
         // UPDATED!
         if width > 0 && height > 0 {
-            self.projection.resize(width, height);
+            self.cam_ctx.projection.resize(width, height);
             self.is_surface_configured = true;
             self.gfx_ctx.config.width = width;
             self.gfx_ctx.config.height = height;
@@ -258,7 +193,7 @@ impl State {
 
     // UPDATED!
     pub fn handle_key(&mut self, event_loop: &ActiveEventLoop, key: KeyCode, pressed: bool) {
-        if !self.camera_controller.handle_key(key, pressed) {
+        if !self.cam_ctx.controller.handle_key(key, pressed) {
             match (key, pressed) {
                 (KeyCode::Escape, true) => event_loop.exit(),
                 _ => {}
@@ -276,18 +211,18 @@ impl State {
 
     // NEW!
     pub fn handle_mouse_scroll(&mut self, delta: &MouseScrollDelta) {
-        self.camera_controller.handle_scroll(delta);
+        self.cam_ctx.controller.handle_scroll(delta);
     }
 
     pub fn update(&mut self, dt: std::time::Duration) {
         // UPDATED!
-        self.camera_controller.update_camera(&mut self.camera, dt);
-        self.camera_uniform
-            .update_view_proj(&self.camera, &self.projection);
+        self.cam_ctx.controller.update_camera(&mut self.cam_ctx.camera, dt);
+        self.cam_ctx.uniform
+            .update_view_proj(&self.cam_ctx.camera, &self.cam_ctx.projection);
         self.gfx_ctx.queue.write_buffer(
-            &self.camera_buffer,
+            &self.cam_ctx.buffer,
             0,
-            bytemuck::cast_slice(&[self.camera_uniform]),
+            bytemuck::cast_slice(&[self.cam_ctx.uniform]),
         );
 
         // Update the light
