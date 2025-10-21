@@ -15,7 +15,6 @@ use std::f32::consts::PI;
 
 use std::sync::Arc;
 
-use wgpu::util::DeviceExt;
 use winit::{
     event::{MouseButton, MouseScrollDelta},
     event_loop::ActiveEventLoop,
