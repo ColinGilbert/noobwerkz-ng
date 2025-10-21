@@ -10,6 +10,7 @@ pub struct GraphicsContext {
     pub config: wgpu::SurfaceConfiguration,
     pub surface_format: wgpu::TextureFormat,
     pub depth_texture: Texture,
+    pub texture_bind_group_layout: wgpu::BindGroupLayout,
 }
 
 impl GraphicsContext {
@@ -55,6 +56,47 @@ impl GraphicsContext {
             .find(|f| f.is_srgb())
             .unwrap_or(surface_caps.formats[0]);
 
+        let texture_bind_group_layout = device
+                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                    entries: &[
+                        // diffuse map
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 0,
+                            visibility: wgpu::ShaderStages::FRAGMENT,
+                            ty: wgpu::BindingType::Texture {
+                                multisampled: false,
+                                sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                                view_dimension: wgpu::TextureViewDimension::D2,
+                            },
+                            count: None,
+                        },
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 1,
+                            visibility: wgpu::ShaderStages::FRAGMENT,
+                            ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                            count: None,
+                        },
+                        // normal map
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 2,
+                            visibility: wgpu::ShaderStages::FRAGMENT,
+                            ty: wgpu::BindingType::Texture {
+                                multisampled: false,
+                                sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                                view_dimension: wgpu::TextureViewDimension::D2,
+                            },
+                            count: None,
+                        },
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 3,
+                            visibility: wgpu::ShaderStages::FRAGMENT,
+                            ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                            count: None,
+                        },
+                    ],
+                    label: Some("texture_bind_group_layout"),
+                });
+
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
@@ -74,6 +116,7 @@ impl GraphicsContext {
             queue,
             surface_format,
             depth_texture,
+            texture_bind_group_layout,
         }
     }
 }

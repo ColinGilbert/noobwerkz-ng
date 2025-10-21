@@ -63,49 +63,6 @@ impl State {
 
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
 
-        let texture_bind_group_layout =
-            gfx_ctx
-                .device
-                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                    entries: &[
-                        // diffuse map
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 0,
-                            visibility: wgpu::ShaderStages::FRAGMENT,
-                            ty: wgpu::BindingType::Texture {
-                                multisampled: false,
-                                sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                                view_dimension: wgpu::TextureViewDimension::D2,
-                            },
-                            count: None,
-                        },
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 1,
-                            visibility: wgpu::ShaderStages::FRAGMENT,
-                            ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                            count: None,
-                        },
-                        // normal map
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 2,
-                            visibility: wgpu::ShaderStages::FRAGMENT,
-                            ty: wgpu::BindingType::Texture {
-                                multisampled: false,
-                                sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                                view_dimension: wgpu::TextureViewDimension::D2,
-                            },
-                            count: None,
-                        },
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 3,
-                            visibility: wgpu::ShaderStages::FRAGMENT,
-                            ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                            count: None,
-                        },
-                    ],
-                    label: Some("texture_bind_group_layout"),
-                });
-
         let camera = Camera::new(
             glam::Vec3 {
                 x: 0.0,
@@ -174,7 +131,7 @@ impl State {
                 "model.bin".to_owned(),
                 &mut gfx_ctx.device,
                 &mut gfx_ctx.queue,
-                &texture_bind_group_layout,
+                &gfx_ctx.texture_bind_group_layout,
             )
             .await
             .unwrap(),
@@ -220,7 +177,7 @@ impl State {
             &gfx_ctx.device,
             &light_ctx.light_buffer,
             &camera_buffer,
-            &texture_bind_group_layout,
+            &gfx_ctx.texture_bind_group_layout,
             &camera_bind_group_layout,
             &light_ctx.light_bind_group_layout,
             &gfx_ctx.config,
@@ -252,7 +209,7 @@ impl State {
                 "alt-material",
                 diffuse_texture,
                 normal_texture,
-                &texture_bind_group_layout,
+                &gfx_ctx.texture_bind_group_layout,
             )
         };
 
