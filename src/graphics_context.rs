@@ -3,6 +3,7 @@ safe_index::new! {
   map: Pipelines
 }
 use crate::texture::*;
+use crate::model::Material;
 
 pub struct GraphicsContext {
     pub device: wgpu::Device,
@@ -11,6 +12,7 @@ pub struct GraphicsContext {
     pub surface_format: wgpu::TextureFormat,
     pub depth_texture: Texture,
     pub texture_bind_group_layout: wgpu::BindGroupLayout,
+    pub debug_material: Material,
 }
 
 impl GraphicsContext {
@@ -110,6 +112,36 @@ impl GraphicsContext {
 
         let depth_texture = Texture::create_depth_texture(&device, &config, "depth_texture");
 
+        let debug_material = {
+            let diffuse_bytes = include_bytes!("../res/cobble-diffuse.png");
+            let normal_bytes = include_bytes!("../res/cobble-normal.png");
+
+            let diffuse_texture = Texture::from_bytes(
+                &device,
+                &queue,
+                diffuse_bytes,
+                "res/alt-diffuse.png",
+                false,
+            )
+            .unwrap();
+            let normal_texture = Texture::from_bytes(
+                &device,
+                &queue,
+                normal_bytes,
+                "res/alt-normal.png",
+                true,
+            )
+            .unwrap();
+
+            Material::new(
+                &device,
+                "alt-material",
+                diffuse_texture,
+                normal_texture,
+                &texture_bind_group_layout,
+            )
+        };
+
         Self {
             device,
             config,
@@ -117,6 +149,7 @@ impl GraphicsContext {
             surface_format,
             depth_texture,
             texture_bind_group_layout,
+            debug_material
         }
     }
 }

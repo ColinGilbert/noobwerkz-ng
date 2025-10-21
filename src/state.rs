@@ -4,7 +4,6 @@ use crate::camera::*;
 use crate::graphics_context::*;
 use crate::instance::*;
 use crate::light::*;
-use crate::model::*;
 use crate::model_node::*;
 use crate::passes::{Pass, phong::*};
 use crate::resource::*;
@@ -33,9 +32,6 @@ pub struct State {
     pub model_nodes: Vec<ModelNode>,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
-    #[allow(unused)]
-    #[allow(dead_code)]
-    pub debug_material: Material,
     // NEW!
     pub mouse_pressed: bool,
 }
@@ -121,35 +117,6 @@ impl State {
             &gfx_ctx.config,
         );
 
-        let debug_material = {
-            let diffuse_bytes = include_bytes!("../res/cobble-diffuse.png");
-            let normal_bytes = include_bytes!("../res/cobble-normal.png");
-
-            let diffuse_texture = Texture::from_bytes(
-                &gfx_ctx.device,
-                &gfx_ctx.queue,
-                diffuse_bytes,
-                "res/alt-diffuse.png",
-                false,
-            )
-            .unwrap();
-            let normal_texture = Texture::from_bytes(
-                &gfx_ctx.device,
-                &gfx_ctx.queue,
-                normal_bytes,
-                "res/alt-normal.png",
-                true,
-            )
-            .unwrap();
-
-            Material::new(
-                &gfx_ctx.device,
-                "alt-material",
-                diffuse_texture,
-                normal_texture,
-                &gfx_ctx.texture_bind_group_layout,
-            )
-        };
 
         Ok(Self {
             window,
@@ -160,9 +127,6 @@ impl State {
             phong,
             model_nodes,
             is_surface_configured: false,
-            #[allow(dead_code)]
-            debug_material,
-            // NEW!
             mouse_pressed: false,
         })
     }
