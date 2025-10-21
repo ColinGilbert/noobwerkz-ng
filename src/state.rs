@@ -3,13 +3,13 @@
 use crate::camera::*;
 use crate::graphics_context::*;
 use crate::instance::*;
+use crate::light::*;
 use crate::model::*;
 use crate::model_node::*;
+use crate::passes::Pass;
+use crate::passes::phong::*;
 use crate::resource::*;
 use crate::texture::*;
-use crate::light_uniform::*;
-use crate::passes::phong::*;
-use crate::passes::Pass;
 
 use std::f32::consts::PI;
 
@@ -37,12 +37,10 @@ pub struct State {
     pub camera_uniform: CameraUniform,
     pub camera_buffer: wgpu::Buffer,
     pub camera_bind_group: wgpu::BindGroup,
+    pub light_ctx: LightContext,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
     #[allow(unused)]
-    pub light_uniform: LightUniform,
-    pub light_buffer: wgpu::Buffer,
-    pub light_bind_group: wgpu::BindGroup,
     #[allow(dead_code)]
     pub debug_material: Material,
     // NEW!
@@ -66,7 +64,8 @@ impl State {
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
 
         let texture_bind_group_layout =
-            gfx_ctx.device
+            gfx_ctx
+                .device
                 .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                     entries: &[
                         // diffuse map
@@ -127,21 +126,21 @@ impl State {
         let camera_controller = CameraController::new(4.0, 0.4);
 
         let mut camera_uniform = CameraUniform::new();
-        
+
         camera_uniform.update_view_proj(&camera, &projection);
 
-        
         let camera_buffer = gfx_ctx
-        .device
-        .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Camera Buffer"),
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Camera Buffer"),
                 contents: bytemuck::cast_slice(&[camera_uniform]),
                 usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             });
-            
-            let camera_bind_group_layout =
-            gfx_ctx.device
-            .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+
+        let camera_bind_group_layout =
+            gfx_ctx
+                .device
+                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                     entries: &[wgpu::BindGroupLayoutEntry {
                         binding: 0,
                         visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
@@ -155,15 +154,17 @@ impl State {
                     label: Some("camera_bind_group_layout"),
                 });
 
-        let camera_bind_group = gfx_ctx.device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: &camera_bind_group_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: camera_buffer.as_entire_binding(),
-            }],
-            label: Some("camera_bind_group"),
-        });
-  
+        let camera_bind_group = gfx_ctx
+            .device
+            .create_bind_group(&wgpu::BindGroupDescriptor {
+                layout: &camera_bind_group_layout,
+                entries: &[wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: camera_buffer.as_entire_binding(),
+                }],
+                label: Some("camera_bind_group"),
+            });
+
         let mut model_nodes = Vec::<ModelNode>::new();
 
         const SPACE_BETWEEN: f32 = 1.0;
@@ -177,7 +178,7 @@ impl State {
             )
             .await
             .unwrap(),
-             (0..NUM_INSTANCES_PER_ROW)
+            (0..NUM_INSTANCES_PER_ROW)
                 .flat_map(|z| {
                     (0..NUM_INSTANCES_PER_ROW).map(move |x| {
                         let x = SPACE_BETWEEN * (x as f32 - NUM_INSTANCES_PER_ROW as f32 / 10.0);
@@ -202,60 +203,26 @@ impl State {
                             rotation,
                             scale,
                         }
-                    }
-                    )
+                    })
                 })
-                .collect::<Vec<_>>()
+                .collect::<Vec<_>>(),
         ));
-
-  
-        let light_uniform = LightUniform {
+        let mut lights = Vec::<LightUniform>::new();
+        lights.push(LightUniform {
             position: [2.0, 2.0, 2.0],
             _padding: 0,
             color: [1.0, 1.0, 1.0],
             _padding2: 0,
-        };
-
-        let light_buffer = gfx_ctx
-            .device
-            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Light VB"),
-                contents: bytemuck::cast_slice(&[light_uniform]),
-                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-            });
-
-        let light_bind_group_layout =
-            gfx_ctx.device
-                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                    entries: &[wgpu::BindGroupLayoutEntry {
-                        binding: 0,
-                        visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
-                        ty: wgpu::BindingType::Buffer {
-                            ty: wgpu::BufferBindingType::Uniform,
-                            has_dynamic_offset: false,
-                            min_binding_size: None,
-                        },
-                        count: None,
-                    }],
-                    label: None,
-                });
-
-        let light_bind_group = gfx_ctx.device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: &light_bind_group_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: light_buffer.as_entire_binding(),
-            }],
-            label: None,
         });
+        let light_ctx = LightContext::new(&gfx_ctx.device, lights);
 
-      let phong = Phong::new(
+        let phong = Phong::new(
             &gfx_ctx.device,
-            &light_buffer,
+            &light_ctx.light_buffer,
             &camera_buffer,
             &texture_bind_group_layout,
             &camera_bind_group_layout,
-            &light_bind_group_layout,
+            &light_ctx.light_bind_group_layout,
             &gfx_ctx.config,
         );
 
@@ -293,6 +260,7 @@ impl State {
             window,
             surface,
             gfx_ctx,
+            light_ctx,
             phong,
             model_nodes,
             camera,
@@ -302,9 +270,6 @@ impl State {
             camera_bind_group,
             camera_uniform,
             is_surface_configured: false,
-            light_uniform,
-            light_buffer,
-            light_bind_group,
             #[allow(dead_code)]
             debug_material,
             // NEW!
@@ -324,9 +289,13 @@ impl State {
             self.is_surface_configured = true;
             self.gfx_ctx.config.width = width;
             self.gfx_ctx.config.height = height;
-            self.surface.configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
-            self.gfx_ctx.depth_texture =
-                Texture::create_depth_texture(&self.gfx_ctx.device, &self.gfx_ctx.config, "depth_texture");
+            self.surface
+                .configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
+            self.gfx_ctx.depth_texture = Texture::create_depth_texture(
+                &self.gfx_ctx.device,
+                &self.gfx_ctx.config,
+                "depth_texture",
+            );
         }
     }
 
@@ -365,14 +334,14 @@ impl State {
         );
 
         // Update the light
-        let old_position: glam::Vec3 = self.light_uniform.position.into();
-        self.light_uniform.position =
+        let old_position: glam::Vec3 = self.light_ctx.light_uniforms[0].position.into();
+        self.light_ctx.light_uniforms[0].position =
             (glam::Quat::from_axis_angle(glam::Vec3::Y, PI * dt.as_secs_f32()) * old_position)
                 .into();
         self.gfx_ctx.queue.write_buffer(
-            &self.light_buffer,
+            &self.light_ctx.light_buffer,
             0,
-            bytemuck::cast_slice(&[self.light_uniform]),
+            bytemuck::cast_slice(&[self.light_ctx.light_uniforms[0]]),
         );
     }
 
@@ -389,14 +358,13 @@ impl State {
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
 
-            self.phong.draw(
-        &self.gfx_ctx.device,
-        &self.gfx_ctx.queue,
-        &self.model_nodes,
-        &self.gfx_ctx.depth_texture.view,
-        &view
-
-            );
+        self.phong.draw(
+            &self.gfx_ctx.device,
+            &self.gfx_ctx.queue,
+            &self.model_nodes,
+            &self.gfx_ctx.depth_texture.view,
+            &view,
+        );
 
         output.present();
 

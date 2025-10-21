@@ -11,4 +11,4 @@ pub mod model3d_schema_capnp;
 pub mod passes;
 pub mod model_node;
 pub mod scene;
-pub mod light_uniform;
+pub mod light;
