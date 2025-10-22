@@ -1,4 +1,5 @@
 use instant::{Duration, Instant};
+use std::ops::{Add, Sub};
 use wgpu::util::DeviceExt;
 use winit::dpi::PhysicalPosition;
 use winit::event::*;
@@ -25,7 +26,13 @@ pub struct CameraContext {
 
 impl CameraContext {
     pub fn new(device: &wgpu::Device, config: &wgpu::SurfaceConfiguration) -> Self {
-        let camera = Camera::new(100.0, 100.0, glam::Vec3::from_slice(&[0.0, 0.0, 0.0]));
+        let camera = Camera::new(
+            1.0,
+            1.0,
+            glam::Vec3::from_slice(&[0.0, 10.0, 10.0]),
+            glam::Vec3::ZERO,
+            glam::Vec3::Y,
+        );
         let projection = Projection::new(
             config.width,
             config.height,
@@ -113,200 +120,112 @@ impl CameraMovement {
 }
 
 pub struct Camera {
-    pub position: glam::Vec3,
-    //pub previous_seconds: f64,
-    pub fwd: glam::Vec4,
-    pub rgt: glam::Vec4,
-    pub up: glam::Vec4,
-    pub quaternion: glam::Quat,
-    pub translation_mat: glam::Mat4,
-    pub rotation_mat: glam::Mat4,
-    pub view_mat: glam::Mat4,
+    pub eye: glam::Vec3,
+    pub target: glam::Vec3,
+    pub up: glam::Vec3,
     pub speed: f32,
     pub heading_speed: f32,
+    pub view_mat: glam::Mat4,
 }
 
 impl Camera {
-    pub fn new(speed: f32, heading_speed: f32, position: glam::Vec3) -> Self {
-        let translation_mat = glam::Mat4::from_translation(position);
-        let initial_heading: f32 = 0.0;
-        let q = glam::Quat::from_axis_angle(
-            glam::Vec3 {
-                x: -initial_heading,
-                y: 0.0,
-                z: 0.0,
-            },
-            0.0,
-        );
-        let rotation_mat = glam::Mat4::from_quat(q);
-        let view_mat = rotation_mat * translation_mat;
-        let fwd = glam::Vec4::from_slice(&[0.0, 0.0, -1.0, 0.0]);
-        let rgt = glam::Vec4::from_slice(&[1.0, 0.0, 0.0, 0.0]);
-        let up = glam::Vec4::from_slice(&[0.0, 1.0, 0.0, 0.0]);
-
+    pub fn new(
+        speed: f32,
+        heading_speed: f32,
+        eye: glam::Vec3,
+        target: glam::Vec3,
+        up: glam::Vec3,
+    ) -> Self {
+        let view_mat = glam::Mat4::look_at_rh(eye, target, glam::Vec3::Y);
         Camera {
-            position,
+            eye,
+            target,
             //previous_seconds: 0.0,
-            fwd,
-            rgt,
             up,
-            quaternion: glam::Quat::IDENTITY,
-            translation_mat,
-            rotation_mat,
-            view_mat,
             speed,
             heading_speed,
+            view_mat,
         }
     }
 
     pub fn update(&mut self, delta: f32, movement: &CameraMovement) {
         let mut cam_moved = false;
-        let mut movement_accum = glam::Vec3::from_slice(&[0.0, 0.0, 0.0]);
         let mut cam_yaw = 0.0;
         let mut cam_pitch = 0.0;
         let mut cam_roll = 0.0;
+        let forward = self.target.sub(self.eye);
+        let forward_normalized = forward.normalize();
+        let forward_magnitude = forward.length();
+        let right = forward_normalized.cross(self.up);
+
+        if movement.move_in && forward_magnitude >= self.speed {
+            self.eye = self.eye.add(forward_normalized * self.speed);
+        } 
+        if movement.move_out {
+           self.eye = self.eye.sub(forward_normalized * self.speed);
+        }
+
         if movement.move_left {
-            movement_accum[0] -= self.speed * delta;
+            self.eye = self.target.sub(forward.sub(right * self.speed));
+            self.target = self.target.add(right * self.speed);
             cam_moved = true;
         }
 
         if movement.move_right {
-            movement_accum[0] += self.speed * delta;
+            self.eye = self.target.sub(forward.add(right * self.speed));
+            self.target = self.target.sub(right * self.speed);
             cam_moved = true;
         }
 
         if movement.move_up {
-            movement_accum[1] += self.speed * delta;
+            self.eye = self.target.sub(forward.add(self.up * self.speed));
+            self.target = self.target.sub(self.up * self.speed);
             cam_moved = true;
         }
 
         if movement.move_down {
-            movement_accum[1] -= self.speed * delta;
+            self.eye = self.target.sub(forward.sub(self.up * self.speed));
+            self.target = self.target.add(self.up * self.speed);
             cam_moved = true;
         }
 
         if movement.move_in {
-            movement_accum[2] -= self.speed * delta;
+            self.eye = self.eye.add(forward_normalized * self.speed);
+            self.target = self.target.add(forward_normalized * self.speed);
             cam_moved = true;
         }
 
         if movement.move_out {
-            movement_accum[2] += self.speed * delta;
+            self.eye = self.eye.sub(forward_normalized * self.speed);
+            self.target = self.target.sub(forward_normalized * self.speed);
             cam_moved = true;
         }
 
         if movement.swing_left {
-            cam_yaw += self.heading_speed * delta;
-            cam_moved = true;
-
-            let q_yaw = glam::Quat::from_axis_angle(
-                glam::Vec3::from_slice(&[self.up[0], self.up[1], self.up[2]]),
-                cam_yaw,
-            );
-            self.quaternion = q_yaw * self.quaternion;
-
-            self.rotation_mat = glam::Mat4::from_quat(self.quaternion);
-            self.fwd = self.rotation_mat * glam::Vec4::from_slice(&[0.0, 0.0, -1.0, 0.0]);
-            self.rgt = self.rotation_mat * glam::Vec4::from_slice(&[1.0, 0.0, 0.0, 0.0]);
-            self.up = self.rotation_mat * glam::Vec4::from_slice(&[0.0, 1.0, 0.0, 0.0]);
         }
 
         if movement.swing_right {
             cam_yaw -= self.heading_speed * delta;
-            cam_moved = true;
-
-            let q_yaw = glam::Quat::from_axis_angle(
-                glam::Vec3::from_slice(&[self.up[0], self.up[1], self.up[2]]),
-                cam_yaw,
-            );
-            self.quaternion = q_yaw * self.quaternion;
-
-            self.rotation_mat = glam::Mat4::from_quat(self.quaternion);
-            self.fwd = self.rotation_mat * glam::Vec4::from_slice(&[0.0, 0.0, -1.0, 0.0]);
-            self.rgt = self.rotation_mat * glam::Vec4::from_slice(&[1.0, 0.0, 0.0, 0.0]);
-            self.up = self.rotation_mat * glam::Vec4::from_slice(&[0.0, 1.0, 0.0, 0.0]);
         }
 
         if movement.swing_over {
             cam_pitch += self.heading_speed * delta;
-            cam_moved = true;
-
-            let q_pitch = glam::Quat::from_axis_angle(
-                glam::Vec3::from_slice(&[self.rgt[0], self.rgt[1], self.rgt[2]]),
-                cam_pitch,
-            );
-            self.quaternion = q_pitch * self.quaternion;
-
-            self.rotation_mat = glam::Mat4::from_quat(self.quaternion);
-            self.fwd = self.rotation_mat * glam::Vec4::from_slice(&[0.0, 0.0, -1.0, 0.0]);
-            self.rgt = self.rotation_mat * glam::Vec4::from_slice(&[1.0, 0.0, 0.0, 0.0]);
-            self.up = self.rotation_mat * glam::Vec4::from_slice(&[0.0, 1.0, 0.0, 0.0]);
         }
 
         if movement.swing_under {
             cam_pitch -= self.heading_speed * delta;
-            cam_moved = true;
-
-            let q_pitch = glam::Quat::from_axis_angle(
-                glam::Vec3::from_slice(&[self.rgt[0], self.rgt[1], self.rgt[2]]),
-                cam_pitch,
-            );
-            self.quaternion = q_pitch * self.quaternion;
-
-            self.rotation_mat = glam::Mat4::from_quat(self.quaternion);
-            self.fwd = self.rotation_mat * glam::Vec4::from_slice(&[0.0, 0.0, -1.0, 0.0]);
-            self.rgt = self.rotation_mat * glam::Vec4::from_slice(&[1.0, 0.0, 0.0, 0.0]);
-            self.up = self.rotation_mat * glam::Vec4::from_slice(&[0.0, 1.0, 0.0, 0.0]);
         }
 
         if movement.roll_clockwise {
             cam_roll -= self.heading_speed * delta;
-            cam_moved = true;
-
-            let q_roll = glam::Quat::from_axis_angle(
-                glam::Vec3::from_slice(&[self.fwd[0], self.fwd[1], self.fwd[2]]),
-                cam_roll,
-            );
-            self.quaternion = q_roll * self.quaternion;
-
-            self.rotation_mat = glam::Mat4::from_quat(self.quaternion);
-            self.fwd = self.rotation_mat * glam::Vec4::from_slice(&[0.0, 0.0, -1.0, 0.0]);
-            self.rgt = self.rotation_mat * glam::Vec4::from_slice(&[1.0, 0.0, 0.0, 0.0]);
-            self.up = self.rotation_mat * glam::Vec4::from_slice(&[0.0, 1.0, 0.0, 0.0]);
         }
 
         if movement.roll_counterclockwise {
             cam_roll = self.heading_speed * delta;
-            cam_moved = true;
-
-            let q_roll = glam::Quat::from_axis_angle(
-                glam::Vec3::from_slice(&[self.fwd[0], self.fwd[1], self.fwd[2]]),
-                cam_roll,
-            );
-            self.quaternion = q_roll * self.quaternion;
-
-            self.rotation_mat = glam::Mat4::from_quat(self.quaternion);
-            self.fwd = self.rotation_mat * glam::Vec4::from_slice(&[0.0, 0.0, -1.0, 0.0]);
-            self.rgt = self.rotation_mat * glam::Vec4::from_slice(&[1.0, 0.0, 0.0, 0.0]);
-            self.up = self.rotation_mat * glam::Vec4::from_slice(&[0.0, 1.0, 0.0, 0.0]);
         }
 
         if cam_moved {
-            self.rotation_mat = glam::Mat4::from_quat(self.quaternion);
-
-            self.position = self.position
-                + glam::Vec3::from_slice(&[self.fwd[0], self.fwd[1], self.fwd[2]])
-                    * -movement_accum[2];
-            self.position = self.position
-                + glam::Vec3::from_slice(&[self.up[0], self.up[1], self.up[2]]) * movement_accum[1];
-            self.position = self.position
-                + glam::Vec3::from_slice(&[self.rgt[0], self.rgt[1], self.rgt[2]])
-                    * movement_accum[0];
-
-            self.translation_mat =
-                glam::Mat4::IDENTITY * glam::Mat4::from_translation(self.position);
-
-            self.view_mat = self.rotation_mat.inverse() * self.translation_mat.inverse();
+            self.view_mat = glam::Mat4::look_at_rh(self.eye, self.target, self.up);
         }
     }
 }
@@ -329,7 +248,7 @@ impl CameraUniform {
     }
 
     pub fn update_view_proj(&mut self, camera: &Camera, projection: &Projection) {
-        self.view_position = [camera.position.x, camera.position.y, camera.position.z, 1.0];
+        self.view_position = [camera.eye.x, camera.eye.y, camera.eye.z, 1.0];
         self.view_projection = (projection.calc_matrix() * camera.view_mat).to_cols_array_2d();
     }
 }
