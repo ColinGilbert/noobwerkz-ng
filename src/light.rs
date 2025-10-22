@@ -11,10 +11,7 @@ impl LightContext {
     pub fn new(device: &wgpu::Device, light_uniforms: Vec<LightUniform> ) -> Self {
         let light_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Light VB"),
-            /////////////////////////////////////////////////////////////////
-            // NOTE: Here we only use the first light buffer. TODO: Fix!
-            /////////////////////////////////////////////////////////////////
-            contents: bytemuck::cast_slice(&[light_uniforms[0]]),
+            contents: bytemuck::cast_slice(&light_uniforms),
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
 
@@ -41,6 +38,7 @@ impl LightContext {
             }],
             label: None,
         });
+
         Self {
             light_uniforms,
             light_buffer,

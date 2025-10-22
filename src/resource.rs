@@ -91,8 +91,9 @@ pub async fn load_model_from_serialized(
                 indices.push(i as u32);
             }
         }
-
-        calculate_tangents_and_bitangents(&mut verts, &indices);
+        if mesh_serialized.has_uvs() && mesh_serialized.get_uvs().unwrap().len() == mesh_serialized.get_positions().unwrap().len() {
+            calculate_tangents_and_bitangents(&mut verts, &indices);
+        }
 
         let name: String;
         if mesh_serialized.has_name() {
@@ -126,10 +127,18 @@ pub async fn load_model_from_serialized(
             mesh_serialized.get_rotation_w(),
         );
 
-        let scale= glam::Vec3::new(mesh_serialized.get_scale_x(), mesh_serialized.get_scale_y(), mesh_serialized.get_scale_z());
+        let scale = glam::Vec3::new(
+            mesh_serialized.get_scale_x(),
+            mesh_serialized.get_scale_y(),
+            mesh_serialized.get_scale_z(),
+        );
 
-        let dimensions = glam::Vec3::new(mesh_serialized.get_dimensions_x(), mesh_serialized.get_dimensions_y(), mesh_serialized.get_dimensions_z());
-        
+        let dimensions = glam::Vec3::new(
+            mesh_serialized.get_dimensions_x(),
+            mesh_serialized.get_dimensions_y(),
+            mesh_serialized.get_dimensions_z(),
+        );
+
         result.meshes.push(TexturedMesh {
             name,
             vertex_buffer,

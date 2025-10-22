@@ -49,9 +49,7 @@ impl State {
         });
 
         let surface = instance.create_surface(window.clone()).unwrap();
-
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
-
         let cam_ctx = CameraContext::new(&gfx_ctx.device, &gfx_ctx.config);
         let mut model_nodes = Vec::<ModelNode>::new();
 
@@ -117,7 +115,6 @@ impl State {
             &gfx_ctx.config,
         );
 
-
         Ok(Self {
             window,
             surface,
@@ -153,7 +150,6 @@ impl State {
         }
     }
 
-    // UPDATED!
     pub fn handle_key(&mut self, event_loop: &ActiveEventLoop, key: KeyCode, pressed: bool) {
         if !self.cam_ctx.controller.handle_key(key) {
             match (key, pressed) {
@@ -163,15 +159,15 @@ impl State {
         }
     }
 
-    // NEW!
     pub fn handle_mouse_button(&mut self, button: MouseButton, pressed: bool) {
         match button {
             MouseButton::Left => self.mouse_pressed = pressed,
-            _ => {}
+            _ => {
+                // self.cam_ctx.controller.handle_mouse(mouse_dx, mouse_dy);
+            }
         }
     }
 
-    // NEW!
     pub fn handle_mouse_scroll(&mut self, delta: &MouseScrollDelta) {
         self.cam_ctx.controller.handle_scroll(delta);
     }
@@ -179,7 +175,8 @@ impl State {
     pub fn update(&mut self, dt: std::time::Duration) {
         // UPDATED!
         self.cam_ctx.controller.update_camera(dt);
-        self.cam_ctx.uniform
+        self.cam_ctx
+            .uniform
             .update_view_proj(&self.cam_ctx.controller.camera, &self.cam_ctx.projection);
         self.gfx_ctx.queue.write_buffer(
             &self.cam_ctx.buffer,

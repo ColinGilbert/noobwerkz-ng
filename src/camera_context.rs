@@ -1,10 +1,7 @@
-use crate::camera2::*;
-use instant::{Duration, Instant};
-use std::ops::{Add, Sub};
+use instant::{Instant};
 use wgpu::util::DeviceExt;
-use winit::dpi::PhysicalPosition;
-use winit::event::*;
-use winit::keyboard::KeyCode;
+use crate::camera::*;
+use crate::camera_controller::*;
 
 // pub const OPENGL_TO_WGPU_MATRIX: glam::Mat4 = glam::Mat4::from_cols(
 //     glam::Vec4::from_array([1.0, 0.0, 0.0, 0.0]),
@@ -139,80 +136,5 @@ impl Projection {
         let results =
             glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
         results
-    }
-}
-
-pub struct CameraController {
-    pub last_frame: Instant,
-    pub camera: Camera,
-    //pub movement: CameraMovement,
-}
-
-impl CameraController {
-    pub fn new(last_frame: Instant, camera: Camera) -> Self {
-        Self {
-            last_frame,
-            camera,
-            //movement: CameraMovement::new(),
-        }
-    }
-
-    pub fn handle_key(&mut self, key: KeyCode) -> bool {
-        match key {
-            KeyCode::ArrowUp => {
-                self.camera.move_up();
-                true
-            }
-            KeyCode::ArrowDown => {
-                self.camera.move_down();
-                true
-            }
-            KeyCode::ArrowLeft => {
-                self.camera.move_left();
-                true
-            }
-            KeyCode::ArrowRight => {
-                self.camera.move_right();
-                true
-            }
-            KeyCode::KeyW => true,
-            KeyCode::KeyS => true,
-            KeyCode::KeyA => true,
-            KeyCode::KeyD => true,
-            KeyCode::KeyQ => true,
-            KeyCode::KeyE => true,
-            _ => false,
-        }
-    }
-
-    pub fn handle_mouse(&mut self, mouse_dx: f64, mouse_dy: f64) {
-        // self.rotate_horizontal = mouse_dx ;
-        // self.rotate_vertical = mouse_dy ;
-    }
-
-    pub fn handle_scroll(&mut self, delta: &MouseScrollDelta) {
-        match delta {
-            //     // I'm assuming a line is about 100 pixels
-            MouseScrollDelta::LineDelta(_, s) => {
-                if *s < 0.0 {
-                    self.camera.move_backward();
-                } else {
-                    self.camera.move_forward();
-                }
-            }
-            MouseScrollDelta::PixelDelta(position) => {
-                if position.y < 0.0 {
-                    self.camera.move_backward();
-                } else {
-                    self.camera.move_forward();
-                }
-            }
-        }
-    }
-
-    pub fn update_camera(&mut self, dt: Duration) {
-        let dt = dt.as_secs_f64();
-        self.camera.update(); //dt as f32, &self.movement);
-        //self.movement = CameraMovement::new();
     }
 }
