@@ -28,7 +28,17 @@ pub struct CameraContext {
 
 impl CameraContext {
     pub fn new(device: &wgpu::Device, config: &wgpu::SurfaceConfiguration) -> Self {
-        let camera = Camera::new(&glam::Vec3::from_slice(&[10.0, 10.0, 10.0]), &glam::Vec3 { x: 0.0, y: 0.0, z: 0.0 }, &glam::Vec3::Y, 0.5, degrees_to_radians(15.0));
+        let camera = Camera::new(
+            &glam::Vec3::from_slice(&[10.0, 10.0, 10.0]),
+            &glam::Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            &glam::Vec3::Y,
+            0.5,
+            degrees_to_radians(15.0),
+        );
         let projection = Projection::new(
             config.width,
             config.height,
@@ -150,11 +160,11 @@ impl CameraController {
     pub fn handle_key(&mut self, key: KeyCode) -> bool {
         match key {
             KeyCode::ArrowUp => {
-                self.camera.move_forward();
+                self.camera.move_up();
                 true
             }
             KeyCode::ArrowDown => {
-                self.camera.move_backward();
+                self.camera.move_down();
                 true
             }
             KeyCode::ArrowLeft => {
@@ -165,24 +175,12 @@ impl CameraController {
                 self.camera.move_right();
                 true
             }
-            KeyCode::KeyW => {
-                true
-            }
-            KeyCode::KeyS => {
-                true
-            }
-            KeyCode::KeyA => {
-                true
-            }
-            KeyCode::KeyD => {
-                true
-            }
-            KeyCode::KeyQ => {
-                true
-            }
-            KeyCode::KeyE => {
-                true
-            }
+            KeyCode::KeyW => true,
+            KeyCode::KeyS => true,
+            KeyCode::KeyA => true,
+            KeyCode::KeyD => true,
+            KeyCode::KeyQ => true,
+            KeyCode::KeyE => true,
             _ => false,
         }
     }
@@ -193,10 +191,17 @@ impl CameraController {
     }
 
     pub fn handle_scroll(&mut self, delta: &MouseScrollDelta) {
-        // self.scroll = match delta {
-        //     // I'm assuming a line is about 100 pixels
-        //     MouseScrollDelta::LineDelta(_, scroll) => -scroll * 100.0, // * 0.5,
-        //     MouseScrollDelta::PixelDelta(PhysicalPosition { y: scroll, .. }) => -*scroll ,
+        match delta {
+            //     // I'm assuming a line is about 100 pixels
+            MouseScrollDelta::LineDelta(_, s) => {
+                if *s < 0.0 {
+                    self.camera.move_backward();
+                } else {
+                    self.camera.move_forward();
+                }
+            }
+            MouseScrollDelta::PixelDelta(PhysicalPosition { y: scroll, .. }) => {}
+        }
     }
 
     pub fn update_camera(&mut self, dt: Duration) {
