@@ -1,140 +1,88 @@
 use std::ops::*;
 
-const CAMERA_WORLD_FORWARD: glam::Vec3 = glam::Vec3::Z;
-const CAMERA_WORLD_UP: glam::Vec3 = glam::Vec3::Y;
-const CAMERA_WORLD_RIGHT: glam::Vec3 = glam::Vec3::X;
-
-const CAMERA_MODE_DISABLE_ROLL: u32 = 1; // Disables the roll axis
-const CAMERA_MODE_MOVE_IN_WORLDPLANE: u32 = 1 << 2; // Projects movement onto world plane
-const CAMERA_MODE_CLAMP_PITCH_ANGLE: u32 = 1 << 3; // Limits the pitch angle. Typically used in first/third person to prevent overrotation  (i.e. somersaults).
-const CAMERA_MODE_CLAMP_YAW_ANGLE: u32 = 1 << 4; // Limits the yaw angle.
-const CAMERA_MODE_CLAMP_ROLL_ANGLE: u32 = 1 << 5; // Limits the roll angle.
-const CAMERA_MODE_FREE: u32 = 0; // Free float camera mode (no restrictions applied)
-const CAMERA_MODE_FIRST_PERSON: u32 = CAMERA_MODE_FREE
-    | CAMERA_MODE_DISABLE_ROLL
-    | CAMERA_MODE_MOVE_IN_WORLDPLANE
-    | CAMERA_MODE_CLAMP_PITCH_ANGLE; // Note: Set camera.minPitch = -pi/2 and camera.maxPitch = pi/2
-const CAMERA_MODE_THIRD_PERSON: u32 = CAMERA_MODE_FIRST_PERSON; //  Note: Set camera.minPitch = -pi/2 and camera.maxPitch = pi/2. Note: Use a target_distance > 0
-const CAMERA_MODE_ORBITAL: u32 =
-    CAMERA_MODE_FREE | CAMERA_MODE_DISABLE_ROLL | CAMERA_MODE_CLAMP_PITCH_ANGLE; // Note: Set camera.minPitch = -pi/2 and camera.maxPitch = pi/2
-
-fn mul(q: &glam::Quat, v: &glam::Vec3) -> glam::Vec3 {
-    let tmp0 = q.inverse();
-    let qv = glam::Quat::from_slice(&[v.x, v.y, v.z, 0.0]);
-    let tmp1 = tmp0.mul(qv);
-    let result = tmp1.mul(q);
-    glam::Vec3::from_slice(&[result.x, result.y, result.z])
-}
-
+#[derive(Copy, Clone)]
 pub struct Camera {
-    pub target_position: glam::Vec3,
-    pub target_distance: f32,
-    pub orientation: glam::Quat,
-    pub movement_accumulator: glam::Vec3,
-    pub rotation_accumulator: glam::Vec3,
-    pub min_pitch: f32,
-    pub max_pitch: f32,
-    pub min_yaw: f32,
-    pub max_yaw: f32,
-    pub min_roll: f32,
-    pub max_roll: f32,
+    pub eye: glam::Vec3,
+    pub front: glam::Vec3,
+    pub up: glam::Vec3,
+    pub right: glam::Vec3,
+    pub world_up: glam::Vec3,
+    pub yaw: f32,
+    pub pitch: f32,
+    pub roll: f32,
+    pub movement_speed: f32,
+    pub movement_sensitivity: f32,
+    // pub min_pitch: f32,
+    // pub max_pitch: f32,
+    // pub min_yaw: f32,
+    // pub max_yaw: f32,
+    // pub min_roll: f32,
+    // pub max_roll: f32,
 }
 
 impl Camera {
     pub fn new() -> Self {
-        let view_mat = glam::Mat4::look_at_rh(eye, target, glam::Vec3::Y);
+        let up = glam::Vec3::Y;
+
         Camera {
-            target_position: glam::Vec3::ZERO,
-            target_distance: 0.0,
-            //previous_seconds: 0.0,
-            orientation: glam::Quat::from_slice(&[0.0, 0.0, 0.0, 0.0]),
-            movement_accumulator: glam::Vec3::from_slice(&[0.0, 0.0, 0.0]),
-            rotation_accumulator: glam::Vec3::from_slice(&[0.0, 0.0, 0.0]),
-            min_pitch: 0.0,
-            max_pitch: 0.0,
-            min_yaw: 0.0,
-            max_yaw: 0.0,
-            min_roll: 0.0,
-            max_roll: 0.0,
-        }
-    }
-
-    pub fn forward(self) -> glam::Vec3 {
-        let results = mul(&self.orientation.inverse(), &CAMERA_WORLD_FORWARD);
-        results
-    }
-
-    pub fn up(self) -> glam::Vec3 {
-        let results = mul(&self.orientation.inverse(), &CAMERA_WORLD_UP);
-        results
-    }
-
-    pub fn right(self) -> glam::Vec3 {
-        let results = mul(&self.orientation.inverse(), &CAMERA_WORLD_RIGHT);
-        results
-    }
-
-    pub fn eye(self) -> glam::Vec3 {
-        let target_dist = self.target_distance;
-        let results = self.target_position.add(self.forward().mul(-target_dist));
-        results
-    }
-
-    pub fn move_cam(mut self, offset: &glam::Vec3) {
-        self.movement_accumulator = self.movement_accumulator.add(offset);
-    }
-
-    pub fn rotate_cam(mut self, angles: &glam::Vec3) {
-        self.rotation_accumulator = self.rotation_accumulator.add(angles);
-    }
-
-    pub fn look_at(mut self, forward: &glam::Vec3, up: &glam::Vec3) {
-        let right = up.cross(*forward).normalize();
-
-        let m0 = right.x;
-        let m1 = right.y;
-        let m2 = right.z;
-        let m4 = up.x;
-        let m5 = up.y;
-        let m6 = up.z;
-        let m8 = forward.x;
-        let m9 = forward.y;
-        let m10 = forward.z;
-
-        let trace = m0 + m5 + m10;
-        if trace > 0.0 {
-            let s = 0.5 / (trace + 1.0).sqrt();
-            self.orientation.w = 0.25 / s;
-            self.orientation.x = (m6 - m9) * s;
-            self.orientation.y = (m8 - m2) * s;
-            self.orientation.z = (m1 - m4) * s;
-        } else {
-            if m0 > m5 && m0 > m10 {
-                let s = 2.0 * (1.0 + m0 - m5 - m10).sqrt();
-                self.orientation.w = (m6 - m9) / s;
-                self.orientation.x = 0.25 * s;
-                self.orientation.y = (m4 + m1) / s;
-                self.orientation.z = (m8 + m2) / s;
-            } else if m5 > m10 {
-                let s = 2.0 * (1.0 + m5 - m0 - m10).sqrt();
-                self.orientation.w = (m8 - m2) / s;
-                self.orientation.x = (m4 + m1) / s;
-                self.orientation.y = 0.25 * s;
-                self.orientation.z = (m0 + m6) / s;
-            } else {
-                let s = 2.0 * (1.0 + m10 - m0 -m5).sqrt();
-                self.orientation.w = (m1 - m4) / s;
-                self.orientation.x = (m8 + m2) / s;
-                self.orientation.y = (m9 + m6) /s;
-                self.orientation.z = 0.25 * s;
-            }
+            eye: glam::Vec3::from_slice(&[0.0, 0.0, 0.0]),
+            front: glam::Vec3::from_slice(&[0.0, 0.0, -1.0]),
+            up,
+            right: glam::Vec3::from_slice(&[1.0, 0.0, 0.0]),
+            world_up: up,
+            yaw: 0.0,
+            pitch: 0.0,
+            roll: 0.0,
+            movement_speed: 1.0,
+            movement_sensitivity: 1.0,
+            // min_pitch: -PI / 2.0,
+            // max_pitch: PI / 2.0,
+            // min_yaw: -PI / 2.0,
+            // max_yaw: PI / 2.0,
+            // min_roll: -PI / 2.0,
+            // max_roll: PI / 2.0,
         }
     }
 
     pub fn view_matrix(self) -> glam::Mat4 {
-        glam::Mat4::IDENTITY
+        let result = glam::Mat4::look_at_rh(self.eye, self.eye + self.front, self.up);
+        result
+    }
+
+    pub fn update(&mut self) {
+        let mut front = glam::Vec3::from_slice(&[0.0, 0.0, 0.0]);
+        let (sin_yaw, cos_yaw) = libm::sincosf(self.yaw);
+        let (sin_pitch, cos_pitch) = libm::sincosf(self.pitch);
+
+        front.x = cos_yaw * cos_pitch;
+        front.y = sin_pitch;
+        front.z = sin_yaw * cos_pitch;
+
+        self.front = front.normalize();
+
+        //self.front = front;
+        self.right = (front.cross(self.world_up)).normalize();
+        self.up = (self.right.cross(front)).normalize();
+    }
+
+    pub fn move_forward(&mut self) {
+        self.eye = self.eye.add(self.front.mul(self.movement_speed ));
+    }
+
+    pub fn move_backward(&mut self) {
+        self.eye = self.eye.add(self.front.mul(-self.movement_speed));
+    }
+
+    pub fn move_left(&mut self) {
+        self.eye = self.eye.add(self.right.mul(-self.movement_speed));
+    }
+
+    pub fn move_right(&mut self) {
+        self.eye = self.eye.add(self.right.mul(self.movement_speed));
     }
 }
+
+
 pub struct CameraMovement {
     pub move_left: bool,
     pub move_right: bool,
