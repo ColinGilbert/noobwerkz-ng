@@ -200,7 +200,13 @@ impl CameraController {
                     self.camera.move_forward();
                 }
             }
-            MouseScrollDelta::PixelDelta(PhysicalPosition { y: scroll, .. }) => {}
+            MouseScrollDelta::PixelDelta(position) => {
+                if position.y < 0.0 {
+                    self.camera.move_backward();
+                } else {
+                    self.camera.move_forward();
+                }
+            }
         }
     }
 
