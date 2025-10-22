@@ -3,6 +3,7 @@ pub mod state;
 pub mod app;
 pub mod graphics_context;
 pub mod camera;
+pub mod camera2;
 pub mod camera_context;
 pub mod texture;
 pub mod model;

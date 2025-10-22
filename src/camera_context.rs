@@ -1,4 +1,4 @@
-use crate::camera::*;
+use crate::camera2::*;
 use instant::{Duration, Instant};
 use std::ops::{Add, Sub};
 use wgpu::util::DeviceExt;
@@ -28,7 +28,7 @@ pub struct CameraContext {
 
 impl CameraContext {
     pub fn new(device: &wgpu::Device, config: &wgpu::SurfaceConfiguration) -> Self {
-        let camera = Camera::new();
+        let camera = Camera::new(&glam::Vec3::from_slice(&[10.0, 10.0, 10.0]), &glam::Vec3 { x: 0.0, y: 0.0, z: 0.0 }, &glam::Vec3::Y, 0.5, degrees_to_radians(15.0));
         let projection = Projection::new(
             config.width,
             config.height,
@@ -81,39 +81,6 @@ impl CameraContext {
     }
 }
 
-pub struct CameraMovement {
-    pub move_left: bool,
-    pub move_right: bool,
-    pub move_up: bool,
-    pub move_down: bool,
-    pub move_in: bool,
-    pub move_out: bool,
-    pub swing_left: bool,
-    pub swing_right: bool,
-    pub swing_over: bool,
-    pub swing_under: bool,
-    pub roll_clockwise: bool,
-    pub roll_counterclockwise: bool,
-}
-
-impl CameraMovement {
-    pub fn new() -> Self {
-        Self {
-            move_left: false,
-            move_right: false,
-            move_up: false,
-            move_down: false,
-            move_in: false,
-            move_out: false,
-            swing_left: false,
-            swing_right: false,
-            swing_over: false,
-            swing_under: false,
-            roll_clockwise: false,
-            roll_counterclockwise: false,
-        }
-    }
-}
 // This represents the camera uniform that lives on the GPU
 #[repr(C)]
 // Derive the required traits for safe casting.
@@ -168,7 +135,7 @@ impl Projection {
 pub struct CameraController {
     pub last_frame: Instant,
     pub camera: Camera,
-    pub movement: CameraMovement,
+    //pub movement: CameraMovement,
 }
 
 impl CameraController {
@@ -176,7 +143,7 @@ impl CameraController {
         Self {
             last_frame,
             camera,
-            movement: CameraMovement::new(),
+            //movement: CameraMovement::new(),
         }
     }
 
@@ -199,27 +166,21 @@ impl CameraController {
                 true
             }
             KeyCode::KeyW => {
-                self.movement.move_up = true;
                 true
             }
             KeyCode::KeyS => {
-                self.movement.move_down = true;
                 true
             }
             KeyCode::KeyA => {
-                self.movement.swing_left = true;
                 true
             }
             KeyCode::KeyD => {
-                self.movement.swing_right = true;
                 true
             }
             KeyCode::KeyQ => {
-                self.movement.swing_left = true;
                 true
             }
             KeyCode::KeyE => {
-                self.movement.swing_right = true;
                 true
             }
             _ => false,
@@ -241,6 +202,6 @@ impl CameraController {
     pub fn update_camera(&mut self, dt: Duration) {
         let dt = dt.as_secs_f64();
         self.camera.update(); //dt as f32, &self.movement);
-        self.movement = CameraMovement::new();
+        //self.movement = CameraMovement::new();
     }
 }

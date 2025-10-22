@@ -1,0 +1,150 @@
+use glam::Quat;
+use std::f32::consts::{FRAC_PI_2, PI};
+use std::ops::*;
+
+const PI_2: f32 = PI * 2.0;
+
+pub fn degrees_to_radians(degrees: f32) -> f32 {
+    degrees * std::f32::consts::PI / 180.0
+}
+
+pub struct Camera {
+    pub up: glam::Vec3,
+    pub eye: glam::Vec3,
+    pub eye_delta: glam::Vec3,
+    pub look_at: glam::Vec3,
+    pub direction: glam::Vec3,
+    pub world_up: glam::Vec3, // This is used to reset te camera.
+    //pub scale: f32,
+    pub heading: f32,
+    pub pitch: f32,
+    pub max_pitch_rate: f32,
+    pub max_heading_rate: f32,
+    pub moving: bool,
+    pub speed: f32,
+    pub heading_speed: f32,
+}
+
+impl Camera {
+    pub fn new(
+        starting_eye_pos: &glam::Vec3,
+        look_at: &glam::Vec3,
+        world_up: &glam::Vec3,
+        speed: f32,
+        heading_speed: f32,
+    ) -> Self {
+        Self {
+            up: *world_up,
+            eye: *starting_eye_pos,
+            eye_delta: glam::Vec3::ZERO,
+            look_at: *look_at,
+            direction: (*look_at - *starting_eye_pos).normalize(),
+            world_up: *world_up, // This is used to reset te camera.
+            //scale: scale,
+            heading: 0.0,
+            pitch: 0.0,
+            max_pitch_rate: degrees_to_radians(5.0),
+            max_heading_rate: degrees_to_radians(5.0),
+            moving: true,
+            speed,
+            heading_speed,
+        }
+    }
+
+    pub fn update(&mut self) {
+        // Adapted from: https://github.com/hmazhar/moderngl_camera
+        self.direction = (self.look_at - self.eye).normalize();
+        let axis = glam::Vec3::cross(self.direction, self.up);
+        //compute quaternion for pitch based on the camera pitch angle
+        let pitch_quat = glam::Quat::from_axis_angle(axis, self.pitch);
+        //determine heading quaternion from the camera up vector and the heading angle
+        let heading_quat = glam::Quat::from_axis_angle(self.up, self.heading);
+        //add the two quaternions
+        let mut temp = pitch_quat * heading_quat;
+        temp = temp.normalize();
+        //update the direction from the quaternion
+        self.direction = temp * self.direction;
+        //add the camera delta
+        self.eye += self.eye_delta;
+        //set the look at to be infront of the camera
+        self.look_at = self.eye + self.direction;
+        //damping for smooth camera
+        self.heading *= degrees_to_radians(0.5);
+        self.pitch *= degrees_to_radians(0.5);
+        self.eye_delta = self.eye_delta * 0.8;
+    }
+
+    pub fn view_matrix(&self) -> glam::Mat4 {
+        let view_matrix = glam::Mat4::look_at_rh(self.eye, self.look_at, self.up);
+        //println!("Getting view matrix");
+        view_matrix
+    }
+
+    pub fn reset(&mut self) {
+        self.up = self.world_up;
+    }
+
+    pub fn change_pitch(&mut self, rads: f32) {
+        let mut temp = rads;
+        //Check bounds with the max pitch rate so that we aren't moving too fast
+        if temp < -self.max_pitch_rate {
+            temp = -self.max_pitch_rate;
+        } else if temp > self.max_pitch_rate {
+            temp = self.max_pitch_rate;
+        }
+        self.pitch = self.pitch + temp;
+
+        //Check bounds for the camera pitch
+        if self.pitch > PI_2 {
+            self.pitch -= PI_2;
+        } else if self.pitch < -PI_2 {
+            self.pitch += PI_2;
+        }
+    }
+
+    pub fn change_heading(&mut self, rads: f32) {
+        let mut temp = rads;
+        //Check bounds with the max pitch rate so that we aren't moving too fast
+        if temp < -self.max_heading_rate {
+            temp = -self.max_heading_rate;
+        } else if temp > self.max_heading_rate {
+            temp = self.max_heading_rate;
+        }
+        self.heading = self.heading + temp;
+
+        //Check bounds for the camera pitch
+        if self.heading > PI_2 {
+            self.heading -= PI_2;
+        } else if self.heading < -PI_2 {
+            self.heading += PI_2;
+        }
+    }
+
+    pub fn move_up(&mut self) {
+        self.eye_delta += self.up * self.speed;
+    }
+
+    pub fn move_down(&mut self) {
+        self.eye_delta -= self.up * self.speed;
+    }
+
+    pub fn move_forward(&mut self) {
+        self.eye_delta += self.direction * self.speed;
+    }
+
+    pub fn move_backward(&mut self) {
+        self.eye_delta = self.eye_delta.sub(self.direction.mul(self.speed));
+    }
+
+    pub fn move_right(&mut self) {
+        self.eye_delta = self
+            .eye_delta
+            .add(self.direction.cross(self.up).mul(self.speed));
+    }
+
+    pub fn move_left(&mut self) {
+        self.eye_delta = self
+            .eye_delta
+            .sub(self.direction.cross(self.up).mul(self.speed));
+    }
+}
