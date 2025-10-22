@@ -85,10 +85,52 @@ impl Camera {
     }
 
     pub fn rotate_cam(mut self, angles: &glam::Vec3) {
-        self.rotation_accumulator= self.rotation_accumulator.add(angles);
+        self.rotation_accumulator = self.rotation_accumulator.add(angles);
     }
-    
-    pub fn look_at(self, forward: &glam::Vec3, up: &glam::Vec3) {}
+
+    pub fn look_at(mut self, forward: &glam::Vec3, up: &glam::Vec3) {
+        let right = up.cross(*forward).normalize();
+
+        let m0 = right.x;
+        let m1 = right.y;
+        let m2 = right.z;
+        let m4 = up.x;
+        let m5 = up.y;
+        let m6 = up.z;
+        let m8 = forward.x;
+        let m9 = forward.y;
+        let m10 = forward.z;
+
+        let trace = m0 + m5 + m10;
+        if trace > 0.0 {
+            let s = 0.5 / (trace + 1.0).sqrt();
+            self.orientation.w = 0.25 / s;
+            self.orientation.x = (m6 - m9) * s;
+            self.orientation.y = (m8 - m2) * s;
+            self.orientation.z = (m1 - m4) * s;
+        } else {
+            if m0 > m5 && m0 > m10 {
+                let s = 2.0 * (1.0 + m0 - m5 - m10).sqrt();
+                self.orientation.w = (m6 - m9) / s;
+                self.orientation.x = 0.25 * s;
+                self.orientation.y = (m4 + m1) / s;
+                self.orientation.z = (m8 + m2) / s;
+            } else if m5 > m10 {
+                let s = 2.0 * (1.0 + m5 - m0 - m10).sqrt();
+                self.orientation.w = (m8 - m2) / s;
+                self.orientation.x = (m4 + m1) / s;
+                self.orientation.y = 0.25 * s;
+                self.orientation.z = (m0 + m6) / s;
+            } else {
+                let s = 2.0 * (1.0 + m10 - m0 -m5).sqrt();
+                self.orientation.w = (m1 - m4) / s;
+                self.orientation.x = (m8 + m2) / s;
+                self.orientation.y = (m9 + m6) /s;
+                self.orientation.z = 0.25 * s;
+            }
+        }
+    }
+
     pub fn view_matrix(self) -> glam::Mat4 {
         glam::Mat4::IDENTITY
     }
