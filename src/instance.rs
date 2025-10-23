@@ -37,7 +37,7 @@ impl Vertex for InstanceRaw {
             attributes: &[
                 wgpu::VertexAttribute {
                     offset: 0,
-                    // While our vertex shader only uses locations 0, and 1 now, we are reserving 2, 3, 4.
+                    // Our vertex shader uses slots 0-4. We start at 5.
                     shader_location: 5,
                     format: wgpu::VertexFormat::Float32x4,
                 },
