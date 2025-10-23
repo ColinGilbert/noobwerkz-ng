@@ -136,7 +136,7 @@ impl State {
     pub fn resize(&mut self, width: u32, height: u32) {
         // UPDATED!
         if width > 0 && height > 0 {
-            self.cam_ctx.projection.resize(width, height);
+            self.cam_ctx.controller.projection.resize(width, height);
             self.is_surface_configured = true;
             self.gfx_ctx.config.width = width;
             self.gfx_ctx.config.height = height;
@@ -177,7 +177,7 @@ impl State {
         self.cam_ctx.controller.update_camera(dt);
         self.cam_ctx
             .uniform
-            .update_view_proj(&self.cam_ctx.controller.camera, &self.cam_ctx.projection);
+            .update_view_proj(&self.cam_ctx.controller.camera, &self.cam_ctx.controller.projection);
         self.gfx_ctx.queue.write_buffer(
             &self.cam_ctx.buffer,
             0,

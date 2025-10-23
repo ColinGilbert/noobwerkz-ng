@@ -15,7 +15,6 @@ pub fn degrees_to_radians(degrees: f32) -> f32 {
 }
 
 pub struct CameraContext {
-    pub projection: Projection,
     pub controller: CameraController,
     pub uniform: CameraUniform,
     pub buffer: wgpu::Buffer,
@@ -25,28 +24,10 @@ pub struct CameraContext {
 
 impl CameraContext {
     pub fn new(device: &wgpu::Device, config: &wgpu::SurfaceConfiguration) -> Self {
-        let camera = Camera::new(
-            &glam::Vec3::from_slice(&[10.0, 10.0, 10.0]),
-            &glam::Vec3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            &glam::Vec3::Y,
-            0.5,
-            degrees_to_radians(15.0),
-        );
-        let projection = Projection::new(
-            config.width,
-            config.height,
-            degrees_to_radians(45.0),
-            0.1,
-            1000.0,
-        );
 
         let mut uniform = CameraUniform::new();
-        uniform.update_view_proj(&camera, &projection);
-        let controller = CameraController::new(Instant::now(), camera);
+        let controller = CameraController::new(Instant::now(), config.width, config.height);
+        uniform.update_view_proj(&controller.camera, &controller.projection);
 
         let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Camera Buffer"),
@@ -78,7 +59,6 @@ impl CameraContext {
         });
 
         Self {
-            projection,
             controller,
             uniform,
             buffer,
@@ -108,33 +88,5 @@ impl CameraUniform {
     pub fn update_view_proj(&mut self, camera: &Camera, projection: &Projection) {
         self.view_position = [camera.eye.x, camera.eye.y, camera.eye.z, 1.0];
         self.view_projection = (projection.calc_matrix() * camera.view_matrix()).to_cols_array_2d();
-    }
-}
-pub struct Projection {
-    pub aspect_ratio: f32,
-    pub fovy_rad: f32,
-    pub znear: f32,
-    pub zfar: f32,
-}
-
-impl Projection {
-    pub fn new(height: u32, width: u32, fovy_rad: f32, znear: f32, zfar: f32) -> Self {
-        Self {
-            aspect_ratio: width as f32 / height as f32,
-            fovy_rad,
-            znear,
-            zfar,
-        }
-    }
-
-    pub fn resize(&mut self, height: u32, width: u32) -> () {
-        self.aspect_ratio = width as f32 / height as f32;
-    }
-
-    pub fn calc_matrix(&self) -> glam::Mat4 {
-        //OPENGL_TO_WGPU_MATRIX * glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
-        let results =
-            glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
-        results
     }
 }

@@ -146,3 +146,32 @@ impl Camera {
             .sub(self.direction.cross(self.up).mul(self.speed));
     }
 }
+
+pub struct Projection {
+    pub aspect_ratio: f32,
+    pub fovy_rad: f32,
+    pub znear: f32,
+    pub zfar: f32,
+}
+
+impl Projection {
+    pub fn new(height: u32, width: u32, fovy_rad: f32, znear: f32, zfar: f32) -> Self {
+        Self {
+            aspect_ratio: width as f32 / height as f32,
+            fovy_rad,
+            znear,
+            zfar,
+        }
+    }
+
+    pub fn resize(&mut self, height: u32, width: u32) -> () {
+        self.aspect_ratio = width as f32 / height as f32;
+    }
+
+    pub fn calc_matrix(&self) -> glam::Mat4 {
+        //OPENGL_TO_WGPU_MATRIX * glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
+        let results =
+            glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
+        results
+    }
+}

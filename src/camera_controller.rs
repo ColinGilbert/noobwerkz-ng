@@ -1,20 +1,40 @@
-
+use crate::camera::*;
+use instant::{Duration, Instant};
 use winit::event::*;
 use winit::keyboard::KeyCode;
-use instant::{Duration, Instant};
-use crate::camera::*;
+
 pub struct CameraController {
     pub last_frame: Instant,
     pub camera: Camera,
+    pub projection: Projection,
     //pub movement: CameraMovement,
 }
 
 impl CameraController {
-    pub fn new(last_frame: Instant, camera: Camera) -> Self {
+    pub fn new(last_frame: Instant, width: u32, height: u32) -> Self {
+        let camera = Camera::new(
+            &glam::Vec3::from_slice(&[10.0, 10.0, 10.0]),
+            &glam::Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            &glam::Vec3::Y,
+            0.5,
+            degrees_to_radians(15.0),
+        );
+        let projection = Projection::new(
+            height,
+            width,
+            degrees_to_radians(45.0),
+            0.1,
+            1000.0,
+        );
+
         Self {
             last_frame,
             camera,
-            //movement: CameraMovement::new(),
+            projection,
         }
     }
 
@@ -47,8 +67,9 @@ impl CameraController {
     }
 
     pub fn handle_mouse(&mut self, mouse_dx: f64, mouse_dy: f64) {
-        self.camera.change_yaw(degrees_to_radians(mouse_dx as f32));//rotate_horizontal = mouse_dx ;
-        self.camera.change_pitch(degrees_to_radians(mouse_dy as f32));//)rotate_vertical = mouse_dy ;
+        self.camera.change_yaw(degrees_to_radians(mouse_dx as f32)); //rotate_horizontal = mouse_dx ;
+        self.camera
+            .change_pitch(degrees_to_radians(mouse_dy as f32)); //)rotate_vertical = mouse_dy ;
     }
 
     pub fn handle_scroll(&mut self, delta: &MouseScrollDelta) {
