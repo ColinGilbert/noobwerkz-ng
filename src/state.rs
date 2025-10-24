@@ -6,7 +6,6 @@ use crate::texture::*;
 use crate::user_context::*;
 use crate::callbacks::*;
 
-use std::f32::consts::PI;
 use std::sync::*;
 use winit::{
     event::{MouseButton, MouseScrollDelta},
@@ -170,30 +169,9 @@ impl State {
     }
 
     pub fn update(&mut self, dt: std::time::Duration) {
-        let mut u = USER_CONTEXT.lock().unwrap();
-        let scene_idx = u.active_scene;
-        let s = &mut u.scenes[scene_idx];
-        let cam_idx = s.active_camera;
-        s.cameras[s.active_camera].update();
-        self.cam_ctx
-            .uniform
-            .update_view_proj(&s.cameras[cam_idx], &s.cameras[cam_idx].projection);
-        self.gfx_ctx.queue.write_buffer(
-            &self.cam_ctx.buffer,
-            0,
-            bytemuck::cast_slice(&[self.cam_ctx.uniform]),
-        );
-
-        // Update the light
-        let old_position: glam::Vec3 = self.light_ctx.light_uniforms[0].position.into();
-        self.light_ctx.light_uniforms[0].position =
-            (glam::Quat::from_axis_angle(glam::Vec3::Y, PI * dt.as_secs_f32()) * old_position)
-                .into();
-        self.gfx_ctx.queue.write_buffer(
-            &self.light_ctx.light_buffer,
-            0,
-            bytemuck::cast_slice(&[self.light_ctx.light_uniforms[0]]),
-        );
+      if let Some(cb) = *USER_UPDATE_CALLBACK.lock().unwrap() {
+            cb(&mut self.gfx_ctx, &mut self.cam_ctx, &mut self.light_ctx, dt);
+        }
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
