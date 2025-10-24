@@ -1,7 +1,7 @@
 use instant::{Instant};
 use wgpu::util::DeviceExt;
 use crate::camera::*;
-use crate::camera_controller::*;
+use crate::user_context::*;
 
 // pub const OPENGL_TO_WGPU_MATRIX: glam::Mat4 = glam::Mat4::from_cols(
 //     glam::Vec4::from_array([1.0, 0.0, 0.0, 0.0]),
@@ -10,12 +10,7 @@ use crate::camera_controller::*;
 //     glam::Vec4::from_array([0.0, 0.0, 0.5, 1.0]),
 // );
 
-pub fn degrees_to_radians(degrees: f32) -> f32 {
-    degrees * std::f32::consts::PI / 180.0
-}
-
 pub struct CameraContext {
-    pub controller: CameraController,
     pub uniform: CameraUniform,
     pub buffer: wgpu::Buffer,
     pub bind_group_layout: wgpu::BindGroupLayout,
@@ -23,11 +18,18 @@ pub struct CameraContext {
 }
 
 impl CameraContext {
-    pub fn new(device: &wgpu::Device, config: &wgpu::SurfaceConfiguration) -> Self {
+    pub fn new(device: &wgpu::Device, config: &wgpu::SurfaceConfiguration, c: &Camera) -> Self {
 
         let mut uniform = CameraUniform::new();
-        let controller = CameraController::new(Instant::now(), config.width, config.height);
-        uniform.update_view_proj(&controller.camera, &controller.projection);
+        //let controller = CameraController::new(Instant::now(), config.width, config.height);
+
+        // let mut u = USER_CONTEXT.lock().unwrap();
+        // let scene_idx = u.active_scene;
+        // let s = &mut u.scenes[scene_idx];
+        // let cam_idx = s.active_camera;
+        // let c = &mut s.cameras[cam_idx];
+
+        uniform.update_view_proj(c, &c.projection);
 
         let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Camera Buffer"),
@@ -59,34 +61,11 @@ impl CameraContext {
         });
 
         Self {
-            controller,
+            // controller,
             uniform,
             buffer,
             bind_group_layout,
             bind_group,
         }
-    }
-}
-
-// This represents the camera uniform that lives on the GPU
-#[repr(C)]
-// Derive the required traits for safe casting.
-#[derive(Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct CameraUniform {
-    pub view_position: [f32; 4],
-    pub view_projection: [[f32; 4]; 4],
-}
-
-impl CameraUniform {
-    pub fn new() -> Self {
-        Self {
-            view_position: [0.0, 0.0, 0.0, 1.0],
-            view_projection: glam::Mat4::IDENTITY.to_cols_array_2d(),
-        }
-    }
-
-    pub fn update_view_proj(&mut self, camera: &Camera, projection: &Projection) {
-        self.view_position = [camera.eye.x, camera.eye.y, camera.eye.z, 1.0];
-        self.view_projection = (projection.calc_matrix() * camera.view_matrix()).to_cols_array_2d();
     }
 }

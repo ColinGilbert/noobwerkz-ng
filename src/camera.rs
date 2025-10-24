@@ -1,4 +1,4 @@
-use std::f32::consts::{PI};
+use std::f32::consts::PI;
 use std::ops::*;
 
 const PI_2: f32 = PI * 2.0;
@@ -16,11 +16,12 @@ pub struct Camera {
     pub world_up: glam::Vec3, // This is used to reset the camera.
     pub yaw: f32,
     pub pitch: f32,
-    pub max_pitch_rate: f32,
     pub max_yaw_rate: f32,
+    pub max_pitch_rate: f32,
     pub moving: bool,
     pub speed: f32,
     pub heading_speed: f32,
+    pub projection: Projection,
 }
 
 impl Camera {
@@ -30,6 +31,7 @@ impl Camera {
         world_up: &glam::Vec3,
         speed: f32,
         heading_speed: f32,
+        projection: Projection,
     ) -> Self {
         Self {
             up: *world_up,
@@ -41,11 +43,13 @@ impl Camera {
             //scale: scale,
             yaw: 0.0,
             pitch: 0.0,
-            max_pitch_rate: degrees_to_radians(5.0),
             max_yaw_rate: degrees_to_radians(5.0),
+            max_pitch_rate: degrees_to_radians(5.0),
             moving: true,
             speed,
+            // Should be between 0 and 1
             heading_speed,
+            projection,
         }
     }
 
@@ -90,7 +94,7 @@ impl Camera {
         } else if temp > self.max_pitch_rate {
             temp = self.max_pitch_rate;
         }
-        self.pitch = self.pitch + temp;
+        self.pitch = self.pitch + (temp * self.heading_speed);
 
         //Check bounds for the camera pitch
         if self.pitch > PI_2 {
@@ -108,7 +112,7 @@ impl Camera {
         } else if temp > self.max_yaw_rate {
             temp = self.max_yaw_rate;
         }
-        self.yaw = self.yaw + temp;
+        self.yaw = self.yaw + (temp * self.heading_speed);
 
         //Check bounds for the camera pitch
         if self.yaw > PI_2 {
@@ -173,5 +177,28 @@ impl Projection {
         let results =
             glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
         results
+    }
+}
+
+// This represents the camera uniform that lives on the GPU
+#[repr(C)]
+// Derive the required traits for safe casting.
+#[derive(Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct CameraUniform {
+    pub view_position: [f32; 4],
+    pub view_projection: [[f32; 4]; 4],
+}
+
+impl CameraUniform {
+    pub fn new() -> Self {
+        Self {
+            view_position: [0.0, 0.0, 0.0, 1.0],
+            view_projection: glam::Mat4::IDENTITY.to_cols_array_2d(),
+        }
+    }
+
+    pub fn update_view_proj(&mut self, camera: &Camera, projection: &Projection) {
+        self.view_position = [camera.eye.x, camera.eye.y, camera.eye.z, 1.0];
+        self.view_projection = (projection.calc_matrix() * camera.view_matrix()).to_cols_array_2d();
     }
 }

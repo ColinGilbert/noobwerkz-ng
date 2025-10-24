@@ -1,5 +1,5 @@
 //use glam::{Mat4, Quat, Vec3A};
-
+use crate::camera::*;
 use crate::camera_context::*;
 use crate::graphics_context::*;
 use crate::instance::*;
@@ -7,7 +7,9 @@ use crate::light::*;
 use crate::model_node::*;
 use crate::passes::{Pass, phong::*};
 use crate::resource::*;
+use crate::scene::*;
 use crate::texture::*;
+use crate::user_context::*;
 
 use std::f32::consts::PI;
 
@@ -29,7 +31,6 @@ pub struct State {
     pub light_ctx: LightContext,
     pub cam_ctx: CameraContext,
     pub phong: Phong,
-    pub model_nodes: Vec<ModelNode>,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
     // NEW!
@@ -50,11 +51,9 @@ impl State {
 
         let surface = instance.create_surface(window.clone()).unwrap();
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
-        let cam_ctx = CameraContext::new(&gfx_ctx.device, &gfx_ctx.config);
-        let mut model_nodes = Vec::<ModelNode>::new();
 
-        const SPACE_BETWEEN: f32 = 1.0;
-        model_nodes.push(ModelNode::new(
+        let mut u = USER_CONTEXT.lock().unwrap();
+        u.models.push(
             load_model_from_serialized(
                 "res".to_owned(),
                 "model.bin".to_owned(),
@@ -64,6 +63,36 @@ impl State {
             )
             .await
             .unwrap(),
+        );
+
+        let projection = Projection::new(
+            gfx_ctx.config.height,
+            gfx_ctx.config.width,
+            degrees_to_radians(45.0),
+            0.0001,
+            1000.0,
+        );
+
+        let mut s = Scene::new();
+        let c = Camera::new(
+            &glam::Vec3 {
+                x: 10.0,
+                y: 10.0,
+                z: 10.0,
+            },
+            &glam::Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            &glam::Vec3::Y,
+            0.1,
+            0.1,
+            projection,
+        );
+        const SPACE_BETWEEN: f32 = 1.0;
+        s.model_nodes.push(ModelNode::new(
+            u.models.len() - 1,
             (0..NUM_INSTANCES_PER_ROW)
                 .flat_map(|z| {
                     (0..NUM_INSTANCES_PER_ROW).map(move |x| {
@@ -94,6 +123,11 @@ impl State {
                 .collect::<Vec<_>>(),
         ));
 
+        let cam_ctx = CameraContext::new(&gfx_ctx.device, &gfx_ctx.config, &c);
+        s.cameras.push(c);
+        u.scenes.push(s);
+
+
         let mut lights = Vec::<LightUniform>::new();
 
         lights.push(LightUniform {
@@ -122,7 +156,6 @@ impl State {
             light_ctx,
             cam_ctx,
             phong,
-            model_nodes,
             is_surface_configured: false,
             mouse_pressed: false,
         })
@@ -134,9 +167,14 @@ impl State {
     }
 
     pub fn resize(&mut self, width: u32, height: u32) {
-        // UPDATED!
+        println!("resizing");
+        let mut u = USER_CONTEXT.lock().unwrap();
+        let scene_idx = u.active_scene;
+        let s = &mut u.scenes[scene_idx];
+        let cam_idx = s.active_camera;
+        let c = &mut s.cameras[cam_idx];
         if width > 0 && height > 0 {
-            self.cam_ctx.controller.projection.resize(width, height);
+            c.projection.resize(height, width);
             self.is_surface_configured = true;
             self.gfx_ctx.config.width = width;
             self.gfx_ctx.config.height = height;
@@ -151,15 +189,43 @@ impl State {
     }
 
     pub fn handle_key(&mut self, event_loop: &ActiveEventLoop, key: KeyCode, pressed: bool) {
-        if !self.cam_ctx.controller.handle_key(key) {
-            match (key, pressed) {
-                (KeyCode::Escape, true) => event_loop.exit(),
-                _ => {}
+        // if !self.cam_ctx.controller.handle_key(key) {
+        let mut u = USER_CONTEXT.lock().unwrap();
+        let scene_idx = u.active_scene;
+        let s = &mut u.scenes[scene_idx];
+        let cam_idx = s.active_camera;
+        let c = &mut s.cameras[cam_idx];
+        match (key, pressed) {
+            (KeyCode::ArrowUp, true) => {
+                c.move_up();
+                //true
             }
+            (KeyCode::ArrowDown, true) => {
+                c.move_down();
+                // true
+            }
+            (KeyCode::ArrowLeft, true) => {
+                c.move_left();
+                // true
+            }
+            (KeyCode::ArrowRight, true) => {
+                c.move_right();
+                // true
+            }
+            (KeyCode::Escape, true) => {
+                event_loop.exit();
+            } // true},
+            _ => {} //false }
         }
+        // }
     }
 
     pub fn handle_mouse_button(&mut self, button: MouseButton, pressed: bool) {
+        let mut u = USER_CONTEXT.lock().unwrap();
+        let scene_idx = u.active_scene;
+        let s = &mut u.scenes[scene_idx];
+        let cam_idx = s.active_camera;
+        let c = &mut s.cameras[cam_idx];
         match button {
             MouseButton::Left => self.mouse_pressed = pressed,
             _ => {
@@ -169,15 +235,39 @@ impl State {
     }
 
     pub fn handle_mouse_scroll(&mut self, delta: &MouseScrollDelta) {
-        self.cam_ctx.controller.handle_scroll(delta);
+        let mut u = USER_CONTEXT.lock().unwrap();
+        let scene_idx = u.active_scene;
+        let s = &mut u.scenes[scene_idx];
+        let cam_idx = s.active_camera;
+        let c = &mut s.cameras[cam_idx];
+        match delta {
+            //     // I'm assuming a line is about 100 pixels
+            MouseScrollDelta::LineDelta(_, s) => {
+                if *s < 0.0 {
+                    c.move_backward();
+                } else {
+                    c.move_forward();
+                }
+            }
+            MouseScrollDelta::PixelDelta(position) => {
+                if position.y < 0.0 {
+                    c.move_backward();
+                } else {
+                    c.move_forward();
+                }
+            }
+        }
     }
 
     pub fn update(&mut self, dt: std::time::Duration) {
-        // UPDATED!
-        self.cam_ctx.controller.update_camera(dt);
+        let mut u = USER_CONTEXT.lock().unwrap();
+        let scene_idx = u.active_scene;
+        let s = &mut u.scenes[scene_idx];
+        let cam_idx = s.active_camera;
+        s.cameras[s.active_camera].update();
         self.cam_ctx
             .uniform
-            .update_view_proj(&self.cam_ctx.controller.camera, &self.cam_ctx.controller.projection);
+            .update_view_proj(&s.cameras[cam_idx], &s.cameras[cam_idx].projection);
         self.gfx_ctx.queue.write_buffer(
             &self.cam_ctx.buffer,
             0,
@@ -208,11 +298,14 @@ impl State {
         let view = output
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
+        let u = USER_CONTEXT.lock().unwrap();
+        let s = &u.scenes[u.active_scene];
 
         self.phong.draw(
             &self.gfx_ctx.device,
             &self.gfx_ctx.queue,
-            &self.model_nodes,
+            &u.models,
+            &s.model_nodes,
             &self.gfx_ctx.depth_texture.view,
             &view,
         );

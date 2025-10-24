@@ -1,15 +1,16 @@
-
 use crate::state::State;
+use crate::camera::*;
+use crate::user_context::*;
 
 use instant::*;
+use std::sync::Arc;
 use winit::{
     application::ApplicationHandler,
     event::{DeviceEvent, DeviceId, KeyEvent, WindowEvent},
     event_loop::{ActiveEventLoop, EventLoop},
-    keyboard::{PhysicalKey},
-    window::{Window},
+    keyboard::PhysicalKey,
+    window::Window,
 };
-use std::sync::Arc;
 
 pub struct App {
     #[cfg(target_arch = "wasm32")]
@@ -49,7 +50,6 @@ impl ApplicationHandler<State> for App {
             let html_canvas_element = canvas.unchecked_into();
             window_attributes = window_attributes.with_canvas(Some(html_canvas_element));
         }
-
         let window = Arc::new(event_loop.create_window(window_attributes).unwrap());
 
         #[cfg(not(target_arch = "wasm32"))]
@@ -104,7 +104,15 @@ impl ApplicationHandler<State> for App {
         match event {
             DeviceEvent::MouseMotion { delta: (dx, dy) } => {
                 if state.mouse_pressed {
-                    state.cam_ctx.controller.handle_mouse(dx, dy);
+                    let mut u = USER_CONTEXT.lock().unwrap();
+                    let scene_idx = u.active_scene;
+                    let s = &mut u.scenes[scene_idx];
+                    let cam_idx = s.active_camera;
+                    let c = &mut s.cameras[cam_idx];
+
+                    c.change_yaw(degrees_to_radians(dx as f32)); //rotate_horizontal = mouse_dx ;
+                    c.change_pitch(degrees_to_radians(dy as f32)); //)rotate_vertical = mouse_dy ;
+                    //state.cam_ctx.controller.handle_mouse(dx, dy);
                 }
             }
             _ => {}
@@ -162,7 +170,6 @@ impl ApplicationHandler<State> for App {
         }
     }
 }
-
 
 pub fn run() -> anyhow::Result<()> {
     #[cfg(not(target_arch = "wasm32"))]

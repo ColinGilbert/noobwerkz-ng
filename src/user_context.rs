@@ -1,20 +1,26 @@
 use std::sync::*;
 
+use crate::{camera::Camera, model::Model, model_node::ModelNode, scene::Scene};
+
 pub struct UserContext {
-pub x: f32,
+    pub models: Vec<Model>,
+    pub scenes: Vec<Scene>,
+    pub active_scene: usize,
 }
 
 impl UserContext {
     pub fn new() -> Self {
-        Self {
-            x: 47.0,
-        }
+        let models = Vec::<Model>::new();
+        let scenes = Vec::<Scene>::new();
+        Self { models, scenes, active_scene: 0 }
     }
 }
 
+#[allow(unused)]
 type SharedContext = Arc<Mutex<UserContext>>;
 
-static USER_CONTEXT : LazyLock<SharedContext> = LazyLock::new(|| {
+#[allow(unused)]
+pub static USER_CONTEXT: LazyLock<SharedContext> = LazyLock::new(|| {
     let ctx = UserContext::new();
     Arc::new(Mutex::new(ctx))
 });

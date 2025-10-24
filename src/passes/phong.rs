@@ -20,6 +20,7 @@ impl Pass for Phong {
         &mut self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
+        models: &Vec<Model>,
         model_nodes: &Vec<ModelNode>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
@@ -69,14 +70,14 @@ impl Pass for Phong {
                 render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
                 render_pass.set_pipeline(&self.light_render_pipeline);
                 render_pass.draw_light_model(
-                    &m.model,
+                    &models[m.model_idx],
                     &self.camera_bind_group,
                     &self.light_bind_group,
                 );
 
                 render_pass.set_pipeline(&self.render_pipeline);
                 render_pass.draw_model_instanced(
-                    &m.model,
+                    &models[m.model_idx],
                     0..m.instances.len() as u32,
                     &self.camera_bind_group,
                     &self.light_bind_group,
