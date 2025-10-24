@@ -10,6 +10,8 @@ use crate::resource::*;
 use crate::scene::*;
 use crate::texture::*;
 use crate::user_context::*;
+use crate::callbacks::*;
+
 
 use std::f32::consts::PI;
 
@@ -35,6 +37,13 @@ pub struct State {
     pub is_surface_configured: bool,
     // NEW!
     pub mouse_pressed: bool,
+}
+
+// pub struct UserCallbacks;
+// impl UserSetup for UserCallbacks {
+//     fn user_setup(&self) {
+        
+//     }
 }
 
 impl State {
@@ -159,6 +168,11 @@ impl State {
             is_surface_configured: false,
             mouse_pressed: false,
         })
+    }
+
+
+    pub fn call_user_setup_cb(&self, callback: &dyn UserSetup) {
+        callback.user_setup();
     }
 
     #[allow(unused)]
