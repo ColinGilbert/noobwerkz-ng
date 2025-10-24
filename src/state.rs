@@ -45,9 +45,9 @@ pub struct State {
 //    callback("Hello from the library");
 // }
 
-static CALLBACK: Lazy<Mutex<Option<fn(&mut GraphicsContext) -> &dyn Future<Output = ()>>>> = Lazy::new(|| Mutex::new(None));
+static CALLBACK: Lazy<Mutex<Option<fn(&mut GraphicsContext)>>> = Lazy::new(|| Mutex::new(None));
 
-pub fn init_user_setup_callback(callback: fn (gfx_ctx: &mut GraphicsContext) -> &dyn Future<Output = ()>) {
+pub fn init_user_setup_callback(callback: fn (gfx_ctx: &mut GraphicsContext)) {
     *CALLBACK.lock().unwrap() = Some(callback);
 }
 
