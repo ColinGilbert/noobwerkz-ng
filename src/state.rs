@@ -12,8 +12,8 @@ use crate::scene::*;
 use crate::texture::*;
 use crate::user_context::*;
 
-use std::f32::consts::PI;
 use once_cell::sync::Lazy;
+use std::f32::consts::PI;
 use std::sync::*;
 
 use winit::{
@@ -22,7 +22,6 @@ use winit::{
     keyboard::KeyCode,
     window::Window,
 };
-
 
 pub struct State {
     pub window: Arc<Window>,
@@ -37,9 +36,7 @@ pub struct State {
     pub mouse_pressed: bool,
 }
 
-
 // pub type UserSetupCallback = fn(&str);
-
 
 // pub fn initialize_callbacks(callback: UserSetupCallback) {
 //    callback("Hello from the library");
@@ -47,8 +44,17 @@ pub struct State {
 
 static CALLBACK: Lazy<Mutex<Option<fn(&mut GraphicsContext)>>> = Lazy::new(|| Mutex::new(None));
 
-pub fn init_user_setup_callback(callback: fn (gfx_ctx: &mut GraphicsContext))-> impl Future<Output = ()> {
-    *CALLBACK.lock().unwrap() = Some(callback);
+// pub fn init_user_setup_callback(callback: fn (gfx_ctx: &mut GraphicsContext))-> impl Future<Output = ()> {
+//     *CALLBACK.lock().unwrap() = Some(callback);
+// }
+
+pub async fn init_user_setup_callback<T, C>(callback: C, arg: T)
+where
+    C: AsyncCallback<T>,
+{
+    println!("Before callback");
+    callback.call(arg).await; // Await the future returned by the callback
+    println!("After callback");
 }
 
 impl State {
@@ -66,11 +72,10 @@ impl State {
         let surface = instance.create_surface(window.clone()).unwrap();
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
 
-        
         if let Some(cb) = *CALLBACK.lock().unwrap() {
             cb(&mut gfx_ctx);
         }
-        
+
         let mut u = USER_CONTEXT.lock().unwrap();
         let mut s = &u.scenes[u.active_scene];
         let mut c = &s.cameras[s.active_camera];
@@ -95,7 +100,6 @@ impl State {
             &light_ctx.light_bind_group_layout,
             &gfx_ctx.config,
         );
-        
 
         Ok(Self {
             window,
