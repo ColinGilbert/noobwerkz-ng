@@ -15,7 +15,7 @@ use crate::user_context::*;
 use once_cell::sync::Lazy;
 use std::f32::consts::PI;
 use std::sync::*;
-
+use std::{future::Future, pin::Pin};
 use winit::{
     event::{MouseButton, MouseScrollDelta},
     event_loop::ActiveEventLoop,
@@ -41,21 +41,21 @@ pub struct State {
 // pub fn initialize_callbacks(callback: UserSetupCallback) {
 //    callback("Hello from the library");
 // }
-
+// static CALLBACK: Box<Option<dyn AsyncCallback<T, Output = impl Future<Output = ()>>>> = Box::new(None);
 static CALLBACK: Lazy<Mutex<Option<fn(&mut GraphicsContext)>>> = Lazy::new(|| Mutex::new(None));
 
-// pub fn init_user_setup_callback(callback: fn (gfx_ctx: &mut GraphicsContext))-> impl Future<Output = ()> {
-//     *CALLBACK.lock().unwrap() = Some(callback);
-// }
+// // pub fn init_user_setup_callback(callback: fn (gfx_ctx: &mut GraphicsContext))-> impl Future<Output = ()> {
+// //     *CALLBACK.lock().unwrap() = Some(callback);
+// // }
 
-pub async fn init_user_setup_callback<T, C>(callback: C, arg: T)
-where
-    C: AsyncCallback<T>,
-{
-    println!("Before callback");
-    callback.call(arg).await; // Await the future returned by the callback
-    println!("After callback");
-}
+// pub async fn init_user_setup_callback<T, C>(callback: C, arg: T)
+// where
+//     C: AsyncCallback<T>,
+// {
+//     println!("Before callback");
+//     *CALLBACK.lock().unwrap() = Some(callback);
+//     println!("After callback");
+// }
 
 impl State {
     pub async fn new(window: Arc<Window>) -> anyhow::Result<State> {

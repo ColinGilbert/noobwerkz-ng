@@ -1,4 +1,4 @@
-use std::future::Future;
+use std::{future::Future, pin::Pin};
 
 pub trait AsyncCallback<T> {
     type Output: Future<Output = ()>; // Or a specific return type
