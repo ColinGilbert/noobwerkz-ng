@@ -223,9 +223,7 @@ impl State {
     pub fn handle_mouse_button(&mut self, button: MouseButton, pressed: bool) {
         match button {
             MouseButton::Left => self.mouse_pressed = pressed,
-            _ => {
-                // self.cam_ctx.controller.handle_mouse(mouse_dx, mouse_dy);
-            }
+            _ => {}
         }
     }
 
