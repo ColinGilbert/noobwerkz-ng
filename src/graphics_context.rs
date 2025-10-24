@@ -113,8 +113,8 @@ impl GraphicsContext {
         let depth_texture = Texture::create_depth_texture(&device, &config, "depth_texture");
 
         let debug_material = {
-            let diffuse_bytes = include_bytes!("../res/cobble-diffuse.png");
-            let normal_bytes = include_bytes!("../res/cobble-normal.png");
+            let diffuse_bytes = include_bytes!("default-diffuse.png");
+            let normal_bytes = include_bytes!("default-normal.png");
 
             let diffuse_texture = Texture::from_bytes(
                 &device,
