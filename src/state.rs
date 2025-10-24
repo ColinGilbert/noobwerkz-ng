@@ -23,7 +23,6 @@ use winit::{
     window::Window,
 };
 
-const NUM_INSTANCES_PER_ROW: u32 = 10;
 
 pub struct State {
     pub window: Arc<Window>,
@@ -46,9 +45,9 @@ pub struct State {
 //    callback("Hello from the library");
 // }
 
-static CALLBACK: Lazy<Mutex<Option<fn()>>> = Lazy::new(|| Mutex::new(None));
+static CALLBACK: Lazy<Mutex<Option<fn(&mut GraphicsContext)>>> = Lazy::new(|| Mutex::new(None));
 
-pub fn init_user_setup_callback(callback: fn()) {
+pub fn init_user_setup_callback(callback: fn(gfx_ctx: &mut GraphicsContext)) {
     *CALLBACK.lock().unwrap() = Some(callback);
 }
 
@@ -67,84 +66,13 @@ impl State {
         let surface = instance.create_surface(window.clone()).unwrap();
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
 
-        let mut u = USER_CONTEXT.lock().unwrap();
-        u.models.push(
-            load_model_from_serialized(
-                "res".to_owned(),
-                "model.bin".to_owned(),
-                &mut gfx_ctx.device,
-                &mut gfx_ctx.queue,
-                &gfx_ctx.texture_bind_group_layout,
-            )
-            .await
-            .unwrap(),
-        );
-
-        let projection = Projection::new(
-            gfx_ctx.config.height,
-            gfx_ctx.config.width,
-            degrees_to_radians(45.0),
-            0.0001,
-            1000.0,
-        );
-
-        let mut s = Scene::new();
-        let c = Camera::new(
-            &glam::Vec3 {
-                x: 10.0,
-                y: 10.0,
-                z: 10.0,
-            },
-            &glam::Vec3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            &glam::Vec3::Y,
-            0.1,
-            0.1,
-            projection,
-        );
-        const SPACE_BETWEEN: f32 = 1.0;
-        s.model_nodes.push(ModelNode::new(
-            u.models.len() - 1,
-            (0..NUM_INSTANCES_PER_ROW)
-                .flat_map(|z| {
-                    (0..NUM_INSTANCES_PER_ROW).map(move |x| {
-                        let x = SPACE_BETWEEN * (x as f32 - NUM_INSTANCES_PER_ROW as f32 / 10.0);
-                        let z = SPACE_BETWEEN * (z as f32 - NUM_INSTANCES_PER_ROW as f32 / 10.0);
-
-                        let position: glam::Vec3A = glam::Vec3 { x, y: 0.0, z }.into();
-
-                        let rotation = if position == glam::Vec3A::ZERO {
-                            glam::Quat::from_axis_angle(glam::Vec3::Z, 0.0)
-                        } else {
-                            let pos: glam::Vec3 = position.into();
-                            glam::Quat::from_axis_angle(pos.normalize(), 45.0)
-                        };
-                        let scale: glam::Vec3A = glam::Vec3 {
-                            x: 10.0,
-                            y: 10.0,
-                            z: 10.0,
-                        }
-                        .into();
-                        Instance {
-                            position,
-                            rotation,
-                            scale,
-                        }
-                    })
-                })
-                .collect::<Vec<_>>(),
-        ));
 
         let cam_ctx = CameraContext::new(&gfx_ctx.device, &c);
-        s.cameras.push(c);
-        u.scenes.push(s);
+ 
 
 
         if let Some(cb) = *CALLBACK.lock().unwrap() {
-            cb();
+            cb(&mut gfx_ctx);
         }
 
         let mut lights = Vec::<LightUniform>::new();
