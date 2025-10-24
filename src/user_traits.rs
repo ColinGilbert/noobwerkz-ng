@@ -1,5 +1,3 @@
-
-
-trait UserContextTrait {
+trait UserTrait {
     fn update(delta: f64);
 }
