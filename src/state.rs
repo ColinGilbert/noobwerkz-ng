@@ -1,21 +1,14 @@
 //use glam::{Mat4, Quat, Vec3A};
-use crate::callbacks::*;
-use crate::camera::*;
 use crate::camera_context::*;
 use crate::graphics_context::*;
-use crate::instance::*;
 use crate::light::*;
-use crate::model_node::*;
 use crate::passes::{Pass, phong::*};
-use crate::resource::*;
-use crate::scene::*;
 use crate::texture::*;
 use crate::user_context::*;
+use crate::callbacks::*;
 
-use once_cell::sync::Lazy;
 use std::f32::consts::PI;
 use std::sync::*;
-use std::{future::Future, pin::Pin};
 use winit::{
     event::{MouseButton, MouseScrollDelta},
     event_loop::ActiveEventLoop,
@@ -36,11 +29,6 @@ pub struct State {
     pub mouse_pressed: bool,
 }
 
-static USER_SETUP_CALLBACK: Lazy<Mutex<Option<fn(&mut GraphicsContext)>>> = Lazy::new(|| Mutex::new(None));
-
-pub fn init_user_setup_callback(callback: fn (gfx_ctx: &mut GraphicsContext)) {
-    *USER_SETUP_CALLBACK.lock().unwrap() = Some(callback);
-}
 
 impl State {
     pub async fn new(window: Arc<Window>) -> anyhow::Result<State> {
@@ -61,9 +49,9 @@ impl State {
             cb(&mut gfx_ctx);
         }
 
-        let mut u = USER_CONTEXT.lock().unwrap();
-        let mut s = &u.scenes[u.active_scene];
-        let mut c = &s.cameras[s.active_camera];
+        let u = USER_CONTEXT.lock().unwrap();
+        let s = &u.scenes[u.active_scene];
+        let c = &s.cameras[s.active_camera];
         let cam_ctx = CameraContext::new(&gfx_ctx.device, &c);
         let mut lights = Vec::<LightUniform>::new();
 
