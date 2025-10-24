@@ -1,5 +1,4 @@
 use crate::instance::Instance;
-use crate::model::*;
 pub struct ModelNode {
     pub model_idx: usize,
     pub instances: Vec<Instance>,

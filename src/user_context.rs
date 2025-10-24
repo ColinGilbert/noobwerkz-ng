@@ -1,6 +1,6 @@
 use std::sync::*;
 
-use crate::{camera::Camera, model::Model, model_node::ModelNode, scene::Scene};
+use crate::{model::Model, scene::Scene};
 
 pub struct UserContext {
     pub models: Vec<Model>,

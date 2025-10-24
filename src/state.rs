@@ -123,7 +123,7 @@ impl State {
                 .collect::<Vec<_>>(),
         ));
 
-        let cam_ctx = CameraContext::new(&gfx_ctx.device, &gfx_ctx.config, &c);
+        let cam_ctx = CameraContext::new(&gfx_ctx.device, &c);
         s.cameras.push(c);
         u.scenes.push(s);
 
@@ -221,11 +221,6 @@ impl State {
     }
 
     pub fn handle_mouse_button(&mut self, button: MouseButton, pressed: bool) {
-        let mut u = USER_CONTEXT.lock().unwrap();
-        let scene_idx = u.active_scene;
-        let s = &mut u.scenes[scene_idx];
-        let cam_idx = s.active_camera;
-        let c = &mut s.cameras[cam_idx];
         match button {
             MouseButton::Left => self.mouse_pressed = pressed,
             _ => {

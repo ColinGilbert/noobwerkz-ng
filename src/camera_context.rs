@@ -1,7 +1,5 @@
-use instant::{Instant};
 use wgpu::util::DeviceExt;
 use crate::camera::*;
-use crate::user_context::*;
 
 // pub const OPENGL_TO_WGPU_MATRIX: glam::Mat4 = glam::Mat4::from_cols(
 //     glam::Vec4::from_array([1.0, 0.0, 0.0, 0.0]),
@@ -18,18 +16,11 @@ pub struct CameraContext {
 }
 
 impl CameraContext {
-    pub fn new(device: &wgpu::Device, config: &wgpu::SurfaceConfiguration, c: &Camera) -> Self {
+    pub fn new(device: &wgpu::Device, cam: &Camera) -> Self {
 
         let mut uniform = CameraUniform::new();
-        //let controller = CameraController::new(Instant::now(), config.width, config.height);
 
-        // let mut u = USER_CONTEXT.lock().unwrap();
-        // let scene_idx = u.active_scene;
-        // let s = &mut u.scenes[scene_idx];
-        // let cam_idx = s.active_camera;
-        // let c = &mut s.cameras[cam_idx];
-
-        uniform.update_view_proj(c, &c.projection);
+        uniform.update_view_proj(cam, &cam.projection);
 
         let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Camera Buffer"),
