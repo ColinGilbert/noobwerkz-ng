@@ -36,26 +36,11 @@ pub struct State {
     pub mouse_pressed: bool,
 }
 
-// pub type UserSetupCallback = fn(&str);
-
-// pub fn initialize_callbacks(callback: UserSetupCallback) {
-//    callback("Hello from the library");
-// }
-// static CALLBACK: Box<Option<dyn AsyncCallback<T, Output = impl Future<Output = ()>>>> = Box::new(None);
-static CALLBACK: Lazy<Mutex<Option<fn(&mut GraphicsContext)>>> = Lazy::new(|| Mutex::new(None));
+static USER_SETUP_CALLBACK: Lazy<Mutex<Option<fn(&mut GraphicsContext)>>> = Lazy::new(|| Mutex::new(None));
 
 pub fn init_user_setup_callback(callback: fn (gfx_ctx: &mut GraphicsContext)) {
-    *CALLBACK.lock().unwrap() = Some(callback);
+    *USER_SETUP_CALLBACK.lock().unwrap() = Some(callback);
 }
-
-// pub async fn init_user_setup_callback<T, C>(callback: C, arg: T)
-// where
-//     C: AsyncCallback<T>,
-// {
-//     println!("Before callback");
-//     *CALLBACK.lock().unwrap() = Some(callback);
-//     println!("After callback");
-// }
 
 impl State {
     pub async fn new(window: Arc<Window>) -> anyhow::Result<State> {
@@ -72,7 +57,7 @@ impl State {
         let surface = instance.create_surface(window.clone()).unwrap();
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
 
-        if let Some(cb) = *CALLBACK.lock().unwrap() {
+        if let Some(cb) = *USER_SETUP_CALLBACK.lock().unwrap() {
             cb(&mut gfx_ctx);
         }
 
