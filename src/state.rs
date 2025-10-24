@@ -1,4 +1,3 @@
-//use glam::{Mat4, Quat, Vec3A};
 use crate::camera_context::*;
 use crate::graphics_context::*;
 use crate::light::*;
@@ -53,10 +52,8 @@ impl State {
         let u = USER_CONTEXT.lock().unwrap();
         let s = &u.scenes[u.active_scene];
         let c = &s.cameras[s.active_camera];
+
         let cam_ctx = CameraContext::new(&gfx_ctx.device, &c);
-
-  
-
         let light_ctx = LightContext::new(&gfx_ctx.device, lights);
 
         let phong = Phong::new(
