@@ -3,7 +3,7 @@ safe_index::new! {
   map: Pipelines
 }
 use crate::texture::*;
-use crate::model::NormalMappedMaterial;
+use crate::normal_mapped_model::NormalMappedMaterial;
 
 pub struct GraphicsContext {
     pub device: wgpu::Device,

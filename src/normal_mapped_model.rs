@@ -130,7 +130,6 @@ safe_index::new! {
 }
 
 pub struct TexturedMesh {
-    #[allow(unused)]
     pub name: String,
     pub vertex_buffer: wgpu::Buffer,
     pub index_buffer: wgpu::Buffer,
@@ -142,11 +141,12 @@ pub struct TexturedMesh {
     pub dimensions: glam::Vec3,
 }
 
-pub struct Model {
+pub struct NormalMappedModel {
     pub meshes: TexturedMeshes<TexturedMesh>,
     pub materials: NormalMappedMaterials<NormalMappedMaterial>,
 }
-impl Model {
+
+impl NormalMappedModel {
     pub fn new() -> Self {
         Self {
             meshes: TexturedMeshes::new(),
@@ -176,13 +176,13 @@ pub trait DrawModel<'a> {
     #[allow(unused)]
     fn draw_model(
         &mut self,
-        model: &'a Model,
+        model: &'a NormalMappedModel,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_model_instanced(
         &mut self,
-        model: &'a Model,
+        model: &'a NormalMappedModel,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -190,7 +190,7 @@ pub trait DrawModel<'a> {
     #[allow(unused)]
     fn draw_model_instanced_with_material(
         &mut self,
-        model: &'a Model,
+        model: &'a NormalMappedModel,
         material: &'a NormalMappedMaterial,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
@@ -230,7 +230,7 @@ where
 
     fn draw_model(
         &mut self,
-        model: &'b Model,
+        model: &'b NormalMappedModel,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
     ) {
@@ -239,7 +239,7 @@ where
 
     fn draw_model_instanced(
         &mut self,
-        model: &'b Model,
+        model: &'b NormalMappedModel,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
@@ -258,7 +258,7 @@ where
 
     fn draw_model_instanced_with_material(
         &mut self,
-        model: &'b Model,
+        model: &'b NormalMappedModel,
         material: &'b NormalMappedMaterial,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
@@ -294,13 +294,13 @@ pub trait DrawLight<'a> {
 
     fn draw_light_model(
         &mut self,
-        model: &'a Model,
+        model: &'a NormalMappedModel,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_light_model_instanced(
         &mut self,
-        model: &'a Model,
+        model: &'a NormalMappedModel,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -336,7 +336,7 @@ where
 
     fn draw_light_model(
         &mut self,
-        model: &'b Model,
+        model: &'b NormalMappedModel,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
     ) {
@@ -344,7 +344,7 @@ where
     }
     fn draw_light_model_instanced(
         &mut self,
-        model: &'b Model,
+        model: &'b NormalMappedModel,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,

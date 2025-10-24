@@ -4,7 +4,7 @@ use model3d_schema_capnp::model;
 use std::fs;
 use wgpu::util::DeviceExt;
 
-use crate::model::{NormalMappedMaterial, NormalMappedMaterialIndex, Model, NormalMappedModelVertex, TexturedMesh};
+use crate::normal_mapped_model::{NormalMappedMaterial, NormalMappedMaterialIndex, NormalMappedModel, NormalMappedModelVertex, TexturedMesh};
 use crate::texture;
 
 mod model3d_schema_capnp {
@@ -18,7 +18,7 @@ pub async fn load_model_from_serialized(
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
-) -> Result<Model> {
+) -> Result<NormalMappedModel> {
     let full_path = filepath.clone() + "/" + &filename;
     // println!("Full path: {}", full_path);
     let data = fs::read(full_path).unwrap();
@@ -34,7 +34,7 @@ pub async fn load_model_from_serialized(
     let materials_serialized = message.as_ref().unwrap().get_materials().unwrap();
     let mut verts = Vec::<NormalMappedModelVertex>::new();
     let mut indices = Vec::<u32>::new();
-    let mut result = Model::new();
+    let mut result = NormalMappedModel::new();
     for mesh_serialized in meshes_serialized {
         if mesh_serialized.has_positions() {
             if !mesh_serialized.has_normals() {

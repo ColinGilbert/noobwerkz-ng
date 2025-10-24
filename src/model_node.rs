@@ -1,11 +1,11 @@
 use crate::instance::Instance;
-pub struct ModelNode {
+pub struct NormalMappedModelNode {
     pub model_idx: usize,
     pub instances: Vec<Instance>,
     pub visible: Vec<bool>,
 }
 
-impl ModelNode {
+impl NormalMappedModelNode {
     pub fn new(model_idx: usize, instances: Vec<Instance>) -> Self {
         let len = instances.len();
         Self {

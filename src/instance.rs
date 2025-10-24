@@ -1,5 +1,5 @@
 use std::mem;
-use crate::model::*;
+use crate::normal_mapped_model::*;
 
 pub struct Instance {
     pub position: glam::Vec3A,
@@ -35,7 +35,7 @@ impl Vertex for InstanceRaw {
             // instance when the shader starts processing a new instance
             step_mode: wgpu::VertexStepMode::Instance,
             attributes: &[
-                // Model matrix
+                // NormalMappedModel matrix
                 wgpu::VertexAttribute {
                     offset: 0,
                     // Our vertex shader uses slots 0-4. We start at 5.

@@ -4,7 +4,6 @@ use anyhow::*;
 use image::GenericImageView;
 
 pub struct Texture {
-    #[allow(unused)]
     pub texture: wgpu::Texture,
     pub view: wgpu::TextureView,
     pub sampler: wgpu::Sampler,
@@ -55,7 +54,6 @@ impl Texture {
         }
     }
 
-    #[allow(dead_code)]
     pub fn from_bytes(
         device: &wgpu::Device,
         queue: &wgpu::Queue,
@@ -88,7 +86,7 @@ impl Texture {
         } else {
             wgpu::TextureFormat::Rgba8UnormSrgb
         };
-        
+
         let texture = device.create_texture(&wgpu::TextureDescriptor {
             label,
             size,
