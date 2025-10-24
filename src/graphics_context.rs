@@ -3,7 +3,7 @@ safe_index::new! {
   map: Pipelines
 }
 use crate::texture::*;
-use crate::model::Material;
+use crate::model::NormalMappedMaterial;
 
 pub struct GraphicsContext {
     pub device: wgpu::Device,
@@ -12,7 +12,7 @@ pub struct GraphicsContext {
     pub surface_format: wgpu::TextureFormat,
     pub depth_texture: Texture,
     pub texture_bind_group_layout: wgpu::BindGroupLayout,
-    pub debug_material: Material,
+    pub debug_material: NormalMappedMaterial,
 }
 
 impl GraphicsContext {
@@ -133,7 +133,7 @@ impl GraphicsContext {
             )
             .unwrap();
 
-            Material::new(
+            NormalMappedMaterial::new(
                 &device,
                 "alt-material",
                 diffuse_texture,

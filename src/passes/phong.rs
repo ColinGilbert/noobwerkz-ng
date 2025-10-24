@@ -137,7 +137,7 @@ impl Phong {
                 &render_pipeline_layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[ModelVertex::desc(), InstanceRaw::desc()],
+                &[NormalMappedModelVertex::desc(), InstanceRaw::desc()],
                 shader,
             )
         };
@@ -158,7 +158,7 @@ impl Phong {
                 &layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[ModelVertex::desc()],
+                &[NormalMappedModelVertex::desc()],
                 shader,
             )
         };

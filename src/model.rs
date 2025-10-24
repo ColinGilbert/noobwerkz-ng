@@ -10,7 +10,7 @@ pub trait Vertex {
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct ModelVertex {
+pub struct NormalMappedModelVertex {
     pub position: [f32; 3],
     pub tex_coords: [f32; 2],
     pub normal: [f32; 3],
@@ -18,7 +18,7 @@ pub struct ModelVertex {
     pub bitangent: [f32; 3],
 }
 
-impl ModelVertex {
+impl NormalMappedModelVertex {
     pub fn new() -> Self {
         Self {
             position: [0.0; 3],
@@ -30,11 +30,11 @@ impl ModelVertex {
     }
 }
 
-impl Vertex for ModelVertex {
+impl Vertex for NormalMappedModelVertex {
     fn desc() -> wgpu::VertexBufferLayout<'static> {
         use std::mem;
         wgpu::VertexBufferLayout {
-            array_stride: mem::size_of::<ModelVertex>() as wgpu::BufferAddress,
+            array_stride: mem::size_of::<NormalMappedModelVertex>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Vertex,
             attributes: &[
                 // Positions
@@ -43,13 +43,13 @@ impl Vertex for ModelVertex {
                     shader_location: 0,
                     format: wgpu::VertexFormat::Float32x3,
                 },
-                // Normals
+                // UV
                 wgpu::VertexAttribute {
                     offset: mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
                     shader_location: 1,
                     format: wgpu::VertexFormat::Float32x2,
                 },
-                // UV
+                // Normals
                 wgpu::VertexAttribute {
                     offset: mem::size_of::<[f32; 5]>() as wgpu::BufferAddress,
                     shader_location: 2,
@@ -72,17 +72,14 @@ impl Vertex for ModelVertex {
     }
 }
 
-pub struct Material {
-    #[allow(unused)]
+pub struct NormalMappedMaterial {
     pub name: String,
-    #[allow(unused)]
     pub diffuse_texture: texture::Texture,
-    #[allow(unused)]
     pub normal_texture: texture::Texture,
     pub bind_group: wgpu::BindGroup,
 }
 
-impl Material {
+impl NormalMappedMaterial {
     pub fn new(
         device: &wgpu::Device,
         name: &str,
@@ -128,8 +125,8 @@ safe_index::new! {
 }
 
 safe_index::new! {
-  MaterialIndex,
-  map: Materials
+  NormalMappedMaterialIndex,
+  map: NormalMappedMaterials
 }
 
 pub struct TexturedMesh {
@@ -138,7 +135,7 @@ pub struct TexturedMesh {
     pub vertex_buffer: wgpu::Buffer,
     pub index_buffer: wgpu::Buffer,
     pub num_elements: u32,
-    pub material: MaterialIndex,
+    pub material: NormalMappedMaterialIndex,
     pub translation: glam::Vec3,
     pub rotation: glam::Quat,
     pub scale: glam::Vec3,
@@ -147,29 +144,30 @@ pub struct TexturedMesh {
 
 pub struct Model {
     pub meshes: TexturedMeshes<TexturedMesh>,
-    pub materials: Materials<Material>,
+    pub materials: NormalMappedMaterials<NormalMappedMaterial>,
 }
 impl Model {
     pub fn new() -> Self {
         Self {
             meshes: TexturedMeshes::new(),
-            materials: Materials::new(),
+            materials: NormalMappedMaterials::new(),
         }
     }
 }
+
 pub trait DrawModel<'a> {
     #[allow(unused)]
     fn draw_mesh(
         &mut self,
         mesh: &'a TexturedMesh,
-        material: &'a Material,
+        material: &'a NormalMappedMaterial,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_mesh_instanced(
         &mut self,
         mesh: &'a TexturedMesh,
-        material: &'a Material,
+        material: &'a NormalMappedMaterial,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -193,7 +191,7 @@ pub trait DrawModel<'a> {
     fn draw_model_instanced_with_material(
         &mut self,
         model: &'a Model,
-        material: &'a Material,
+        material: &'a NormalMappedMaterial,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -207,7 +205,7 @@ where
     fn draw_mesh(
         &mut self,
         mesh: &'b TexturedMesh,
-        material: &'b Material,
+        material: &'b NormalMappedMaterial,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
     ) {
@@ -217,7 +215,7 @@ where
     fn draw_mesh_instanced(
         &mut self,
         mesh: &'b TexturedMesh,
-        material: &'b Material,
+        material: &'b NormalMappedMaterial,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
@@ -261,7 +259,7 @@ where
     fn draw_model_instanced_with_material(
         &mut self,
         model: &'b Model,
-        material: &'b Material,
+        material: &'b NormalMappedMaterial,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,

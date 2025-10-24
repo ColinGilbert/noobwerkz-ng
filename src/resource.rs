@@ -4,7 +4,7 @@ use model3d_schema_capnp::model;
 use std::fs;
 use wgpu::util::DeviceExt;
 
-use crate::model::{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
+use crate::model::{NormalMappedMaterial, NormalMappedMaterialIndex, Model, NormalMappedModelVertex, TexturedMesh};
 use crate::texture;
 
 mod model3d_schema_capnp {
@@ -32,7 +32,7 @@ pub async fn load_model_from_serialized(
     let message = message_reader.get_root::<model::Reader>(); //::<model3d_capnp::Reader>();
     let meshes_serialized = message.as_ref().unwrap().get_meshes().unwrap();
     let materials_serialized = message.as_ref().unwrap().get_materials().unwrap();
-    let mut verts = Vec::<ModelVertex>::new();
+    let mut verts = Vec::<NormalMappedModelVertex>::new();
     let mut indices = Vec::<u32>::new();
     let mut result = Model::new();
     for mesh_serialized in meshes_serialized {
@@ -55,7 +55,7 @@ pub async fn load_model_from_serialized(
 
             let mut i = 0;
             while i < positions.len() {
-                let mut v = ModelVertex::new();
+                let mut v = NormalMappedModelVertex::new();
                 let p = positions.get(i);
                 v.position[0] = p.get_array3f_x();
                 v.position[1] = p.get_array3f_y();
@@ -65,7 +65,7 @@ pub async fn load_model_from_serialized(
             }
             i = 0;
             while i < normals.len() {
-                let mut v: ModelVertex = verts[i as usize];
+                let mut v: NormalMappedModelVertex = verts[i as usize];
                 let n = normals.get(i);
                 v.normal[0] = n.get_array3f_x();
                 v.normal[1] = n.get_array3f_y();
@@ -144,7 +144,7 @@ pub async fn load_model_from_serialized(
             vertex_buffer,
             index_buffer,
             num_elements: indices.len() as u32,
-            material: MaterialIndex::new(material_index as usize),
+            material: NormalMappedMaterialIndex::new(material_index as usize),
             translation,
             rotation,
             scale,
@@ -176,7 +176,7 @@ pub async fn load_model_from_serialized(
             .await
             .unwrap();
 
-        let material = Material::new(
+        let material = NormalMappedMaterial::new(
             device,
             &name,
             diffuse_texture,
@@ -188,7 +188,7 @@ pub async fn load_model_from_serialized(
     Ok(result)
 }
 
-fn calculate_tangents_and_bitangents(verts: &mut Vec<ModelVertex>, indices: &Vec<u32>) -> () {
+fn calculate_tangents_and_bitangents(verts: &mut Vec<NormalMappedModelVertex>, indices: &Vec<u32>) -> () {
     let mut triangles_included = vec![0; verts.len()];
 
     // Calculate tangents and bitangets. We're going to
