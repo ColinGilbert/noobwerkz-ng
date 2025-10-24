@@ -44,9 +44,9 @@ pub struct State {
 // static CALLBACK: Box<Option<dyn AsyncCallback<T, Output = impl Future<Output = ()>>>> = Box::new(None);
 static CALLBACK: Lazy<Mutex<Option<fn(&mut GraphicsContext)>>> = Lazy::new(|| Mutex::new(None));
 
-// // pub fn init_user_setup_callback(callback: fn (gfx_ctx: &mut GraphicsContext))-> impl Future<Output = ()> {
-// //     *CALLBACK.lock().unwrap() = Some(callback);
-// // }
+pub fn init_user_setup_callback(callback: fn (gfx_ctx: &mut GraphicsContext)) {
+    *CALLBACK.lock().unwrap() = Some(callback);
+}
 
 // pub async fn init_user_setup_callback<T, C>(callback: C, arg: T)
 // where
