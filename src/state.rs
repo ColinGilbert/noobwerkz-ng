@@ -13,8 +13,8 @@ use crate::texture::*;
 use crate::user_context::*;
 
 use std::f32::consts::PI;
-
-use std::sync::Arc;
+use once_cell::sync::Lazy;
+use std::sync::*;
 
 use winit::{
     event::{MouseButton, MouseScrollDelta},
@@ -39,11 +39,17 @@ pub struct State {
 }
 
 
-pub type UserSetupCallback = fn(&str);
+// pub type UserSetupCallback = fn(&str);
 
 
-pub fn initialize_callbacks(callback: UserSetupCallback) {
-   callback("Hello from the library");
+// pub fn initialize_callbacks(callback: UserSetupCallback) {
+//    callback("Hello from the library");
+// }
+
+static CALLBACK: Lazy<Mutex<Option<fn()>>> = Lazy::new(|| Mutex::new(None));
+
+pub fn init_user_setup_callback(callback: fn()) {
+    *CALLBACK.lock().unwrap() = Some(callback);
 }
 
 impl State {
@@ -135,6 +141,11 @@ impl State {
         let cam_ctx = CameraContext::new(&gfx_ctx.device, &c);
         s.cameras.push(c);
         u.scenes.push(s);
+
+
+        if let Some(cb) = *CALLBACK.lock().unwrap() {
+            cb();
+        }
 
         let mut lights = Vec::<LightUniform>::new();
 

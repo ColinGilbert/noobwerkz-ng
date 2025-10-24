@@ -2051,6 +2051,7 @@ dependencies = [
  "image",
  "instant",
  "libm",
+ "once_cell",
  "ozz-animation-rs",
  "pollster",
  "rapier3d",
