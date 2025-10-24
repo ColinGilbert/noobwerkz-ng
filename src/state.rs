@@ -1,4 +1,5 @@
 //use glam::{Mat4, Quat, Vec3A};
+use crate::callbacks::*;
 use crate::camera::*;
 use crate::camera_context::*;
 use crate::graphics_context::*;
@@ -10,8 +11,6 @@ use crate::resource::*;
 use crate::scene::*;
 use crate::texture::*;
 use crate::user_context::*;
-use crate::callbacks::*;
-
 
 use std::f32::consts::PI;
 
@@ -39,12 +38,13 @@ pub struct State {
     pub mouse_pressed: bool,
 }
 
-// pub struct UserCallbacks;
-// impl UserSetup for UserCallbacks {
-//     fn user_setup(&self) {
-        
-//     }
-// }
+
+pub type UserSetupCallback = fn(&str);
+
+
+pub fn initialize_callbacks(callback: UserSetupCallback) {
+   callback("Hello from the library");
+}
 
 impl State {
     pub async fn new(window: Arc<Window>) -> anyhow::Result<State> {
@@ -136,7 +136,6 @@ impl State {
         s.cameras.push(c);
         u.scenes.push(s);
 
-
         let mut lights = Vec::<LightUniform>::new();
 
         lights.push(LightUniform {
@@ -157,6 +156,7 @@ impl State {
             &light_ctx.light_bind_group_layout,
             &gfx_ctx.config,
         );
+        
 
         Ok(Self {
             window,
@@ -168,11 +168,6 @@ impl State {
             is_surface_configured: false,
             mouse_pressed: false,
         })
-    }
-
-
-    pub fn call_user_setup_cb(&self, callback: &dyn UserSetup) {
-        callback.user_setup();
     }
 
     #[allow(unused)]
