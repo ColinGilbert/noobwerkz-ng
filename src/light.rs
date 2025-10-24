@@ -8,7 +8,7 @@ pub struct LightContext {
 }
 
 impl LightContext {
-    pub fn new(device: &wgpu::Device, light_uniforms: Vec<LightUniform> ) -> Self {
+    pub fn new(device: &wgpu::Device, light_uniforms: Vec<LightUniform>) -> Self {
         let light_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Light VB"),
             contents: bytemuck::cast_slice(&light_uniforms),
@@ -57,4 +57,15 @@ pub struct LightUniform {
     pub _padding: u32,
     pub color: [f32; 3],
     pub _padding2: u32,
+}
+
+impl LightUniform {
+    pub fn new(position: glam::Vec3, color: glam::Vec3) -> Self {
+        Self {
+            position: position.into(),
+            _padding: 0,
+            color: color.into(),
+            _padding2: 0,
+        }
+    }
 }

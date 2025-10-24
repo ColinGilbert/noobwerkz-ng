@@ -44,23 +44,18 @@ impl State {
 
         let surface = instance.create_surface(window.clone()).unwrap();
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
+        let mut lights = Vec::<LightUniform>::new();
 
         if let Some(cb) = *USER_SETUP_CALLBACK.lock().unwrap() {
-            cb(&mut gfx_ctx);
+            cb(&mut gfx_ctx, &mut lights);
         }
 
         let u = USER_CONTEXT.lock().unwrap();
         let s = &u.scenes[u.active_scene];
         let c = &s.cameras[s.active_camera];
         let cam_ctx = CameraContext::new(&gfx_ctx.device, &c);
-        let mut lights = Vec::<LightUniform>::new();
 
-        lights.push(LightUniform {
-            position: [2.0, 2.0, 2.0],
-            _padding: 0,
-            color: [1.0, 1.0, 1.0],
-            _padding2: 0,
-        });
+  
 
         let light_ctx = LightContext::new(&gfx_ctx.device, lights);
 
