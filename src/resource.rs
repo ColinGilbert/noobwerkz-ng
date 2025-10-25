@@ -200,7 +200,6 @@ pub async fn load_model_from_serialized(
 
         let diffuse_texture: texture::Texture;
         if has_diffuse_map {
-            println!("Loadinging diffuse texture: {}", diffuse_path);
             let diffuse_texture_result = load_texture(&diffuse_path, false, device, queue).await;
             match diffuse_texture_result {
                 Ok(value) => {
@@ -215,9 +214,15 @@ pub async fn load_model_from_serialized(
         }
         let normal_texture: texture::Texture;
         if has_normals_map {
-            normal_texture = load_texture(&normals_path, true, device, queue)
-                .await
-                .unwrap();
+            let normal_texture_result = load_texture(&normals_path, true, device, queue).await;
+            match normal_texture_result {
+                Ok(value) => {
+                    normal_texture = value;
+                }
+                Err(_value) => {
+                    normal_texture = default_material.normal_texture.clone();
+                }
+            }
         } else {
             normal_texture = default_material.normal_texture.clone();
         }
