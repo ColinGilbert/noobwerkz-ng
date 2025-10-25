@@ -4,6 +4,7 @@ pub mod graphics_context;
 pub mod camera;
 pub mod camera_context;
 pub mod texture;
+pub mod generic_model;
 pub mod normal_mapped_model;
 pub mod resource;
 pub mod instance;

@@ -3,8 +3,8 @@ use capnp::*;
 use model3d_schema_capnp::model;
 use std::fs;
 use wgpu::util::DeviceExt;
-
-use crate::normal_mapped_model::{NormalMappedMaterial, NormalMappedMaterialIndex, NormalMappedModel, NormalMappedModelVertex, TexturedMesh};
+use crate::generic_model::*;
+use crate::normal_mapped_model::{NormalMappedMaterial, NormalMappedMaterialIndex, NormalMappedModel, NormalMappedModelVertex, NormalMappedTexturedMesh};
 use crate::texture;
 
 mod model3d_schema_capnp {
@@ -18,7 +18,7 @@ pub async fn load_model_from_serialized(
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
-) -> Result<NormalMappedModel> {
+) -> Result<GenericModel> {
     let full_path = filepath.clone() + "/" + &filename;
     // println!("Full path: {}", full_path);
     let data = fs::read(full_path).unwrap();
@@ -139,7 +139,7 @@ pub async fn load_model_from_serialized(
             mesh_serialized.get_dimensions_z(),
         );
 
-        result.meshes.push(TexturedMesh {
+        result.meshes.push(NormalMappedTexturedMesh {
             name,
             vertex_buffer,
             index_buffer,
@@ -185,7 +185,8 @@ pub async fn load_model_from_serialized(
         );
         result.materials.push(material);
     }
-    Ok(result)
+    let final_results = GenericModel::NormalMapped(result);
+    Ok(final_results)
 }
 
 fn calculate_tangents_and_bitangents(verts: &mut Vec<NormalMappedModelVertex>, indices: &Vec<u32>) -> () {

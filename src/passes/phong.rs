@@ -1,4 +1,4 @@
-use crate::model_node::NormalMappedModelNode;
+use crate::model_node::ModelNode;
 use crate::graphics_context::create_render_pipeline;
 use crate::instance::*;
 use crate::normal_mapped_model::*;
@@ -21,7 +21,7 @@ impl Pass for Phong {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         models: &Vec<NormalMappedModel>,
-        model_nodes: &Vec<NormalMappedModelNode>,
+        model_nodes: &Vec<ModelNode>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
     ) {
