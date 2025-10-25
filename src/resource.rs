@@ -3,7 +3,7 @@ use capnp::*;
 use model3d_schema_capnp::model;
 use std::fs;
 use wgpu::util::DeviceExt;
-use crate::model::{NormalMappedMaterial, NormalMappedMaterialIndex, Model, ModelVertex, NormalMappedTexturedMesh};
+use crate::model::*;//{Material, MaterialIndex, Model, ModelVertex, NormalMappedTexturedMesh};
 use crate::texture;
 
 mod model3d_schema_capnp {
@@ -144,7 +144,7 @@ pub async fn load_model_from_serialized(
             vertex_buffer,
             index_buffer,
             num_elements: indices.len() as u32,
-            material: NormalMappedMaterialIndex::new(material_index as usize),
+            material: MaterialIndex::new(material_index as usize),
             translation,
             rotation,
             scale,
@@ -176,11 +176,13 @@ pub async fn load_model_from_serialized(
             .await
             .unwrap();
 
-        let material = NormalMappedMaterial::new(
+            let params = MaterialParams::new(true);
+        let material = Material::new(
             device,
             &name,
+            params,
             diffuse_texture,
-            normals_texture,
+            Some(normals_texture),
             texture_layout,
         );
         result.materials.push(material);

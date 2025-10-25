@@ -2,8 +2,8 @@ safe_index::new! {
   PipelineIndex,
   map: Pipelines
 }
+use crate::model::*;
 use crate::texture::*;
-use crate::model::NormalMappedMaterial;
 
 pub struct GraphicsContext {
     pub device: wgpu::Device,
@@ -12,7 +12,7 @@ pub struct GraphicsContext {
     pub surface_format: wgpu::TextureFormat,
     pub depth_texture: Texture,
     pub texture_bind_group_layout: wgpu::BindGroupLayout,
-    pub debug_material: NormalMappedMaterial,
+    pub debug_material: Material,
 }
 
 impl GraphicsContext {
@@ -51,53 +51,53 @@ impl GraphicsContext {
 
         let surface_caps = surface.get_capabilities(&adapter);
         // Shader code assumes an Srgb surface texture. Using a different one will result all the colors comming out darker. If you want to support non Srgb surfaces, you'll need to account for that when drawing to the frame.
-            let surface_format = surface_caps
+        let surface_format = surface_caps
             .formats
             .iter()
             .copied()
             .find(|f| f.is_srgb())
             .unwrap_or(surface_caps.formats[0]);
 
-        let texture_bind_group_layout = device
-                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                    entries: &[
-                        // diffuse map
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 0,
-                            visibility: wgpu::ShaderStages::FRAGMENT,
-                            ty: wgpu::BindingType::Texture {
-                                multisampled: false,
-                                sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                                view_dimension: wgpu::TextureViewDimension::D2,
-                            },
-                            count: None,
+        let texture_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[
+                    // diffuse map
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Texture {
+                            multisampled: false,
+                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                            view_dimension: wgpu::TextureViewDimension::D2,
                         },
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 1,
-                            visibility: wgpu::ShaderStages::FRAGMENT,
-                            ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                            count: None,
+                        count: None,
+                    },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    },
+                    // normal map
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 2,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Texture {
+                            multisampled: false,
+                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                            view_dimension: wgpu::TextureViewDimension::D2,
                         },
-                        // normal map
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 2,
-                            visibility: wgpu::ShaderStages::FRAGMENT,
-                            ty: wgpu::BindingType::Texture {
-                                multisampled: false,
-                                sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                                view_dimension: wgpu::TextureViewDimension::D2,
-                            },
-                            count: None,
-                        },
-                        wgpu::BindGroupLayoutEntry {
-                            binding: 3,
-                            visibility: wgpu::ShaderStages::FRAGMENT,
-                            ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                            count: None,
-                        },
-                    ],
-                    label: Some("texture_bind_group_layout"),
-                });
+                        count: None,
+                    },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 3,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    },
+                ],
+                label: Some("texture_bind_group_layout"),
+            });
 
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -116,28 +116,20 @@ impl GraphicsContext {
             let diffuse_bytes = include_bytes!("default-diffuse.png");
             let normal_bytes = include_bytes!("default-normal.png");
 
-            let diffuse_texture = Texture::from_bytes(
-                &device,
-                &queue,
-                diffuse_bytes,
-                "res/alt-diffuse.png",
-                false,
-            )
-            .unwrap();
-            let normal_texture = Texture::from_bytes(
-                &device,
-                &queue,
-                normal_bytes,
-                "res/alt-normal.png",
-                true,
-            )
-            .unwrap();
-
-            NormalMappedMaterial::new(
+            let diffuse_texture =
+                Texture::from_bytes(&device, &queue, diffuse_bytes, "res/alt-diffuse.png", false)
+                    .unwrap();
+            let normal_texture =
+                Texture::from_bytes(&device, &queue, normal_bytes, "res/alt-normal.png", true)
+                    .unwrap();
+            let params = MaterialParams::new(true);
+            Material::new(
+        
                 &device,
                 "alt-material",
+                params,
                 diffuse_texture,
-                normal_texture,
+                Some(normal_texture),
                 &texture_bind_group_layout,
             )
         };
@@ -149,7 +141,7 @@ impl GraphicsContext {
             surface_format,
             depth_texture,
             texture_bind_group_layout,
-            debug_material
+            debug_material,
         }
     }
 }
