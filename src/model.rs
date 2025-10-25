@@ -72,6 +72,7 @@ impl Vertex for ModelVertex {
     }
 }
 
+#[derive(Clone)]
 pub struct Material {
     pub name: String,
     pub diffuse_texture: texture::Texture,
