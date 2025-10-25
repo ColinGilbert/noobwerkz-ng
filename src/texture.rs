@@ -62,6 +62,7 @@ impl Texture {
         label: &str,
         is_normal_map: bool,
     ) -> Result<Self> {
+        println!("Loading {} from memory", label);
         let img = image::load_from_memory(bytes)?;
         Self::from_image(device, queue, &img, Some(label), is_normal_map)
     }
@@ -73,9 +74,9 @@ impl Texture {
         label: Option<&str>,
         is_normal_map: bool,
     ) -> Result<Self> {
-        println!("Obtaining imge dimensions");
+        // println!("Obtaining imge dimensions");
         let dimensions = img.dimensions();
-        println!("Obtaining rgba8");
+        // println!("Obtaining rgba8");
         let rgba = img.to_rgba8();
 
         let size = wgpu::Extent3d {
