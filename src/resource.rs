@@ -206,12 +206,14 @@ pub async fn load_model_from_serialized(
                     diffuse_texture = value;
                 }
                 Err(_value) => {
+                    println!("Could not load diffuse texture {}", diffuse_path);
                     diffuse_texture = default_material.diffuse_texture.clone();
                 }
             }
         } else {
             diffuse_texture = default_material.diffuse_texture.clone();
         }
+
         let normal_texture: texture::Texture;
         if has_normals_map {
             let normal_texture_result = load_texture(&normals_path, true, device, queue).await;
@@ -220,6 +222,7 @@ pub async fn load_model_from_serialized(
                     normal_texture = value;
                 }
                 Err(_value) => {
+                    println!("Could not load normals texture {}", normals_path);
                     normal_texture = default_material.normal_texture.clone();
                 }
             }
@@ -236,10 +239,12 @@ pub async fn load_model_from_serialized(
         );
         result.materials.push(material);
     }
+
     if materials_serialized.len() == 0 {
         let material = default_material.clone();
         result.materials.push(material);
     }
+
     Ok(result)
 }
 
