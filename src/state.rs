@@ -1,7 +1,7 @@
 use crate::camera_context::*;
 use crate::graphics_context::*;
 use crate::light::*;
-use crate::passes::{Pass, phong::*};
+use crate::passes::{Pass, forward::*};
 use crate::texture::*;
 use crate::user_context::*;
 use crate::callbacks::*;
@@ -20,7 +20,7 @@ pub struct State {
     pub gfx_ctx: GraphicsContext,
     pub light_ctx: LightContext,
     pub cam_ctx: CameraContext,
-    pub phong: Phong,
+    pub forward_renderer: ForwardRenderer,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
     // NEW!
@@ -55,7 +55,7 @@ impl State {
         let cam_ctx = CameraContext::new(&gfx_ctx.device, &c);
         let light_ctx = LightContext::new(&gfx_ctx.device, lights);
 
-        let phong = Phong::new(
+        let forward_renderer = ForwardRenderer::new(
             &gfx_ctx.device,
             &light_ctx.light_buffer,
             &cam_ctx.buffer,
@@ -71,7 +71,7 @@ impl State {
             gfx_ctx,
             light_ctx,
             cam_ctx,
-            phong,
+            forward_renderer,
             is_surface_configured: false,
             mouse_pressed: false,
         })
@@ -189,7 +189,7 @@ impl State {
         let u = USER_CONTEXT.lock().unwrap();
         let s = &u.scenes[u.active_scene];
 
-        self.phong.draw(
+        self.forward_renderer.draw(
             &self.gfx_ctx.device,
             &self.gfx_ctx.queue,
             &u.models,

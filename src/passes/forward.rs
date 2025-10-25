@@ -7,7 +7,7 @@ use crate::texture::*;
 use std::iter::once;
 use wgpu::util::DeviceExt;
 
-pub struct Phong {
+pub struct ForwardRenderer {
     pub render_pipeline_layout: wgpu::PipelineLayout,
     pub light_bind_group: wgpu::BindGroup,
     pub camera_bind_group: wgpu::BindGroup,
@@ -15,7 +15,7 @@ pub struct Phong {
     pub light_render_pipeline: wgpu::RenderPipeline,
 }
 
-impl Pass for Phong {
+impl Pass for ForwardRenderer {
     fn draw(
         &mut self,
         device: &wgpu::Device,
@@ -88,7 +88,7 @@ impl Pass for Phong {
     }
 }
 
-impl Phong {
+impl ForwardRenderer {
     pub fn new(
         device: &wgpu::Device,
         light_buffer: &wgpu::Buffer,
