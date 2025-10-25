@@ -1,7 +1,7 @@
 use crate::model_node::ModelNode;
 use crate::graphics_context::create_render_pipeline;
 use crate::instance::*;
-use crate::normal_mapped_model::*;
+use crate::model::*;
 use crate::passes::Pass;
 use crate::texture::*;
 use std::iter::once;
@@ -20,7 +20,7 @@ impl Pass for Phong {
         &mut self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        models: &Vec<NormalMappedModel>,
+        models: &Vec<Model>,
         model_nodes: &Vec<ModelNode>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
@@ -137,7 +137,7 @@ impl Phong {
                 &render_pipeline_layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[NormalMappedModelVertex::desc(), InstanceRaw::desc()],
+                &[ModelVertex::desc(), InstanceRaw::desc()],
                 shader,
             )
         };
@@ -158,7 +158,7 @@ impl Phong {
                 &layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[NormalMappedModelVertex::desc()],
+                &[ModelVertex::desc()],
                 shader,
             )
         };

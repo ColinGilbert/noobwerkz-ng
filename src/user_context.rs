@@ -1,16 +1,16 @@
 use std::sync::*;
 
-use crate::{normal_mapped_model::NormalMappedModel, scene::Scene};
+use crate::{model::Model, scene::Scene};
 
 pub struct UserContext {
-    pub models: Vec<NormalMappedModel>,
+    pub models: Vec<Model>,
     pub scenes: Vec<Scene>,
     pub active_scene: usize,
 }
 
 impl UserContext {
     pub fn new() -> Self {
-        let models = Vec::<NormalMappedModel>::new();
+        let models = Vec::<Model>::new();
         let scenes = Vec::<Scene>::new();
         Self { models, scenes, active_scene: 0 }
     }

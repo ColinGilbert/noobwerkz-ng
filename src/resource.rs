@@ -3,8 +3,7 @@ use capnp::*;
 use model3d_schema_capnp::model;
 use std::fs;
 use wgpu::util::DeviceExt;
-use crate::generic_model::*;
-use crate::normal_mapped_model::{NormalMappedMaterial, NormalMappedMaterialIndex, NormalMappedModel, NormalMappedModelVertex, NormalMappedTexturedMesh};
+use crate::model::{NormalMappedMaterial, NormalMappedMaterialIndex, Model, ModelVertex, NormalMappedTexturedMesh};
 use crate::texture;
 
 mod model3d_schema_capnp {
@@ -18,7 +17,7 @@ pub async fn load_model_from_serialized(
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
-) -> Result<GenericModel> {
+) -> Result<Model> {
     let full_path = filepath.clone() + "/" + &filename;
     // println!("Full path: {}", full_path);
     let data = fs::read(full_path).unwrap();
@@ -32,9 +31,9 @@ pub async fn load_model_from_serialized(
     let message = message_reader.get_root::<model::Reader>(); //::<model3d_capnp::Reader>();
     let meshes_serialized = message.as_ref().unwrap().get_meshes().unwrap();
     let materials_serialized = message.as_ref().unwrap().get_materials().unwrap();
-    let mut verts = Vec::<NormalMappedModelVertex>::new();
+    let mut verts = Vec::<ModelVertex>::new();
     let mut indices = Vec::<u32>::new();
-    let mut result = NormalMappedModel::new();
+    let mut result = Model::new();
     for mesh_serialized in meshes_serialized {
         if mesh_serialized.has_positions() {
             if !mesh_serialized.has_normals() {
@@ -55,7 +54,7 @@ pub async fn load_model_from_serialized(
 
             let mut i = 0;
             while i < positions.len() {
-                let mut v = NormalMappedModelVertex::new();
+                let mut v = ModelVertex::new();
                 let p = positions.get(i);
                 v.position[0] = p.get_array3f_x();
                 v.position[1] = p.get_array3f_y();
@@ -65,7 +64,7 @@ pub async fn load_model_from_serialized(
             }
             i = 0;
             while i < normals.len() {
-                let mut v: NormalMappedModelVertex = verts[i as usize];
+                let mut v: ModelVertex = verts[i as usize];
                 let n = normals.get(i);
                 v.normal[0] = n.get_array3f_x();
                 v.normal[1] = n.get_array3f_y();
@@ -139,6 +138,7 @@ pub async fn load_model_from_serialized(
             mesh_serialized.get_dimensions_z(),
         );
 
+ 
         result.meshes.push(NormalMappedTexturedMesh {
             name,
             vertex_buffer,
@@ -185,11 +185,10 @@ pub async fn load_model_from_serialized(
         );
         result.materials.push(material);
     }
-    let final_results = GenericModel::NormalMapped(result);
-    Ok(final_results)
+    Ok(result)
 }
 
-fn calculate_tangents_and_bitangents(verts: &mut Vec<NormalMappedModelVertex>, indices: &Vec<u32>) -> () {
+fn calculate_tangents_and_bitangents(verts: &mut Vec<ModelVertex>, indices: &Vec<u32>) -> () {
     let mut triangles_included = vec![0; verts.len()];
 
     // Calculate tangents and bitangets. We're going to
