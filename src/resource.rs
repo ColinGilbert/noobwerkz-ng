@@ -205,8 +205,8 @@ pub async fn load_model_from_serialized(
                 Ok(value) => {
                     diffuse_texture = value;
                 }
-                Err(_value) => {
-                    println!("Could not load diffuse texture {}", diffuse_path);
+                Err(value) => {
+                    println!("Could not load diffuse texture {}, error: {}", diffuse_path, value);
                     diffuse_texture = default_material.diffuse_texture.clone();
                 }
             }
@@ -221,8 +221,8 @@ pub async fn load_model_from_serialized(
                 Ok(value) => {
                     normal_texture = value;
                 }
-                Err(_value) => {
-                    println!("Could not load normals texture {}", normals_path);
+                Err(value) => {
+                    println!("Could not load normals texture {}, error: {}", normals_path, value);
                     normal_texture = default_material.normal_texture.clone();
                 }
             }
