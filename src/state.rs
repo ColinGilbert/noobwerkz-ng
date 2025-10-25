@@ -1,7 +1,7 @@
 use crate::camera_context::*;
 use crate::graphics_context::*;
 use crate::light::*;
-use crate::passes::{Pass, forward::*};
+use crate::passes::{Pass, forward_renderer::*};
 use crate::texture::*;
 use crate::user_context::*;
 use crate::callbacks::*;
