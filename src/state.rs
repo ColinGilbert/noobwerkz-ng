@@ -1,11 +1,13 @@
+use crate::callbacks::*;
 use crate::camera_context::*;
+use crate::camera::*;
 use crate::graphics_context::*;
 use crate::light::*;
 use crate::passes::{Pass, forward_renderer::*};
 use crate::texture::*;
 use crate::user_context::*;
-use crate::callbacks::*;
 
+use std::f64;
 use std::sync::*;
 use winit::{
     event::{MouseButton, MouseScrollDelta},
@@ -23,10 +25,8 @@ pub struct State {
     pub forward_renderer: ForwardRenderer,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
-    // NEW!
     pub mouse_pressed: bool,
 }
-
 
 impl State {
     pub async fn new(window: Arc<Window>) -> anyhow::Result<State> {
@@ -143,6 +143,19 @@ impl State {
         }
     }
 
+    pub fn handle_mouse_motion(&mut self, dx: f64, dy: f64) {
+        if self.mouse_pressed {
+            let mut u = USER_CONTEXT.lock().unwrap();
+            let scene_idx = u.active_scene;
+            let s = &mut u.scenes[scene_idx];
+            let cam_idx = s.active_camera;
+            let c = &mut s.cameras[cam_idx];
+
+            c.change_yaw(degrees_to_radians(dx as f32)); //rotate_horizontal = mouse_dx ;
+            c.change_pitch(degrees_to_radians(dy as f32)); //)rotate_vertical = mouse_dy ;
+        }
+    }
+
     pub fn handle_mouse_scroll(&mut self, delta: &MouseScrollDelta) {
         let mut u = USER_CONTEXT.lock().unwrap();
         let scene_idx = u.active_scene;
@@ -169,8 +182,13 @@ impl State {
     }
 
     pub fn update(&mut self, dt: std::time::Duration) {
-      if let Some(cb) = *USER_UPDATE_CALLBACK.lock().unwrap() {
-            cb(&mut self.gfx_ctx, &mut self.cam_ctx, &mut self.light_ctx, dt);
+        if let Some(cb) = *USER_UPDATE_CALLBACK.lock().unwrap() {
+            cb(
+                &mut self.gfx_ctx,
+                &mut self.cam_ctx,
+                &mut self.light_ctx,
+                dt,
+            );
         }
     }
 

@@ -1,6 +1,4 @@
 use crate::state::State;
-use crate::camera::*;
-use crate::user_context::*;
 
 use instant::*;
 use std::sync::Arc;
@@ -103,17 +101,7 @@ impl ApplicationHandler<State> for App {
         };
         match event {
             DeviceEvent::MouseMotion { delta: (dx, dy) } => {
-                if state.mouse_pressed {
-                    let mut u = USER_CONTEXT.lock().unwrap();
-                    let scene_idx = u.active_scene;
-                    let s = &mut u.scenes[scene_idx];
-                    let cam_idx = s.active_camera;
-                    let c = &mut s.cameras[cam_idx];
-
-                    c.change_yaw(degrees_to_radians(dx as f32)); //rotate_horizontal = mouse_dx ;
-                    c.change_pitch(degrees_to_radians(dy as f32)); //)rotate_vertical = mouse_dy ;
-                    //state.cam_ctx.controller.handle_mouse(dx, dy);
-                }
+                state.handle_mouse_motion(dx, dy);
             }
             _ => {}
         }

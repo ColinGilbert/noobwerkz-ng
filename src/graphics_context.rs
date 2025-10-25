@@ -117,10 +117,10 @@ impl GraphicsContext {
             let normal_bytes = include_bytes!("default-normal.png");
 
             let diffuse_texture =
-                Texture::from_bytes(&device, &queue, diffuse_bytes, "res/alt-diffuse.png", false)
+                Texture::from_bytes(&device, &queue, diffuse_bytes, "default-diffuse", false)
                     .unwrap();
             let normal_texture =
-                Texture::from_bytes(&device, &queue, normal_bytes, "res/alt-normal.png", true)
+                Texture::from_bytes(&device, &queue, normal_bytes, "default-normal", true)
                     .unwrap();
             Material::new(
                 &device,
