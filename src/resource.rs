@@ -14,7 +14,7 @@ mod model3d_schema_capnp {
 pub async fn load_model_from_serialized(
     filepath: String,
     filename: String,
-    default_normal: texture::Texture,
+    default_material: Material,
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
@@ -195,7 +195,7 @@ pub async fn load_model_from_serialized(
                 .await
                 .unwrap();
         } else {
-            normal_texture = default_normal.clone();
+            normal_texture = default_material.normal_texture.clone();
         }
 
         let material = Material::new(
@@ -205,6 +205,10 @@ pub async fn load_model_from_serialized(
             normal_texture,
             texture_layout,
         );
+        result.materials.push(material);
+    }
+    if materials_serialized.len() == 0 {
+        let material = default_material;
         result.materials.push(material);
     }
     Ok(result)
