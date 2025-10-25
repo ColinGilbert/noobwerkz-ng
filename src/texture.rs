@@ -62,7 +62,7 @@ impl Texture {
         label: &str,
         is_normal_map: bool,
     ) -> Result<Self> {
-        println!("Loading {} from memory", label);
+        //println!("Loading {} from memory", label);
         let img = image::load_from_memory(bytes)?;
         Self::from_image(device, queue, &img, Some(label), is_normal_map)
     }
