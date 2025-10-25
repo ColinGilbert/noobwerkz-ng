@@ -200,6 +200,7 @@ pub async fn load_model_from_serialized(
 
         let diffuse_texture: texture::Texture;
         if has_diffuse_map {
+            println!("Loadinging diffuse texture: {}", diffuse_path);
             diffuse_texture = load_texture(&diffuse_path, false, device, queue)
                 .await
                 .unwrap();
@@ -225,7 +226,7 @@ pub async fn load_model_from_serialized(
         result.materials.push(material);
     }
     if materials_serialized.len() == 0 {
-        let material = default_material;
+        let material = default_material.clone();
         result.materials.push(material);
     }
     Ok(result)
