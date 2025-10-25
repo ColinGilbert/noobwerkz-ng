@@ -1,10 +1,10 @@
+use crate::model::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
+use crate::texture;
 use capnp::message::*;
 use capnp::*;
 use model3d_schema_capnp::model;
 use std::fs;
 use wgpu::util::DeviceExt;
-use crate::model::*;//{Material, MaterialIndex, Model, ModelVertex, NormalMappedTexturedMesh};
-use crate::texture;
 
 mod model3d_schema_capnp {
     include!("model3d_schema_capnp.rs");
@@ -14,6 +14,7 @@ mod model3d_schema_capnp {
 pub async fn load_model_from_serialized(
     filepath: String,
     filename: String,
+    default_normal: texture::Texture,
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
@@ -90,7 +91,10 @@ pub async fn load_model_from_serialized(
                 indices.push(i as u32);
             }
         }
-        if mesh_serialized.has_uvs() && mesh_serialized.get_uvs().unwrap().len() == mesh_serialized.get_positions().unwrap().len() {
+        if mesh_serialized.has_uvs()
+            && mesh_serialized.get_uvs().unwrap().len()
+                == mesh_serialized.get_positions().unwrap().len()
+        {
             calculate_tangents_and_bitangents(&mut verts, &indices);
         }
 
@@ -138,8 +142,7 @@ pub async fn load_model_from_serialized(
             mesh_serialized.get_dimensions_z(),
         );
 
- 
-        result.meshes.push(NormalMappedTexturedMesh {
+        result.meshes.push(TexturedMesh {
             name,
             vertex_buffer,
             index_buffer,
@@ -172,17 +175,21 @@ pub async fn load_model_from_serialized(
         let diffuse_texture = load_texture(&diffuse_path, false, device, queue)
             .await
             .unwrap();
-        let normals_texture = load_texture(&normals_path, true, device, queue)
-            .await
-            .unwrap();
 
-            let params = MaterialParams::new(true);
+        let normal_texture: texture::Texture;
+        if normals_path != "" {
+            normal_texture = load_texture(&normals_path, true, device, queue)
+                .await
+                .unwrap();
+        } else {
+            normal_texture = default_normal.clone();
+        }
+
         let material = Material::new(
             device,
             &name,
-            params,
             diffuse_texture,
-            Some(normals_texture),
+            normal_texture,
             texture_layout,
         );
         result.materials.push(material);

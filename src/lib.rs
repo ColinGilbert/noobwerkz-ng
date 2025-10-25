@@ -13,5 +13,4 @@ pub mod model_node;
 pub mod scene;
 pub mod light;
 pub mod user_context;
-pub mod user_traits;
 pub mod callbacks;

@@ -122,14 +122,11 @@ impl GraphicsContext {
             let normal_texture =
                 Texture::from_bytes(&device, &queue, normal_bytes, "res/alt-normal.png", true)
                     .unwrap();
-            let params = MaterialParams::new(true);
             Material::new(
-        
                 &device,
                 "alt-material",
-                params,
                 diffuse_texture,
-                Some(normal_texture),
+                normal_texture,
                 &texture_bind_group_layout,
             )
         };

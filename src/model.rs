@@ -71,25 +71,11 @@ impl Vertex for ModelVertex {
         }
     }
 }
-pub struct MaterialParams {
-    pub diffuse: bool,
-    pub normal: bool,
-}
-
-impl MaterialParams {
-    pub fn new(normal: bool) -> Self {
-        Self {
-            diffuse: true,
-            normal
-        }
-    }
-}
 
 pub struct Material {
-    pub params: MaterialParams,
     pub name: String,
     pub diffuse_texture: texture::Texture,
-    pub normal_texture: Option<texture::Texture>,
+    pub normal_texture: texture::Texture,
     pub bind_group: wgpu::BindGroup,
 }
 
@@ -97,73 +83,45 @@ impl Material {
     pub fn new(
         device: &wgpu::Device,
         name: &str,
-        params: MaterialParams,
         diffuse_texture: texture::Texture,
-        normal_texture: Option<texture::Texture>,
+        normal_texture: texture::Texture,
         layout: &wgpu::BindGroupLayout,
     ) -> Self {
-        if params.normal {
-            let normal_tex = normal_texture.unwrap();
-            let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-                layout,
-                entries: &[
-                    wgpu::BindGroupEntry {
-                        binding: 0,
-                        resource: wgpu::BindingResource::TextureView(&diffuse_texture.view),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 1,
-                        resource: wgpu::BindingResource::Sampler(&diffuse_texture.sampler),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 2,
-                        resource: wgpu::BindingResource::TextureView(&normal_tex.view),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 3,
-                        resource: wgpu::BindingResource::Sampler(&normal_tex.sampler),
-                    },
-                ],
-                label: Some(name),
-            });
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&diffuse_texture.view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&diffuse_texture.sampler),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: wgpu::BindingResource::TextureView(&normal_texture.view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
+                    resource: wgpu::BindingResource::Sampler(&normal_texture.sampler),
+                },
+            ],
+            label: Some(name),
+        });
 
-            Self {
-                params,
-                name: String::from(name),
-                diffuse_texture,
-                normal_texture: Some(normal_tex),
-                bind_group,
-            }
-        }
-        else {
-            let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-                layout,
-                entries: &[
-                    wgpu::BindGroupEntry {
-                        binding: 0,
-                        resource: wgpu::BindingResource::TextureView(&diffuse_texture.view),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 1,
-                        resource: wgpu::BindingResource::Sampler(&diffuse_texture.sampler),
-                    },
-                    ],
-                label: Some(name)});
-
-            Self {
-                params,
-                name: String::from(name),
-                diffuse_texture,
-                normal_texture: Option::None,
-                bind_group,
-            }        
+        Self {
+            name: String::from(name),
+            diffuse_texture,
+            normal_texture,
+            bind_group,
         }
     }
 }
 
 safe_index::new! {
-  NormalMappedTexturedMeshIndex,
-  map: NormalMappedTexturedMeshes
+  TexturedMeshIndex,
+  map: TexturedMeshes
 }
 
 safe_index::new! {
@@ -171,7 +129,7 @@ safe_index::new! {
   map: Materials
 }
 
-pub struct NormalMappedTexturedMesh {
+pub struct TexturedMesh {
     pub name: String,
     pub vertex_buffer: wgpu::Buffer,
     pub index_buffer: wgpu::Buffer,
@@ -184,14 +142,14 @@ pub struct NormalMappedTexturedMesh {
 }
 
 pub struct Model {
-    pub meshes: NormalMappedTexturedMeshes<NormalMappedTexturedMesh>,
+    pub meshes: TexturedMeshes<TexturedMesh>,
     pub materials: Materials<Material>,
 }
 
 impl Model {
     pub fn new() -> Self {
         Self {
-            meshes: NormalMappedTexturedMeshes::new(),
+            meshes: TexturedMeshes::new(),
             materials: Materials::new(),
         }
     }
@@ -201,14 +159,14 @@ pub trait DrawModel<'a> {
     #[allow(unused)]
     fn draw_mesh(
         &mut self,
-        mesh: &'a NormalMappedTexturedMesh,
+        mesh: &'a TexturedMesh,
         material: &'a Material,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_mesh_instanced(
         &mut self,
-        mesh: &'a NormalMappedTexturedMesh,
+        mesh: &'a TexturedMesh,
         material: &'a Material,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
@@ -246,7 +204,7 @@ where
 {
     fn draw_mesh(
         &mut self,
-        mesh: &'b NormalMappedTexturedMesh,
+        mesh: &'b TexturedMesh,
         material: &'b Material,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
@@ -256,7 +214,7 @@ where
 
     fn draw_mesh_instanced(
         &mut self,
-        mesh: &'b NormalMappedTexturedMesh,
+        mesh: &'b TexturedMesh,
         material: &'b Material,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
@@ -322,13 +280,13 @@ pub trait DrawLight<'a> {
     #[allow(unused)]
     fn draw_light_mesh(
         &mut self,
-        mesh: &'a NormalMappedTexturedMesh,
+        mesh: &'a TexturedMesh,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_light_mesh_instanced(
         &mut self,
-        mesh: &'a NormalMappedTexturedMesh,
+        mesh: &'a TexturedMesh,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -355,7 +313,7 @@ where
 {
     fn draw_light_mesh(
         &mut self,
-        mesh: &'b NormalMappedTexturedMesh,
+        mesh: &'b TexturedMesh,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
     ) {
@@ -364,7 +322,7 @@ where
 
     fn draw_light_mesh_instanced(
         &mut self,
-        mesh: &'b NormalMappedTexturedMesh,
+        mesh: &'b TexturedMesh,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
