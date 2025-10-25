@@ -157,6 +157,19 @@ pub async fn load_model_from_serialized(
 
     for material_serialized in materials_serialized {
         let name = material_serialized.get_name().unwrap().to_string().unwrap();
+        let has_diffuse_map: bool;
+        if material_serialized
+            .get_diffuse_texture_path()
+            .unwrap()
+            .to_string()
+            .unwrap()
+            == ""
+        {
+            has_diffuse_map = false;
+        } else {
+            has_diffuse_map = true;
+        }
+
         let has_normals_map: bool;
         if material_serialized
             .get_normals_texture_path()
@@ -185,10 +198,14 @@ pub async fn load_model_from_serialized(
                 .to_string()
                 .unwrap();
 
-        let diffuse_texture = load_texture(&diffuse_path, false, device, queue)
-            .await
-            .unwrap();
-
+        let diffuse_texture: texture::Texture;
+        if has_diffuse_map {
+            diffuse_texture = load_texture(&diffuse_path, false, device, queue)
+                .await
+                .unwrap();
+        } else {
+            diffuse_texture = default_material.diffuse_texture.clone();
+        }
         let normal_texture: texture::Texture;
         if has_normals_map {
             normal_texture = load_texture(&normals_path, true, device, queue)
