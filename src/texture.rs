@@ -73,7 +73,9 @@ impl Texture {
         label: Option<&str>,
         is_normal_map: bool,
     ) -> Result<Self> {
+        println!("Obtaining imge dimensions");
         let dimensions = img.dimensions();
+        println!("Obtaining rgba8");
         let rgba = img.to_rgba8();
 
         let size = wgpu::Extent3d {
