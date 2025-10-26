@@ -13,7 +13,6 @@ pub struct ForwardRenderer {
     pub camera_bind_group: wgpu::BindGroup,
     pub render_pipeline: wgpu::RenderPipeline,
     pub light_render_pipeline: wgpu::RenderPipeline,
-    pub model_instances: Vec<InstanceRaw>,
 }
 
 impl Pass for ForwardRenderer {
@@ -59,11 +58,12 @@ impl Pass for ForwardRenderer {
             });
 
             for m in model_nodes.iter() {
-
+                let mut count = 0;
                 let mut instance_data= Vec::<InstanceRaw>::new();// = ;m.instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
                 for (i, visible) in m.visible.iter().enumerate() {
                     if *visible {
                         instance_data.push(m.instances[i].to_raw());
+                        count += count;
                     }
                 }
 
@@ -85,7 +85,7 @@ impl Pass for ForwardRenderer {
                 render_pass.set_pipeline(&self.render_pipeline);
                 render_pass.draw_model_instanced(
                     &models[m.model_idx],
-                    0..m.instances.len() as u32,
+                    0..count,
                     &self.camera_bind_group,
                     &self.light_bind_group,
                 );
