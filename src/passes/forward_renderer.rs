@@ -98,10 +98,10 @@ impl Pass for ForwardRenderer {
 
             for m in skinned_model_nodes.iter() {
                 let mut count = 0;
-                let mut instance_data = Vec::<InstanceRaw>::new(); // = ;m.instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
+                let mut instance_data = Vec::<SkinnedInstanceRaw>::new(); // = ;m.instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
                 for (i, visible) in m.visible.iter().enumerate() {
                     if *visible {
-                        instance_data.push(m.instances[i].to_raw());
+                        instance_data.push(m.instances[i].to_skinned_raw());
                         count += 1;
                     }
                 }

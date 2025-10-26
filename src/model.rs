@@ -148,14 +148,14 @@ impl Vertex for SkinnedModelVertex {
                 },
                 // Bone indices. We start at shader location 12 because InstanceRaw takes 5-11
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 25]>() as wgpu::BufferAddress,
-                    shader_location: 12,
+                    offset: mem::size_of::<[f32; 14]>() as wgpu::BufferAddress,
+                    shader_location: 5,
                     format: wgpu::VertexFormat::Uint32x4,
                 },
                 // Bone weights
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 29]>() as wgpu::BufferAddress,
-                    shader_location: 13,
+                    offset: mem::size_of::<[f32; 18]>() as wgpu::BufferAddress,
+                    shader_location: 6,
                     format: wgpu::VertexFormat::Float32x4,
                 },
             ],
@@ -326,8 +326,6 @@ pub trait DrawModel<'a> {
     );
 }
 
-
-
 pub trait DrawSkinnedModel<'a> {
     #[allow(unused)]
     fn draw_skinned_mesh(
@@ -345,7 +343,6 @@ pub trait DrawSkinnedModel<'a> {
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
-
     #[allow(unused)]
     fn draw_skinned_model(
         &mut self,
