@@ -175,7 +175,7 @@ impl ForwardRenderer {
 
         let skinned_render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                label: Some("Render Pipeline Layout"),
+                label: Some("Skinned Pipeline Layout"),
                 bind_group_layouts: &[
                     &texture_bind_group_layout,
                     &camera_bind_group_layout,
@@ -209,7 +209,7 @@ impl ForwardRenderer {
                 &skinned_render_pipeline_layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[ModelVertex::desc(), InstanceRaw::desc()],
+                &[SkinnedModelVertex::desc(), SkinnedInstanceRaw::desc()],
                 shader,
             )
         };
