@@ -120,17 +120,6 @@ pub async fn load_model_from_serialized(
             name = filename.clone();
         }
 
-        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some(&format!("{:?} Vertex Buffer", name)),
-            contents: bytemuck::cast_slice(&verts),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
-        let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some(&format!("{:?} Index Buffer", name)),
-            contents: bytemuck::cast_slice(&indices),
-            usage: wgpu::BufferUsages::INDEX,
-        });
-
         let material_index = mesh_serialized.get_material_index();
 
         let translation = glam::Vec3::new(
@@ -158,6 +147,17 @@ pub async fn load_model_from_serialized(
         );
 
         if !has_bones {
+            let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some(&format!("{:?} Vertex Buffer", name)),
+                contents: bytemuck::cast_slice(&verts),
+                usage: wgpu::BufferUsages::VERTEX,
+            });
+            let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some(&format!("{:?} Index Buffer", name)),
+                contents: bytemuck::cast_slice(&indices),
+                usage: wgpu::BufferUsages::INDEX,
+            });
+
             result_model.meshes.push(TexturedMesh {
                 name,
                 vertex_buffer,
@@ -207,6 +207,17 @@ pub async fn load_model_from_serialized(
                         .unwrap(),
                 );
             }
+            let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some(&format!("{:?} Vertex Buffer", name)),
+                contents: bytemuck::cast_slice(&verts_skinned),
+                usage: wgpu::BufferUsages::VERTEX,
+            });
+            let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some(&format!("{:?} Index Buffer", name)),
+                contents: bytemuck::cast_slice(&indices),
+                usage: wgpu::BufferUsages::INDEX,
+            });
+
             println!("Bone names: {:?}", bone_names);
             result_skinned.meshes.push(SkinnedTexturedMesh {
                 name,
@@ -325,11 +336,11 @@ pub async fn load_model_from_serialized(
             result_skinned.materials.push(material);
         }
     }
-        if !has_bones {
-            result_model.name = filename;
-        } else {
-            result_skinned.name = filename;
-        }
+    if !has_bones {
+        result_model.name = filename;
+    } else {
+        result_skinned.name = filename;
+    }
 
     let result: GenericModel;
     if !has_bones {
