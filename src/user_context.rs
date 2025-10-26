@@ -1,9 +1,13 @@
 use std::sync::*;
 
-use crate::{model::Model, scene::Scene};
+use crate::{
+    model::{Model, SkinnedModel},
+    scene::Scene,
+};
 
 pub struct UserContext {
     pub models: Vec<Model>,
+    pub skinned_models: Vec<SkinnedModel>,
     pub scenes: Vec<Scene>,
     pub active_scene: usize,
 }
@@ -11,8 +15,14 @@ pub struct UserContext {
 impl UserContext {
     pub fn new() -> Self {
         let models = Vec::<Model>::new();
+        let skinned_models = Vec::<SkinnedModel>::new();
         let scenes = Vec::<Scene>::new();
-        Self { models, scenes, active_scene: 0 }
+        Self {
+            models,
+            skinned_models,
+            scenes,
+            active_scene: 0,
+        }
     }
 }
 
