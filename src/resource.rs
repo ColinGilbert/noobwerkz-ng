@@ -196,6 +196,7 @@ pub async fn load_model_from_serialized(
                 verts_skinned[i] = v;
                 i += 1;
             }
+            
             let bone_names_serialized = mesh_serialized.get_bone_names().unwrap();
             let mut bone_names = Vec::<String>::new();
             for (i, _n) in bone_names_serialized.iter().enumerate() {
@@ -207,13 +208,15 @@ pub async fn load_model_from_serialized(
                         .unwrap(),
                 );
             }
+
             let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some(&format!("{:?} Vertex Buffer", name)),
+                label: Some(&format!("{:?} SSkinned Vertex Buffer", name)),
                 contents: bytemuck::cast_slice(&verts_skinned),
                 usage: wgpu::BufferUsages::VERTEX,
             });
+            
             let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some(&format!("{:?} Index Buffer", name)),
+                label: Some(&format!("{:?} Skinned Index Buffer", name)),
                 contents: bytemuck::cast_slice(&indices),
                 usage: wgpu::BufferUsages::INDEX,
             });

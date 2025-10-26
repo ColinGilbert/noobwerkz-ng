@@ -121,7 +121,7 @@ impl Pass for ForwardRenderer {
                 //     &self.light_bind_group,
                 // );
 
-                render_pass.set_pipeline(&self.render_pipeline);
+                render_pass.set_pipeline(&self.skinned_render_pipeline);
                 render_pass.draw_skinned_model_instanced(
                     &skinned_models[m.model_idx],
                     0..count,
