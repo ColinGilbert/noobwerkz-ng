@@ -198,7 +198,7 @@ pub async fn load_model_from_serialized(
             }
             let bone_names_serialized = mesh_serialized.get_bone_names().unwrap();
             let mut bone_names = Vec::<String>::new();
-            for (i, n) in bone_names_serialized.iter().enumerate() {
+            for (i, _n) in bone_names_serialized.iter().enumerate() {
                 bone_names.push(
                     bone_names_serialized
                         .get(i as u32)

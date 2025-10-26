@@ -2,7 +2,7 @@
 
 use std::ops::Range;
 
-use crate::{model, texture};
+use crate::{texture};
 
 pub trait Vertex {
     fn desc() -> wgpu::VertexBufferLayout<'static>;
