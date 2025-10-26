@@ -41,7 +41,7 @@ pub async fn load_model_from_serialized(
 
     let mut has_bones = false;
     for mesh_serialized in meshes_serialized {
-        if mesh_serialized.has_bone_names() {
+        if mesh_serialized.get_bone_names().unwrap().len() > 0 {
             has_bones = true;
         }
     }
