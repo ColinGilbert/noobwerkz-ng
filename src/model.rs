@@ -113,7 +113,7 @@ impl Vertex for SkinnedModelVertex {
     fn desc() -> wgpu::VertexBufferLayout<'static> {
         use std::mem;
         wgpu::VertexBufferLayout {
-            array_stride: mem::size_of::<ModelVertex>() as wgpu::BufferAddress,
+            array_stride: mem::size_of::<SkinnedModelVertex>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Vertex,
             attributes: &[
                 // Positions
@@ -146,7 +146,7 @@ impl Vertex for SkinnedModelVertex {
                     shader_location: 4,
                     format: wgpu::VertexFormat::Float32x3,
                 },
-                // Bone indices. We start at shader location 12 because InstanceRaw takes 5-11
+                // Bone indices
                 wgpu::VertexAttribute {
                     offset: mem::size_of::<[f32; 14]>() as wgpu::BufferAddress,
                     shader_location: 5,
