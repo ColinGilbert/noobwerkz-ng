@@ -91,6 +91,7 @@ pub async fn load_model_from_serialized(
                 indices.push(i as u32);
             }
         }
+        
         if mesh_serialized.has_uvs()
             && mesh_serialized.get_uvs().unwrap().len()
                 == mesh_serialized.get_positions().unwrap().len()

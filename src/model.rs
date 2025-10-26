@@ -72,6 +72,32 @@ impl Vertex for ModelVertex {
     }
 }
 
+#[repr(C)]
+#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct SkinnedModelVertex {
+    pub position: [f32; 3],
+    pub tex_coords: [f32; 2],
+    pub normal: [f32; 3],
+    pub tangent: [f32; 3],
+    pub bitangent: [f32; 3],
+    pub bone_indices: [u32; 4],
+    pub bone_weights: [f32; 4],
+}
+
+impl SkinnedModelVertex {
+    pub fn new() -> Self {
+        Self {
+            position: [0.0; 3],
+            tex_coords: [0.0; 2],
+            normal: [0.0; 3],
+            tangent: [0.0; 3],
+            bitangent: [0.0; 3],
+            bone_indices: [0; 4],
+            bone_weights: [0.0; 4],
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct Material {
     pub name: String,
@@ -126,6 +152,11 @@ safe_index::new! {
 }
 
 safe_index::new! {
+    SkinnedMeshIndex,
+    map: SkinnedMeshes
+}
+
+safe_index::new! {
   MaterialIndex,
   map: Materials
 }
@@ -142,6 +173,19 @@ pub struct TexturedMesh {
     pub dimensions: glam::Vec3,
 }
 
+pub struct SkinnedTexturedMesh {
+    pub name: String,
+    pub vertex_buffer: wgpu::Buffer,
+    pub index_buffer: wgpu::Buffer,
+    pub num_elements: u32,
+    pub material: MaterialIndex,
+    pub translation: glam::Vec3,
+    pub rotation: glam::Quat,
+    //pub scale: glam::Vec3,
+    pub dimensions: glam::Vec3,
+    pub matrices_texture: wgpu::Texture,
+}
+
 pub struct Model {
     pub meshes: TexturedMeshes<TexturedMesh>,
     pub materials: Materials<Material>,
@@ -151,6 +195,20 @@ impl Model {
     pub fn new() -> Self {
         Self {
             meshes: TexturedMeshes::new(),
+            materials: Materials::new(),
+        }
+    }
+}
+
+pub struct SkinnedModel {
+    pub meshes: SkinnedMeshes<SkinnedTexturedMesh>,
+    pub materials: Materials<Material>,
+}
+
+impl SkinnedModel {
+    pub fn new() -> Self {
+        Self {
+            meshes: SkinnedMeshes::new(),
             materials: Materials::new(),
         }
     }
