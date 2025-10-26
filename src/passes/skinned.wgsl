@@ -1,4 +1,8 @@
 // Vertex shader
+@group(0)@binding(3)
+var t_bones: texture_2d<f32>;
+@group(0) @binding(4)
+var s_bones: sampler;
 
 struct Camera {
     view_pos: vec4<f32>,

@@ -201,7 +201,7 @@ impl ForwardRenderer {
 
         let skinned_render_pipeline = {
             let shader = wgpu::ShaderModuleDescriptor {
-                label: Some("SKinned Shader"),
+                label: Some("Skinned Shader"),
                 source: wgpu::ShaderSource::Wgsl(include_str!("skinned.wgsl").into()),
             };
             create_render_pipeline(
