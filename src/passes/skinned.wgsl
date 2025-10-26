@@ -1,7 +1,7 @@
 // Vertex shader
-@group(0)@binding(3)
+@group(3)@binding(0)
 var t_bones: texture_2d<f32>;
-@group(0) @binding(4)
+@group(3) @binding(1)
 var s_bones: sampler;
 
 struct Camera {

@@ -150,7 +150,7 @@ impl Vertex for SkinnedModelVertex {
                 wgpu::VertexAttribute {
                     offset: mem::size_of::<[f32; 14]>() as wgpu::BufferAddress,
                     shader_location: 5,
-                    format: wgpu::VertexFormat::Uint32x4,// Uint32x4,
+                    format: wgpu::VertexFormat::Uint32x4, // Uint32x4,
                 },
                 // Bone weights
                 wgpu::VertexAttribute {
@@ -278,7 +278,7 @@ impl SkinnedModel {
         Self {
             meshes: SkinnedMeshes::new(),
             materials: Materials::new(),
-            name: "".to_owned()
+            name: "".to_owned(),
         }
     }
 }
@@ -334,6 +334,7 @@ pub trait DrawSkinnedModel<'a> {
         material: &'a Material,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
+        animation_matrices_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_skinned_mesh_instanced(
         &mut self,
@@ -342,6 +343,7 @@ pub trait DrawSkinnedModel<'a> {
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
+        animation_matrices_bind_group: &'a wgpu::BindGroup,
     );
     #[allow(unused)]
     fn draw_skinned_model(
@@ -349,6 +351,7 @@ pub trait DrawSkinnedModel<'a> {
         model: &'a SkinnedModel,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
+        animation_matrices_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_skinned_model_instanced(
         &mut self,
@@ -356,6 +359,7 @@ pub trait DrawSkinnedModel<'a> {
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
+        animation_matrices_bind_group: &'a wgpu::BindGroup,
     );
     #[allow(unused)]
     fn draw_skinned_model_instanced_with_material(
@@ -365,6 +369,7 @@ pub trait DrawSkinnedModel<'a> {
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
+        animation_matrices_bind_group: &'a wgpu::BindGroup,
     );
 }
 
@@ -446,7 +451,6 @@ where
     }
 }
 
-
 impl<'a, 'b> DrawSkinnedModel<'b> for wgpu::RenderPass<'a>
 where
     'b: 'a,
@@ -457,6 +461,7 @@ where
         material: &'b Material,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
+        animation_matrices_bind_group: &'b wgpu::BindGroup,
     ) {
         self.draw_skinned_mesh_instanced(mesh, material, 0..1, camera_bind_group, light_bind_group);
     }
@@ -468,12 +473,14 @@ where
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
+        animation_matrices_bind_group: &'b wgpu::BindGroup,
     ) {
         self.set_vertex_buffer(0, mesh.vertex_buffer.slice(..));
         self.set_index_buffer(mesh.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
         self.set_bind_group(0, &material.bind_group, &[]);
         self.set_bind_group(1, camera_bind_group, &[]);
         self.set_bind_group(2, light_bind_group, &[]);
+        self.set_bind_group(3, animation_matrices_bind_group, &[]);
         self.draw_indexed(0..mesh.num_elements, 0, instances);
     }
 
@@ -482,8 +489,15 @@ where
         model: &'b SkinnedModel,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
+        animation_matrices_bind_group: &'b wgpu::BindGroup,
     ) {
-        self.draw_skinned_model_instanced(model, 0..1, camera_bind_group, light_bind_group);
+        self.draw_skinned_model_instanced(
+            model,
+            0..1,
+            camera_bind_group,
+            light_bind_group,
+            animation_matrices_bind_group,
+        );
     }
 
     fn draw_skinned_model_instanced(
@@ -492,6 +506,7 @@ where
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
+        animation_matrices_bind_group: &'b wgpu::BindGroup,
     ) {
         for mesh in &model.meshes {
             let material = &model.materials[mesh.material];
@@ -501,6 +516,7 @@ where
                 instances.clone(),
                 camera_bind_group,
                 light_bind_group,
+                animation_matrices_bind_group,
             );
         }
     }
@@ -512,6 +528,7 @@ where
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
+        animation_matrices_bind_group: &'b wgpu::BindGroup,
     ) {
         for mesh in &model.meshes {
             self.draw_skinned_mesh_instanced(
@@ -520,11 +537,11 @@ where
                 instances.clone(),
                 camera_bind_group,
                 light_bind_group,
+                animation_matrices_bind_group,
             );
         }
     }
 }
-
 
 pub trait DrawLight<'a> {
     #[allow(unused)]
