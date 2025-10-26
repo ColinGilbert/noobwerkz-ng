@@ -2,7 +2,7 @@
 
 use std::ops::Range;
 
-use crate::{texture};
+use crate::texture;
 
 pub trait Vertex {
     fn desc() -> wgpu::VertexBufferLayout<'static>;
@@ -254,6 +254,7 @@ pub struct SkinnedTexturedMesh {
 pub struct Model {
     pub meshes: TexturedMeshes<TexturedMesh>,
     pub materials: Materials<Material>,
+    pub name: String,
 }
 
 impl Model {
@@ -261,6 +262,7 @@ impl Model {
         Self {
             meshes: TexturedMeshes::new(),
             materials: Materials::new(),
+            name: "".to_owned(),
         }
     }
 }
@@ -268,6 +270,7 @@ impl Model {
 pub struct SkinnedModel {
     pub meshes: SkinnedMeshes<SkinnedTexturedMesh>,
     pub materials: Materials<Material>,
+    pub name: String,
 }
 
 impl SkinnedModel {
@@ -275,6 +278,7 @@ impl SkinnedModel {
         Self {
             meshes: SkinnedMeshes::new(),
             materials: Materials::new(),
+            name: "".to_owned()
         }
     }
 }

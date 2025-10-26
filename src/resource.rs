@@ -325,6 +325,12 @@ pub async fn load_model_from_serialized(
             result_skinned.materials.push(material);
         }
     }
+        if !has_bones {
+            result_model.name = filename;
+        } else {
+            result_skinned.name = filename;
+        }
+
     let result: GenericModel;
     if !has_bones {
         result = GenericModel::Textured(result_model);
