@@ -62,7 +62,7 @@ impl Pass for ForwardRenderer {
                 match m.model_type {
                     ModelType::Textured => {}
                     ModelType::TexturedSkinned => {
-                        break;
+                        continue;
                     }
                 }
                 let mut count = 0;
