@@ -1,7 +1,7 @@
-use crate::model_node::ModelNode;
 use crate::graphics_context::create_render_pipeline;
 use crate::instance::*;
 use crate::model::*;
+use crate::model_node::ModelNode;
 use crate::model_node::*;
 use crate::passes::Pass;
 use crate::texture::*;
@@ -59,9 +59,14 @@ impl Pass for ForwardRenderer {
             });
 
             for m in model_nodes.iter() {
-                if m.model_type == ModelType::TexturedSkinned { continue }
+                match m.model_type {
+                    ModelType::Textured => {}
+                    ModelType::TexturedSkinned => {
+                        continue;
+                    }
+                }
                 let mut count = 0;
-                let mut instance_data= Vec::<InstanceRaw>::new();// = ;m.instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
+                let mut instance_data = Vec::<InstanceRaw>::new(); // = ;m.instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
                 for (i, visible) in m.visible.iter().enumerate() {
                     if *visible {
                         instance_data.push(m.instances[i].to_raw());
