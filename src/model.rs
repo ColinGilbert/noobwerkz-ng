@@ -461,7 +461,7 @@ where
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
     ) {
-        self.draw_mesh_instanced(mesh, material, 0..1, camera_bind_group, light_bind_group);
+        self.draw_skinned_mesh_instanced(mesh, material, 0..1, camera_bind_group, light_bind_group);
     }
 
     fn draw_skinned_mesh_instanced(
@@ -486,7 +486,7 @@ where
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
     ) {
-        self.draw_model_instanced(model, 0..1, camera_bind_group, light_bind_group);
+        self.draw_skinned_model_instanced(model, 0..1, camera_bind_group, light_bind_group);
     }
 
     fn draw_skinned_model_instanced(
@@ -498,7 +498,7 @@ where
     ) {
         for mesh in &model.meshes {
             let material = &model.materials[mesh.material];
-            self.draw_mesh_instanced(
+            self.draw_skinned_mesh_instanced(
                 mesh,
                 material,
                 instances.clone(),
@@ -517,7 +517,7 @@ where
         light_bind_group: &'b wgpu::BindGroup,
     ) {
         for mesh in &model.meshes {
-            self.draw_mesh_instanced(
+            self.draw_skinned_mesh_instanced(
                 mesh,
                 material,
                 instances.clone(),

@@ -1,7 +1,7 @@
 use crate::graphics_context::create_render_pipeline;
 use crate::instance::*;
 use crate::model::*;
-use crate::model_node::ModelNode;
+// use crate::model_node::ModelNode;
 use crate::model_node::*;
 use crate::passes::Pass;
 use crate::texture::*;
@@ -10,9 +10,11 @@ use wgpu::util::DeviceExt;
 
 pub struct ForwardRenderer {
     pub render_pipeline_layout: wgpu::PipelineLayout,
+    pub skinned_render_pipeline_layout: wgpu::PipelineLayout,
     pub light_bind_group: wgpu::BindGroup,
     pub camera_bind_group: wgpu::BindGroup,
     pub render_pipeline: wgpu::RenderPipeline,
+    pub skinned_render_pipeline: wgpu::RenderPipeline,
     pub light_render_pipeline: wgpu::RenderPipeline,
 }
 
@@ -22,7 +24,9 @@ impl Pass for ForwardRenderer {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         models: &Vec<Model>,
+        skinned_models: &Vec<SkinnedModel>,
         model_nodes: &Vec<ModelNode>,
+        skinned_model_nodes: &Vec<ModelNode>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
     ) {
@@ -59,12 +63,6 @@ impl Pass for ForwardRenderer {
             });
 
             for m in model_nodes.iter() {
-                match m.model_type {
-                    ModelType::Textured => { }
-                    ModelType::TexturedSkinned => {
-                        continue;
-                    }
-                }
                 let mut count = 0;
                 let mut instance_data = Vec::<InstanceRaw>::new(); // = ;m.instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
                 for (i, visible) in m.visible.iter().enumerate() {
@@ -92,6 +90,40 @@ impl Pass for ForwardRenderer {
                 render_pass.set_pipeline(&self.render_pipeline);
                 render_pass.draw_model_instanced(
                     &models[m.model_idx],
+                    0..count,
+                    &self.camera_bind_group,
+                    &self.light_bind_group,
+                );
+            }
+
+            for m in skinned_model_nodes.iter() {
+                let mut count = 0;
+                let mut instance_data = Vec::<InstanceRaw>::new(); // = ;m.instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
+                for (i, visible) in m.visible.iter().enumerate() {
+                    if *visible {
+                        instance_data.push(m.instances[i].to_raw());
+                        count += 1;
+                    }
+                }
+
+                let instance_buffer =
+                    device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                        label: Some("Instance Buffer"),
+                        contents: bytemuck::cast_slice(&instance_data),
+                        usage: wgpu::BufferUsages::VERTEX,
+                    });
+
+                render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
+                // render_pass.set_pipeline(&self.light_render_pipeline);
+                // render_pass.draw_light_model(
+                //     &models[m.model_idx],
+                //     &self.camera_bind_group,
+                //     &self.light_bind_group,
+                // );
+
+                render_pass.set_pipeline(&self.render_pipeline);
+                render_pass.draw_skinned_model_instanced(
+                    &skinned_models[m.model_idx],
                     0..count,
                     &self.camera_bind_group,
                     &self.light_bind_group,
@@ -141,6 +173,17 @@ impl ForwardRenderer {
                 push_constant_ranges: &[],
             });
 
+        let skinned_render_pipeline_layout =
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("Render Pipeline Layout"),
+                bind_group_layouts: &[
+                    &texture_bind_group_layout,
+                    &camera_bind_group_layout,
+                    &light_bind_group_layout,
+                ],
+                push_constant_ranges: &[],
+            });
+
         let render_pipeline = {
             let shader = wgpu::ShaderModuleDescriptor {
                 label: Some("Normal Shader"),
@@ -149,6 +192,21 @@ impl ForwardRenderer {
             create_render_pipeline(
                 &device,
                 &render_pipeline_layout,
+                config.format,
+                Some(Texture::DEPTH_FORMAT),
+                &[ModelVertex::desc(), InstanceRaw::desc()],
+                shader,
+            )
+        };
+
+        let skinned_render_pipeline = {
+            let shader = wgpu::ShaderModuleDescriptor {
+                label: Some("SKinned Shader"),
+                source: wgpu::ShaderSource::Wgsl(include_str!("skinned.wgsl").into()),
+            };
+            create_render_pipeline(
+                &device,
+                &skinned_render_pipeline_layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
                 &[ModelVertex::desc(), InstanceRaw::desc()],
@@ -179,9 +237,11 @@ impl ForwardRenderer {
 
         Self {
             render_pipeline_layout,
+            skinned_render_pipeline_layout,
             light_bind_group,
             camera_bind_group,
             render_pipeline,
+            skinned_render_pipeline,
             light_render_pipeline,
         }
     }

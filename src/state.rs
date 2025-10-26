@@ -211,7 +211,9 @@ impl State {
             &self.gfx_ctx.device,
             &self.gfx_ctx.queue,
             &u.models,
+            &u.skinned_models,
             &s.model_nodes,
+            &s.skinned_model_nodes,
             &self.gfx_ctx.depth_texture.view,
             &view,
         );
