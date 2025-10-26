@@ -13,6 +13,7 @@ pub struct ForwardRenderer {
     pub camera_bind_group: wgpu::BindGroup,
     pub render_pipeline: wgpu::RenderPipeline,
     pub light_render_pipeline: wgpu::RenderPipeline,
+    pub model_instances: Vec<InstanceRaw>,
 }
 
 impl Pass for ForwardRenderer {
@@ -57,8 +58,14 @@ impl Pass for ForwardRenderer {
                 timestamp_writes: None,
             });
 
-            for (_i, m) in model_nodes.iter().enumerate() {
-                let instance_data = m.instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
+            for m in model_nodes.iter() {
+
+                let mut instance_data:Vec<InstanceRaw>;// = ;m.instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
+                for (i, visible) in m.visible.iter().enumerate() {
+                    if *visible {
+                        instance_data.push(m.instances[i].to_raw());
+                    }
+                }
 
                 let instance_buffer =
                     device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
