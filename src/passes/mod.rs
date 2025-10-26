@@ -1,6 +1,6 @@
 use crate::model_node::ModelNode;
 use crate::model::*;
-
+use crate::skinned_model::*;
 pub mod forward_renderer;
 
 pub trait Pass {

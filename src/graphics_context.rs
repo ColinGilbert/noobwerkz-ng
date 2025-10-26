@@ -2,7 +2,7 @@ safe_index::new! {
   PipelineIndex,
   map: Pipelines
 }
-use crate::model::*;
+use crate::material::*;
 use crate::texture::*;
 
 pub struct GraphicsContext {

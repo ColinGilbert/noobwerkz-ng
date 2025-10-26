@@ -1,8 +1,8 @@
 use std::sync::*;
-
 use crate::{
-    model::{Model, SkinnedModel},
-    scene::Scene,
+    model::*,
+    skinned_model::*,
+    scene::*,
 };
 
 pub struct UserContext {

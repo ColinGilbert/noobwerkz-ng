@@ -14,3 +14,6 @@ pub mod scene;
 pub mod light;
 pub mod user_context;
 pub mod callbacks;
+pub mod material;
+pub mod skinned_model;
+pub mod index_types;

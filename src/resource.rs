@@ -1,5 +1,8 @@
 use crate::model::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
+use crate::skinned_model::*;
+use crate::material::*;
 use crate::texture;
+use crate::index_types::*;
 use capnp::message::*;
 use capnp::*;
 use model3d_schema_capnp::model;

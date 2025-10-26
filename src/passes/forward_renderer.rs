@@ -1,6 +1,7 @@
 use crate::graphics_context::create_render_pipeline;
 use crate::instance::*;
 use crate::model::*;
+use crate::skinned_model::*;
 // use crate::model_node::ModelNode;
 use crate::model_node::*;
 use crate::passes::Pass;
