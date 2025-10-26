@@ -2,7 +2,7 @@
 
 use std::ops::Range;
 
-use crate::texture;
+use crate::{model, texture};
 
 pub trait Vertex {
     fn desc() -> wgpu::VertexBufferLayout<'static>;
@@ -96,6 +96,17 @@ impl SkinnedModelVertex {
             bone_weights: [0.0; 4],
         }
     }
+    pub fn from_vert(model_vert: &ModelVertex) -> Self {
+        Self {
+            position: model_vert.position,
+            tex_coords: model_vert.tex_coords,
+            normal: model_vert.normal,
+            tangent: model_vert.tangent,
+            bitangent: model_vert.bitangent,
+            bone_indices: [0; 4],
+            bone_weights: [0.0; 4],
+        }
+    }
 }
 
 impl Vertex for SkinnedModelVertex {
@@ -135,7 +146,7 @@ impl Vertex for SkinnedModelVertex {
                     shader_location: 4,
                     format: wgpu::VertexFormat::Float32x3,
                 },
-                // Bone indices. We start at shader location 12 because InstanceRaw takes 5-11 
+                // Bone indices. We start at shader location 12 because InstanceRaw takes 5-11
                 wgpu::VertexAttribute {
                     offset: mem::size_of::<[f32; 25]>() as wgpu::BufferAddress,
                     shader_location: 12,
@@ -235,9 +246,9 @@ pub struct SkinnedTexturedMesh {
     pub material: MaterialIndex,
     pub translation: glam::Vec3,
     pub rotation: glam::Quat,
-    //pub scale: glam::Vec3,
+    pub scale: glam::Vec3,
     pub dimensions: glam::Vec3,
-    pub matrices_texture: wgpu::Texture,
+    pub matrices_texture: Option<wgpu::Texture>,
 }
 
 pub struct Model {

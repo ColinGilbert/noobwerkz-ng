@@ -5,9 +5,13 @@ use capnp::*;
 use model3d_schema_capnp::model;
 use std::fs;
 use wgpu::util::DeviceExt;
-
 mod model3d_schema_capnp {
     include!("model3d_schema_capnp.rs");
+}
+
+pub enum GenericModel {
+    Model(Model),
+    SkinnedModel(SkinnedModel),
 }
 
 // TODO: Robustify
@@ -18,7 +22,7 @@ pub async fn load_model_from_serialized(
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
-) -> Result<Model> {
+) -> Result<GenericModel> {
     let full_path = filepath.clone() + "/" + &filename;
     // println!("Full path: {}", full_path);
     let data = fs::read(full_path).unwrap();
@@ -32,10 +36,20 @@ pub async fn load_model_from_serialized(
     let message = message_reader.get_root::<model::Reader>(); //::<model3d_capnp::Reader>();
     let meshes_serialized = message.as_ref().unwrap().get_meshes().unwrap();
     let materials_serialized = message.as_ref().unwrap().get_materials().unwrap();
-    let mut verts = Vec::<ModelVertex>::new();
-    let mut indices = Vec::<u32>::new();
-    let mut result = Model::new();
+    let mut result_model = Model::new();
+    let mut result_skinned = SkinnedModel::new();
+
+    let mut has_bones = false;
     for mesh_serialized in meshes_serialized {
+        if mesh_serialized.has_bone_names() {
+            has_bones = true;
+        }
+    }
+
+    for mesh_serialized in meshes_serialized {
+        let mut verts = Vec::<ModelVertex>::new();
+        let mut verts_skinned = Vec::<SkinnedModelVertex>::new();
+        let mut indices = Vec::<u32>::new();
         if mesh_serialized.has_positions() {
             if !mesh_serialized.has_normals() {
                 () // TODO: Generate normals
@@ -91,7 +105,7 @@ pub async fn load_model_from_serialized(
                 indices.push(i as u32);
             }
         }
-        
+
         if mesh_serialized.has_uvs()
             && mesh_serialized.get_uvs().unwrap().len()
                 == mesh_serialized.get_positions().unwrap().len()
@@ -143,17 +157,70 @@ pub async fn load_model_from_serialized(
             mesh_serialized.get_dimensions_z(),
         );
 
-        result.meshes.push(TexturedMesh {
-            name,
-            vertex_buffer,
-            index_buffer,
-            num_elements: indices.len() as u32,
-            material: MaterialIndex::new(material_index as usize),
-            translation,
-            rotation,
-            scale,
-            dimensions,
-        });
+        if !has_bones {
+            result_model.meshes.push(TexturedMesh {
+                name,
+                vertex_buffer,
+                index_buffer,
+                num_elements: indices.len() as u32,
+                material: MaterialIndex::new(material_index as usize),
+                translation,
+                rotation,
+                scale,
+                dimensions,
+            });
+        } else {
+            // We extract the bones components now
+            let bone_indices_serialized = mesh_serialized.get_bone_indices().unwrap();
+            let mut i: usize = 0;
+            while i < bone_indices_serialized.len() as usize {
+                let mut v = SkinnedModelVertex::from_vert(&verts[i]);
+                let bone_indices = bone_indices_serialized.get(i as u32);
+                v.bone_indices[0] = bone_indices.get_array4u_x() as u32;
+                v.bone_indices[1] = bone_indices.get_array4u_y() as u32;
+                v.bone_indices[2] = bone_indices.get_array4u_z() as u32;
+                v.bone_indices[3] = bone_indices.get_array4u_w() as u32;
+                verts_skinned.push(v);
+                i += 1;
+            }
+
+            let bone_weights_serialized = mesh_serialized.get_bone_weights().unwrap();
+            i = 0;
+            while i < bone_weights_serialized.len() as usize {
+                let mut v = verts_skinned[i];
+                let bone_weights = bone_weights_serialized.get(i as u32);
+                v.bone_weights[0] = bone_weights.get_array4f_x();
+                v.bone_weights[1] = bone_weights.get_array4f_y();
+                v.bone_weights[2] = bone_weights.get_array4f_z();
+                v.bone_weights[3] = bone_weights.get_array4f_w();
+                verts_skinned[i] = v;
+                i += 1;
+            }
+            let bone_names_serialized = mesh_serialized.get_bone_names().unwrap();
+            let mut bone_names = Vec::<String>::new();
+            for (i, n) in bone_names_serialized.iter().enumerate() {
+                bone_names.push(
+                    bone_names_serialized
+                        .get(i as u32)
+                        .unwrap()
+                        .to_string()
+                        .unwrap(),
+                );
+            }
+            println!("Bone names: {:?}", bone_names);
+            result_skinned.meshes.push(SkinnedTexturedMesh {
+                name,
+                vertex_buffer,
+                index_buffer,
+                num_elements: indices.len() as u32,
+                material: MaterialIndex::new(material_index as usize),
+                translation,
+                rotation,
+                scale,
+                dimensions,
+                matrices_texture: Option::None,
+            });
+        }
     }
 
     for material_serialized in materials_serialized {
@@ -207,7 +274,10 @@ pub async fn load_model_from_serialized(
                     diffuse_texture = value;
                 }
                 Err(value) => {
-                    println!("Could not load diffuse texture {}, error: {}", diffuse_path, value);
+                    println!(
+                        "Could not load diffuse texture {}, error: {}",
+                        diffuse_path, value
+                    );
                     diffuse_texture = default_material.diffuse_texture.clone();
                 }
             }
@@ -223,14 +293,16 @@ pub async fn load_model_from_serialized(
                     normal_texture = value;
                 }
                 Err(value) => {
-                    println!("Could not load normals texture {}, error: {}", normals_path, value);
+                    println!(
+                        "Could not load normals texture {}, error: {}",
+                        normals_path, value
+                    );
                     normal_texture = default_material.normal_texture.clone();
                 }
             }
         } else {
             normal_texture = default_material.normal_texture.clone();
         }
-
         let material = Material::new(
             device,
             &name,
@@ -238,14 +310,27 @@ pub async fn load_model_from_serialized(
             normal_texture,
             texture_layout,
         );
-        result.materials.push(material);
+        if !has_bones {
+            result_model.materials.push(material);
+        } else {
+            result_skinned.materials.push(material);
+        }
     }
 
     if materials_serialized.len() == 0 {
         let material = default_material.clone();
-        result.materials.push(material);
+        if !has_bones {
+            result_model.materials.push(material);
+        } else {
+            result_skinned.materials.push(material);
+        }
     }
-
+    let result: GenericModel;
+    if !has_bones {
+        result = GenericModel::Model(result_model);
+    } else {
+        result = GenericModel::SkinnedModel(result_skinned);
+    }
     Ok(result)
 }
 
