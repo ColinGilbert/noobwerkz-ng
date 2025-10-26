@@ -60,7 +60,7 @@ impl Pass for ForwardRenderer {
 
             for m in model_nodes.iter() {
                 match m.model_type {
-                    ModelType::Textured => { println!("Drawing {}", models[m.model_idx].name); }
+                    ModelType::Textured => { }
                     ModelType::TexturedSkinned => {
                         continue;
                     }
