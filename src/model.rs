@@ -150,7 +150,7 @@ impl Vertex for SkinnedModelVertex {
                 wgpu::VertexAttribute {
                     offset: mem::size_of::<[f32; 14]>() as wgpu::BufferAddress,
                     shader_location: 5,
-                    format: wgpu::VertexFormat::Uint32x4,
+                    format: wgpu::VertexFormat::Uint32x4,// Uint32x4,
                 },
                 // Bone weights
                 wgpu::VertexAttribute {
