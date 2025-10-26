@@ -1,7 +1,7 @@
 use crate::instance::Instance;
 
 pub enum ModelType {
-    DiffuseMapped, NormalMapped, SkinnedDiffusedMapped, SkinnedNormalMapped
+    Textured, TexturedSkinned,
 }
 pub struct ModelNode {
     pub model_type: ModelType, 
