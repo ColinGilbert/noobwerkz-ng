@@ -10,8 +10,8 @@ mod model3d_schema_capnp {
 }
 
 pub enum GenericModel {
-    Model(Model),
-    SkinnedModel(SkinnedModel),
+    Textured(Model),
+    SkinnedTextured(SkinnedModel),
 }
 
 // TODO: Robustify
@@ -327,9 +327,9 @@ pub async fn load_model_from_serialized(
     }
     let result: GenericModel;
     if !has_bones {
-        result = GenericModel::Model(result_model);
+        result = GenericModel::Textured(result_model);
     } else {
-        result = GenericModel::SkinnedModel(result_skinned);
+        result = GenericModel::SkinnedTextured(result_skinned);
     }
     Ok(result)
 }
