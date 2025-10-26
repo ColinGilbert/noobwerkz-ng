@@ -63,7 +63,7 @@ impl Pass for ForwardRenderer {
                 for (i, visible) in m.visible.iter().enumerate() {
                     if *visible {
                         instance_data.push(m.instances[i].to_raw());
-                        count += count;
+                        count += 1;
                     }
                 }
 
