@@ -4,8 +4,8 @@ use crate::model::*;
 use crate::skinned_model::*;
 // use crate::model_node::ModelNode;
 use crate::model_node::*;
-use crate::skinned_model_node::*;
 use crate::passes::Pass;
+use crate::skinned_model_node::*;
 use crate::texture::*;
 use std::iter::once;
 // use wgpu::BufferDescriptor;
@@ -120,23 +120,6 @@ impl Pass for ForwardRenderer {
                         usage: wgpu::BufferUsages::VERTEX,
                     });
 
-                let animation_matrices_storage_buffer =
-                    device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                        label: Some("Animation matrices storage buffer"),
-                        contents: bytemuck::cast_slice(anim_matrices),
-                        usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
-                    });
-
-                let animation_matrices_bind_group =
-                    device.create_bind_group(&wgpu::BindGroupDescriptor {
-                        layout: &self.bone_matrices_bind_group_layout,
-                        entries: &[wgpu::BindGroupEntry {
-                            binding: 0,
-                            resource: animation_matrices_storage_buffer.as_entire_binding(),
-                        }],
-                        label: Some("Animation matrices bind Group"),
-                    });
-
                 render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
 
                 render_pass.set_pipeline(&self.skinned_render_pipeline);
@@ -146,7 +129,7 @@ impl Pass for ForwardRenderer {
                     0..count,
                     &self.camera_bind_group,
                     &self.light_bind_group,
-                    &animation_matrices_bind_group,
+                    &m.bind_group,
                 );
             }
         }

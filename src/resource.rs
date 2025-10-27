@@ -1,12 +1,12 @@
+use crate::index_types::*;
+use crate::material::*;
 use crate::model::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
 use crate::skinned_model::*;
-use crate::material::*;
 use crate::texture;
-use crate::index_types::*;
 use capnp::message::*;
 use capnp::*;
-use ozz_animation_rs::*;
 use model3d_schema_capnp::model;
+// use ozz_animation_rs::*;
 use std::fs;
 use wgpu::util::DeviceExt;
 mod model3d_schema_capnp {
@@ -200,7 +200,7 @@ pub async fn load_model_from_serialized(
                 verts_skinned[i] = v;
                 i += 1;
             }
-            
+
             let bone_names_serialized = mesh_serialized.get_bone_names().unwrap();
             let mut bone_names = Vec::<String>::new();
             for (i, _n) in bone_names_serialized.iter().enumerate() {
@@ -218,7 +218,7 @@ pub async fn load_model_from_serialized(
                 contents: bytemuck::cast_slice(&verts_skinned),
                 usage: wgpu::BufferUsages::VERTEX,
             });
-            
+
             let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some(&format!("{:?} Skinned Index Buffer", name)),
                 contents: bytemuck::cast_slice(&indices),
@@ -443,11 +443,34 @@ pub async fn load_binary(file_name: &str) -> anyhow::Result<Vec<u8>> {
     Ok(data)
 }
 
-pub async fn load_skeletal_model(filepath: &str, model_filename: &str, skeleton_filename: &str, animation_filenames: &Vec<String>,  default_material: Material, device: &mut wgpu::Device, queue: &mut wgpu::Queue, texture_layout: &wgpu::BindGroupLayout) {
-    let model = load_model_from_serialized(filepath.to_string(), model_filename.to_string(), default_material, device, queue, texture_layout).await.unwrap();
-    match model {
-        GenericModel::Textured(value) => { ()},
-        GenericModel::SkinnedTextured(value) => {
-        }
-    }
-}
+
+
+// pub async fn load_skeletal_model(
+//     filepath: &str,
+//     model_filename: &str,
+//     skeleton_filename: &str,
+//     animation_filenames: &Vec<String>,
+//     default_material: Material,
+//     device: &mut wgpu::Device,
+//     queue: &mut wgpu::Queue,
+//     texture_layout: &wgpu::BindGroupLayout,
+//     bone_matrices_bind_group_layout: &wgpu::BindGroupLayout,
+
+// ) {
+//     let model = load_model_from_serialized(
+//         filepath.to_string(),
+//         model_filename.to_string(),
+//         default_material,
+//         device,
+//         queue,
+//         texture_layout,
+//     )
+//     .await
+//     .unwrap();
+//     match model {
+//         GenericModel::Textured(_value) => (),
+//         GenericModel::SkinnedTextured(value) => {
+
+//         }
+//     }
+// }
