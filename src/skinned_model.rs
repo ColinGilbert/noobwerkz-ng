@@ -1,12 +1,17 @@
-use std::ops::Range;
 use crate::index_types::*;
 use crate::material::*;
 use crate::model::*;
+use std::ops::Range;
 
 pub struct SkinnedModel {
     pub meshes: SkinnedMeshes<SkinnedTexturedMesh>,
     pub materials: Materials<Material>,
     pub name: String,
+    pub bone_matrices: Vec<AnimationMatrix>,
+    pub num_bones_per_model: u32,
+    pub max_instances: u32,
+    pub storage_buffer: Option<wgpu::Buffer>,
+    pub bind_group: Option<wgpu::BindGroup>,
 }
 
 impl SkinnedModel {
@@ -15,6 +20,11 @@ impl SkinnedModel {
             meshes: SkinnedMeshes::new(),
             materials: Materials::new(),
             name: "".to_owned(),
+            bone_matrices: Vec::<AnimationMatrix>::new(),
+            num_bones_per_model: 0,
+            max_instances: 0,
+            storage_buffer: Option::None,
+            bind_group: Option::None,
         }
     }
 }
@@ -123,7 +133,6 @@ impl Vertex for SkinnedModelVertex {
     }
 }
 
-
 pub trait DrawSkinnedModel<'a> {
     #[allow(unused)]
     fn draw_skinned_mesh(
@@ -171,7 +180,6 @@ pub trait DrawSkinnedModel<'a> {
     );
 }
 
-
 impl<'a, 'b> DrawSkinnedModel<'b> for wgpu::RenderPass<'a>
 where
     'b: 'a,
@@ -184,7 +192,14 @@ where
         light_bind_group: &'b wgpu::BindGroup,
         animation_matrices_bind_group: &'b wgpu::BindGroup,
     ) {
-        self.draw_skinned_mesh_instanced(mesh, material, 0..1, camera_bind_group, light_bind_group, animation_matrices_bind_group);
+        self.draw_skinned_mesh_instanced(
+            mesh,
+            material,
+            0..1,
+            camera_bind_group,
+            light_bind_group,
+            animation_matrices_bind_group,
+        );
     }
 
     fn draw_skinned_mesh_instanced(
@@ -262,4 +277,10 @@ where
             );
         }
     }
+}
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct AnimationMatrix {
+    pub m: [[f32; 4]; 4],
 }

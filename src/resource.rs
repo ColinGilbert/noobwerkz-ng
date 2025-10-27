@@ -224,7 +224,7 @@ pub async fn load_model_from_serialized(
                 usage: wgpu::BufferUsages::INDEX,
             });
 
-            println!("Bone names: {:?}", bone_names);
+            //println!("Bone names: {:?}", bone_names);
             result_skinned.meshes.push(SkinnedTexturedMesh {
                 name,
                 vertex_buffer,

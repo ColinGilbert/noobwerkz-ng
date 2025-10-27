@@ -62,6 +62,7 @@ impl State {
             &gfx_ctx.texture_bind_group_layout,
             &cam_ctx.bind_group_layout,
             &light_ctx.light_bind_group_layout,
+            &gfx_ctx.bone_matrices_bind_group_layout,
             &gfx_ctx.config,
         );
 

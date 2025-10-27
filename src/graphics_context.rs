@@ -12,6 +12,7 @@ pub struct GraphicsContext {
     pub surface_format: wgpu::TextureFormat,
     pub depth_texture: Texture,
     pub texture_bind_group_layout: wgpu::BindGroupLayout,
+    pub bone_matrices_bind_group_layout: gpu::BindGroupLayout,
     pub debug_material: Material,
 }
 
@@ -99,6 +100,23 @@ impl GraphicsContext {
                 label: Some("texture_bind_group_layout"),
             });
 
+            let bone_matrices_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        entries: &[
+            wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Storage { read_only: true }, // Set to true if read-only
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            },
+        ],
+        label: Some("Storage Buffer Bind Group Layout"),
+    });
+
+
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
@@ -138,6 +156,7 @@ impl GraphicsContext {
             surface_format,
             depth_texture,
             texture_bind_group_layout,
+            bone_matrices_bind_group_layout,
             debug_material,
         }
     }

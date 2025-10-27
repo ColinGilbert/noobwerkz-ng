@@ -7,6 +7,7 @@ use crate::model_node::*;
 use crate::passes::Pass;
 use crate::texture::*;
 use std::iter::once;
+// use wgpu::BufferDescriptor;
 use wgpu::util::DeviceExt;
 
 pub struct ForwardRenderer {
@@ -17,6 +18,7 @@ pub struct ForwardRenderer {
     pub render_pipeline: wgpu::RenderPipeline,
     pub skinned_render_pipeline: wgpu::RenderPipeline,
     pub light_render_pipeline: wgpu::RenderPipeline,
+    pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
 }
 
 impl Pass for ForwardRenderer {
@@ -100,6 +102,9 @@ impl Pass for ForwardRenderer {
             for m in skinned_model_nodes.iter() {
                 let mut count = 0;
                 let mut instance_data = Vec::<SkinnedInstanceRaw>::new(); // = ;m.instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
+                let mut model = skinned_models[m.model_idx]; //anim_matrices= Vec::<AnimationMatrix>::new();
+                let mut anim_matrices = &model.bone_matrices;
+
                 for (i, visible) in m.visible.iter().enumerate() {
                     if *visible {
                         instance_data.push(m.instances[i].to_skinned_raw());
@@ -114,6 +119,20 @@ impl Pass for ForwardRenderer {
                         usage: wgpu::BufferUsages::VERTEX,
                     });
 
+                let animation_matrices_storage_buffer =
+                    device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                        label: Some("Animation storage buffer"),
+                        contents: bytemuck::cast_slice(anim_matrices),
+                        usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
+                    });
+                let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+                    layout: &bind_group_layout,
+                    entries: &[wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: animation_matrices_storage_buffer.as_entire_binding(), // Or a specific BufferBinding if using a slice
+                    }],
+                    label: Some("Storage Buffer Bind Group"),
+                });
                 render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
                 // render_pass.set_pipeline(&self.light_render_pipeline);
                 // render_pass.draw_light_model(
@@ -123,6 +142,7 @@ impl Pass for ForwardRenderer {
                 // );
 
                 render_pass.set_pipeline(&self.skinned_render_pipeline);
+
                 render_pass.draw_skinned_model_instanced(
                     &skinned_models[m.model_idx],
                     0..count,
@@ -143,6 +163,7 @@ impl ForwardRenderer {
         texture_bind_group_layout: &wgpu::BindGroupLayout,
         camera_bind_group_layout: &wgpu::BindGroupLayout,
         light_bind_group_layout: &wgpu::BindGroupLayout,
+        bone_matrices_bind_group_layout: &wgpu::BindGroupLayout,
         config: &wgpu::SurfaceConfiguration,
     ) -> Self {
         let light_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
@@ -244,6 +265,7 @@ impl ForwardRenderer {
             render_pipeline,
             skinned_render_pipeline,
             light_render_pipeline,
+            bone_matrices_bind_group_layout: bone_matrices_bind_group_layout.clone(),
         }
     }
 }

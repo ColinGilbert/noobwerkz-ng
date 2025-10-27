@@ -1,9 +1,4 @@
 // Vertex shader
-@group(3)@binding(0)
-var t_bones: texture_2d<f32>;
-@group(3) @binding(1)
-var s_bones: sampler;
-
 struct Camera {
     view_pos: vec4<f32>,
     view_proj: mat4x4<f32>,
@@ -18,7 +13,16 @@ struct Light {
 @group(2) @binding(0)
 var<uniform> light: Light;
 
+struct AnimationMatrixData {
+    values: array<mat4x4>,
+};
+
+@group(3) @binding(0)
+var<storage, read> animation_matrices: AnimationMatrixData;
+
+
 struct VertexInput {
+    @builtin(instance_index) instance_index: u32,
     @location(0) position: vec3<f32>,
     @location(1) tex_coords: vec2<f32>,
     @location(2) normal: vec3<f32>,
