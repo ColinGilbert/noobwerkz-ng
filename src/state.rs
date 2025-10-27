@@ -22,6 +22,7 @@ pub struct State {
     pub gfx_ctx: GraphicsContext,
     pub light_ctx: LightContext,
     pub cam_ctx: CameraContext,
+    pub user_ctx: UserContext,
     pub forward_renderer: ForwardRenderer,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
@@ -43,12 +44,12 @@ impl State {
         let surface = instance.create_surface(window.clone()).unwrap();
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
         let mut lights = Vec::<LightUniform>::new();
-
+        let mut user_ctx = UserContext::new();// { models: :, skinned_models: (), scenes: (), active_scene: () }
         if let Some(cb) = *USER_SETUP_CALLBACK.lock().unwrap() {
-            cb(&mut gfx_ctx, &mut lights);
+            cb(&mut gfx_ctx, &mut user_ctx, &mut lights);
         }
 
-        let u = USER_CONTEXT.lock().unwrap();
+        let u = &user_ctx;
         let s = &u.scenes[u.active_scene];
         let c = &s.cameras[s.active_camera];
 
@@ -71,6 +72,7 @@ impl State {
             surface,
             gfx_ctx,
             light_ctx,
+            user_ctx,
             cam_ctx,
             forward_renderer,
             is_surface_configured: false,
@@ -85,7 +87,7 @@ impl State {
 
     pub fn resize(&mut self, width: u32, height: u32) {
         println!("resizing");
-        let mut u = USER_CONTEXT.lock().unwrap();
+        let u = &mut self.user_ctx;
         let scene_idx = u.active_scene;
         let s = &mut u.scenes[scene_idx];
         let cam_idx = s.active_camera;
@@ -107,7 +109,7 @@ impl State {
 
     pub fn handle_key(&mut self, event_loop: &ActiveEventLoop, key: KeyCode, pressed: bool) {
         // if !self.cam_ctx.controller.handle_key(key) {
-        let mut u = USER_CONTEXT.lock().unwrap();
+        let u = &mut self.user_ctx;
         let scene_idx = u.active_scene;
         let s = &mut u.scenes[scene_idx];
         let cam_idx = s.active_camera;
@@ -146,7 +148,7 @@ impl State {
 
     pub fn handle_mouse_motion(&mut self, dx: f64, dy: f64) {
         if self.mouse_pressed {
-            let mut u = USER_CONTEXT.lock().unwrap();
+            let u = &mut self.user_ctx;
             let scene_idx = u.active_scene;
             let s = &mut u.scenes[scene_idx];
             let cam_idx = s.active_camera;
@@ -158,7 +160,7 @@ impl State {
     }
 
     pub fn handle_mouse_scroll(&mut self, delta: &MouseScrollDelta) {
-        let mut u = USER_CONTEXT.lock().unwrap();
+        let u = &mut self.user_ctx;
         let scene_idx = u.active_scene;
         let s = &mut u.scenes[scene_idx];
         let cam_idx = s.active_camera;
@@ -188,6 +190,7 @@ impl State {
                 &mut self.gfx_ctx,
                 &mut self.cam_ctx,
                 &mut self.light_ctx,
+                &mut self.user_ctx,
                 dt,
             );
         }
@@ -205,7 +208,7 @@ impl State {
         let view = output
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
-        let u = USER_CONTEXT.lock().unwrap();
+        let u = &mut self.user_ctx;
         let s = &u.scenes[u.active_scene];
 
         self.forward_renderer.draw(
