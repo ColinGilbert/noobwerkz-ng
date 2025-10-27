@@ -12,7 +12,7 @@ pub struct GraphicsContext {
     pub surface_format: wgpu::TextureFormat,
     pub depth_texture: Texture,
     pub texture_bind_group_layout: wgpu::BindGroupLayout,
-    pub bone_matrices_bind_group_layout: gpu::BindGroupLayout,
+    pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
     pub debug_material: Material,
 }
 
