@@ -5,6 +5,7 @@ use crate::texture;
 use crate::index_types::*;
 use capnp::message::*;
 use capnp::*;
+use ozz_animation_rs::*;
 use model3d_schema_capnp::model;
 use std::fs;
 use wgpu::util::DeviceExt;
@@ -440,4 +441,13 @@ pub async fn load_binary(file_name: &str) -> anyhow::Result<Vec<u8>> {
     };
 
     Ok(data)
+}
+
+pub async fn load_skeletal_model(filepath: &str, model_filename: &str, skeleton_filename: &str, animation_filenames: &Vec<String>,  default_material: Material, device: &mut wgpu::Device, queue: &mut wgpu::Queue, texture_layout: &wgpu::BindGroupLayout) {
+    let model = load_model_from_serialized(filepath.to_string(), model_filename.to_string(), default_material, device, queue, texture_layout).await.unwrap();
+    match model {
+        GenericModel::Textured(value) => { ()},
+        GenericModel::SkinnedTextured(value) => {
+        }
+    }
 }

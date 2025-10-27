@@ -7,11 +7,7 @@ pub struct SkinnedModel {
     pub meshes: SkinnedMeshes<SkinnedTexturedMesh>,
     pub materials: Materials<Material>,
     pub name: String,
-    pub bone_matrices: Vec<AnimationMatrix>,
-    pub num_bones_per_model: u32,
-    pub max_instances: u32,
-    pub storage_buffer: Option<wgpu::Buffer>,
-    pub bind_group: Option<wgpu::BindGroup>,
+    pub num_bones: usize,
 }
 
 impl SkinnedModel {
@@ -20,11 +16,7 @@ impl SkinnedModel {
             meshes: SkinnedMeshes::new(),
             materials: Materials::new(),
             name: "".to_owned(),
-            bone_matrices: Vec::<AnimationMatrix>::new(),
-            num_bones_per_model: 0,
-            max_instances: 0,
-            storage_buffer: Option::None,
-            bind_group: Option::None,
+            num_bones: 0,
         }
     }
 }

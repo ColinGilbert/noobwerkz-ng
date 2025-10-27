@@ -10,6 +10,7 @@ pub mod instance;
 pub mod model3d_schema_capnp;
 pub mod passes;
 pub mod model_node;
+pub mod skinned_model_node;
 pub mod scene;
 pub mod light;
 pub mod user_context;
