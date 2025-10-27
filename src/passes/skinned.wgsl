@@ -14,7 +14,7 @@ struct Light {
 var<uniform> light: Light;
 
 struct AnimationMatrixData {
-    values: array<mat4x4>,
+    values: array<mat4x4<f32>>,
 };
 
 @group(3) @binding(0)
