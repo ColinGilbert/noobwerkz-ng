@@ -104,7 +104,7 @@ impl Pass for ForwardRenderer {
                 let mut count = 0;
                 let mut instance_data = Vec::<SkinnedInstanceRaw>::new();
                 let model = &skinned_models[m.model_idx];
-                let anim_matrices = &m.bone_matrices;
+                //let anim_matrices = &m.bone_matrices;
 
                 for (i, visible) in m.visible.iter().enumerate() {
                     if *visible {
@@ -125,7 +125,7 @@ impl Pass for ForwardRenderer {
                 render_pass.set_pipeline(&self.skinned_render_pipeline);
 
                 render_pass.draw_skinned_model_instanced(
-                    &skinned_models[m.model_idx],
+                    &model,
                     0..count,
                     &self.camera_bind_group,
                     &self.light_bind_group,
