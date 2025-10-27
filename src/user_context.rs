@@ -1,13 +1,12 @@
 //use std::sync::*;
 use crate::{
-    model::*,
-    skinned_model::*,
-    scene::*,
+    model::*, scene::*, skeletal_context::SkeletalContext, skinned_model::*
 };
 
 pub struct UserContext {
     pub models: Vec<Model>,
     pub skinned_models: Vec<SkinnedModel>,
+    pub skeletals: Vec<SkeletalContext>,
     pub scenes: Vec<Scene>,
     pub active_scene: usize,
 }
@@ -16,21 +15,14 @@ impl UserContext {
     pub fn new() -> Self {
         let models = Vec::new();
         let skinned_models = Vec::new();
+        let skeletals = Vec::new();
         let scenes = Vec::<Scene>::new();
         Self {
             models,
             skinned_models,
+            skeletals,
             scenes,
             active_scene: 0,
         }
     }
 }
-
-// #[allow(unused)]
-// type SharedContext = Arc<Mutex<UserContext>>;
-
-// #[allow(unused)]
-// pub static USER_CONTEXT: LazyLock<SharedContext> = LazyLock::new(|| {
-//     let ctx = UserContext::new();
-//     Arc::new(Mutex::new(ctx))
-// });

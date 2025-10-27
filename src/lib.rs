@@ -19,3 +19,4 @@ pub mod material;
 pub mod skinned_model;
 pub mod index_types;
 pub mod skeletal_context;
+pub mod skeletal_animate;

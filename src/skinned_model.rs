@@ -7,7 +7,7 @@ pub struct SkinnedModel {
     pub meshes: SkinnedMeshes<SkinnedTexturedMesh>,
     pub materials: Materials<Material>,
     pub name: String,
-    pub num_bones: usize,
+    //pub num_bones: usize,
 }
 
 impl SkinnedModel {
@@ -16,7 +16,7 @@ impl SkinnedModel {
             meshes: SkinnedMeshes::new(),
             materials: Materials::new(),
             name: "".to_owned(),
-            num_bones: 0,
+            //num_bones: 0,
         }
     }
 }

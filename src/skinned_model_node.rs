@@ -3,7 +3,7 @@ use crate::skinned_model::*;
 use wgpu::{util::*, BindGroupLayout};
 
 pub struct SkinnedModelNode {
-    pub model_idx: usize,
+    pub skinned_model_idx: usize,
     pub instances: Vec<Instance>,
     pub visible: Vec<bool>,
 
@@ -15,7 +15,7 @@ pub struct SkinnedModelNode {
 }
 
 impl SkinnedModelNode {
-    pub fn new(device: &mut wgpu::Device, bone_matrices_bind_group_layout: &BindGroupLayout ,model_idx: usize, instances: Vec<Instance>, num_bones: usize) -> Self {
+    pub fn new(device: &mut wgpu::Device, bone_matrices_bind_group_layout: &BindGroupLayout, skinned_model_idx: usize, instances: Vec<Instance>, num_bones: usize) -> Self {
         let len = instances.len();
         let bone_matrices = vec![AnimationMatrix { m: [[0.0; 4];4] }; len * num_bones];
             let storage_buffer =
@@ -37,7 +37,7 @@ impl SkinnedModelNode {
                 
 
         Self {
-            model_idx,
+           skinned_model_idx,
             instances,
             visible: vec![true; len],
             bone_matrices,

@@ -37,7 +37,7 @@ impl SkeletalContext {
     }
 }
 
-pub async fn load_archive(
+async fn load_archive(
     path: &str,
 ) -> Result<ozz_animation_rs::Archive<Cursor<Vec<u8>>>, ozz_animation_rs::OzzError> {
     use std::fs::File;

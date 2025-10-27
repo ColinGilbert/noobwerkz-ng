@@ -103,7 +103,7 @@ impl Pass for ForwardRenderer {
             for m in skinned_model_nodes.iter() {
                 let mut count = 0;
                 let mut instance_data = Vec::<SkinnedInstanceRaw>::new();
-                let model = &skinned_models[m.model_idx];
+                let model = &skinned_models[m.skinned_model_idx];
                 //let anim_matrices = &m.bone_matrices;
 
                 for (i, visible) in m.visible.iter().enumerate() {
