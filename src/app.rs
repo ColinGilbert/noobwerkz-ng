@@ -1,6 +1,5 @@
 use crate::state::State;
 
-use instant::*;
 use std::sync::Arc;
 use winit::{
     application::ApplicationHandler,
@@ -14,7 +13,7 @@ pub struct App {
     #[cfg(target_arch = "wasm32")]
     proxy: Option<winit::event_loop::EventLoopProxy<State>>,
     state: Option<State>,
-    last_time: Instant,
+    last_time: web_time::Instant,
 }
 
 impl App {
@@ -25,7 +24,7 @@ impl App {
             state: None,
             #[cfg(target_arch = "wasm32")]
             proxy,
-            last_time: Instant::now(),
+            last_time: web_time::Instant::now(),
         }
     }
 }
@@ -123,7 +122,7 @@ impl ApplicationHandler<State> for App {
             WindowEvent::Resized(size) => state.resize(size.width, size.height),
             WindowEvent::RedrawRequested => {
                 let dt = self.last_time.elapsed();
-                self.last_time = Instant::now();
+                self.last_time = web_time::Instant::now();
                 state.update(dt);
                 match state.render() {
                     Ok(_) => {}

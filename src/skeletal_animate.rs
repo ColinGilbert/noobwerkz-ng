@@ -2,9 +2,9 @@ use crate::graphics_context::*;
 use crate::instance::Instance;
 use crate::skinned_model_node::*;
 use crate::user_context::*;
-use std::sync::{Arc, RwLock};
-use ozz_animation_rs::OzzBuf;
 use glam::Vec4Swizzles;
+use ozz_animation_rs::OzzBuf;
+use std::sync::{Arc, RwLock};
 
 pub fn make_skinned_model_nodes(
     gfx_ctx: &mut GraphicsContext,
@@ -28,10 +28,16 @@ pub fn make_skinned_model_nodes(
     s.skinned_model_nodes.push(node);
 }
 
-
-pub fn update_skinned_model_node(gfx_ctx: &mut GraphicsContext, user_ctx: &mut UserContext, skeletal_context_idx: usize, scene_idx: usize, skinned_model_node_idx: usize, dt: &instant::Duration) {
+pub fn update_skinned_model_node(
+    gfx_ctx: &mut GraphicsContext,
+    user_ctx: &mut UserContext,
+    //skeletal_context_idx: usize,
+    scene_idx: usize,
+    skinned_model_node_idx: usize,
+    dt: &web_time::Duration,
+) {
     let s = &mut user_ctx.scenes[scene_idx];
-    let skeletal_ctx = &mut user_ctx.skeletals[skeletal_context_idx];
+    //let skeletal_ctx = &mut user_ctx.skeletals[skeletal_context_idx];
     let skinned_model_node = &mut s.skinned_model_nodes[skinned_model_node_idx];
 }
 
@@ -46,7 +52,7 @@ pub trait OzzTrait
 where
     Self: Send + Sync,
 {
-    fn update(&mut self, time: instant::Duration);
+    fn update(&mut self, time: web_time::Duration);
     fn root(&self) -> glam::Mat4;
     fn bone_trans(&self) -> &[OzzTransform];
     fn spine_trans(&self) -> &[OzzTransform];
@@ -62,20 +68,31 @@ pub struct OzzPlayback {
 }
 
 impl OzzPlayback {
-    pub async fn new(skeleton: &Arc<ozz_animation_rs::Skeleton>, animation: &Arc<ozz_animation_rs::Animation>) -> Box<dyn OzzTrait> {
-
+    pub async fn new(
+        skeleton: &Arc<ozz_animation_rs::Skeleton>,
+        animation: &Arc<ozz_animation_rs::Animation>,
+    ) -> Self {
         let mut o = OzzPlayback {
             skeleton: skeleton.clone(),
             sample_job: ozz_animation_rs::SamplingJob::default(),
             l2m_job: ozz_animation_rs::LocalToModelJob::default(),
-            models: Arc::new(RwLock::new(vec![glam::Mat4::default(); skeleton.num_joints()])),
+            models: Arc::new(RwLock::new(vec![
+                glam::Mat4::default();
+                skeleton.num_joints()
+            ])),
             bone_trans: Vec::new(),
             spine_trans: Vec::new(),
         };
 
         o.sample_job.set_animation(animation.clone());
-        o.sample_job.set_context(ozz_animation_rs::SamplingContext::new(animation.num_tracks()));
-        let sample_out = Arc::new(RwLock::new(vec![ozz_animation_rs::SoaTransform::default(); skeleton.num_soa_joints()]));
+        o.sample_job
+            .set_context(ozz_animation_rs::SamplingContext::new(
+                animation.num_tracks(),
+            ));
+        let sample_out = Arc::new(RwLock::new(vec![
+            ozz_animation_rs::SoaTransform::default();
+            skeleton.num_soa_joints()
+        ]));
         o.sample_job.set_output(sample_out.clone());
 
         o.l2m_job.set_skeleton(skeleton.clone());
@@ -98,7 +115,7 @@ impl OzzPlayback {
 
         o.bone_trans.reserve(bone_count);
         o.spine_trans.reserve(spine_count);
-        Box::new(o)
+        o
     }
 }
 
@@ -115,7 +132,7 @@ impl OzzTrait for OzzPlayback {
         &self.spine_trans
     }
 
-    fn update(&mut self, time: instant::Duration) {
+    fn update(&mut self, time: web_time::Duration) {
         let duration = self.sample_job.animation().unwrap().duration();
         let ratio = (time.as_secs() as f32 % duration) / duration;
         self.sample_job.set_ratio(ratio);
@@ -148,7 +165,8 @@ impl OzzTrait for OzzPlayback {
 
             let bone_rot_y = glam::Vec3::cross(binormal, bone_dir).normalize();
             let bone_rot_z = glam::Vec3::cross(bone_dir, bone_rot_y).normalize();
-            let bone_rot = glam::Quat::from_mat3(&glam::Mat3::from_cols(bone_dir, bone_rot_y, bone_rot_z));
+            let bone_rot =
+                glam::Quat::from_mat3(&glam::Mat3::from_cols(bone_dir, bone_rot_y, bone_rot_z));
 
             self.bone_trans.push(OzzTransform {
                 scale,

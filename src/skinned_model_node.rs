@@ -1,4 +1,4 @@
-use crate::instance::Instance;
+use crate::{instance::Instance, skeletal_animate::OzzPlayback};
 use crate::skinned_model::*;
 use wgpu::{BindGroupLayout, util::*};
 
@@ -10,6 +10,7 @@ pub struct SkinnedModelNode {
     pub num_bones: usize,
     pub storage_buffer: wgpu::Buffer,
     pub bind_group: wgpu::BindGroup,
+    //pub playbacks: Vec<OzzPlayback>,
 }
 
 impl SkinnedModelNode {
