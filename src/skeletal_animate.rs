@@ -1,12 +1,10 @@
 use crate::graphics_context::*;
 use crate::instance::Instance;
-//use crate::scene::*;
-//use crate::skeletal_context::*;
-//use crate::skinned_model::*;
 use crate::skinned_model_node::*;
 use crate::user_context::*;
-//use ozz_animation_rs::*;
-//use std::sync::{Arc, RwLock};
+use std::sync::{Arc, RwLock};
+use ozz_animation_rs::OzzBuf;
+use glam::Vec4Swizzles;
 
 pub fn make_skinned_model_nodes(
     gfx_ctx: &mut GraphicsContext,
@@ -20,36 +18,159 @@ pub fn make_skinned_model_nodes(
     //let model = &user_ctx.skinned_models[skinned_model_idx];
     let skeletal = &user_ctx.skeletals[skeletal_context_idx];
     let num_bones = skeletal.skeleton.num_joints();
-    let node = SkinnedModelNode::new(&mut gfx_ctx.device, &gfx_ctx.bone_matrices_bind_group_layout, skinned_model_idx, instances, num_bones);
+    let node = SkinnedModelNode::new(
+        &mut gfx_ctx.device,
+        &gfx_ctx.bone_matrices_bind_group_layout,
+        skinned_model_idx,
+        instances,
+        num_bones,
+    );
     s.skinned_model_nodes.push(node);
 }
 
-// pub async fn load_skeletal_model(
-//     filepath: &str,
-//     model_filename: &str,
-//     skeleton_filename: &str,
-//     animation_filenames: &Vec<String>,
-//     default_material: Material,
-//     device: &mut wgpu::Device,
-//     queue: &mut wgpu::Queue,
-//     texture_layout: &wgpu::BindGroupLayout,
-//     bone_matrices_bind_group_layout: &wgpu::BindGroupLayout,
 
-// ) {
-//     let model = load_model_from_serialized(
-//         filepath.to_string(),
-//         model_filename.to_string(),
-//         default_material,
-//         device,
-//         queue,
-//         texture_layout,
-//     )
-//     .await
-//     .unwrap();
-//     match model {
-//         GenericModel::Textured(_value) => (),
-//         GenericModel::SkinnedTextured(value) => {
+pub fn update_skinned_model_node(gfx_ctx: &mut GraphicsContext, user_ctx: &mut UserContext, skeletal_context_idx: usize, scene_idx: usize, skinned_model_node_idx: usize, dt: &instant::Duration) {
+    let s = &mut user_ctx.scenes[scene_idx];
+    let skeletal_ctx = &mut user_ctx.skeletals[skeletal_context_idx];
+    let skinned_model_node = &mut s.skinned_model_nodes[skinned_model_node_idx];
+}
 
-//         }
-//     }
-// }
+#[derive(Debug, Clone, Copy)]
+pub struct OzzTransform {
+    pub scale: f32,
+    pub rotation: glam::Quat,
+    pub position: glam::Vec3,
+}
+
+pub trait OzzTrait
+where
+    Self: Send + Sync,
+{
+    fn update(&mut self, time: instant::Duration);
+    fn root(&self) -> glam::Mat4;
+    fn bone_trans(&self) -> &[OzzTransform];
+    fn spine_trans(&self) -> &[OzzTransform];
+}
+
+pub struct OzzPlayback {
+    skeleton: Arc<ozz_animation_rs::Skeleton>,
+    sample_job: ozz_animation_rs::SamplingJobArc,
+    l2m_job: ozz_animation_rs::LocalToModelJobArc,
+    models: Arc<RwLock<Vec<glam::Mat4>>>,
+    bone_trans: Vec<OzzTransform>,
+    spine_trans: Vec<OzzTransform>,
+}
+
+impl OzzPlayback {
+    pub async fn new(skeleton: &Arc<ozz_animation_rs::Skeleton>, animation: &Arc<ozz_animation_rs::Animation>) -> Box<dyn OzzTrait> {
+
+        let mut o = OzzPlayback {
+            skeleton: skeleton.clone(),
+            sample_job: ozz_animation_rs::SamplingJob::default(),
+            l2m_job: ozz_animation_rs::LocalToModelJob::default(),
+            models: Arc::new(RwLock::new(vec![glam::Mat4::default(); skeleton.num_joints()])),
+            bone_trans: Vec::new(),
+            spine_trans: Vec::new(),
+        };
+
+        o.sample_job.set_animation(animation.clone());
+        o.sample_job.set_context(ozz_animation_rs::SamplingContext::new(animation.num_tracks()));
+        let sample_out = Arc::new(RwLock::new(vec![ozz_animation_rs::SoaTransform::default(); skeleton.num_soa_joints()]));
+        o.sample_job.set_output(sample_out.clone());
+
+        o.l2m_job.set_skeleton(skeleton.clone());
+        o.l2m_job.set_input(sample_out.clone());
+        o.l2m_job.set_output(o.models.clone());
+
+        let mut bone_count = 0;
+        let mut spine_count = 0;
+        for i in 0..skeleton.num_joints() {
+            let parent_id = skeleton.joint_parent(i);
+            if parent_id as i32 == ozz_animation_rs::SKELETON_NO_PARENT {
+                continue;
+            }
+            bone_count += 1;
+            spine_count += 1;
+            if skeleton.is_leaf(i as i16) {
+                spine_count += 1;
+            }
+        }
+
+        o.bone_trans.reserve(bone_count);
+        o.spine_trans.reserve(spine_count);
+        Box::new(o)
+    }
+}
+
+impl OzzTrait for OzzPlayback {
+    fn root(&self) -> glam::Mat4 {
+        self.models.buf().unwrap()[0]
+    }
+
+    fn bone_trans(&self) -> &[OzzTransform] {
+        &self.bone_trans
+    }
+
+    fn spine_trans(&self) -> &[OzzTransform] {
+        &self.spine_trans
+    }
+
+    fn update(&mut self, time: instant::Duration) {
+        let duration = self.sample_job.animation().unwrap().duration();
+        let ratio = (time.as_secs() as f32 % duration) / duration;
+        self.sample_job.set_ratio(ratio);
+        self.sample_job.run().unwrap();
+        self.l2m_job.run().unwrap();
+
+        self.bone_trans.clear();
+        self.spine_trans.clear();
+
+        let modals = self.models.buf().unwrap();
+        for (i, current) in modals.iter().enumerate() {
+            let parent_id = self.skeleton.joint_parent(i);
+            if parent_id as i32 == ozz_animation_rs::SKELETON_NO_PARENT {
+                continue;
+            }
+            let parent = &modals[parent_id as usize];
+
+            let current_pos = current.w_axis.xyz();
+            let parent_pos = parent.w_axis.xyz();
+            let scale: f32 = (current_pos - parent_pos).length();
+
+            let bone_dir = (current_pos - parent_pos).normalize();
+            let dot1 = glam::Vec3::dot(bone_dir, parent.x_axis.xyz());
+            let dot2 = glam::Vec3::dot(bone_dir, parent.z_axis.xyz());
+            let binormal = if dot1.abs() < dot2.abs() {
+                parent.x_axis.xyz()
+            } else {
+                parent.z_axis.xyz()
+            };
+
+            let bone_rot_y = glam::Vec3::cross(binormal, bone_dir).normalize();
+            let bone_rot_z = glam::Vec3::cross(bone_dir, bone_rot_y).normalize();
+            let bone_rot = glam::Quat::from_mat3(&glam::Mat3::from_cols(bone_dir, bone_rot_y, bone_rot_z));
+
+            self.bone_trans.push(OzzTransform {
+                scale,
+                rotation: bone_rot,
+                position: parent_pos,
+            });
+
+            let parent_rot = glam::Quat::from_mat4(parent);
+            self.spine_trans.push(OzzTransform {
+                scale,
+                rotation: parent_rot,
+                position: parent_pos,
+            });
+
+            if self.skeleton.is_leaf(i as i16) {
+                let current_rot = glam::Quat::from_mat4(current);
+                self.spine_trans.push(OzzTransform {
+                    scale,
+                    rotation: current_rot,
+                    position: current_pos,
+                });
+            }
+        }
+    }
+}

@@ -17,6 +17,7 @@ impl UserContext {
         let skinned_models = Vec::new();
         let skeletals = Vec::new();
         let scenes = Vec::<Scene>::new();
+        
         Self {
             models,
             skinned_models,

@@ -26,6 +26,7 @@ impl SkeletalContext {
             Arc::new(ozz_animation_rs::Skeleton::from_archive(&mut ar_skeleton).unwrap());
         
         let mut animations = Vec::new();
+        
         for mut a in ar_animations {
             animations.push(Arc::new(ozz_animation_rs::Animation::from_archive(&mut a).unwrap()));
         }
