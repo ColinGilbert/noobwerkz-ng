@@ -1,45 +1,6 @@
-use crate::graphics_context::*;
-use crate::instance::Instance;
-use crate::skinned_model_node::*;
-use crate::user_context::*;
 use glam::Vec4Swizzles;
 use ozz_animation_rs::OzzBuf;
 use std::sync::{Arc, RwLock};
-
-pub fn make_skinned_model_nodes(
-    gfx_ctx: &mut GraphicsContext,
-    user_ctx: &mut UserContext,
-    skeletal_context_idx: usize,
-    skinned_model_idx: usize,
-    scene_idx: usize,
-    instances: Vec<Instance>,
-) {
-    let s = &mut user_ctx.scenes[scene_idx];
-    //let model = &user_ctx.skinned_models[skinned_model_idx];
-    let skeletal = &user_ctx.skeletals[skeletal_context_idx];
-    let num_bones = skeletal.skeleton.num_joints();
-    let node = SkinnedModelNode::new(
-        &mut gfx_ctx.device,
-        &gfx_ctx.bone_matrices_bind_group_layout,
-        skinned_model_idx,
-        instances,
-        num_bones,
-    );
-    s.skinned_model_nodes.push(node);
-}
-
-pub fn update_skinned_model_node(
-    gfx_ctx: &mut GraphicsContext,
-    user_ctx: &mut UserContext,
-    //skeletal_context_idx: usize,
-    scene_idx: usize,
-    skinned_model_node_idx: usize,
-    dt: &web_time::Duration,
-) {
-    let s = &mut user_ctx.scenes[scene_idx];
-    //let skeletal_ctx = &mut user_ctx.skeletals[skeletal_context_idx];
-    let skinned_model_node = &mut s.skinned_model_nodes[skinned_model_node_idx];
-}
 
 #[derive(Debug, Clone, Copy)]
 pub struct OzzTransform {
@@ -59,6 +20,7 @@ where
 }
 
 pub struct OzzPlayback {
+    seek: f32,
     skeleton: Arc<ozz_animation_rs::Skeleton>,
     sample_job: ozz_animation_rs::SamplingJobArc,
     l2m_job: ozz_animation_rs::LocalToModelJobArc,
@@ -73,6 +35,7 @@ impl OzzPlayback {
         animation: &Arc<ozz_animation_rs::Animation>,
     ) -> Self {
         let mut o = OzzPlayback {
+            seek: 0.0,
             skeleton: skeleton.clone(),
             sample_job: ozz_animation_rs::SamplingJob::default(),
             l2m_job: ozz_animation_rs::LocalToModelJob::default(),
@@ -94,7 +57,6 @@ impl OzzPlayback {
             skeleton.num_soa_joints()
         ]));
         o.sample_job.set_output(sample_out.clone());
-
         o.l2m_job.set_skeleton(skeleton.clone());
         o.l2m_job.set_input(sample_out.clone());
         o.l2m_job.set_output(o.models.clone());
@@ -134,7 +96,8 @@ impl OzzTrait for OzzPlayback {
 
     fn update(&mut self, time: web_time::Duration) {
         let duration = self.sample_job.animation().unwrap().duration();
-        let ratio = (time.as_secs() as f32 % duration) / duration;
+        self.seek += time.as_secs() as f32 % duration;
+        let ratio = self.seek / duration;
         self.sample_job.set_ratio(ratio);
         self.sample_job.run().unwrap();
         self.l2m_job.run().unwrap();
