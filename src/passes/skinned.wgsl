@@ -84,7 +84,7 @@ fn vs_main(
 
     var out: VertexOutput;
     out.clip_position = camera.view_proj * world_position;
-    out.world_normal = world_normal;
+    out.world_normal = model.normal;// world_normal;
     out.tex_coords = model.tex_coords;
     out.cam_view_pos = camera.view_pos.xyz;
     out.light_position = light.position;
@@ -134,7 +134,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let ambient_strength = 0.1;
     let ambient_color = light.color * ambient_strength;
 
-    let world_normal = normalize(TBN * in.world_normal);//object_normal);
+    let world_normal = normalize(TBN * in.world_normal);
     let tangent_position = TBN * in.clip_position.xyz;
     let tangent_view_position = TBN * in.cam_view_pos;
     let tangent_light_position = TBN * in.light_position;
