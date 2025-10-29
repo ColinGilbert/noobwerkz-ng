@@ -74,11 +74,11 @@ fn vs_main(
     //let world_tangent = normalize(normal_matrix * model.tangent);
     //let world_bitangent = normalize(normal_matrix * model.bitangent);
 
-    let tangent_matrix = transpose(mat3x3<f32>(
-        world_tangent,
-        world_bitangent,
-        world_normal,
-    ));
+    // let tangent_matrix = transpose(mat3x3<f32>(
+    //     world_tangent,
+    //     world_bitangent,
+    //     world_normal,
+    // ));
 
     let world_position = model_matrix * vec4<f32>(model.position, 1.0);
 
@@ -130,7 +130,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let tangent = normalize(inverse * p_fx);
     let bitangent = normalize(inverse * p_fy);
     let TBN = mat3x3<f32>(tangent, bitangent, in.world_normal);
-    
+
     // We don't need (or want) much ambient light, so 0.1 is fine
     let ambient_strength = 0.1;
     let ambient_color = light.color * ambient_strength;
