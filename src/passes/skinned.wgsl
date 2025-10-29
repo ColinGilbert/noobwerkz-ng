@@ -70,6 +70,7 @@ fn vs_main(
     let world_normal = normalize(normal_matrix * model.normal);
     let world_tangent = normalize(normal_matrix * model.tangent);
     let world_bitangent = normalize(normal_matrix * model.bitangent);
+
     let tangent_matrix = transpose(mat3x3<f32>(
         world_tangent,
         world_bitangent,
@@ -102,10 +103,13 @@ var s_normal: sampler;
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let object_color: vec4<f32> = textureSample(t_diffuse, s_diffuse, in.tex_coords);
     let object_normal: vec3<f32> = textureSample(t_normal, s_normal, in.tex_coords).xyz;
+
     let p_fx: vec3<f32> = dpdx(in.clip_position.xyz);
     let p_fy: vec3<f32> = dpdy(in.clip_position.xyz);
     let t_fx: vec2<f32> = dpdx(in.tex_coords.xy);
     let t_fy: vec2<f32> = dpdy(in.tex_coords.xy);
+
+    let M = mat3<f32>(vec3<f32>(t_fx.x, t_fx.y, 0.0), vec3<f32>(t_fy.x, t_fy.y, 0.0), vec3<32f>(0.0, 0.0, 1.0));
 
     // We don't need (or want) much ambient light, so 0.1 is fine
     let ambient_strength = 0.1;
