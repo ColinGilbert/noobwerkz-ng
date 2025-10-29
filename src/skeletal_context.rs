@@ -13,14 +13,15 @@ impl SkeletalContext {
         skeleton_filename: String,
         animation_filenames: &Vec<String>,
     ) -> Self {
-        let skeleton_filepath = filepath + &"/".to_owned() + &skeleton_filename;
+        let skeleton_filepath = filepath.clone() + &"/".to_owned() + &skeleton_filename;
         
         let mut ar_skeleton = block_on(load_archive(skeleton_filepath.as_str())).unwrap();
         let mut ar_animations = Vec::new();
         
         for a in animation_filenames {
             println!("Getting animation {}", a );
-            ar_animations.push(block_on(load_archive(a.as_str())).unwrap());
+            let anim_filepath = filepath.clone() + &"/".to_owned() + anim_filepath;
+            ar_animations.push(block_on(load_archive(anim_filepath.as_str())).unwrap());
         }
 
         let skeleton =
