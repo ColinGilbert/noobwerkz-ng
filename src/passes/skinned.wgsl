@@ -128,7 +128,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let inverse = inverse_mat3x3(M);
     let tangent = normalize(inverse * p_fx);
     let bitangent = normalize(inverse * p_fy);
-    let TBN = mat3x3<f32>(tangent, bitangent, in.world_normal);
+    let TBN = transpose(mat3x3<f32>(tangent, bitangent, in.world_normal));
 
     // We don't need (or want) much ambient light, so 0.1 is fine
     let ambient_strength = 0.1;
