@@ -88,6 +88,14 @@ fn vs_main(
     return out;
 }
 
+fn inverse_mat3x3(matrix: mat3x3<f32>) -> mat3x3<f32> {
+    let tmp0 = cross(matrix[1], matrix[2]);
+    let tmp1 = cross(matrix[2], matrix[0]);
+    let tmp2 = cross(matrix[0], matrix[1]);
+    let inv_det = 1.0 / dot(matrix[2], tmp2);
+    return transpose(mat3x3<f32>(tmp0 * inv_det, tmp1 * inv_det, tmp2 * inv_det));
+}
+
 // Fragment shader
 
 @group(0) @binding(0)
@@ -110,9 +118,9 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let t_fy: vec2<f32> = dpdy(in.tex_coords.xy);
 
     let M = mat3x3<f32>(vec3<f32>(t_fx.x, t_fx.y, 0.0), vec3<f32>(t_fy.x, t_fy.y, 0.0), vec3<f32>(0.0, 0.0, 1.0));
-    let inverse = M.inverse;
-    let tangent = (inverse * p_fx).normalize;
-    let bitangent = (inverse * p_fy).normalize;
+    let inverse = inverse_mat3x3(M);
+    let tangent = normalize(inverse * p_fx);
+    let bitangent = normalize(inverse * p_fy);
     // We don't need (or want) much ambient light, so 0.1 is fine
     let ambient_strength = 0.1;
     let ambient_color = light.color * ambient_strength;
