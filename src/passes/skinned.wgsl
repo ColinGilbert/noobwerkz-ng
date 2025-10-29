@@ -113,6 +113,7 @@ var s_normal: sampler;
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let object_color: vec4<f32> = textureSample(t_diffuse, s_diffuse, in.tex_coords);
     let object_normal: vec3<f32> = textureSample(t_normal, s_normal, in.tex_coords).xyz;
+    object_normal = object_normal * 2.0 - 1.0; // Re-normalizing to [-1, 1] range
 
     let p_fx: vec3<f32> = dpdx(in.clip_position.xyz);
     let p_fy: vec3<f32> = dpdy(in.clip_position.xyz);
@@ -129,12 +130,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let ambient_strength = 0.1;
     let ambient_color = light.color * ambient_strength;
 
-    // vec3 normalMapSample = texture2D(_NormalMap, vUV).rgb;
-    // normalMapSample = normalMapSample * 2.0 - 1.0; // Re-normalizing to [-1, 1] range
-    // vec3 worldNormal = normalize(TBN * normalMapSample);
+    
+    let world_normal = normalize(TBN * object_normal);
 
     // Create the lighting vectors
-    //let tangent_normal = object_normal.xyz * 2.0 - 1.0;
+    let tangent_normal = object_normal.xyz * 2.0 - 1.0;
     let light_dir = normalize(in.tangent_light_position - in.tangent_position);
     let view_dir = normalize(in.tangent_view_position - in.tangent_position);
     let half_dir = normalize(view_dir + light_dir);
