@@ -136,7 +136,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     
     let world_normal = normalize(TBN * object_normal);
-    let tangent_position = TBN * in.clip_position.xyz
+    let tangent_position = TBN * in.clip_position.xyz;
     
     let tangent_view_position = TBN * in.cam_view_pos;
     let tangent_light_position = TBN * in.light_position;
