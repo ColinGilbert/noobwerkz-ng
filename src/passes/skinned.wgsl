@@ -110,7 +110,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let t_fy: vec2<f32> = dpdy(in.tex_coords.xy);
 
     let M = mat3x3<f32>(vec3<f32>(t_fx.x, t_fx.y, 0.0), vec3<f32>(t_fy.x, t_fy.y, 0.0), vec3<f32>(0.0, 0.0, 1.0));
-    let inverse = M.inverse();
+    let inverse = M.inverse;
     let tangent = (inverse * p_fx).normalize();
     let bitangent = (inverse * p_fy).normalize();
     // We don't need (or want) much ambient light, so 0.1 is fine
