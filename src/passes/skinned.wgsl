@@ -84,7 +84,7 @@ fn vs_main(
 
     var out: VertexOutput;
     out.clip_position = camera.view_proj * world_position;
-    out.world_normal = model.normal;// world_normal;
+    out.world_normal = world_normal;
     out.tex_coords = model.tex_coords;
     out.cam_view_pos = camera.view_pos.xyz;
     out.light_position = light.position;
@@ -116,7 +116,7 @@ var s_normal: sampler;
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let object_color: vec4<f32> = textureSample(t_diffuse, s_diffuse, in.tex_coords);
-    var object_normal: vec3<f32> = textureSample(t_normal, s_normal, in.tex_coords).xyz;
+    le object_normal: vec3<f32> = textureSample(t_normal, s_normal, in.tex_coords).xyz;
     object_normal = object_normal * 2.0 - 1.0; // Re-normalizing to [-1, 1] range
 
     let p_fx: vec3<f32> = dpdx(in.clip_position.xyz);
@@ -140,7 +140,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let tangent_light_position = TBN * in.light_position;
 
     // Create the lighting vectors
-    //let tangent_normal = object_normal.xyz * 2.0 - 1.0;
+    // let tangent_normal = object_normal.xyz * 2.0 - 1.0;
     let light_dir = normalize(tangent_light_position - tangent_position);
     let view_dir = normalize(tangent_view_position - tangent_position);
     let half_dir = normalize(view_dir + light_dir);
