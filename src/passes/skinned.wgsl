@@ -102,7 +102,8 @@ var s_normal: sampler;
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let object_color: vec4<f32> = textureSample(t_diffuse, s_diffuse, in.tex_coords);
     let object_normal: vec4<f32> = textureSample(t_normal, s_normal, in.tex_coords);
-    
+    let p_fx: f32 = dpdx(in.clip_position);
+    let p_fy: f32 = dpdy(in.clip_position);
     // We don't need (or want) much ambient light, so 0.1 is fine
     let ambient_strength = 0.1;
     let ambient_color = light.color * ambient_strength;
