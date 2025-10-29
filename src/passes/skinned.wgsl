@@ -46,7 +46,7 @@ struct VertexOutput {
     @location(0) world_normal: vec3<f32>, 
     @location(1) tex_coords: vec2<f32>,
     @location(2) cam_view_pos: vec3<f32>,
-    @location(3) light_position: vec3<f32>,
+    @location(3) light_pos: vec3<f32>,
     // @location(2) tangent_position: vec3<f32>,
     //@location(3) tangent_light_position: vec3<f32>,
     //@location(4) tangent_view_position: vec3<f32>,
@@ -87,7 +87,7 @@ fn vs_main(
     out.world_normal = world_normal;
     out.tex_coords = model.tex_coords;
     out.cam_view_pos = camera.view_pos.xyz;
-    out.light_position = light.position;
+    out.light_pos = light.position;
     // out.tangent_position = tangent_matrix * world_position.xyz;
     // out.tangent_view_position = tangent_matrix * camera.view_pos.xyz;
     //out.tangent_light_position = tangent_matrix * light.position;
@@ -137,11 +137,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let world_normal = normalize(TBN * in.world_normal);
     let tangent_position = TBN * in.clip_position.xyz;
     let tangent_view_position = TBN * in.cam_view_pos;
-    let tangent_light_position = TBN * in.light_position;
+    let tangent_light_position = TBN * in.light_pos;
 
     // Create the lighting vectors
     // let tangent_normal = object_normal.xyz * 2.0 - 1.0;
-    let light_dir = normalize(in.light_position); //(tangent_light_position - tangent_position);
+    let light_dir = normalize(tangent_light_position - tangent_position);
     let view_dir = normalize(tangent_view_position - tangent_position);
     let half_dir = normalize(view_dir + light_dir);
 
