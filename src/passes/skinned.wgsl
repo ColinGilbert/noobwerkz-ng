@@ -104,8 +104,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let object_normal: vec4<f32> = textureSample(t_normal, s_normal, in.tex_coords);
     let p_fx: vec3<f32> = dpdx(in.clip_position.xyz);
     let p_fy: vec3<f32> = dpdy(in.clip_position.xyz);
-    let t_fx = vec2<f32> = dpdx(in.tex_coords.xy);
-    let t_fy = vec2<f32> = dpdy(in.tex_coords.xy);
+    let t_fx: vec2<f32> = dpdx(in.tex_coords.xy);
+    let t_fy: vec2<f32> = dpdy(in.tex_coords.xy);
     // We don't need (or want) much ambient light, so 0.1 is fine
     let ambient_strength = 0.1;
     let ambient_color = light.color * ambient_strength;
