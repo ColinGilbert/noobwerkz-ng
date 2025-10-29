@@ -20,7 +20,7 @@ impl SkeletalContext {
         
         for a in animation_filenames {
             let anim_filepath = filepath.clone() + &"/".to_owned() + a;
-            println!("Getting animation {}", anim_filepath);
+            //println!("Getting animation {}", anim_filepath);
             ar_animations.push(block_on(load_archive(anim_filepath.as_str())).unwrap());
         }
 
