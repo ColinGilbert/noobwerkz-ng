@@ -1,4 +1,5 @@
 // Vertex shader
+
 struct Camera {
     view_pos: vec4<f32>,
     view_proj: mat4x4<f32>,
@@ -13,43 +14,29 @@ struct Light {
 @group(2) @binding(0)
 var<uniform> light: Light;
 
-struct AnimationMatrixData {
-    values: array<mat4x4<f32>>,
-};
-
-@group(3) @binding(0)
-var<storage, read> animation_matrices: AnimationMatrixData;
-
-
 struct VertexInput {
-    @builtin(instance_index) instance_index: u32,
     @location(0) position: vec3<f32>,
     @location(1) tex_coords: vec2<f32>,
     @location(2) normal: vec3<f32>,
     @location(3) tangent: vec3<f32>,
     @location(4) bitangent: vec3<f32>,
-    @location(5) bone_indices: vec4<u32>,
-    @location(6) bone_weights: vec4<f32>,
 }
 struct InstanceInput {
-    @location(7) model_matrix_0: vec4<f32>,
-    @location(8) model_matrix_1: vec4<f32>,
-    @location(9) model_matrix_2: vec4<f32>,
-    @location(10) model_matrix_3: vec4<f32>,
-    @location(11) normal_matrix_0: vec3<f32>,
-    @location(12) normal_matrix_1: vec3<f32>,
-    @location(13) normal_matrix_2: vec3<f32>,
+    @location(5) model_matrix_0: vec4<f32>,
+    @location(6) model_matrix_1: vec4<f32>,
+    @location(7) model_matrix_2: vec4<f32>,
+    @location(8) model_matrix_3: vec4<f32>,
+    @location(9) normal_matrix_0: vec3<f32>,
+    @location(10) normal_matrix_1: vec3<f32>,
+    @location(11) normal_matrix_2: vec3<f32>,
 }
 
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
-    @location(0) world_normal: vec3<f32>, 
-    @location(1) tex_coords: vec2<f32>,
-    @location(2) cam_view_pos: vec3<f32>,
-    @location(3) light_pos: vec3<f32>,
-    // @location(2) tangent_position: vec3<f32>,
-    //@location(3) tangent_light_position: vec3<f32>,
-    //@location(4) tangent_view_position: vec3<f32>,
+    @location(0) tex_coords: vec2<f32>,
+    @location(1) tangent_position: vec3<f32>,
+    @location(2) tangent_light_position: vec3<f32>,
+    @location(3) tangent_view_position: vec3<f32>,
 }
 
 @vertex
@@ -71,35 +58,23 @@ fn vs_main(
 
     // Construct the tangent matrix
     let world_normal = normalize(normal_matrix * model.normal);
-    //let world_tangent = normalize(normal_matrix * model.tangent);
-    //let world_bitangent = normalize(normal_matrix * model.bitangent);
-
-    // let tangent_matrix = transpose(mat3x3<f32>(
-    //     world_tangent,
-    //     world_bitangent,
-    //     world_normal,
-    // ));
+    let world_tangent = normalize(normal_matrix * model.tangent);
+    let world_bitangent = normalize(normal_matrix * model.bitangent);
+    let tangent_matrix = transpose(mat3x3<f32>(
+        world_tangent,
+        world_bitangent,
+        world_normal,
+    ));
 
     let world_position = model_matrix * vec4<f32>(model.position, 1.0);
 
     var out: VertexOutput;
     out.clip_position = camera.view_proj * world_position;
-    out.world_normal = world_normal;
     out.tex_coords = model.tex_coords;
-    out.cam_view_pos = camera.view_pos.xyz;
-    out.light_pos = light.position;
-    // out.tangent_position = tangent_matrix * world_position.xyz;
-    // out.tangent_view_position = tangent_matrix * camera.view_pos.xyz;
-    //out.tangent_light_position = tangent_matrix * light.position;
+    out.tangent_position = tangent_matrix * world_position.xyz;
+    out.tangent_view_position = tangent_matrix * camera.view_pos.xyz;
+    out.tangent_light_position = tangent_matrix * light.position;
     return out;
-}
-
-fn inverse_mat3x3(matrix: mat3x3<f32>) -> mat3x3<f32> {
-    let tmp0 = cross(matrix[1], matrix[2]);
-    let tmp1 = cross(matrix[2], matrix[0]);
-    let tmp2 = cross(matrix[0], matrix[1]);
-    let inv_det = 1.0 / dot(matrix[2], tmp2);
-    return transpose(mat3x3<f32>(tmp0 * inv_det, tmp1 * inv_det, tmp2 * inv_det));
 }
 
 // Fragment shader
@@ -116,39 +91,22 @@ var s_normal: sampler;
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let object_color: vec4<f32> = textureSample(t_diffuse, s_diffuse, in.tex_coords);
-    var object_normal: vec3<f32> = textureSample(t_normal, s_normal, in.tex_coords).xyz;
-    object_normal = object_normal * 2.0 - 1.0; // Re-normalizing to [-1, 1] range
-
-    let p_fx: vec3<f32> = dpdx(in.clip_position.xyz);
-    let p_fy: vec3<f32> = dpdy(in.clip_position.xyz);
-    let t_fx: vec2<f32> = dpdx(in.tex_coords.xy);
-    let t_fy: vec2<f32> = dpdy(in.tex_coords.xy);
-
-    let M = mat3x3<f32>(vec3<f32>(t_fx.x, t_fx.y, 0.0), vec3<f32>(t_fy.x, t_fy.y, 0.0), vec3<f32>(0.0, 0.0, 1.0));
-    let inverse = inverse_mat3x3(M);
-    let tangent = normalize(inverse * p_fx);
-    let bitangent = normalize(inverse * p_fy);
-    let TBN = transpose(mat3x3<f32>(tangent, bitangent, in.world_normal));
-
+    let object_normal: vec4<f32> = textureSample(t_normal, s_normal, in.tex_coords);
+    
     // We don't need (or want) much ambient light, so 0.1 is fine
     let ambient_strength = 0.1;
     let ambient_color = light.color * ambient_strength;
 
-    let world_normal = normalize(TBN * object_normal);
-    let tangent_position = TBN * in.clip_position.xyz;
-    let tangent_view_position = TBN * in.cam_view_pos;
-    let tangent_light_position = TBN * in.light_pos;
-
     // Create the lighting vectors
-    // let tangent_normal = object_normal.xyz * 2.0 - 1.0;
-    let light_dir = normalize(tangent_light_position - tangent_position);
-    let view_dir = normalize(tangent_view_position - tangent_position);
+    let tangent_normal = object_normal.xyz * 2.0 - 1.0;
+    let light_dir = normalize(in.tangent_light_position - in.tangent_position);
+    let view_dir = normalize(in.tangent_view_position - in.tangent_position);
     let half_dir = normalize(view_dir + light_dir);
 
-    let diffuse_strength = max(dot(world_normal, light_dir), 0.0);
+    let diffuse_strength = max(dot(tangent_normal, light_dir), 0.0);
     let diffuse_color = light.color * diffuse_strength;
 
-    let specular_strength = pow(max(dot(world_normal, half_dir), 0.0), 32.0);
+    let specular_strength = pow(max(dot(tangent_normal, half_dir), 0.0), 32.0);
     let specular_color = specular_strength * light.color;
 
     let result = (ambient_color + diffuse_color + specular_color) * object_color.xyz;
