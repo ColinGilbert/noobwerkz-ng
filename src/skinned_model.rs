@@ -274,5 +274,5 @@ where
 #[repr(C)]
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct AnimationMatrix {
-    pub data: [f32; 16],
+    pub data: [[f32; 4]; 4],
 }

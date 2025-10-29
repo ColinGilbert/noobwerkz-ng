@@ -38,7 +38,7 @@ impl SkinnedModelNode {
             p.update(web_time::Duration::from_secs(0));
             let bone_transforms = p.bone_trans();
             for b in bone_transforms {
-                bone_matrices.push(AnimationMatrix { data: (glam::Mat4::IDENTITY * glam::Mat4::from_scale(glam::Vec3 {x: b.scale, y: b.scale, z: b.scale}) * glam::Mat4::from_quat(b.rotation) * glam::Mat4::from_translation(b.position)).to_cols_array()});
+                bone_matrices.push(AnimationMatrix { data: (glam::Mat4::IDENTITY * glam::Mat4::from_scale(glam::Vec3 {x: b.scale, y: b.scale, z: b.scale}) * glam::Mat4::from_quat(b.rotation) * glam::Mat4::from_translation(b.position)).to_cols_array_2d()});
             }
         }
 
@@ -81,7 +81,7 @@ impl SkinnedModelNode {
             p.update(dt);
             let bone_transforms = p.bone_trans();
             for b in bone_transforms {
-                self.bone_matrices.push(AnimationMatrix { data: (glam::Mat4::IDENTITY * glam::Mat4::from_scale(glam::Vec3 {x: b.scale, y: b.scale, z: b.scale}) * glam::Mat4::from_quat(b.rotation) * glam::Mat4::from_translation(b.position)).to_cols_array()});
+                self.bone_matrices.push(AnimationMatrix { data: (glam::Mat4::IDENTITY * glam::Mat4::from_scale(glam::Vec3 {x: b.scale, y: b.scale, z: b.scale}) * glam::Mat4::from_quat(b.rotation) * glam::Mat4::from_translation(b.position)).to_cols_array_2d()});
             }
         }
         self.storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
