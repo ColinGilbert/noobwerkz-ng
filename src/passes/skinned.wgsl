@@ -117,7 +117,7 @@ var s_normal: sampler;
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let object_color: vec4<f32> = textureSample(t_diffuse, s_diffuse, in.tex_coords);
     var object_normal: vec3<f32> = textureSample(t_normal, s_normal, in.tex_coords).xyz;
-    object_normal = object_normal * 2.0 - 1.0; // Re-normalizing to [-1, 1] range
+   // object_normal = object_normal * 2.0 - 1.0; // Re-normalizing to [-1, 1] range
 
     let p_fx: vec3<f32> = dpdx(in.clip_position.xyz);
     let p_fy: vec3<f32> = dpdy(in.clip_position.xyz);
@@ -138,7 +138,6 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     
     let world_normal = normalize(TBN * object_normal);
     let tangent_position = TBN * in.clip_position.xyz;
-    
     let tangent_view_position = TBN * in.cam_view_pos;
     let tangent_light_position = TBN * in.light_position;
 
