@@ -43,11 +43,11 @@ struct InstanceInput {
 
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
-    @builtin(normal) clip_normal: vec3<f32>, 
-    @location(0) tex_coords: vec2<f32>,
-    @location(1) tangent_position: vec3<f32>,
-    @location(2) tangent_light_position: vec3<f32>,
-    @location(3) tangent_view_position: vec3<f32>,
+    @location(0) world_normal: vec3<f32>, 
+    @location(1) tex_coords: vec2<f32>,
+    @location(2) tangent_position: vec3<f32>,
+    @location(3) tangent_light_position: vec3<f32>,
+    @location(4) tangent_view_position: vec3<f32>,
 }
 
 @vertex
@@ -82,6 +82,7 @@ fn vs_main(
 
     var out: VertexOutput;
     out.clip_position = camera.view_proj * world_position;
+    out.world_normal = world_normal;
     out.tex_coords = model.tex_coords;
     out.tangent_position = tangent_matrix * world_position.xyz;
     out.tangent_view_position = tangent_matrix * camera.view_pos.xyz;
@@ -123,7 +124,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     let tangent = normalize(inverse * p_fx);
     let bitangent = normalize(inverse * p_fy);
-    let TBN = mat3x3<f32>(tangent, bitangent, );
+    let TBN = mat3x3<f32>(tangent, bitangent, in.world_normal);
     // We don't need (or want) much ambient light, so 0.1 is fine
     let ambient_strength = 0.1;
     let ambient_color = light.color * ambient_strength;
