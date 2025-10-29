@@ -45,9 +45,11 @@ struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
     @location(0) world_normal: vec3<f32>, 
     @location(1) tex_coords: vec2<f32>,
-    @location(2) tangent_position: vec3<f32>,
-    @location(3) tangent_light_position: vec3<f32>,
-    @location(4) tangent_view_position: vec3<f32>,
+    @location(2) cam_view_pos: vec3<f32>,
+    @location(3) light_position: vec3<f32>,
+    // @location(2) tangent_position: vec3<f32>,
+    //@location(3) tangent_light_position: vec3<f32>,
+    //@location(4) tangent_view_position: vec3<f32>,
 }
 
 @vertex
@@ -69,8 +71,8 @@ fn vs_main(
 
     // Construct the tangent matrix
     let world_normal = normalize(normal_matrix * model.normal);
-    let world_tangent = normalize(normal_matrix * model.tangent);
-    let world_bitangent = normalize(normal_matrix * model.bitangent);
+    //let world_tangent = normalize(normal_matrix * model.tangent);
+    //let world_bitangent = normalize(normal_matrix * model.bitangent);
 
     let tangent_matrix = transpose(mat3x3<f32>(
         world_tangent,
@@ -84,9 +86,11 @@ fn vs_main(
     out.clip_position = camera.view_proj * world_position;
     out.world_normal = world_normal;
     out.tex_coords = model.tex_coords;
-    out.tangent_position = tangent_matrix * world_position.xyz;
-    out.tangent_view_position = tangent_matrix * camera.view_pos.xyz;
-    out.tangent_light_position = tangent_matrix * light.position;
+    out.cam_view_pos = camera.view_pos.xyz;
+    out.light_position = light.position;
+    // out.tangent_position = tangent_matrix * world_position.xyz;
+    // out.tangent_view_position = tangent_matrix * camera.view_pos.xyz;
+    //out.tangent_light_position = tangent_matrix * light.position;
     return out;
 }
 
@@ -132,11 +136,15 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     
     let world_normal = normalize(TBN * object_normal);
+    let tangent_position = TBN * in.clip_position.xyz
+    
+    let tangent_view_position = TBN * in.cam_view_pos;
+    let tangent_light_position = TBN * in.light_position;
 
     // Create the lighting vectors
     //let tangent_normal = object_normal.xyz * 2.0 - 1.0;
-    let light_dir = normalize(in.tangent_light_position - in.tangent_position);
-    let view_dir = normalize(in.tangent_view_position - in.tangent_position);
+    let light_dir = normalize(tangent_light_position - tangent_position);
+    let view_dir = normalize(tangent_view_position - tangent_position);
     let half_dir = normalize(view_dir + light_dir);
 
     let diffuse_strength = max(dot(world_normal, light_dir), 0.0);
