@@ -141,7 +141,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     // Create the lighting vectors
     // let tangent_normal = object_normal.xyz * 2.0 - 1.0;
-    let light_dir = normalize(tangent_light_position - tangent_position);
+    let light_dir = normalize(in.light_position); //(tangent_light_position - tangent_position);
     let view_dir = normalize(tangent_view_position - tangent_position);
     let half_dir = normalize(view_dir + light_dir);
 
