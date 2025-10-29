@@ -38,10 +38,10 @@ impl SkinnedModelNode {
             p.update(web_time::Duration::from_secs(0));
             let bone_transforms = p.bone_trans();
             for b in bone_transforms {
-                bone_matrices.push(AnimationMatrix { data: (glam::Mat4::IDENTITY * glam::Mat4::from_scale(glam::Vec3 {x: b.scale, y: b.scale, z: b.scale})*glam::Mat4::from_quat(b.rotation)*glam::Mat4::from_translation(b.position)).to_cols_array()});
+                bone_matrices.push(AnimationMatrix { data: (glam::Mat4::IDENTITY * glam::Mat4::from_scale(glam::Vec3 {x: b.scale, y: b.scale, z: b.scale}) * glam::Mat4::from_quat(b.rotation) * glam::Mat4::from_translation(b.position)).to_cols_array()});
             }
         }
-        //vec![AnimationMatrix { m: [[0.0; 4]; 4] }; len * num_bones];
+
         let storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Animation matrices storage buffer"),
             contents: bytemuck::cast_slice(&bone_matrices),
@@ -72,8 +72,6 @@ impl SkinnedModelNode {
         &mut self,
         device: &mut wgpu::Device,
         bone_matrices_bind_group_layout: &BindGroupLayout,
-        // instances: Vec<Instance>,
-        // bone_matrices: &Vec<AnimationMatrix>,
     ) {
 
         //self.instances = instances;

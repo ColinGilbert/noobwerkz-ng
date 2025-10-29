@@ -19,6 +19,7 @@ impl SkeletalContext {
         let mut ar_animations = Vec::new();
         
         for a in animation_filenames {
+            println!("Getting animation {}", a );
             ar_animations.push(block_on(load_archive(a.as_str())).unwrap());
         }
 
@@ -26,7 +27,7 @@ impl SkeletalContext {
             Arc::new(ozz_animation_rs::Skeleton::from_archive(&mut ar_skeleton).unwrap());
         
         let mut animations = Vec::new();
-        
+
         for mut a in ar_animations {
             animations.push(Arc::new(ozz_animation_rs::Animation::from_archive(&mut a).unwrap()));
         }
