@@ -82,7 +82,7 @@ fn vs_main(
 
     var out: VertexOutput;
     out.clip_position = camera.view_proj * world_position;
-    out.world_normal = model.normal;
+    out.world_normal = world_normal;
     out.tex_coords = model.tex_coords;
     out.tangent_position = tangent_matrix * world_position.xyz;
     out.tangent_view_position = tangent_matrix * camera.view_pos.xyz;
@@ -134,15 +134,15 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let world_normal = normalize(TBN * object_normal);
 
     // Create the lighting vectors
-    let tangent_normal = world_normal.xyz * 2.0 - 1.0;
+    //let tangent_normal = object_normal.xyz * 2.0 - 1.0;
     let light_dir = normalize(in.tangent_light_position - in.tangent_position);
     let view_dir = normalize(in.tangent_view_position - in.tangent_position);
     let half_dir = normalize(view_dir + light_dir);
 
-    let diffuse_strength = max(dot(tangent_normal, light_dir), 0.0);
+    let diffuse_strength = max(dot(object_normal, light_dir), 0.0);
     let diffuse_color = light.color * diffuse_strength;
 
-    let specular_strength = pow(max(dot(tangent_normal, half_dir), 0.0), 32.0);
+    let specular_strength = pow(max(dot(object_normal, half_dir), 0.0), 32.0);
     let specular_color = specular_strength * light.color;
 
     let result = (ambient_color + diffuse_color + specular_color) * object_color.xyz;
