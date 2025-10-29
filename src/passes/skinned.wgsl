@@ -43,6 +43,7 @@ struct InstanceInput {
 
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
+    @builtin(normal) clip_normal: vec3<f32>, 
     @location(0) tex_coords: vec2<f32>,
     @location(1) tangent_position: vec3<f32>,
     @location(2) tangent_light_position: vec3<f32>,
@@ -119,14 +120,21 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     let M = mat3x3<f32>(vec3<f32>(t_fx.x, t_fx.y, 0.0), vec3<f32>(t_fy.x, t_fy.y, 0.0), vec3<f32>(0.0, 0.0, 1.0));
     let inverse = inverse_mat3x3(M);
+
     let tangent = normalize(inverse * p_fx);
     let bitangent = normalize(inverse * p_fy);
+    let TBN = mat3x3<f32>(tangent, bitangent, );
     // We don't need (or want) much ambient light, so 0.1 is fine
     let ambient_strength = 0.1;
     let ambient_color = light.color * ambient_strength;
 
+    // vec3 normalMapSample = texture2D(_NormalMap, vUV).rgb;
+    // normalMapSample = normalMapSample * 2.0 - 1.0; // Re-normalizing to [-1, 1] range
+    // vec3 worldNormal = normalize(TBN * normalMapSample);
+
     // Create the lighting vectors
-    let tangent_normal = object_normal.xyz * 2.0 - 1.0;
+    //let tangent_normal = object_normal.xyz * 2.0 - 1.0;
+    let world_normal = 
     let light_dir = normalize(in.tangent_light_position - in.tangent_position);
     let view_dir = normalize(in.tangent_view_position - in.tangent_position);
     let half_dir = normalize(view_dir + light_dir);
