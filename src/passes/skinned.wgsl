@@ -126,7 +126,6 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     let M = mat3x3<f32>(vec3<f32>(t_fx.x, t_fx.y, 0.0), vec3<f32>(t_fy.x, t_fy.y, 0.0), vec3<f32>(0.0, 0.0, 1.0));
     let inverse = inverse_mat3x3(M);
-
     let tangent = normalize(inverse * p_fx);
     let bitangent = normalize(inverse * p_fy);
     let TBN = mat3x3<f32>(tangent, bitangent, in.world_normal);
@@ -135,8 +134,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let ambient_strength = 0.1;
     let ambient_color = light.color * ambient_strength;
 
-    
-    let world_normal = normalize(TBN * object_normal);
+    let world_normal = normalize(TBN * in.world_normal);//object_normal);
     let tangent_position = TBN * in.clip_position.xyz;
     let tangent_view_position = TBN * in.cam_view_pos;
     let tangent_light_position = TBN * in.light_position;
