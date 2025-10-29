@@ -19,8 +19,8 @@ impl SkeletalContext {
         let mut ar_animations = Vec::new();
         
         for a in animation_filenames {
-            println!("Getting animation {}", a );
-            let anim_filepath = filepath.clone() + &"/".to_owned() + anim_filepath;
+            let anim_filepath = filepath.clone() + &"/".to_owned() + a;
+            println!("Getting animation {}", anim_filepath);
             ar_animations.push(block_on(load_archive(anim_filepath.as_str())).unwrap());
         }
 
