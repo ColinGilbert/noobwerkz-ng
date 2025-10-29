@@ -21,7 +21,7 @@ struct AnimationMatrixData {
 var<storage, read> animation_matrices: AnimationMatrixData;
 
 @group(4) @binding(0)
-var uniform num_bones: u32;
+var<uniform> num_bones: u32;
 
 
 struct VertexInput {
