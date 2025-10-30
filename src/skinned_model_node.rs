@@ -60,7 +60,7 @@ impl SkinnedModelNode {
             }
             //println!("Num bones in model = {}, Num bones: {}", num_bones, i);
         }
-        println!("Bone matrices length {}", bone_matrices.len());
+        println!("Bone matrices length: {}, num bones: {}", bone_matrices.len(), num_bones);
         let storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Animation matrices storage buffer"),
             contents: bytemuck::cast_slice(&bone_matrices),
