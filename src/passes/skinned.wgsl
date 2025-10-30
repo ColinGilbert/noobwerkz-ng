@@ -97,7 +97,7 @@ fn vs_main(
     out.clip_position = camera.view_proj * world_position;
     //out.world_normal = v_normal;
     out.tex_coords = model.tex_coords;
-    out.tangent_position = tbn_matrix * skinned_position.xyz;
+    out.tangent_position = tbn_matrix * world_position.xyz;
     out.tangent_view_position = tbn_matrix * camera.view_pos.xyz;
     out.tangent_light_position = tbn_matrix * light.position;
     return out;
