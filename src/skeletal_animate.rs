@@ -97,9 +97,9 @@ impl OzzTrait for OzzPlayback {
     fn update(&mut self, dt: web_time::Duration) {
         let duration = self.sample_job.animation().unwrap().duration();
         // println!("Duration {}, dt {}", duration, dt.as_secs_f32());
-        self.seek += dt.as_secs_f32() * 1_000_000.0;
+        self.seek += dt.as_secs_f32() * 1_000_000_000.0;
         self.seek %= duration;
-        println!("seek {}", self.seek);
+        //println!("seek {}", self.seek);
         let ratio = self.seek / duration;
         self.sample_job.set_ratio(ratio);
         self.sample_job.run().unwrap();
@@ -114,6 +114,7 @@ impl OzzTrait for OzzPlayback {
             if parent_id as i32 == ozz_animation_rs::SKELETON_NO_PARENT {
                 continue;
             }
+            println!("Found parent. Continuing.")
             let parent = &modals[parent_id as usize];
 
             let current_pos = current.w_axis.xyz();
