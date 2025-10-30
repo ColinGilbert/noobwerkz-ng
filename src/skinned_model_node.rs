@@ -50,9 +50,9 @@ impl SkinnedModelNode {
                         * glam::Mat4::from_translation(b.position)
                         * glam::Mat4::from_quat(b.rotation)
                         * glam::Mat4::from_scale(glam::Vec3 {
-                            x: 4.0,
-                            y: 4.0,
-                            z: 4.0,
+                            x: b.scale,
+                            y: b.scale,
+                            z: b.scale,
                         }))
                     .to_cols_array_2d(),
                 });
