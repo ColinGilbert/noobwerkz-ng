@@ -61,11 +61,11 @@ fn vs_main(
         instance.model_matrix_2,
         instance.model_matrix_3,
     );
-    let normal_matrix = mat3x3<f32>(
-        instance.normal_matrix_0,
-        instance.normal_matrix_1,
-        instance.normal_matrix_2,
-    );
+    // let normal_matrix = mat3x3<f32>(
+    //     instance.normal_matrix_0,
+    //     instance.normal_matrix_1,
+    //     instance.normal_matrix_2,
+    // );
     let offset = num_bones * model.instance_index;
     let bone_transform = mat4x4<f32>(
         (model.bone_weights.x * bone_matrices.values[offset + model.bone_indices.x]) + (model.bone_weights.y * bone_matrices.values[offset + model.bone_indices.y]) + (model.bone_weights.z * bone_matrices.values[offset + model.bone_indices.z]) + (model.bone_weights.w * bone_matrices.values[offset + model.bone_indices.w])
@@ -82,16 +82,14 @@ fn vs_main(
     let skinned_bitangent = cross(skinned_normal, skinned_tangent);
 
     // Construct the tangent matrix
-    let world_normal = normalize(normal_matrix * skinned_normal);
-    let world_tangent = normalize(normal_matrix * skinned_tangent);
-    let world_bitangent = normalize(normal_matrix * skinned_bitangent);
-    // let tbn_matrix = transpose(mat3x3<f32>(
-    //     skinned_tangent,
-    //     skinned_bitangent,
-    //     skinned_normal,
-    // ));
-
-    let tbn_matrix = mat3x3<f32>(world_tangent, world_bitangent, world_normal);
+    //let world_normal = normalize(normal_matrix * model.normal);
+    // let world_tangent = normalize(normal_matrix * model.tangent);
+    // let world_bitangent = normalize(normal_matrix * model.bitangent);
+    let tbn_matrix = transpose(mat3x3<f32>(
+        skinned_tangent,
+        skinned_bitangent,
+        skinned_normal,
+    ));
 
     let world_position = world * vec4<f32>(model.position, 1.0);
 
