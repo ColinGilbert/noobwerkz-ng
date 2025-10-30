@@ -70,6 +70,16 @@ fn vs_main(
         (model.bone_weights.x * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.x]) + (model.bone_weights.y * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.y]) + (model.bone_weights.z * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.z]) + (model.bone_weights.w * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.w])
     );
 
+    var skinned_position: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+    for (var i: u32 = 0u; i < 4u; i = i + 1u) {
+        let bone_index = model.bone_indices[i];
+        let weight = model.bone_weights[i];
+        let bone_matrix = bone_matrices.values[num_bones * model.instance_index + bone_index];
+        
+        // Accumulate the weighted bone transformation
+        skinned_position += (boneMatrix * vec4<f32>(in.position, 1.0)) * weight;
+    }
+
     let world = model_matrix * bone_transform;
 
     let skinned_normal = normalize(mat3x3<f32>(world[0].xyz, world[1].xyz, world[2].xyz) * model.normal);
@@ -94,10 +104,10 @@ fn vs_main(
     let world_position = world * vec4<f32>(model.position, 1.0);
 
     var out: VertexOutput;
-    out.clip_position = camera.view_proj * world_position;
+    out.clip_position = camera.view_proj * model_matrix * skinned_position;
     //out.world_normal = v_normal;
     out.tex_coords = model.tex_coords;
-    out.tangent_position = tbn_matrix * world_position.xyz;
+    out.tangent_position = tbn_matrix * skinned_position.xyz;
     out.tangent_view_position = tbn_matrix * camera.view_pos.xyz;
     out.tangent_light_position = tbn_matrix * light.position;
     return out;
