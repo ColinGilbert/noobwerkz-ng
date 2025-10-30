@@ -43,6 +43,7 @@ impl SkinnedModelNode {
         for p in &mut playbacks {
             p.update(web_time::Duration::from_secs(0));
             let bone_transforms = p.bone_trans();
+            let mut i = 0;
             for b in bone_transforms {
                 bone_matrices.push(AnimationMatrix {
                     data: (glam::Mat4::IDENTITY
@@ -55,7 +56,9 @@ impl SkinnedModelNode {
                         }))
                     .to_cols_array_2d(),
                 });
+                i += 1;
             }
+            println!("Num bones: {}", i);
         }
 
         let storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
