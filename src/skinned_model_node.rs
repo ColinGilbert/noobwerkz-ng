@@ -30,6 +30,7 @@ impl SkinnedModelNode {
         let len = instances.len();
         let mut bone_matrices = Vec::new();
 
+        println!("New skinned model node");
         let num_bones_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Num bones uniform buffer"),
             contents: bytemuck::cast_slice(&[num_bones]),
@@ -42,7 +43,7 @@ impl SkinnedModelNode {
 
         for p in &mut playbacks {
             p.update(web_time::Duration::from_secs(0));
-            let bone_transforms = p.spine_trans();
+            let bone_transforms = p.bone_trans();
             //let mut i = 0;
             for b in bone_transforms {
                 bone_matrices.push(AnimationMatrix {
