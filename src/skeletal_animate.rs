@@ -97,7 +97,7 @@ impl OzzTrait for OzzPlayback {
     fn update(&mut self, time: web_time::Duration) {
         let duration = self.sample_job.animation().unwrap().duration();
         //println!("Duration {}", duration);
-        self.seek += time.as_secs_f32()*1000.0 % duration;
+        self.seek += time.as_secs_f32()*10_000.0 % duration;
         let ratio = self.seek / duration;
         self.sample_job.set_ratio(ratio);
         self.sample_job.run().unwrap();
