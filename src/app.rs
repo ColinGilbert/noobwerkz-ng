@@ -122,8 +122,8 @@ impl ApplicationHandler<State> for App {
             WindowEvent::Resized(size) => state.resize(size.width, size.height),
             WindowEvent::RedrawRequested => {
                 let dt = self.last_time.elapsed();
-                self.last_time = web_time::Instant::now();
                 state.update(dt);
+                self.last_time = web_time::Instant::now();
                 match state.render() {
                     Ok(_) => {}
                     // Reconfigure the surface if it's lost or outdated
