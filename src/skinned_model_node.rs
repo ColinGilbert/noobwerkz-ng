@@ -88,9 +88,9 @@ impl SkinnedModelNode {
 
     pub fn update(
         &mut self,
-        device: &mut wgpu::Device,
+        _device: &mut wgpu::Device,
         queue: &mut wgpu::Queue,
-        bone_matrices_bind_group_layout: &BindGroupLayout,
+        _bone_matrices_bind_group_layout: &BindGroupLayout,
         dt: web_time::Duration,
     ) {
         self.bone_matrices.clear();
@@ -109,14 +109,14 @@ impl SkinnedModelNode {
                 });
             }
         }
-        println!("Bone matrices {}", self.bone_matrices.len());
+        // println!("Bone matrices {}", self.bone_matrices.len());
         // self.storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         //     label: Some("Animation matrices storage buffer"),
         //     contents: bytemuck::cast_slice(&self.bone_matrices),
         //     usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         // });
-        queue.write_buffer(&self.storage_buffer, 0, bytemuck::cast_slice(&self.bone_matrices));
 
+        queue.write_buffer(&self.storage_buffer, 0, bytemuck::cast_slice(&self.bone_matrices));
 
         // self.bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
         //     layout: bone_matrices_bind_group_layout,
