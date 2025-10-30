@@ -65,8 +65,8 @@ impl SkinnedModelVertex {
             normal: model_vert.normal,
             tangent: model_vert.tangent,
             bitangent: model_vert.bitangent,
-            bone_indices: [1,2,3,4],
-            bone_weights: [1.0; 4],
+            bone_indices: [0; 4],
+            bone_weights: [0.0; 4],
         }
     }
 }
@@ -112,7 +112,7 @@ impl Vertex for SkinnedModelVertex {
                 wgpu::VertexAttribute {
                     offset: mem::size_of::<[f32; 14]>() as wgpu::BufferAddress,
                     shader_location: 5,
-                    format: wgpu::VertexFormat::Uint32x4, // Uint32x4,
+                    format: wgpu::VertexFormat::Uint32x4,
                 },
                 // Bone weights
                 wgpu::VertexAttribute {
