@@ -74,7 +74,7 @@ fn vs_main(
        for (var i: u32 = 0u; i < 4u; i = i + 1u) {
         let bone_index = model.bone_indices[i];
         let weight = model.bone_weights[i];
-        let bone_matrix = bone_matrices[bone_index];
+        let bone_matrix = bone_matrices.values[num_bones*model.instance_index + bone_index];
         
         // Accumulate the weighted bone transformation
         skinned_position += (boneMatrix * vec4<f32>(in.position, 1.0)) * weight;
