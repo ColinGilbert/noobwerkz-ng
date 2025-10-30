@@ -65,8 +65,8 @@ impl SkinnedModelVertex {
             normal: model_vert.normal,
             tangent: model_vert.tangent,
             bitangent: model_vert.bitangent,
-            bone_indices: [0; 4],
-            bone_weights: [0.0; 4],
+            bone_indices: [1,2,3,4],
+            bone_weights: [1.0; 4],
         }
     }
 }
