@@ -72,7 +72,7 @@ fn vs_main(
     let bone_transform = mat4x4<f32>((bone_matrices.values[num_bones * model.instance_index + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.w] * model.bone_weights.w));
     let world = model_matrix * bone_transform;
     let final_position = world * vec4<f32>(model.position.xyz, 1.0);
-    let skinned_normal = normalize(normal_matrix * mat3x3<f32>(world) * model.normal);
+    let skinned_normal = normalize(normal_matrix * mat3x3<f32>(world[0].xyz, world[1].xyz, world[2].xyz) * model.normal);
  
     let skinned_tangent = normalize(vec3<f32>(bone_transform * vec4<f32>(model.tangent.xyz, 0.0)));
 
