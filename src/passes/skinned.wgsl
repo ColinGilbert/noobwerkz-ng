@@ -19,6 +19,8 @@ struct AnimationMatrixData {
 
 @group(3) @binding(0)
 var<storage, read> animation_matrices: AnimationMatrixData;
+@group(3) @binding(1)
+var<uniform> num_bones: u32;
 
 struct VertexInput {
     @builtin(instance_index) instance_index: u32,
