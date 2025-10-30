@@ -115,6 +115,7 @@ impl OzzTrait for OzzPlayback {
                 println!("Could not find parent");
                 continue;
             }
+            println!("Found parent.");
             let parent = &modals[parent_id as usize];
 
             let current_pos = current.w_axis.xyz();
