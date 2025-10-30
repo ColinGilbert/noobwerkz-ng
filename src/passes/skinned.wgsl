@@ -81,7 +81,7 @@ fn vs_main(
     }
 
 
-    let world = model_matrix * skinned_position;
+    let world = skinned_position * model_matrix;// * skinned_position;
 
     let skinned_normal = normalize(mat3x3<f32>(world[0].xyz, world[1].xyz, world[2].xyz) * model.normal);
 
