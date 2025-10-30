@@ -91,7 +91,7 @@ fn vs_main(
     //     skinned_normal,
     // ));
 
-    let tbn_matrix = transpose(mat3x3<f32>(world_tangent, world_bitangent, world_normal));
+    let tbn_matrix = mat3x3<f32>(world_tangent, world_bitangent, world_normal);
 
     let world_position = world * vec4<f32>(model.position, 1.0);
 
