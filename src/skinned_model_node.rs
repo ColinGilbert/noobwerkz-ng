@@ -1,8 +1,5 @@
-use std::mem;
-
 use crate::skinned_model::*;
 use crate::{instance::Instance, skeletal_animate::*, skeletal_context::*};
-use image::write_buffer_with_format;
 use wgpu::{BindGroupLayout, util::*};
 
 pub struct SkinnedModelNode {
@@ -49,14 +46,7 @@ impl SkinnedModelNode {
             //let mut i = 0;
             for b in bone_transforms {
                 bone_matrices.push(BoneMatrix {
-                    data: (glam::Mat4::IDENTITY
-                        * glam::Mat4::from_translation(b.position)
-                        * glam::Mat4::from_quat(b.rotation)
-                        * glam::Mat4::from_scale(glam::Vec3 {
-                            x: b.scale,
-                            y: b.scale,
-                            z: b.scale,
-                        }))
+                    data: (glam::Mat4::from_scale_rotation_translation(glam::Vec3{x: b.scale, y: b.scale, z: b.scale}, b.rotation, b.position))
                     .to_cols_array_2d(),
                 });
                 // i += 1;
