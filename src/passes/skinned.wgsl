@@ -94,7 +94,7 @@ fn vs_main(
     let world_position = world * vec4<f32>(model.position, 1.0);
 
     var out: VertexOutput;
-    out.clip_position = camera.view_proj * world_position;
+    out.clip_position = world_position * camera.view_proj;
     //out.world_normal = v_normal;
     out.tex_coords = model.tex_coords;
     out.tangent_position = tbn_matrix * world_position.xyz;
