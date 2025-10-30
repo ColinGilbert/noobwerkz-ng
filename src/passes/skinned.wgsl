@@ -61,11 +61,11 @@ fn vs_main(
         instance.model_matrix_2,
         instance.model_matrix_3,
     );
-    let normal_matrix = mat3x3<f32>(
-        instance.normal_matrix_0,
-        instance.normal_matrix_1,
-        instance.normal_matrix_2,
-    );
+    // let normal_matrix = mat3x3<f32>(
+    //     instance.normal_matrix_0,
+    //     instance.normal_matrix_1,
+    //     instance.normal_matrix_2,
+    // );
     let offset = num_bones * model.instance_index;
     let bone_transform = mat4x4<f32>(
         (model.bone_weights.x * bone_matrices.values[offset + model.bone_indices.x]) + (model.bone_weights.y * bone_matrices.values[offset + model.bone_indices.y]) + (model.bone_weights.z * bone_matrices.values[offset + model.bone_indices.z]) + (model.bone_weights.w * bone_matrices.values[offset + model.bone_indices.w])
