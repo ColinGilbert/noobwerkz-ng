@@ -97,25 +97,35 @@ impl GraphicsContext {
                         count: None,
                     },
                 ],
-                label: Some("texture_bind_group_layout"),
+                label: Some("textures bind group layout"),
             });
 
-            let bone_matrices_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-        entries: &[
-            wgpu::BindGroupLayoutEntry {
-                binding: 0,
-                visibility: wgpu::ShaderStages::VERTEX,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Storage { read_only: true }, // Set to true if read-only
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
-                },
-                count: None,
-            },
-        ],
-        label: Some("Storage Buffer Bind Group Layout"),
-    });
-
+        let bone_matrices_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::VERTEX,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Storage { read_only: true }, // Set to true if read-only
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: wgpu::ShaderStages::VERTEX,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Uniform,
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    },
+                ],
+                label: Some("Bone matrices storage buffer bind group layout"),
+            });
 
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -138,8 +148,7 @@ impl GraphicsContext {
                 Texture::from_bytes(&device, &queue, diffuse_bytes, "default-diffuse", false)
                     .unwrap();
             let normal_texture =
-                Texture::from_bytes(&device, &queue, normal_bytes, "default-normal", true)
-                    .unwrap();
+                Texture::from_bytes(&device, &queue, normal_bytes, "default-normal", true).unwrap();
             Material::new(
                 &device,
                 "alt-material",
