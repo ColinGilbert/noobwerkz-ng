@@ -102,13 +102,13 @@ fn vs_main(
         skinned_normal,
     ));
 
-    let world_position = world* vec4<f32>(model.position, 1.0);
+    //let world_position = world* vec4<f32>(model.position, 1.0);
 
     var out: VertexOutput;
-    out.clip_position = camera.view_proj * world_position;
+    out.clip_position = camera.view_proj * world;
     //out.world_normal = v_normal;
     out.tex_coords = model.tex_coords;
-    out.tangent_position = tbn_matrix * world_position.xyz;
+    out.tangent_position = tbn_matrix * world.xyz;
     out.tangent_view_position = tbn_matrix * camera.view_pos.xyz;
     out.tangent_light_position = tbn_matrix * light.position;
     return out;
