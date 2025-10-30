@@ -1,6 +1,5 @@
 use crate::skinned_model::*;
 use crate::{instance::Instance, skeletal_animate::*, skeletal_context::*};
-use futures::executor::block_on;
 use wgpu::{BindGroupLayout, util::*};
 
 pub struct SkinnedModelNode {
@@ -25,7 +24,7 @@ impl SkinnedModelNode {
     ) -> Self {
         let mut playbacks = Vec::new();
         let skeleton = skeletal_context.skeleton.clone();
-        let num_bones = skeleton.num_joints() as u32 - 1;
+        let num_bones = skeleton.num_joints() as u32;
         let animation = skeletal_context.animations[0].clone();
         let len = instances.len();
         let mut bone_matrices = Vec::new();
@@ -38,7 +37,7 @@ impl SkinnedModelNode {
         });
 
         for _i in 0..len {
-            playbacks.push(block_on(OzzPlayback::new(&skeleton, &animation)));
+            playbacks.push(futures::executor::block_on(OzzPlayback::new(&skeleton, &animation)));
         }
 
         for p in &mut playbacks {
