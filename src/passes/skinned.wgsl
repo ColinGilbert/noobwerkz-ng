@@ -67,12 +67,9 @@ fn vs_main(
         instance.normal_matrix_2,
     );
     let bone_transform = mat4x4<f32>(
-        (model.bone_weights.x * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.x]) + 
-        (model.bone_weights.y * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.y]) + 
-        (model.bone_weights.z * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.z]) + 
-        (model.bone_weights.w * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.w])
+        (model.bone_weights.x * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.x]) + (model.bone_weights.y * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.y]) + (model.bone_weights.z * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.z]) + (model.bone_weights.w * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.w])
     );
-    
+
     let world = model_matrix * bone_transform;
 
     let skinned_normal = normalize(mat3x3<f32>(world[0].xyz, world[1].xyz, world[2].xyz) * model.normal);
@@ -94,7 +91,7 @@ fn vs_main(
         skinned_normal,
     ));
 
-    let world_position = world * vec4<f32>(model.position, 1.0);
+    let world_position = vec4<f32>(model.position, 1.0) * world;
 
     //let normal_matrix = transpose(model.normal)
 
