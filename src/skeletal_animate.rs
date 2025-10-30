@@ -41,7 +41,7 @@ impl OzzPlayback {
             l2m_job: ozz_animation_rs::LocalToModelJob::default(),
             models: Arc::new(RwLock::new(vec![
                 glam::Mat4::default();
-                skeleton.num_joints() -1
+                skeleton.num_joints()
             ])),
             bone_trans: Vec::new(),
             spine_trans: Vec::new(),
