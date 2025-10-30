@@ -131,6 +131,7 @@ pub async fn load_model_from_serialized(
             mesh_serialized.get_translation_y(),
             mesh_serialized.get_translation_z(),
         );
+
         let rotation = glam::Quat::from_xyzw(
             mesh_serialized.get_rotation_x(),
             mesh_serialized.get_rotation_y(),
@@ -214,7 +215,7 @@ pub async fn load_model_from_serialized(
             }
 
             let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some(&format!("{:?} SSkinned Vertex Buffer", name)),
+                label: Some(&format!("{:?} Skinned Vertex Buffer", name)),
                 contents: bytemuck::cast_slice(&verts_skinned),
                 usage: wgpu::BufferUsages::VERTEX,
             });
@@ -236,7 +237,7 @@ pub async fn load_model_from_serialized(
                 rotation,
                 scale,
                 dimensions,
-                matrices_texture: Option::None,
+                //matrices_texture: Option::None,
             });
         }
     }

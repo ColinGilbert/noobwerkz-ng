@@ -18,7 +18,7 @@ struct BoneMatrixData {
 };
 
 @group(3) @binding(0)
-var<storage, read> animation_matrices: BoneMatrixData;
+var<storage, read> bone_matrices: BoneMatrixData;
 @group(3) @binding(1)
 var<uniform> num_bones: u32;
 
