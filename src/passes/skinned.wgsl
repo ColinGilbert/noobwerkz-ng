@@ -77,7 +77,7 @@ fn vs_main(
     let skinned_tangent = normalize(vec3<f32>(bone_transform * vec4<f32>(model.tangent.xyz, 0.0)));
 
     // Calculate bitangent from the normal and tangent
-    vec3 skinned_bitangent = cross(skinned_normal, skinned_tangent);
+    let skinned_bitangent = cross(skinned_normal, skinned_tangent);
 
 
     // Construct the tangent matrix
@@ -85,9 +85,9 @@ fn vs_main(
     // let world_tangent = normalize(normal_matrix * model.tangent);
     // let world_bitangent = normalize(normal_matrix * model.bitangent);
     let tangent_matrix = transpose(mat3x3<f32>(
-         world_tangent,
-         world_bitangent,
-         world_normal,
+         skinned_tangent,
+         skinned_bitangent,
+         skinned_normal,
      ));
 
     //let world_position = model_matrix * vec4<f32>(model.position, 1.0);
