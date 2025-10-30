@@ -66,7 +66,7 @@ fn vs_main(
         instance.normal_matrix_1,
         instance.normal_matrix_2,
     );
-    let bone_transform = (bone_matrices[num_bones * instance_index + bone_indices.x] * bone_weights.x) + (bone_matrices[num_bones * instance_index + bone_indices.y] * bone_weights.y) + (bone_matrices[num_bones * instance_index + bone_indices.z] * bone_weights.z) + (bone_matrices[num_bones * instance_index + bone_indices.w] * bone_weights.w) 
+    let bone_transform = (bone_matrices[num_bones * instance_index + bone_indices.x] * bone_weights.x) + (bone_matrices[num_bones * instance_index + bone_indices.y] * bone_weights.y) + (bone_matrices[num_bones * instance_index + bone_indices.z] * bone_weights.z) + (bone_matrices[num_bones * instance_index + bone_indices.w] * bone_weights.w);
 
 
     // Construct the tangent matrix
