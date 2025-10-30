@@ -1,5 +1,8 @@
+use std::mem;
+
 use crate::skinned_model::*;
 use crate::{instance::Instance, skeletal_animate::*, skeletal_context::*};
+use image::write_buffer_with_format;
 use wgpu::{BindGroupLayout, util::*};
 
 pub struct SkinnedModelNode {
@@ -97,6 +100,7 @@ impl SkinnedModelNode {
     pub fn update(
         &mut self,
         device: &mut wgpu::Device,
+        queue: &mut wgpu::Queue,
         bone_matrices_bind_group_layout: &BindGroupLayout,
         dt: web_time::Duration,
     ) {
@@ -119,12 +123,14 @@ impl SkinnedModelNode {
                 });
             }
         }
-        //println!("Bone matrices {}", self.bone_matrices.len());
-        self.storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Animation matrices storage buffer"),
-            contents: bytemuck::cast_slice(&self.bone_matrices),
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
-        });
+        // //println!("Bone matrices {}", self.bone_matrices.len());
+        // self.storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        //     label: Some("Animation matrices storage buffer"),
+        //     contents: bytemuck::cast_slice(&self.bone_matrices),
+        //     usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+        // });
+        queue.write_buffer(&self.storage_buffer, 0, bytemuck::cast_slice(&self.bone_matrices));
+
 
         // self.bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
         //     layout: bone_matrices_bind_group_layout,
