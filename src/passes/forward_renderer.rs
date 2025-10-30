@@ -184,6 +184,7 @@ impl ForwardRenderer {
                     &texture_bind_group_layout,
                     &camera_bind_group_layout,
                     &light_bind_group_layout,
+                    &bone_matrices_bind_group_layout,
                 ],
                 push_constant_ranges: &[],
             });
