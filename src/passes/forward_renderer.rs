@@ -113,7 +113,6 @@ impl Pass for ForwardRenderer {
                 //     }
                 // }
 
-                queue.write_buffer(&m.storage_buffer, 0, bytemuck::cast_slice(&m.bone_matrices));
 
                 for i in &m.instances {
                     instance_data.push(i.to_skinned_raw());
