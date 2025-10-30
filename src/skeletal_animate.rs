@@ -99,8 +99,8 @@ impl OzzTrait for OzzPlayback {
         // println!("Duration {}, dt {}", duration, dt.as_secs_f32());
         self.seek += dt.as_secs_f32() * 1_000_000_000.0;
         self.seek %= duration;
-        println!("seek {}", self.seek);
         let ratio = self.seek / duration;
+        println!("ratio {}", ratio);
         self.sample_job.set_ratio(ratio);
         self.sample_job.run().unwrap();
         self.l2m_job.run().unwrap();
