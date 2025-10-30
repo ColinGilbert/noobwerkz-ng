@@ -29,7 +29,6 @@ impl SkinnedModelNode {
         let len = instances.len();
         let mut bone_matrices = Vec::new();
 
-        println!("New skinned model node");
         let num_bones_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Num bones uniform buffer"),
             contents: bytemuck::cast_slice(&[num_bones]),
@@ -101,14 +100,11 @@ impl SkinnedModelNode {
             let bone_transforms = p.bone_trans();
             for b in bone_transforms {
                 self.bone_matrices.push(BoneMatrix {
-                    data: (glam::Mat4::IDENTITY
-                        * glam::Mat4::from_translation(b.position)
-                        * glam::Mat4::from_quat(b.rotation)
-                        * glam::Mat4::from_scale(glam::Vec3 {
+                    data: glam::Mat4::from_scale_rotation_translation(glam::Vec3 {
                             x: b.scale,
                             y: b.scale,
                             z: b.scale,
-                        }))
+                        }, b.rotation, b.position)
                     .to_cols_array_2d(),
                 });
             }
