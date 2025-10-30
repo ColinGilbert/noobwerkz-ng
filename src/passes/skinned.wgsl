@@ -67,7 +67,7 @@ fn vs_main(
         instance.normal_matrix_2,
     );
     let bone_transform = mat4x4<f32>(
-        (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.w] * model.bone_weights.w)
+        (model.bone_weights.x * bone_matrices.values[num_bones * model.instance_index + model.bone_indices.x]) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.w] * model.bone_weights.w)
     );
     
     let world = model_matrix * bone_transform;
