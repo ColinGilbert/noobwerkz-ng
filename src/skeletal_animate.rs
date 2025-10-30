@@ -105,7 +105,7 @@ impl OzzTrait for OzzPlayback {
         self.sample_job.run().unwrap();
         self.l2m_job.run().unwrap();
 
-        // println!("{:?}", self.bone_trans);
+        println!("{:?}", self.bone_trans);
         self.bone_trans.clear();
         self.spine_trans.clear();
 
