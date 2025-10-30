@@ -20,6 +20,8 @@ struct AnimationMatrixData {
 @group(3) @binding(0)
 var<storage, read> bone_matrices: AnimationMatrixData;
 @group(3) @binding(1)
+var<storage, read> inverse_transpose_bone_matrices: AnimationMatrixData;
+@group(3) @binding(2)
 var<uniform> num_bones: u32;
 
 struct VertexInput {
@@ -45,6 +47,7 @@ struct InstanceInput {
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
     @location(0) tex_coords: vec2<f32>,
+    // @location(1) world_normal: vec3<f32>,
     @location(1) tangent_position: vec3<f32>,
     @location(2) tangent_light_position: vec3<f32>,
     @location(3) tangent_view_position: vec3<f32>,
@@ -67,21 +70,33 @@ fn vs_main(
         instance.normal_matrix_2,
     );
     let bone_transform = mat4x4<f32>((bone_matrices.values[num_bones * model.instance_index + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.w] * model.bone_weights.w));
+    let world = model_matrix * bone_transform;
+    let final_position = world * vec4<f32>(model.position.xyz, 1.0);
+    let skinned_normal = normalize(normal_matrix * mat3x3<f32>(world) * model.normal);
+ 
+    let skinned_tangent = normalize(vec3<f32>(bone_transform * vec4<f32>(model.tangent.xyz, 0.0)));
+
+    // Calculate bitangent from the normal and tangent
+    vec3 skinned_bitangent = cross(skinned_normal, skinned_tangent);
+
 
     // Construct the tangent matrix
-    let world_normal = normalize(normal_matrix * model.normal);
-    let world_tangent = normalize(normal_matrix * model.tangent);
-    let world_bitangent = normalize(normal_matrix * model.bitangent);
+    //let world_normal = normalize(normal_matrix * model.normal);
+    // let world_tangent = normalize(normal_matrix * model.tangent);
+    // let world_bitangent = normalize(normal_matrix * model.bitangent);
     let tangent_matrix = transpose(mat3x3<f32>(
-        world_tangent,
-        world_bitangent,
-        world_normal,
-    ));
+         world_tangent,
+         world_bitangent,
+         world_normal,
+     ));
 
-    let world_position = model_matrix * vec4<f32>(model.position, 1.0);
+    //let world_position = model_matrix * vec4<f32>(model.position, 1.0);
+
+    //let normal_matrix = transpose(model.normal)
 
     var out: VertexOutput;
     out.clip_position = camera.view_proj * world_position;
+    //out.world_normal = v_normal;
     out.tex_coords = model.tex_coords;
     out.tangent_position = tangent_matrix * world_position.xyz;
     out.tangent_view_position = tangent_matrix * camera.view_pos.xyz;
