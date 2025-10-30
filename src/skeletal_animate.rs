@@ -75,8 +75,8 @@ impl OzzPlayback {
             }
         }
 
-        o.bone_trans.reserve(bone_count);
-        o.spine_trans.reserve(spine_count);
+       // o.bone_trans.reserve(bone_count);
+        //o.spine_trans.reserve(spine_count);
         o
     }
 }
