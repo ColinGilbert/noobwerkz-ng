@@ -43,7 +43,7 @@ impl SkinnedModelNode {
 
         for p in &mut playbacks {
             p.update(web_time::Duration::from_secs(0));
-            let bone_transforms = p.bone_trans();
+            let bone_transforms = p.spine_trans();
             //let mut i = 0;
             for b in bone_transforms {
                 bone_matrices.push(AnimationMatrix {
