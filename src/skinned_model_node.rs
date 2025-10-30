@@ -122,7 +122,7 @@ impl SkinnedModelNode {
         self.storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Animation matrices storage buffer"),
             contents: bytemuck::cast_slice(&self.bone_matrices),
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
         });
 
         self.bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
