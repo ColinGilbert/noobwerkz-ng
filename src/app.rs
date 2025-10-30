@@ -124,8 +124,9 @@ impl ApplicationHandler<State> for App {
                 let dt = self.last_time.elapsed();
                 state.update(dt);
                 match state.render() {
-                    Ok(_) => {                    self.last_time = web_time::Instant::now();
-}
+                    Ok(_) => {
+                        //self.last_time = web_time::Instant::now();
+                    }
                     // Reconfigure the surface if it's lost or outdated
                     Err(wgpu::SurfaceError::Lost | wgpu::SurfaceError::Outdated) => {
                         let size = state.window.inner_size();
