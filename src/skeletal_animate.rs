@@ -112,9 +112,9 @@ impl OzzTrait for OzzPlayback {
         for (i, current) in modals.iter().enumerate() {
             let parent_id = self.skeleton.joint_parent(i);
             if parent_id as i32 == ozz_animation_rs::SKELETON_NO_PARENT {
+                println!("Could not find parent");
                 continue;
             }
-            println!("Found parent. Continuing.");
             let parent = &modals[parent_id as usize];
 
             let current_pos = current.w_axis.xyz();
