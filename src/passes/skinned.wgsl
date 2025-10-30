@@ -43,7 +43,7 @@ struct InstanceInput {
 }
 
 struct VertexOutput {
-    @builtin(position) clip_position: vec4<f32>,
+    @builtin(position) final_position: vec4<f32>,
     @location(0) tex_coords: vec2<f32>,
     // @location(1) world_normal: vec3<f32>,
     @location(1) tangent_position: vec3<f32>,
@@ -69,7 +69,6 @@ fn vs_main(
     );
     let bone_transform = mat4x4<f32>((bone_matrices.values[num_bones * model.instance_index + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.w] * model.bone_weights.w));
     let world = model_matrix * bone_transform;
-    //et final_position = world * vec4<f32>(model.position.xyz, 1.0);
 
     let skinned_normal = normalize(mat3x3<f32>(world[0].xyz, world[1].xyz, world[2].xyz) * model.normal);
  
@@ -95,7 +94,7 @@ fn vs_main(
     //let normal_matrix = transpose(model.normal)
 
     var out: VertexOutput;
-    out.clip_position = camera.view_proj * world_position;
+    out.final_position = camera.view_proj * world_position;
     //out.world_normal = v_normal;
     out.tex_coords = model.tex_coords;
     out.tangent_position = tangent_matrix * world_position.xyz;
