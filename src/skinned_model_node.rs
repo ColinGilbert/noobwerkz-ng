@@ -6,7 +6,7 @@ use wgpu::{BindGroupLayout, util::*};
 pub struct SkinnedModelNode {
     pub skinned_model_idx: usize,
     pub instances: Vec<Instance>,
-    pub visible: Vec<bool>,
+    //pub visible: Vec<bool>,
     pub playbacks: Vec<OzzPlayback>,
     pub bone_matrices: Vec<AnimationMatrix>,
     pub num_bones: u32,
@@ -85,7 +85,7 @@ impl SkinnedModelNode {
         Self {
             skinned_model_idx,
             instances,
-            visible: vec![true; len],
+            //visible: vec![true; len],
             playbacks,
             bone_matrices,
             num_bones,

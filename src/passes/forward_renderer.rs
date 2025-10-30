@@ -106,11 +106,17 @@ impl Pass for ForwardRenderer {
                 let model = &skinned_models[m.skinned_model_idx];
                 //let anim_matrices = &m.bone_matrices;
 
-                for (i, visible) in m.visible.iter().enumerate() {
-                    if *visible {
-                        instance_data.push(m.instances[i].to_skinned_raw());
-                        count += 1;
-                    }
+                // for (i, visible) in m.visible.iter().enumerate() {
+                //     if *visible {
+                //         instance_data.push(m.instances[i].to_skinned_raw());
+                //         count += 1;
+                //     }
+                // }
+
+
+                for i in m.instances {
+                    instance_data.push(i.to_skinned_raw());
+                    count += 1;
                 }
 
                 let instance_buffer =
