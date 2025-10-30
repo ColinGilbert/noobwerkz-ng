@@ -120,7 +120,7 @@ impl SkinnedModelNode {
                 });
             }
         }
-        println!("Bone matrices {}", self.bone_matrices.len());
+        //println!("Bone matrices {}", self.bone_matrices.len());
         self.storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Animation matrices storage buffer"),
             contents: bytemuck::cast_slice(&self.bone_matrices),
