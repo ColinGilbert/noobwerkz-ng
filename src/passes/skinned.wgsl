@@ -67,11 +67,14 @@ fn vs_main(
         instance.normal_matrix_1,
         instance.normal_matrix_2,
     );
-    let bone_transform = mat4x4<f32>((bone_matrices.values[num_bones * model.instance_index + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.w] * model.bone_weights.w));
-    let world = model_matrix * bone_transform;
+    let bone_transform = mat4x4<f32>(
+        (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.w] * model.bone_weights.w)
+    );
+
+    let world = bone_transform * model_matrix;// * bone_transform;
 
     let skinned_normal = normalize(mat3x3<f32>(world[0].xyz, world[1].xyz, world[2].xyz) * model.normal);
- 
+
     let transformed_tangent = bone_transform * vec4<f32>(model.tangent, 0.0);
     let skinned_tangent = normalize(transformed_tangent.xyz);
 
@@ -84,10 +87,10 @@ fn vs_main(
     // let world_tangent = normalize(normal_matrix * model.tangent);
     // let world_bitangent = normalize(normal_matrix * model.bitangent);
     let tangent_matrix = transpose(mat3x3<f32>(
-         skinned_tangent,
-         skinned_bitangent,
-         skinned_normal,
-     ));
+        skinned_tangent,
+        skinned_bitangent,
+        skinned_normal,
+    ));
 
     let world_position = world * vec4<f32>(model.position, 1.0);
 
