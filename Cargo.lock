@@ -1884,6 +1884,7 @@ dependencies = [
  "glam 0.30.9",
  "image",
  "libm",
+ "once_cell",
  "ozz-animation-rs",
  "pollster",
  "rapier3d",
