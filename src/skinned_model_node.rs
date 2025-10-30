@@ -58,7 +58,7 @@ impl SkinnedModelNode {
                 });
                 i += 1;
             }
-            println!("Num bones: {}", i);
+            println!("Num bones in model = {}, Num bones: {}", num_bones, i);
         }
 
         let storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
