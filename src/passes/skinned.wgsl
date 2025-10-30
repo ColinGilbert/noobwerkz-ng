@@ -13,12 +13,12 @@ struct Light {
 @group(2) @binding(0)
 var<uniform> light: Light;
 
-struct BoneMatrixData {
+struct BoneMatrix {
     values: array<mat4x4<f32>>,
 };
 
 @group(3) @binding(0)
-var<storage, read> bone_matrices: BoneMatrixData;
+var<storage, read> bone_matrices: BoneMatrix;
 @group(3) @binding(1)
 var<uniform> num_bones: u32;
 
@@ -43,9 +43,8 @@ struct InstanceInput {
 }
 
 struct VertexOutput {
-    @builtin(position) final_position: vec4<f32>,
+    @builtin(position) clip_position: vec4<f32>,
     @location(0) tex_coords: vec2<f32>,
-    // @location(1) world_normal: vec3<f32>,
     @location(1) tangent_position: vec3<f32>,
     @location(2) tangent_light_position: vec3<f32>,
     @location(3) tangent_view_position: vec3<f32>,
@@ -70,8 +69,8 @@ fn vs_main(
     let bone_transform = mat4x4<f32>(
         (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[num_bones * model.instance_index + model.bone_indices.w] * model.bone_weights.w)
     );
-
-    let world = bone_transform * model_matrix;// * bone_transform;
+    
+    let world = model_matrix * bone_transform;
 
     let skinned_normal = normalize(mat3x3<f32>(world[0].xyz, world[1].xyz, world[2].xyz) * model.normal);
 
@@ -97,7 +96,7 @@ fn vs_main(
     //let normal_matrix = transpose(model.normal)
 
     var out: VertexOutput;
-    out.final_position = camera.view_proj * world_position;
+    out.clip_position = camera.view_proj * world_position;
     //out.world_normal = v_normal;
     out.tex_coords = model.tex_coords;
     out.tangent_position = tangent_matrix * world_position.xyz;
