@@ -74,7 +74,7 @@ fn vs_main(
     let final_position = world * vec4<f32>(model.position.xyz, 1.0);
     let skinned_normal = normalize(normal_matrix * mat3x3<f32>(world[0].xyz, world[1].xyz, world[2].xyz) * model.normal);
  
-    let skinned_tangent = normalize(vec3<f32>(bone_transform * vec4<f32>(model.tangent.xyz, 0.0)));
+    let skinned_tangent = normalize(vec3<f32>(bone_transform * vec4<f32>(model.tangent.xyz, 0.0)).xyz);
 
     // Calculate bitangent from the normal and tangent
     let skinned_bitangent = cross(skinned_normal, skinned_tangent);
