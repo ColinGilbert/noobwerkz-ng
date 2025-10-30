@@ -91,7 +91,7 @@ fn vs_main(
         skinned_normal,
     ));
 
-    let world_position = world * vec4<f32>(model.position, 1.0);
+    let world_position = world * vec4<f32>(model.position, 0.0);
 
     //let normal_matrix = transpose(model.normal)
 
