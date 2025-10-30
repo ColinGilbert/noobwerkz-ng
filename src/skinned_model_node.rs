@@ -7,7 +7,7 @@ pub struct SkinnedModelNode {
     pub instances: Vec<Instance>,
     //pub visible: Vec<bool>,
     pub playbacks: Vec<OzzPlayback>,
-    pub bone_matrices: Vec<AnimationMatrix>,
+    pub bone_matrices: Vec<BoneMatrix>,
     pub num_bones: u32,
     pub storage_buffer: wgpu::Buffer,
     pub num_bones_buffer: wgpu::Buffer,
@@ -24,7 +24,7 @@ impl SkinnedModelNode {
     ) -> Self {
         let mut playbacks = Vec::new();
         let skeleton = skeletal_context.skeleton.clone();
-        let num_bones = skeleton.num_joints() as u32;
+        let num_bones = skeleton.num_joints() as u32 - 1;
         let animation = skeletal_context.animations[0].clone();
         let len = instances.len();
         let mut bone_matrices = Vec::new();
@@ -45,7 +45,7 @@ impl SkinnedModelNode {
             let bone_transforms = p.bone_trans();
             //let mut i = 0;
             for b in bone_transforms {
-                bone_matrices.push(AnimationMatrix {
+                bone_matrices.push(BoneMatrix {
                     data: (glam::Mat4::IDENTITY
                         * glam::Mat4::from_translation(b.position)
                         * glam::Mat4::from_quat(b.rotation)
@@ -106,7 +106,7 @@ impl SkinnedModelNode {
             p.update(dt);
             let bone_transforms = p.bone_trans();
             for b in bone_transforms {
-                self.bone_matrices.push(AnimationMatrix {
+                self.bone_matrices.push(BoneMatrix {
                     data: (glam::Mat4::IDENTITY
                         * glam::Mat4::from_translation(b.position)
                         * glam::Mat4::from_quat(b.rotation)

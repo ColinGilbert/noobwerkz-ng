@@ -273,6 +273,6 @@ where
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct AnimationMatrix {
+pub struct BoneMatrix {
     pub data: [[f32; 4]; 4],
 }
