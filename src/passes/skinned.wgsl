@@ -20,8 +20,6 @@ struct AnimationMatrixData {
 @group(3) @binding(0)
 var<storage, read> bone_matrices: AnimationMatrixData;
 @group(3) @binding(1)
-var<storage, read> inverse_transpose_bone_matrices: AnimationMatrixData;
-@group(3) @binding(2)
 var<uniform> num_bones: u32;
 
 struct VertexInput {
