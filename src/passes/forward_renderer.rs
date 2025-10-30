@@ -86,7 +86,7 @@ impl Pass for ForwardRenderer {
                 render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
                 render_pass.set_pipeline(&self.light_render_pipeline);
                 render_pass.draw_light_model(
-                    &models[m.model_idx],
+                    &models[0],
                     &self.camera_bind_group,
                     &self.light_bind_group,
                 );
