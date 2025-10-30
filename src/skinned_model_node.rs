@@ -104,7 +104,7 @@ impl SkinnedModelNode {
 
         for p in &mut self.playbacks {
             p.update(dt);
-            let bone_transforms = p.spine_trans();
+            let bone_transforms = p.bone_trans();
             for b in bone_transforms {
                 self.bone_matrices.push(AnimationMatrix {
                     data: (glam::Mat4::IDENTITY
