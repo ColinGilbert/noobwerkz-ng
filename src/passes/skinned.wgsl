@@ -77,7 +77,7 @@ fn vs_main(
         let bone_matrix = bone_matrices.values[num_bones * model.instance_index + bone_index];
         
         // Accumulate the weighted bone transformation
-        skinned_position += (boneMatrix * vec4<f32>(in.position, 1.0)) * weight;
+        skinned_position += (bone_matrix * vec4<f32>(in.position, 1.0)) * weight;
     }
 
     let world = model_matrix * bone_transform;
