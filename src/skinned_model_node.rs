@@ -25,14 +25,14 @@ impl SkinnedModelNode {
     ) -> Self {
         let mut playbacks = Vec::new();
         let skeleton = skeletal_context.skeleton.clone();
-        let num_bones = [skeleton.num_joints() as u32];
+        let num_bones = skeleton.num_joints() as u32;
         let animation = skeletal_context.animations[0].clone();
         let len = instances.len();
         let mut bone_matrices = Vec::new();
 
         let num_bones_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Num bones uniform buffer"),
-            contents: bytemuck::cast_slice(&num_bones),
+            contents: bytemuck::cast_slice(&[num_bones]),
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
 
@@ -84,7 +84,7 @@ impl SkinnedModelNode {
             visible: vec![true; len],
             playbacks,
             bone_matrices,
-            num_bones: num_bones[0],
+            num_bones,
             storage_buffer,
             num_bones_buffer,
             bind_group,
