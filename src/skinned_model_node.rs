@@ -105,8 +105,8 @@ impl SkinnedModelNode {
             for b in bone_transforms {
                 self.bone_matrices.push(AnimationMatrix {
                     data: (glam::Mat4::IDENTITY
-                        * glam::Mat4::from_translation(b.position)
                         * glam::Mat4::from_quat(b.rotation)
+                        * glam::Mat4::from_translation(b.position)
                         )
                     .to_cols_array_2d()
                 });
