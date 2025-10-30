@@ -91,7 +91,7 @@ fn vs_main(
         skinned_normal,
     ));
 
-    let world_position = bone_transform * modek_matrix * vec4<f32>(model.position, 1.0);
+    let world_position = bone_transform * model_matrix * vec4<f32>(model.position, 1.0);
 
     var out: VertexOutput;
     out.clip_position = camera.view_proj * world_position;
