@@ -185,7 +185,7 @@ impl State {
     }
 
     pub fn update(&mut self, dt: std::time::Duration) {
-        println!("update dt={}", dt.as_millis());
+        println!("update dt={}", dt.as_secs_f32());
         if let Some(cb) = *USER_UPDATE_CALLBACK.lock().unwrap() {
             cb(
                 &mut self.gfx_ctx,
