@@ -70,7 +70,7 @@ fn vs_main(
     //     (model.bone_weights.x * bone_matrices.values[(num_bones * model.instance_index) + model.bone_indices.x]) + (model.bone_weights.y * bone_matrices.values[(num_bones * model.instance_index) + model.bone_indices.y]) + (model.bone_weights.z * bone_matrices.values[(num_bones * model.instance_index) + model.bone_indices.z]) + (model.bone_weights.w * bone_matrices.values[(num_bones * model.instance_index) + model.bone_indices.w])
     // );
 
-       var skinned_position: vec4<f32> = vec4f<f32>(0.0, 0.0, 0.0, 0.0);
+       var skinned_position: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
        for (var i: u32 = 0u; i < 4u; i = i + 1u) {
         let bone_index = model.bone_indices[i];
         let weight = model.bone_weights[i];
