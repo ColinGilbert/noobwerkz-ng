@@ -114,7 +114,7 @@ impl Pass for ForwardRenderer {
                 // }
 
 
-                for i in m.instances {
+                for i in &m.instances {
                     instance_data.push(i.to_skinned_raw());
                     count += 1;
                 }
