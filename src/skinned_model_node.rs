@@ -123,22 +123,22 @@ impl SkinnedModelNode {
         self.storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Animation matrices storage buffer"),
             contents: bytemuck::cast_slice(&self.bone_matrices),
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         });
 
-        self.bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: bone_matrices_bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: self.storage_buffer.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: self.num_bones_buffer.as_entire_binding(),
-                },
-            ],
-            label: Some("Animation matrices bind Group"),
-        });
+        // self.bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        //     layout: bone_matrices_bind_group_layout,
+        //     entries: &[
+        //         wgpu::BindGroupEntry {
+        //             binding: 0,
+        //             resource: self.storage_buffer.as_entire_binding(),
+        //         },
+        //         wgpu::BindGroupEntry {
+        //             binding: 1,
+        //             resource: self.num_bones_buffer.as_entire_binding(),
+        //         },
+        //     ],
+        //     label: Some("Animation matrices bind Group"),
+        // });
     }
 }
