@@ -183,13 +183,13 @@ pub async fn load_model_from_serialized(
             while i < bone_indices_serialized.len() as usize {
                 let mut v = SkinnedModelVertex::from_vert(&verts[i]);
                 let bone_indices = bone_indices_serialized.get(i as u32);
-                v.bone_indices[0] = bone_indices.get_array4u_x() as u32;
-                v.bone_indices[1] = bone_indices.get_array4u_y() as u32;
-                v.bone_indices[2] = bone_indices.get_array4u_z() as u32;
-                v.bone_indices[3] = bone_indices.get_array4u_w() as u32;
+                v.bone_indices[0] = bone_indices.get_array4u_x();
+                v.bone_indices[1] = bone_indices.get_array4u_y();
+                v.bone_indices[2] = bone_indices.get_array4u_z();
+                v.bone_indices[3] = bone_indices.get_array4u_w();
                 verts_skinned.push(v);
                 s += "(";
-                for bi in v.bone_indices{
+                for bi in v.bone_indices {
                     s += &bi.to_string();
                     s += " ";
                 }
