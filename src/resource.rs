@@ -197,7 +197,7 @@ pub async fn load_model_from_serialized(
 
                 i += 1;
             }
-            s += "\nBone weights:\n";
+            //s += "\nBone weights:\n";
             let bone_weights_serialized = mesh_serialized.get_bone_weights().unwrap();
             i = 0;
             
@@ -209,12 +209,12 @@ pub async fn load_model_from_serialized(
                 v.bone_weights[2] = bone_weights.get_array4f_z();
                 v.bone_weights[3] = bone_weights.get_array4f_w();
                 verts_skinned[i] = v;
-                s += "(";
-                for bw in v.bone_weights {
-                    s += &bw.to_string();
-                    s += " ";
-                }
-                s+= ")";
+               // s += "(";
+               // for bw in v.bone_weights {
+               //     s += &bw.to_string();
+               //     s += " ";
+               // }
+               // s+= ")";
                 i += 1;
             }
             let bone_names_serialized = mesh_serialized.get_bone_names().unwrap();
@@ -228,11 +228,11 @@ pub async fn load_model_from_serialized(
                         .unwrap(),
                 );
             }
-            s += "\nBone names\n";
-            for bn in bone_names {
-                s += &bn;
-                s += " ";
-            }
+            // s += "\nBone names\n";
+            // for bn in bone_names {
+            //     s += &bn;
+            //     s += " ";
+            // }
             println!("{}", s);
 
             let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
