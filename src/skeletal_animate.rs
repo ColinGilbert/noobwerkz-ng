@@ -1,5 +1,5 @@
 use glam::Vec4Swizzles;
-use ozz_animation_rs::OzzBuf;
+use ozz_animation_rs::{OzzBuf, SoaTransform};
 use std::sync::{Arc, RwLock};
 
 #[derive(Debug, Clone, Copy)]
@@ -27,6 +27,7 @@ pub struct OzzPlayback {
     models: Arc<RwLock<Vec<glam::Mat4>>>,
     bone_trans: Vec<OzzTransform>,
     spine_trans: Vec<OzzTransform>,
+    sample_out: Arc<RwLock<Vec<SoaTransform>>>,
 }
 
 impl OzzPlayback {
@@ -60,7 +61,7 @@ impl OzzPlayback {
         o.l2m_job.set_skeleton(skeleton.clone());
         o.l2m_job.set_input(sample_out.clone());
         o.l2m_job.set_output(o.models.clone());
-
+        o.sample_out = sample_out;
         let mut bone_count = 0;
         let mut spine_count = 0;
         for i in 0..skeleton.num_joints() {
@@ -97,7 +98,7 @@ impl OzzTrait for OzzPlayback {
     fn update(&mut self, dt: web_time::Duration) {
         let duration = self.sample_job.animation().unwrap().duration();
         // println!("Duration {}, dt {}", duration, dt.as_secs_f32());
-        self.seek += dt.as_secs_f32()* 1000.0;
+        self.seek += dt.as_secs_f32() * 1000.0;
         self.seek %= duration;
         let ratio = self.seek / duration;
 
