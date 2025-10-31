@@ -197,13 +197,13 @@ pub async fn load_model_from_serialized(
                 s += ") ";
 
                 s += "Serialized (";
-                s += bone_indices.get_array4u_x().to_string();
+                s += &bone_indices.get_array4u_x().to_string();
                 s += " ";
-                s += bone_indices.get_array4u_y().to_string();
+                s += &bone_indices.get_array4u_y().to_string();
                 s += " ";
-                s += bone_indices.get_array4u_z().to_string();
+                s += &bone_indices.get_array4u_z().to_string();
                 s += " ";
-                s += bone_indices.get_array4u_w().to_string();
+                s += &bone_indices.get_array4u_w().to_string();
                 s += ")";
 
                 i += 1;
