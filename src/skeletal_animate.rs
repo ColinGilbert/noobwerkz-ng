@@ -46,6 +46,7 @@ impl OzzPlayback {
             ])),
             bone_trans: Vec::new(),
             spine_trans: Vec::new(),
+            sample_out: Arc::new(RwLock::new(Vec::new())),
         };
 
         o.sample_job.set_animation(animation.clone());
