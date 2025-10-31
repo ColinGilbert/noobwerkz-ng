@@ -54,7 +54,7 @@ impl OzzPlayback {
             ));
         let sample_out = Arc::new(RwLock::new(vec![
             ozz_animation_rs::SoaTransform::default();
-            skeleton.num_soa_joints()
+            skeleton.num_joints()
         ]));
         println!("Num joints: {} NUm SoA joints: {}",skeleton.num_joints(), skeleton.num_soa_joints() );
         o.sample_job.set_output(sample_out.clone());
