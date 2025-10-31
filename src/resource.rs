@@ -179,14 +179,14 @@ pub async fn load_model_from_serialized(
             let bone_indices_serialized = mesh_serialized.get_bone_indices().unwrap();
             let mut s = String::new();
             s += "Bone indices:\n";
-            let mut i: usize = 0;
-            while i < bone_indices_serialized.len() as usize {
+            let mut i = 0;
+            while i < bone_indices_serialized.len() {
                 let mut v = SkinnedModelVertex::from_vert(&verts[i]);
-                let bone_indices_r = bone_indices_serialized.get(i as u32);
-                v.bone_indices[0] = bone_indices_r.get_array4u_x();
-                v.bone_indices[1] = bone_indices_r.get_array4u_y();
-                v.bone_indices[2] = bone_indices_r.get_array4u_z();
-                v.bone_indices[3] = bone_indices_r.get_array4u_w();
+                let bone_indices = bone_indices_serialized.get(i as u32);
+                v.bone_indices[0] = bone_indices.get_array4u_x();
+                v.bone_indices[1] = bone_indices.get_array4u_y();
+                v.bone_indices[2] = bone_indices.get_array4u_z();
+                v.bone_indices[3] = bone_indices.get_array4u_w();
                 verts_skinned.push(v);
                 s += "Vertex (";
                 for bi in v.bone_indices {
@@ -201,7 +201,7 @@ pub async fn load_model_from_serialized(
             let bone_weights_serialized = mesh_serialized.get_bone_weights().unwrap();
             i = 0;
 
-            while i < bone_weights_serialized.len() as usize {
+            while i < bone_weights_serialized.len() {
                 let mut v = verts_skinned[i];
                 let bone_weights = bone_weights_serialized.get(i as u32);
                 v.bone_weights[0] = bone_weights.get_array4f_x();
@@ -209,12 +209,6 @@ pub async fn load_model_from_serialized(
                 v.bone_weights[2] = bone_weights.get_array4f_z();
                 v.bone_weights[3] = bone_weights.get_array4f_w();
                 verts_skinned[i] = v;
-                // s += "(";
-                // for bw in v.bone_weights {
-                //     s += &bw.to_string();
-                //     s += " ";
-                // }
-                // s+= ")";
                 i += 1;
             }
             let bone_names_serialized = mesh_serialized.get_bone_names().unwrap();
