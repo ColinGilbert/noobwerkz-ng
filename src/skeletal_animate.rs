@@ -56,7 +56,7 @@ impl OzzPlayback {
             ozz_animation_rs::SoaTransform::default();
             skeleton.num_soa_joints()
         ]));
-        println!("Num joints: {} NUm SoA joints: {}",skeleton.num_joints(), skeleton.num_soa_joints() );
+        //println!("Num joints: {} NUm SoA joints: {}",skeleton.num_joints(), skeleton.num_soa_joints() );
         o.sample_job.set_output(sample_out.clone());
         o.l2m_job.set_skeleton(skeleton.clone());
         o.l2m_job.set_input(sample_out.clone());

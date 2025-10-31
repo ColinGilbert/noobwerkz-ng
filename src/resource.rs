@@ -177,6 +177,8 @@ pub async fn load_model_from_serialized(
         } else {
             // We extract the bones components now
             let bone_indices_serialized = mesh_serialized.get_bone_indices().unwrap();
+            let mut s = String::new();
+            s += "Bone indices";
             let mut i: usize = 0;
             while i < bone_indices_serialized.len() as usize {
                 let mut v = SkinnedModelVertex::from_vert(&verts[i]);
@@ -186,6 +188,12 @@ pub async fn load_model_from_serialized(
                 v.bone_indices[2] = bone_indices.get_array4u_z() as u32;
                 v.bone_indices[3] = bone_indices.get_array4u_w() as u32;
                 verts_skinned.push(v);
+                for bi in v.bone_indices{
+                    s += &bi.to_string();
+                    s += " ";
+                }
+                s += "\n";
+                println!(s);
                 i += 1;
             }
 
@@ -201,6 +209,8 @@ pub async fn load_model_from_serialized(
                 verts_skinned[i] = v;
                 i += 1;
             }
+
+            s +=
 
             let bone_names_serialized = mesh_serialized.get_bone_names().unwrap();
             let mut bone_names = Vec::<String>::new();
