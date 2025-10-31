@@ -188,7 +188,7 @@ pub async fn load_model_from_serialized(
                 v.bone_indices[2] = bone_indices.get_array4u_z() as u32;
                 v.bone_indices[3] = bone_indices.get_array4u_w() as u32;
                 verts_skinned.push(v);
-                s+= "(";
+                s += "(";
                 for bi in v.bone_indices{
                     s += &bi.to_string();
                     s += " ";
@@ -197,9 +197,10 @@ pub async fn load_model_from_serialized(
 
                 i += 1;
             }
-            println!("{}", s);
+            s += "\nBone weights:\n";
             let bone_weights_serialized = mesh_serialized.get_bone_weights().unwrap();
             i = 0;
+            
             while i < bone_weights_serialized.len() as usize {
                 let mut v = verts_skinned[i];
                 let bone_weights = bone_weights_serialized.get(i as u32);
@@ -208,6 +209,12 @@ pub async fn load_model_from_serialized(
                 v.bone_weights[2] = bone_weights.get_array4f_z();
                 v.bone_weights[3] = bone_weights.get_array4f_w();
                 verts_skinned[i] = v;
+                s += "(";
+                for bw in v.bone_weights {
+                    s += &bw.to_string();
+                    s += " ";
+                }
+                s+= ")";
                 i += 1;
             }
 
