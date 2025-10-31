@@ -54,7 +54,7 @@ impl OzzPlayback {
             ));
         let sample_out = Arc::new(RwLock::new(vec![
             ozz_animation_rs::SoaTransform::default();
-            skeleton.num_joints()
+            skeleton.num_soa_joints()
         ]));
         println!("Num joints: {} NUm SoA joints: {}",skeleton.num_joints(), skeleton.num_soa_joints() );
         o.sample_job.set_output(sample_out.clone());
@@ -97,7 +97,7 @@ impl OzzTrait for OzzPlayback {
 
     fn update(&mut self, dt: web_time::Duration) {
         let duration = self.sample_job.animation().unwrap().duration();
-        // println!("Duration {}, dt {}", duration, dt.as_secs_f32());
+        println!("Duration {}, dt {}", duration, dt.as_secs_f32());
         self.seek += dt.as_secs_f32()* 1000.0;
         self.seek %= duration;
         let ratio = self.seek / duration;
