@@ -217,7 +217,6 @@ pub async fn load_model_from_serialized(
                 s+= ")";
                 i += 1;
             }
-
             let bone_names_serialized = mesh_serialized.get_bone_names().unwrap();
             let mut bone_names = Vec::<String>::new();
             for (i, _n) in bone_names_serialized.iter().enumerate() {
@@ -229,6 +228,12 @@ pub async fn load_model_from_serialized(
                         .unwrap(),
                 );
             }
+            s += "\nBone names\n";
+            for bn in bone_names {
+                s += &bn;
+                s += " ";
+            }
+            println!("{}", s);
 
             let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some(&format!("{:?} Skinned Vertex Buffer", name)),
