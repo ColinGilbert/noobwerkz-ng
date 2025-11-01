@@ -62,7 +62,7 @@ fn vs_main(
         instance.model_matrix_3,
     );
  
-    let offset = num_bones * (model.instance_index -1 );
+    let offset = num_bones * model.instance_index;
     let bone_transform = mat4x4<f32>(
         (bone_matrices.values[offset + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.values[offset + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[offset + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[offset + model.bone_indices.w] * model.bone_weights.w )
     );
