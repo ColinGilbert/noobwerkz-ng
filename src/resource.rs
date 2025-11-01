@@ -41,25 +41,34 @@ struct SerializedModel {
     materials: Vec<SerializedMaterial>,
 }
 
-pub fn load_model_from_json(filepath: String, filename: String, default_material: Material) -> SerializedModel {
-    let mut o = SerializedModel {
-    meshes: Vec::new(),
-    materials: Vec::new(),
-};
+impl SerializedModel {
+    pub fn new() -> Self {
+        Self {
+            meshes: Vec::new(),
+            materials: Vec::new(),
+        }
+    }
+}
+
+pub fn load_model_from_json(
+    filepath: String,
+    filename: String,
+    default_material: Material,
+) -> SerializedModel {
+    let mut o = SerializedModel::new();
     let full_path = filepath.clone() + "/" + &filename;
     // println!("Full path: {}", full_path);
     let data = fs::read_to_string(full_path).unwrap();
     let parsed = json::parse(&data).unwrap();
     let mut meshes_index = 0;
-    
-    while meshes_index < parsed["meshes"].len()  {
-        let name= &parsed["meshes"][meshes_index]["name"];
+
+    while meshes_index < parsed["meshes"].len() {
+        let name = &parsed["meshes"][meshes_index]["name"];
         println!("Mesh name{}", name);
         meshes_index += 1;
     }
     o
 }
-
 
 // TODO: Robustify
 pub async fn load_model_from_serialized(
@@ -73,7 +82,8 @@ pub async fn load_model_from_serialized(
     let full_path = filepath.clone() + "/" + &filename;
     // println!("Full path: {}", full_path);
     let data = fs::read(full_path).unwrap();
-    let deserialized_data: SerializedModel = rmp_serde::from_slice(&data).expect("Serialized model did not load");
+    let deserialized_data: SerializedModel =
+        rmp_serde::from_slice(&data).expect("Serialized model did not load");
     // let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
     //     label: Some(&format!("{:?} Vertex Buffer", name)),
     //     contents: bytemuck::cast_slice(&verts),
