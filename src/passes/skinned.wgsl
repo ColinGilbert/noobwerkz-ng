@@ -66,7 +66,7 @@ fn vs_main(
     //     instance.normal_matrix_1,
     //     instance.normal_matrix_2,
     // );
-    let offset = num_bones * model.instance_index -1;
+    let offset = num_bones * model.instance_index;
     let bone_transform = mat4x4<f32>(
         (bone_matrices.values[offset + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.values[offset + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[offset + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[offset + model.bone_indices.w] * model.bone_weights.w )
     );
@@ -94,7 +94,7 @@ fn vs_main(
 
 
     var out: VertexOutput;
-    out.clip_position = camera.view_proj * model * model.position;
+    out.clip_position = camera.view_proj * world * model.position;
     //out.world_normal = v_normal;
     out.tex_coords = model.tex_coords;
     out.tangent_position = tbn_matrix * world_position.xyz;
