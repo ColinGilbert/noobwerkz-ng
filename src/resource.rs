@@ -62,8 +62,8 @@ pub fn load_model_from_json(
     let parsed = json::parse(&data).unwrap();
     let mut meshes_index = 0;
 
-    while meshes_index < parsed["meshes"].len() {
-        let name = &parsed["meshes"][meshes_index]["name"];
+    while meshes_index < parsed["model"]["meshes"].len() {
+        let name = &parsed["model"]["meshes"][meshes_index]["name"];
         println!("Mesh name {}", name.to_string());
         meshes_index += 1;
     }
