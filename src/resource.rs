@@ -277,7 +277,7 @@ pub async fn load_skinned_model_from_serialized(
 
         let mut skinned_verts = Vec::<SkinnedModelVertex>::new();
 
-        for v in verts {
+        for (i, v) in verts.iter().enumerate() {
             let mut sv = SkinnedModelVertex::from_vert(&v);
             sv.bone_indices = m.bone_indices[i];
             sv.bone_weights = m.bone_weights[i];
