@@ -84,10 +84,7 @@ impl SerializedModel {
     }
 }
 
-pub fn load_model_from_json(
-    filepath: String,
-    filename: String,
-) -> SerializedModel {
+pub fn load_model_from_json(filepath: String, filename: String) -> SerializedModel {
     let mut o = SerializedModel::new();
     let full_path = filepath.clone() + "/" + &filename;
     // println!("Full path: {}", full_path);
@@ -239,6 +236,7 @@ pub fn load_model_from_json(
 pub async fn load_skinned_model_from_serialized(
     model: SerializedModel,
     default_material: Material,
+    path: String,
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
@@ -284,7 +282,6 @@ pub async fn load_skinned_model_from_serialized(
             skinned_verts.push(sv);
         }
 
-
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some(&format!("{:?} Skinned Vertex Buffer", m.name)),
             contents: bytemuck::cast_slice(&skinned_verts),
@@ -320,8 +317,8 @@ pub async fn load_skinned_model_from_serialized(
         let name = m.name;
         let diffuse_texture: Texture;
         if m.diffuse_texture_path != "" {
-            let diffuse_texture_result =
-                load_texture(&m.diffuse_texture_path, false, device, queue).await;
+            let full_path: String = path.clone() + "/" + &m.diffuse_texture_path;
+            let diffuse_texture_result = load_texture(&full_path, false, device, queue).await;
             match diffuse_texture_result {
                 Ok(value) => {
                     diffuse_texture = value;
@@ -340,8 +337,9 @@ pub async fn load_skinned_model_from_serialized(
 
         let normal_texture: texture::Texture;
         if m.normals_texture_path != "" {
-            let normal_texture_result =
-                load_texture(&m.normals_texture_path, true, device, queue).await;
+            let full_path: String = path.clone() + "/" + &m.normals_texture_path;
+
+            let normal_texture_result = load_texture(&full_path, true, device, queue).await;
             match normal_texture_result {
                 Ok(value) => {
                     normal_texture = value;
