@@ -46,12 +46,14 @@ pub fn load_model_from_json(filepath: String, filename: String, default_material
     let full_path = filepath.clone() + "/" + &filename;
     // println!("Full path: {}", full_path);
     let data = fs::read_to_string(full_path).unwrap();
-    let parsed = json::parse(&data);
+    let parsed = json::parse(&data).unwrap();
     let mut meshes_index = 0;
     
-    while meshes_index < parsed.meshes.len()  {
-    let name: String =  parsed.meshes.name;
-    
+    while meshes_index < parsed["meshes"].len()  {
+        let name= &parsed["meshes"][meshes_index]["name"];
+        println!("Mesh name{}", name);
+        meshes_index += 1;
+    }
     o
 }
 
