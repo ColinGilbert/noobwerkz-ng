@@ -104,7 +104,7 @@ impl SkinnedModelNode {
                             x: b.scale,
                             y: b.scale,
                             z: b.scale,
-                        }, b.rotation, -b.position)
+                        }, b.rotation, b.position)
                     .to_cols_array_2d(),
                 });
             }
