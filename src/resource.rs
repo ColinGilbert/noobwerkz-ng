@@ -242,7 +242,7 @@ pub async fn load_skinned_model_from_serialized(
     texture_layout: &wgpu::BindGroupLayout,
 ) -> Option<SkinnedModel> {
     let mut model_results = SkinnedModel::new();
-    for m in model.meshes {
+    for mut m in model.meshes {
         let mut verts = Vec::<ModelVertex>::new();
         let mut indices = Vec::<u32>::new();
         if m.positions.len() != m.normals.len() {
