@@ -61,12 +61,8 @@ fn vs_main(
         instance.model_matrix_2,
         instance.model_matrix_3,
     );
-    // let normal_matrix = mat3x3<f32>(
-    //     instance.normal_matrix_0,
-    //     instance.normal_matrix_1,
-    //     instance.normal_matrix_2,
-    // );
-    let offset = num_bones * model.instance_index;
+ 
+    let offset = (num_bones * model.instance_index) - 1;
     let bone_transform = mat4x4<f32>(
         (bone_matrices.values[offset + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.values[offset + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[offset + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[offset + model.bone_indices.w] * model.bone_weights.w )
     );
@@ -79,23 +75,16 @@ fn vs_main(
     let transformed_tangent = bone_transform * vec4<f32>(model.tangent, 0.0);
     let skinned_tangent = normalize(transformed_tangent.xyz);
 
-    // Calculate bitangent from the normal and tangent
     let skinned_bitangent = cross(skinned_normal, skinned_tangent);
 
-    // Construct the tangent matrix
-    //let world_normal = normalize(normal_matrix * model.normal);
-    // let world_tangent = normalize(normal_matrix * model.tangent);
-    // let world_bitangent = normalize(normal_matrix * model.bitangent);
     let tbn_matrix = transpose(mat3x3<f32>(
         skinned_tangent,
         skinned_bitangent,
         skinned_normal,
     ));
 
-
     var out: VertexOutput;
     out.clip_position = camera.view_proj * world_position;
-    //out.world_normal = v_normal;
     out.tex_coords = model.tex_coords;
     out.tangent_position = tbn_matrix * world_position.xyz;
     out.tangent_view_position = tbn_matrix * camera.view_pos.xyz;
