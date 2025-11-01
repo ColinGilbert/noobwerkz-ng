@@ -58,7 +58,7 @@ pub fn load_model_from_json(
     let mut o = SerializedModel::new();
     let full_path = filepath.clone() + "/" + &filename;
     // println!("Full path: {}", full_path);
-    let data = fs::read_to_string(full_path).unwrap();
+    let data = fs::read_to_string(full_path).unwrap() + " }";
     let parsed = json::parse(&data).unwrap();
     let mut meshes_index = 0;
 
