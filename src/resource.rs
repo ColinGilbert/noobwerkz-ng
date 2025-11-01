@@ -56,7 +56,7 @@ pub async fn load_model_from_serialized(
     let full_path = filepath.clone() + "/" + &filename;
     // println!("Full path: {}", full_path);
     let data = fs::read(full_path).unwrap();
-    let deserialized_data: SerializedModel = rmp_serde::from_slice(&data).unwrap();
+    let deserialized_data: SerializedModel = rmp_serde::from_slice(&data).expect("Serialized model");
     // let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
     //     label: Some(&format!("{:?} Vertex Buffer", name)),
     //     contents: bytemuck::cast_slice(&verts),
