@@ -117,7 +117,7 @@ impl SkinnedModelNode {
         //     usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         // });
 
-        queue.write_buffer(&self.storage_buffer, 1, bytemuck::cast_slice(&self.bone_matrices));
+        queue.write_buffer(&self.storage_buffer, 16, bytemuck::cast_slice(&self.bone_matrices));
 
         // self.bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
         //     layout: bone_matrices_bind_group_layout,
