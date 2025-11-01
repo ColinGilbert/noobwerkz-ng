@@ -7,7 +7,6 @@ pub mod texture;
 pub mod model;
 pub mod resource;
 pub mod instance;
-pub mod model3d_schema_capnp;
 pub mod passes;
 pub mod model_node;
 pub mod skinned_model_node;
