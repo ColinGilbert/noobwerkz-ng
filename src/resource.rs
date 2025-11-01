@@ -64,7 +64,7 @@ pub fn load_model_from_json(
 
     while meshes_index < parsed["meshes"].len() {
         let name = &parsed["meshes"][meshes_index]["name"];
-        println!("Mesh name{}", name);
+        println!("Mesh name {}", name.to_string());
         meshes_index += 1;
     }
     o
