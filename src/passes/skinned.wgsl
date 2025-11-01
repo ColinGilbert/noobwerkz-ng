@@ -72,9 +72,9 @@ fn vs_main(
     );
 
     let world_position = bone_transform * vec4<f32>(model.position, 1.0);
-    let world = model_matrix * bone_transform;
+    let world_matrix = model_matrix * bone_transform;
 
-    let skinned_normal = normalize(mat3x3<f32>(world[0].xyz, world[1].xyz, world[2].xyz) * model.normal);
+    let skinned_normal = normalize(mat3x3<f32>(world_matrix[0].xyz, world_matrix[1].xyz, world_matrix[2].xyz) * model.normal);
 
     let transformed_tangent = bone_transform * vec4<f32>(model.tangent, 0.0);
     let skinned_tangent = normalize(transformed_tangent.xyz);
@@ -94,7 +94,7 @@ fn vs_main(
 
 
     var out: VertexOutput;
-    out.clip_position = camera.view_proj * model_matrix *  world_position;
+    out.clip_position = model_matrix * camera.view_proj * world_position;
     //out.world_normal = v_normal;
     out.tex_coords = model.tex_coords;
     out.tangent_position = tbn_matrix * world_position.xyz;
