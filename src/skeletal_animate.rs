@@ -102,7 +102,7 @@ impl OzzTrait for OzzPlayback {
         self.seek %= duration;
         let ratio = self.seek / duration;
 
-        println!("ratio {}", ratio);
+       // println!("ratio {}", ratio);
         self.sample_job.set_ratio(ratio);
         self.sample_job.run().unwrap();
         self.l2m_job.run().unwrap();
