@@ -48,7 +48,7 @@ impl SkinnedModelNode {
             for b in bone_transforms {
                 bone_matrices.push(BoneMatrix {
                     data: (glam::Mat4::from_scale_rotation_translation(glam::Vec3{x: b.scale, y: b.scale, z: b.scale}, b.rotation, b.position))
-                    .to_cols_array(),
+                    .to_cols_array_2d(),
                 });
             }
 
@@ -106,11 +106,11 @@ impl SkinnedModelNode {
                             y: b.scale,
                             z: b.scale,
                         }, b.rotation, b.position)
-                    .to_cols_array(),
+                    .to_cols_array_2d(),
                 });
             }
         }
-        //println!("Bone matrices {}", self.bone_matrices.len());
+        println!("Bone matrices {}", self.bone_matrices.len());
         // self.storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         //     label: Some("Animation matrices storage buffer"),
         //     contents: bytemuck::cast_slice(&self.bone_matrices),
