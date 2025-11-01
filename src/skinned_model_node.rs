@@ -24,7 +24,7 @@ impl SkinnedModelNode {
     ) -> Self {
         let mut playbacks = Vec::new();
         let skeleton = skeletal_context.skeleton.clone();
-        let num_bones = skeleton.num_joints() as u32 - 1;
+        let num_bones = skeleton.num_joints() as u32 - 1; // We subtract the root bone
         println!("Num bones {}", num_bones);
         let animation = skeletal_context.animations[0].clone();
         let len = instances.len();
@@ -43,18 +43,17 @@ impl SkinnedModelNode {
         for p in &mut playbacks {
             p.update(web_time::Duration::from_secs(0));
             let bone_transforms = p.bone_trans();
-            println!("Bone transform length {}", bone_transforms.len());
+            //println!("Bone transform length {}", bone_transforms.len());
             //let mut i = 0;
             for b in bone_transforms {
                 bone_matrices.push(BoneMatrix {
                     data: (glam::Mat4::from_scale_rotation_translation(glam::Vec3{x: b.scale, y: b.scale, z: b.scale}, b.rotation, b.position))
                     .to_cols_array_2d(),
                 });
-                // i += 1;
             }
-            //println!("Num bones in model = {}, Num bones: {}", num_bones, i);
+
         }
-        // println!("Bone matrices length: {}, num bones: {}", bone_matrices.len(), num_bones);
+        println!("Bone matrices length: {}, Bone matrices size: {} MiB, num bones: {}", bone_matrices.len(), bone_matrices.len() * 16 * 4/(1024*1024), num_bones);
         let storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Animation matrices storage buffer"),
             contents: bytemuck::cast_slice(&bone_matrices),
