@@ -36,7 +36,7 @@ struct SerializedMaterial {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
-struct SerializedModel {
+pub struct SerializedModel {
     meshes: Vec<SerializedMesh>,
     materials: Vec<SerializedMaterial>,
 }
