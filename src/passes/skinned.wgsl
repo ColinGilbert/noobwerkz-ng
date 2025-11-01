@@ -71,7 +71,7 @@ fn vs_main(
         (model.bone_weights.x * bone_matrices.values[offset + model.bone_indices.x]) + (model.bone_weights.y * bone_matrices.values[offset + model.bone_indices.y]) + (model.bone_weights.z * bone_matrices.values[offset + model.bone_indices.z]) + (model.bone_weights.w * bone_matrices.values[offset + model.bone_indices.w])
     );
 
-    let world = model_matrix * bone_transform;
+    let world =  bone_transform * model_matrix;
 
     let skinned_normal = normalize(mat3x3<f32>(world[0].xyz, world[1].xyz, world[2].xyz) * model.normal);
 
