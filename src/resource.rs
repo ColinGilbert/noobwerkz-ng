@@ -251,6 +251,7 @@ pub async fn load_skinned_model_from_serialized(
         }
         if m.positions.len() != m.uvs.len() {
             println!("Not enough UVs");
+            m.uvs.resize(m.positions.len(), [0.0, 0.0]);
             return Option::None;
         }
         if m.positions.len() != m.bone_indices.len() {
