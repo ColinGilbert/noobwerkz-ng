@@ -246,15 +246,19 @@ pub async fn load_skinned_model_from_serialized(
         let mut verts = Vec::<ModelVertex>::new();
         let mut indices = Vec::<u32>::new();
         if m.positions.len() != m.normals.len() {
+            println!("Not enough normals");
             return Option::None;
         }
         if m.positions.len() != m.uvs.len() {
+            println!("Not enough UVs");
             return Option::None;
         }
         if m.positions.len() != m.bone_indices.len() {
+            println!("Not enough bone indices");
             return Option::None;
         }
         if m.positions.len() != m.bone_weights.len() {
+            println!("Not enough bone weights");
             return Option::None;
         }
         let mut i = 0;
