@@ -33,7 +33,7 @@ impl SkeletalContext {
             animations.push(Arc::new(ozz_animation_rs::Animation::from_archive(&mut a).unwrap()));
         }
 
-        //println!("Num tracks: {}", animations[0].num_tracks());
+        println!("Num tracks: {}", animations[0].num_tracks());
 
         Self {
             skeleton,

@@ -51,8 +51,8 @@ impl SkinnedModelNode {
                     .to_cols_array_2d(),
                 });
             }
-
         }
+
         println!("Bone matrices length: {}, Bone matrices size: {} MiB, num bones: {}", bone_matrices.len(), (bone_matrices.len() as f32 * 16.0 * 4.0)/(1024.0*1024.0), num_bones);
         let storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Animation matrices storage buffer"),
@@ -74,6 +74,7 @@ impl SkinnedModelNode {
             ],
             label: Some("Animation matrices bind Group"),
         });
+        
         Self {
             skinned_model_idx,
             instances,
@@ -110,28 +111,7 @@ impl SkinnedModelNode {
                 });
             }
         }
-        //println!("Bone matrices {}", self.bone_matrices.len());
-        // self.storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-        //     label: Some("Animation matrices storage buffer"),
-        //     contents: bytemuck::cast_slice(&self.bone_matrices),
-        //     usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
-        // });
 
         queue.write_buffer(&self.storage_buffer, 0, bytemuck::cast_slice(&self.bone_matrices));
-
-        // self.bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-        //     layout: bone_matrices_bind_group_layout,
-        //     entries: &[
-        //         wgpu::BindGroupEntry {
-        //             binding: 0,
-        //             resource: self.storage_buffer.as_entire_binding(),
-        //         },
-        //         wgpu::BindGroupEntry {
-        //             binding: 1,
-        //             resource: self.num_bones_buffer.as_entire_binding(),
-        //         },
-        //     ],
-        //     label: Some("Animation matrices bind Group"),
-        // });
     }
 }
