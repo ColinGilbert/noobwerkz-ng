@@ -42,7 +42,10 @@ struct SerializedModel {
 }
 
 pub fn load_model_from_json(filepath: String, filename: String, default_material: Material) -> SerializedModel {
-    let mut o: SerializedModel;
+    let mut o = SerializedModel {
+    meshes: Vec::new(),
+    materials: Vec::new(),
+};
     let full_path = filepath.clone() + "/" + &filename;
     // println!("Full path: {}", full_path);
     let data = fs::read_to_string(full_path).unwrap();
