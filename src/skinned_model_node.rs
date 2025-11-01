@@ -24,8 +24,7 @@ impl SkinnedModelNode {
     ) -> Self {
         let mut playbacks = Vec::new();
         let skeleton = skeletal_context.skeleton.clone();
-        let num_bones = skeleton.num_soa_joints() as u32; // We subtract the root bone
-        println!("Num bones {}", num_bones - 1);
+        let num_bones = skeleton.num_joints() as u32 - 1; // We subtract the root bone
         let animation = skeletal_context.animations[0].clone();
         let len = instances.len();
         let mut bone_matrices = Vec::new();
@@ -43,7 +42,7 @@ impl SkinnedModelNode {
         for p in &mut playbacks {
             p.update(web_time::Duration::from_secs(0));
             let bone_transforms = p.bone_trans();
-            println!("Bone transform length {}", bone_transforms.len());
+            //println!("Bone transform length {}", bone_transforms.len());
             //let mut i = 0;
             for b in bone_transforms {
                 bone_matrices.push(BoneMatrix {
