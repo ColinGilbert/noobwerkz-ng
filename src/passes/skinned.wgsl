@@ -72,7 +72,7 @@ fn vs_main(
     );
 
     let world_matrix = model_matrix * bone_transform;
-    let world_position = world_matrix * vec4<f32>(model.position, 0.0);
+    let world_position = world_matrix * vec4<f32>(model.position, 1.0);
 
     let skinned_normal = normalize(mat3x3<f32>(world_matrix[0].xyz, world_matrix[1].xyz, world_matrix[2].xyz) * model.normal);
 
