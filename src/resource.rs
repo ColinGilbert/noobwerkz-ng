@@ -236,7 +236,7 @@ pub fn load_model_from_json(
 }
 
 // TODO: Robustify
-pub fn load_skinned_model_from_serialized(
+pub async fn load_skinned_model_from_serialized(
     model: SerializedModel,
     default_material: Material,
     device: &mut wgpu::Device,
@@ -369,7 +369,7 @@ pub fn load_skinned_model_from_serialized(
 
     Some(model_results)
 }
-pub fn load_model_from_serialized(
+pub async fn load_model_from_serialized(
     model: SerializedModel,
     default_material: Material,
     device: &mut wgpu::Device,
