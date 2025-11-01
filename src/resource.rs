@@ -1,13 +1,10 @@
-use crate::index_types::*;
 use crate::material::*;
 use crate::model::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
 use crate::skinned_model::*;
 use crate::texture;
 // use ozz_animation_rs::*;
-use rmp_serde::{Deserializer, Serializer};
 use serde::{Deserialize, Serialize};
 use std::fs;
-use wgpu::util::DeviceExt;
 
 pub enum GenericModel {
     Textured(Model),
@@ -44,6 +41,21 @@ struct SerializedModel {
     materials: Vec<SerializedMaterial>,
 }
 
+pub fn load_model_from_json(filepath: String, filename: String, default_material: Material) -> SerializedModel {
+    let mut o: SerializedModel;
+    let full_path = filepath.clone() + "/" + &filename;
+    // println!("Full path: {}", full_path);
+    let data = fs::read_to_string(full_path).unwrap();
+    let parsed = json::parse(&data);
+    let mut meshes_index = 0;
+    
+    while meshes_index < parsed.meshes.len()  {
+    let name: String =  parsed.meshes.name;
+    
+    o
+}
+
+
 // TODO: Robustify
 pub async fn load_model_from_serialized(
     filepath: String,
@@ -56,7 +68,7 @@ pub async fn load_model_from_serialized(
     let full_path = filepath.clone() + "/" + &filename;
     // println!("Full path: {}", full_path);
     let data = fs::read(full_path).unwrap();
-    let deserialized_data: SerializedModel = rmp_serde::from_slice(&data).expect("Serialized model");
+    let deserialized_data: SerializedModel = rmp_serde::from_slice(&data).expect("Serialized model did not load");
     // let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
     //     label: Some(&format!("{:?} Vertex Buffer", name)),
     //     contents: bytemuck::cast_slice(&verts),
