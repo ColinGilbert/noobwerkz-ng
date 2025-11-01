@@ -88,9 +88,9 @@ impl SkinnedModelNode {
 
     pub fn update(
         &mut self,
-        device: &mut wgpu::Device,
+        _device: &mut wgpu::Device,
         queue: &mut wgpu::Queue,
-        bone_matrices_bind_group_layout: &BindGroupLayout,
+        _bone_matrices_bind_group_layout: &BindGroupLayout,
         dt: web_time::Duration,
     ) {
         self.bone_matrices.clear();
@@ -104,7 +104,7 @@ impl SkinnedModelNode {
                             x: b.scale,
                             y: b.scale,
                             z: b.scale,
-                        }, b.rotation, b.position)
+                        }, b.rotation, -b.position)
                     .to_cols_array_2d(),
                 });
             }
@@ -118,19 +118,19 @@ impl SkinnedModelNode {
 
         queue.write_buffer(&self.storage_buffer, 0, bytemuck::cast_slice(&self.bone_matrices));
 
-        self.bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: bone_matrices_bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: self.storage_buffer.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: self.num_bones_buffer.as_entire_binding(),
-                },
-            ],
-            label: Some("Animation matrices bind Group"),
-        });
+        // self.bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        //     layout: bone_matrices_bind_group_layout,
+        //     entries: &[
+        //         wgpu::BindGroupEntry {
+        //             binding: 0,
+        //             resource: self.storage_buffer.as_entire_binding(),
+        //         },
+        //         wgpu::BindGroupEntry {
+        //             binding: 1,
+        //             resource: self.num_bones_buffer.as_entire_binding(),
+        //         },
+        //     ],
+        //     label: Some("Animation matrices bind Group"),
+        // });
     }
 }
