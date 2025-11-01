@@ -67,7 +67,7 @@ pub fn load_model_from_json(
         println!("Mesh name {}", name.to_string());
         meshes_index += 1;
     }
-    println!("{:#}", parsed);
+    //println!("{:#}", parsed);
 
     o
 }
