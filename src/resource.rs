@@ -375,19 +375,20 @@ pub async fn load_skinned_model_from_serialized(
 pub async fn load_model_from_serialized(
     model: SerializedModel,
     default_material: Material,
+    path: String,
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
 ) -> Option<Model> {
     let mut model_results = Model::new();
-    for m in model.meshes {
+    for mut m in model.meshes {
         let mut verts = Vec::<ModelVertex>::new();
         let mut indices = Vec::<u32>::new();
         if m.positions.len() != m.normals.len() {
             return Option::None;
         }
         if m.positions.len() != m.uvs.len() {
-            return Option::None;
+            m.uvs.resize(m.positions.len(), [0.0, 0.0]);
         }
         let mut i = 0;
         while i < m.positions.len() {
@@ -440,8 +441,8 @@ pub async fn load_model_from_serialized(
         let name = m.name;
         let diffuse_texture: Texture;
         if m.diffuse_texture_path != "" {
-            let diffuse_texture_result =
-                load_texture(&m.diffuse_texture_path, false, device, queue).await;
+            let diffuse_path = path.clone() + &"/".to_owned() + &m.diffuse_texture_path;
+            let diffuse_texture_result = load_texture(&diffuse_path, false, device, queue).await;
             match diffuse_texture_result {
                 Ok(value) => {
                     diffuse_texture = value;
@@ -459,9 +460,9 @@ pub async fn load_model_from_serialized(
         }
 
         let normal_texture: texture::Texture;
+        let normals_path = path.clone() + &"/".to_owned() + &m.normals_texture_path;
         if m.normals_texture_path != "" {
-            let normal_texture_result =
-                load_texture(&m.normals_texture_path, true, device, queue).await;
+            let normal_texture_result = load_texture(&normals_path, true, device, queue).await;
             match normal_texture_result {
                 Ok(value) => {
                     normal_texture = value;
