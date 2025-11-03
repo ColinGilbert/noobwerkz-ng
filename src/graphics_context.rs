@@ -107,8 +107,8 @@ impl GraphicsContext {
                         binding: 0,
                         visibility: wgpu::ShaderStages::VERTEX,
                         ty: wgpu::BindingType::Buffer {
-                            ty: wgpu::BufferBindingType::Storage { read_only: true }, // Set to true if read-only
-                            has_dynamic_offset: true,
+                            ty: wgpu::BufferBindingType::Storage { read_only: true },
+                            has_dynamic_offset: false,
                             min_binding_size: None,
                         },
                         count: None,
