@@ -24,7 +24,7 @@ impl SkinnedModelNode {
     ) -> Self {
         let mut playbacks = Vec::new();
         let skeleton = skeletal_context.skeleton.clone();
-        let num_bones = skeleton.num_joints() as u32; // We subtract the root bone
+        let num_bones = skeleton.num_joints() as u32 - 1; // We subtract the root bone
         let animation = skeletal_context.animations[0].clone();
         let len = instances.len();
         let mut bone_matrices = Vec::new();
@@ -46,7 +46,7 @@ impl SkinnedModelNode {
             //let mut i = 0;
             for b in bone_transforms {
                 bone_matrices.push(BoneMatrix {
-                    data: (glam::Mat4::from_scale_rotation_translation(glam::Vec3{x: b.scale, y: b.scale, z: b.scale}, b.rotation, b.position))
+                    data: (glam::Mat4::from_scale_rotation_translation(glam::Vec3::splat(b.scale), b.rotation, b.position))
                     .to_cols_array_2d(),
                 });
             }
@@ -101,11 +101,7 @@ impl SkinnedModelNode {
             let bone_transforms = p.bone_trans();
             for b in bone_transforms {
                 self.bone_matrices.push(BoneMatrix {
-                    data: glam::Mat4::from_scale_rotation_translation(glam::Vec3 {
-                            x: b.scale,
-                            y: b.scale,
-                            z: b.scale,
-                        }, b.rotation, b.position)
+                    data: glam::Mat4::from_scale_rotation_translation(glam::Vec3::splat(b.scale), b.rotation, b.position)
                     .to_cols_array_2d(),
                 });
             }
