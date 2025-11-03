@@ -219,7 +219,7 @@ pub fn load_skinned_model_from_serialized(
 
         for (i, v) in verts.iter().enumerate() {
             let mut sv = SkinnedModelVertex::from_vert(&v);
-            let mut bi = m.bone_indices[i];
+            let mut bi = [0;4];//m.bone_indices[i];
             for (ii, bone_index) in m.bone_indices[i].iter().enumerate() {
                 let bone_name = &model.bone_names[*bone_index as usize].clone();
                 let j =     skeletal_context.skeleton.joint_by_name(bone_name).unwrap();
