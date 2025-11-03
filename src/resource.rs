@@ -1,9 +1,11 @@
 use crate::index_types::*;
 use crate::material::*;
 use crate::model::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
+use crate::serialized_model::*;
 use crate::skinned_model::*;
 use crate::texture;
 use crate::texture::Texture;
+use msgpacker::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use wgpu::util::DeviceExt;
@@ -13,77 +15,12 @@ pub enum GenericModel {
     SkinnedTextured(SkinnedModel),
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-struct SerializedMesh {
-    name: String,
-    translation: [f32; 3],
-    scale: [f32; 3],
-    dimensions: [f32; 3],
-    rotation: [f32; 4],
-    positions: Vec<[f32; 3]>,
-    normals: Vec<[f32; 3]>,
-    uvs: Vec<[f32; 2]>,
-    bone_indices: Vec<[u32; 4]>,
-    bone_weights: Vec<[f32; 4]>,
-    indices: Vec<u32>,
-    bone_names: Vec<String>,
-    material_index: u32,
+pub fn load_serialized_model(filepath: String, filename: String) -> SerializedModel {
+    let full_path = filepath.clone() + "/" + &filename;
+    let data = std::fs::read(full_path).unwrap();
+    let (_n, deserialized) = SerializedModel::unpack(&data).unwrap();
+    deserialized
 }
-
-impl SerializedMesh {
-    pub fn new() -> Self {
-        Self {
-            name: "".to_string(),
-            translation: [0.0; 3],
-            scale: [0.0; 3],
-            dimensions: [0.0; 3],
-            rotation: [0.0; 4],
-            positions: Vec::new(),
-            normals: Vec::new(),
-            uvs: Vec::new(),
-            bone_indices: Vec::new(),
-            bone_weights: Vec::new(),
-            indices: Vec::new(),
-            bone_names: Vec::new(),
-            material_index: 0,
-        }
-    }
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-struct SerializedMaterial {
-    name: String,
-    diffuse_texture_path: String,
-    normals_texture_path: String,
-    specular_texture_path: String,
-}
-
-impl SerializedMaterial {
-    pub fn new() -> Self {
-        Self {
-            name: "".to_owned(),
-            diffuse_texture_path: "".to_owned(),
-            normals_texture_path: "".to_owned(),
-            specular_texture_path: "".to_owned(),
-        }
-    }
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct SerializedModel {
-    meshes: Vec<SerializedMesh>,
-    materials: Vec<SerializedMaterial>,
-}
-
-impl SerializedModel {
-    pub fn new() -> Self {
-        Self {
-            meshes: Vec::new(),
-            materials: Vec::new(),
-        }
-    }
-}
-
 pub fn load_model_from_json(filepath: String, filename: String) -> SerializedModel {
     let mut o = SerializedModel::new();
     let full_path = filepath.clone() + "/" + &filename;
@@ -319,7 +256,8 @@ pub fn load_skinned_model_from_serialized(
         let diffuse_texture: Texture;
         if m.diffuse_texture_path != "" {
             let full_path: String = path.clone() + "/" + &m.diffuse_texture_path;
-            let diffuse_texture_result = futures::executor::block_on(load_texture(&full_path, false, device, queue));
+            let diffuse_texture_result =
+                futures::executor::block_on(load_texture(&full_path, false, device, queue));
             match diffuse_texture_result {
                 Ok(value) => {
                     diffuse_texture = value;
@@ -340,7 +278,8 @@ pub fn load_skinned_model_from_serialized(
         if m.normals_texture_path != "" {
             let full_path: String = path.clone() + "/" + &m.normals_texture_path;
 
-            let normal_texture_result = futures::executor::block_on(load_texture(&full_path, true, device, queue));
+            let normal_texture_result =
+                futures::executor::block_on(load_texture(&full_path, true, device, queue));
             match normal_texture_result {
                 Ok(value) => {
                     normal_texture = value;
@@ -436,7 +375,8 @@ pub fn load_model_from_serialized(
         let diffuse_texture: Texture;
         if m.diffuse_texture_path != "" {
             let diffuse_path = path.clone() + &"/".to_owned() + &m.diffuse_texture_path;
-            let diffuse_texture_result = futures::executor::block_on(load_texture(&diffuse_path, false, device, queue));
+            let diffuse_texture_result =
+                futures::executor::block_on(load_texture(&diffuse_path, false, device, queue));
             match diffuse_texture_result {
                 Ok(value) => {
                     diffuse_texture = value;
@@ -456,7 +396,8 @@ pub fn load_model_from_serialized(
         let normal_texture: texture::Texture;
         let normals_path = path.clone() + &"/".to_owned() + &m.normals_texture_path;
         if m.normals_texture_path != "" {
-            let normal_texture_result = futures::executor::block_on(load_texture(&normals_path, true, device, queue));
+            let normal_texture_result =
+                futures::executor::block_on(load_texture(&normals_path, true, device, queue));
             match normal_texture_result {
                 Ok(value) => {
                     normal_texture = value;
