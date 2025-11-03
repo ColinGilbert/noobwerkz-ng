@@ -2,14 +2,11 @@ use crate::index_types::*;
 use crate::material::*;
 use crate::model::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
 use crate::serialized_model::*;
-use crate::skeletal_context;
 use crate::skeletal_context::SkeletalContext;
 use crate::skinned_model::*;
 use crate::texture;
 use crate::texture::Texture;
 use msgpacker::prelude::*;
-use serde::{Deserialize, Serialize};
-use std::fs;
 use wgpu::util::DeviceExt;
 
 pub enum GenericModel {
@@ -25,151 +22,151 @@ pub fn load_serialized_model(filepath: String, filename: String) -> SerializedMo
     deserialized
 }
 
-pub fn load_model_from_json(filepath: String, filename: String) -> SerializedModel {
-    let mut o = SerializedModel::new();
-    let full_path = filepath.clone() + "/" + &filename;
-    // println!("Full path: {}", full_path);
-    let data = fs::read_to_string(full_path).unwrap() + " }";
-    let parsed = json::parse(&data).unwrap();
-    let mut meshes_index = 0;
+// pub fn load_model_from_json(filepath: String, filename: String) -> SerializedModel {
+//     let mut o = SerializedModel::new();
+//     let full_path = filepath.clone() + "/" + &filename;
+//     // println!("Full path: {}", full_path);
+//     let data = fs::read_to_string(full_path).unwrap() + " }";
+//     let parsed = json::parse(&data).unwrap();
+//     let mut meshes_index = 0;
 
-    while meshes_index < parsed["model"]["meshes"].len() {
-        let mut m = SerializedMesh::new();
-        m.name = parsed["model"]["meshes"][meshes_index]["name"].to_string();
-        let mut node = parsed["model"]["meshes"][meshes_index]["translation"].clone();
-        m.translation = [
-            node["value0"].as_f32().unwrap(),
-            node["value1"].as_f32().unwrap(),
-            node["value2"].as_f32().unwrap(),
-        ];
-        node = parsed["model"]["meshes"][meshes_index]["scale"].clone();
-        m.scale = [
-            node["value0"].as_f32().unwrap(),
-            node["value1"].as_f32().unwrap(),
-            node["value2"].as_f32().unwrap(),
-        ];
-        node = parsed["model"]["meshes"][meshes_index]["dimensions"].clone();
-        m.dimensions = [
-            node["value0"].as_f32().unwrap(),
-            node["value1"].as_f32().unwrap(),
-            node["value2"].as_f32().unwrap(),
-        ];
-        node = parsed["model"]["meshes"][meshes_index]["rotation"].clone();
-        m.rotation = [
-            node["value0"].as_f32().unwrap(),
-            node["value1"].as_f32().unwrap(),
-            node["value2"].as_f32().unwrap(),
-            node["value3"].as_f32().unwrap(),
-        ];
-        // positions: Vec<[f32; 3]>,
-        node = parsed["model"]["meshes"][meshes_index]["positions"].clone();
-        let mut i = 0;
-        while i < node.len() {
-            let pos = [
-                node[i]["value0"].as_f32().unwrap(),
-                node[i]["value1"].as_f32().unwrap(),
-                node[i]["value2"].as_f32().unwrap(),
-            ];
-            m.positions.push(pos);
-            i += 1;
-        }
+//     while meshes_index < parsed["model"]["meshes"].len() {
+//         let mut m = SerializedMesh::new();
+//         m.name = parsed["model"]["meshes"][meshes_index]["name"].to_string();
+//         let mut node = parsed["model"]["meshes"][meshes_index]["translation"].clone();
+//         m.translation = [
+//             node["value0"].as_f32().unwrap(),
+//             node["value1"].as_f32().unwrap(),
+//             node["value2"].as_f32().unwrap(),
+//         ];
+//         node = parsed["model"]["meshes"][meshes_index]["scale"].clone();
+//         m.scale = [
+//             node["value0"].as_f32().unwrap(),
+//             node["value1"].as_f32().unwrap(),
+//             node["value2"].as_f32().unwrap(),
+//         ];
+//         node = parsed["model"]["meshes"][meshes_index]["dimensions"].clone();
+//         m.dimensions = [
+//             node["value0"].as_f32().unwrap(),
+//             node["value1"].as_f32().unwrap(),
+//             node["value2"].as_f32().unwrap(),
+//         ];
+//         node = parsed["model"]["meshes"][meshes_index]["rotation"].clone();
+//         m.rotation = [
+//             node["value0"].as_f32().unwrap(),
+//             node["value1"].as_f32().unwrap(),
+//             node["value2"].as_f32().unwrap(),
+//             node["value3"].as_f32().unwrap(),
+//         ];
+//         // positions: Vec<[f32; 3]>,
+//         node = parsed["model"]["meshes"][meshes_index]["positions"].clone();
+//         let mut i = 0;
+//         while i < node.len() {
+//             let pos = [
+//                 node[i]["value0"].as_f32().unwrap(),
+//                 node[i]["value1"].as_f32().unwrap(),
+//                 node[i]["value2"].as_f32().unwrap(),
+//             ];
+//             m.positions.push(pos);
+//             i += 1;
+//         }
 
-        // normals: Vec<[f32; 3]>,
-        node = parsed["model"]["meshes"][meshes_index]["normals"].clone();
-        i = 0;
-        while i < node.len() {
-            let normal = [
-                node[i]["value0"].as_f32().unwrap(),
-                node[i]["value1"].as_f32().unwrap(),
-                node[i]["value2"].as_f32().unwrap(),
-            ];
-            m.normals.push(normal);
-            i += 1;
-        }
-        // uvs: Vec<[f32; 2]>,
-        node = parsed["model"]["meshes"][meshes_index]["uvs"].clone();
-        i = 0;
-        while i < node.len() {
-            let uv = [
-                node[i]["value0"].as_f32().unwrap(),
-                node[i]["value1"].as_f32().unwrap(),
-            ];
-            m.uvs.push(uv);
-            i += 1;
-        }
-        // bone_indices: Vec<[u32; 4]>,
-        node = parsed["model"]["meshes"][meshes_index]["bone_indices"].clone();
-        i = 0;
-        while i < node.len() {
-            let bi = [
-                node[i]["value0"].as_u32().unwrap(),
-                node[i]["value1"].as_u32().unwrap(),
-                node[i]["value2"].as_u32().unwrap(),
-                node[i]["value3"].as_u32().unwrap(),
-            ];
-            m.bone_indices.push(bi);
-            i += 1;
-        }
-        // bone_weights: Vec<[f32; 4]>,
-        node = parsed["model"]["meshes"][meshes_index]["bone_weights"].clone();
-        i = 0;
-        while i < node.len() {
-            let bw = [
-                node[i]["value0"].as_f32().unwrap(),
-                node[i]["value1"].as_f32().unwrap(),
-                node[i]["value2"].as_f32().unwrap(),
-                node[i]["value3"].as_f32().unwrap(),
-            ];
-            m.bone_weights.push(bw);
-            i += 1;
-        }
-        // indices: Vec<u32>,
-        node = parsed["model"]["meshes"][meshes_index]["indices"].clone();
-        i = 0;
-        while i < node.len() {
-            let id = node[i].as_u32().unwrap();
-            m.indices.push(id);
-            i += 1;
-        }
-        // bone_names: Vec<String>,
-        node = parsed["model"]["meshes"][meshes_index]["bone_names"].clone();
-        i = 0;
-        while i < node.len() {
-            let bn = node[i].to_string();
-            m.bone_names.push(bn);
-            i += 1;
-        }
-        // material_index: u32,
-        node = parsed["model"]["meshes"][meshes_index]["material_index"].clone();
-        i = 0;
-        while i < node.len() {
-            let mi = node.as_u32().unwrap();
-            m.material_index = mi;
-            i += 1;
-        }
-        o.meshes.push(m);
-        //println!("Mesh name {}", name.to_string());
-        meshes_index += 1;
-    }
+//         // normals: Vec<[f32; 3]>,
+//         node = parsed["model"]["meshes"][meshes_index]["normals"].clone();
+//         i = 0;
+//         while i < node.len() {
+//             let normal = [
+//                 node[i]["value0"].as_f32().unwrap(),
+//                 node[i]["value1"].as_f32().unwrap(),
+//                 node[i]["value2"].as_f32().unwrap(),
+//             ];
+//             m.normals.push(normal);
+//             i += 1;
+//         }
+//         // uvs: Vec<[f32; 2]>,
+//         node = parsed["model"]["meshes"][meshes_index]["uvs"].clone();
+//         i = 0;
+//         while i < node.len() {
+//             let uv = [
+//                 node[i]["value0"].as_f32().unwrap(),
+//                 node[i]["value1"].as_f32().unwrap(),
+//             ];
+//             m.uvs.push(uv);
+//             i += 1;
+//         }
+//         // bone_indices: Vec<[u32; 4]>,
+//         node = parsed["model"]["meshes"][meshes_index]["bone_indices"].clone();
+//         i = 0;
+//         while i < node.len() {
+//             let bi = [
+//                 node[i]["value0"].as_u32().unwrap(),
+//                 node[i]["value1"].as_u32().unwrap(),
+//                 node[i]["value2"].as_u32().unwrap(),
+//                 node[i]["value3"].as_u32().unwrap(),
+//             ];
+//             m.bone_indices.push(bi);
+//             i += 1;
+//         }
+//         // bone_weights: Vec<[f32; 4]>,
+//         node = parsed["model"]["meshes"][meshes_index]["bone_weights"].clone();
+//         i = 0;
+//         while i < node.len() {
+//             let bw = [
+//                 node[i]["value0"].as_f32().unwrap(),
+//                 node[i]["value1"].as_f32().unwrap(),
+//                 node[i]["value2"].as_f32().unwrap(),
+//                 node[i]["value3"].as_f32().unwrap(),
+//             ];
+//             m.bone_weights.push(bw);
+//             i += 1;
+//         }
+//         // indices: Vec<u32>,
+//         node = parsed["model"]["meshes"][meshes_index]["indices"].clone();
+//         i = 0;
+//         while i < node.len() {
+//             let id = node[i].as_u32().unwrap();
+//             m.indices.push(id);
+//             i += 1;
+//         }
+//         // bone_names: Vec<String>,
+//         node = parsed["model"]["meshes"][meshes_index]["bone_names"].clone();
+//         i = 0;
+//         while i < node.len() {
+//             let bn = node[i].to_string();
+//             m.bone_names.push(bn);
+//             i += 1;
+//         }
+//         // material_index: u32,
+//         node = parsed["model"]["meshes"][meshes_index]["material_index"].clone();
+//         i = 0;
+//         while i < node.len() {
+//             let mi = node.as_u32().unwrap();
+//             m.material_index = mi;
+//             i += 1;
+//         }
+//         o.meshes.push(m);
+//         //println!("Mesh name {}", name.to_string());
+//         meshes_index += 1;
+//     }
 
-    let mut materials_index = 0;
+//     let mut materials_index = 0;
 
-    while materials_index < parsed["model"]["meshes"].len() {
-        let mut m = SerializedMaterial::new();
-        let mut node = parsed["model"]["materials"][materials_index]["name"].clone();
-        m.name = node.to_string();
-        node = parsed["model"]["materials"][materials_index]["diffuse_texture_path"].clone();
-        m.diffuse_texture_path = node.to_string();
-        node = parsed["model"]["materials"][materials_index]["normal_texture_path"].clone();
-        m.normals_texture_path = node.to_string();
-        node = parsed["model"]["materials"][materials_index]["specular_texture_path"].clone();
-        m.specular_texture_path = node.to_string();
-        o.materials.push(m);
+//     while materials_index < parsed["model"]["meshes"].len() {
+//         let mut m = SerializedMaterial::new();
+//         let mut node = parsed["model"]["materials"][materials_index]["name"].clone();
+//         m.name = node.to_string();
+//         node = parsed["model"]["materials"][materials_index]["diffuse_texture_path"].clone();
+//         m.diffuse_texture_path = node.to_string();
+//         node = parsed["model"]["materials"][materials_index]["normal_texture_path"].clone();
+//         m.normals_texture_path = node.to_string();
+//         node = parsed["model"]["materials"][materials_index]["specular_texture_path"].clone();
+//         m.specular_texture_path = node.to_string();
+//         o.materials.push(m);
 
-        materials_index += 1;
-    }
-    o
-}
+//         materials_index += 1;
+//     }
+//     o
+// }
 
 // TODO: Robustify
 pub fn load_skinned_model_from_serialized(
@@ -228,7 +225,8 @@ pub fn load_skinned_model_from_serialized(
                 let j =     skeletal_context.skeleton.joint_by_name(&bone_name).unwrap();
                 bi[ii] = j as u32;
             }
-            sv.bone_indices = bi;
+            // sv.bone_indices = bi;
+            sv.bone_indices = m.bone_indices;
             sv.bone_weights = m.bone_weights[i];
             skinned_verts.push(sv);
         }
