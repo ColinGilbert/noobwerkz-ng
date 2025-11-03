@@ -110,7 +110,7 @@ impl SkinnedModelNode {
 
         for p in &mut self.playbacks {
             p.update(dt);
-            let bone_transforms = p.bone_trans();
+            let bone_transforms = p.spine_trans();
             for b in bone_transforms {
                 self.bone_matrices.push(BoneMatrix {
                     data: glam::Mat4::from_scale_rotation_translation(glam::Vec3::splat(b.scale), b.rotation, b.position)
