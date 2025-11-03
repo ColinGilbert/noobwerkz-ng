@@ -171,7 +171,7 @@ pub fn load_model_from_json(filepath: String, filename: String) -> SerializedMod
 
 // TODO: Robustify
 pub fn load_skinned_model_from_serialized(
-    model: SerializedModel,
+    model: &mut SerializedModel,
     default_material: Material,
     path: String,
     device: &mut wgpu::Device,
@@ -179,7 +179,7 @@ pub fn load_skinned_model_from_serialized(
     texture_layout: &wgpu::BindGroupLayout,
 ) -> Option<SkinnedModel> {
     let mut model_results = SkinnedModel::new();
-    for mut m in model.meshes {
+    for m in model.meshes.iter_mut() {
         let mut verts = Vec::<ModelVertex>::new();
         let mut indices = Vec::<u32>::new();
         if m.positions.len() != m.normals.len() {
@@ -237,7 +237,7 @@ pub fn load_skinned_model_from_serialized(
         });
 
         model_results.meshes.push(SkinnedTexturedMesh {
-            name: m.name,
+            name: m.name.clone(),
             vertex_buffer,
             index_buffer,
             num_elements: indices.len() as u32,
@@ -253,8 +253,8 @@ pub fn load_skinned_model_from_serialized(
         model_results.materials.push(default_material.clone());
     }
 
-    for m in model.materials {
-        let name = m.name;
+    for m in &model.materials {
+        let name = &m.name;
         let diffuse_texture: Texture;
         if m.diffuse_texture_path != "" {
             let full_path: String = path.clone() + "/" + &m.diffuse_texture_path;
@@ -310,15 +310,15 @@ pub fn load_skinned_model_from_serialized(
     Some(model_results)
 }
 pub fn load_model_from_serialized(
-    model: SerializedModel,
-    default_material: Material,
+    model: &mut SerializedModel,
+    default_material: &Material,
     path: String,
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
 ) -> Option<Model> {
     let mut model_results = Model::new();
-    for mut m in model.meshes {
+    for m in model.meshes.iter_mut() {
         let mut verts = Vec::<ModelVertex>::new();
         let mut indices = Vec::<u32>::new();
         if m.positions.len() != m.normals.len() {
@@ -356,7 +356,7 @@ pub fn load_model_from_serialized(
         });
 
         model_results.meshes.push(TexturedMesh {
-            name: m.name,
+            name: m.name.clone(),
             vertex_buffer,
             index_buffer,
             num_elements: indices.len() as u32,
@@ -372,8 +372,8 @@ pub fn load_model_from_serialized(
         model_results.materials.push(default_material.clone());
     }
 
-    for m in model.materials {
-        let name = m.name;
+    for m in model.materials.iter_mut() {
+        let name = &m.name;
         let diffuse_texture: Texture;
         if m.diffuse_texture_path != "" {
             let diffuse_path = path.clone() + &"/".to_owned() + &m.diffuse_texture_path;
