@@ -60,6 +60,7 @@ impl SerializedMaterial {
 pub struct SerializedModel {
     pub meshes: Vec<SerializedMesh>,
     pub materials: Vec<SerializedMaterial>,
+    pub bone_names: Vec<String>
 }
 
 impl SerializedModel {
@@ -67,6 +68,7 @@ impl SerializedModel {
         Self {
             meshes: Vec::new(),
             materials: Vec::new(),
+            bone_names: Vec::new()
         }
     }
 }
