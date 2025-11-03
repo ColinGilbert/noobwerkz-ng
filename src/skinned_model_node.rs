@@ -115,7 +115,7 @@ impl SkinnedModelNode {
                 self.bone_matrices.push(BoneMatrix {
                     // data: glam::Mat4::from_scale_rotation_translation(glam::Vec3::splat(b.scale), b.rotation, b.position)
                     // .to_cols_array_2d(),
-                    data: glam::Mat4::ZERO.to_cols_array_2d(),
+                    data: glam::Mat4::IDENTITY.to_cols_array_2d(),
                 });
             }
         }
