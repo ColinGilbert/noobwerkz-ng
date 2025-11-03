@@ -17,10 +17,12 @@ pub enum GenericModel {
 
 pub fn load_serialized_model(filepath: String, filename: String) -> SerializedModel {
     let full_path = filepath.clone() + "/" + &filename;
+    println!("Full path {}", full_path);
     let data = std::fs::read(full_path).unwrap();
     let (_n, deserialized) = SerializedModel::unpack(&data).unwrap();
     deserialized
 }
+
 pub fn load_model_from_json(filepath: String, filename: String) -> SerializedModel {
     let mut o = SerializedModel::new();
     let full_path = filepath.clone() + "/" + &filename;
