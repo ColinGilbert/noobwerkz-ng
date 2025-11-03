@@ -36,7 +36,9 @@ impl SkinnedModelNode {
         });
 
         for _i in 0..len {
-            playbacks.push(futures::executor::block_on(OzzPlayback::new(&skeleton, &animation)));
+            playbacks.push(futures::executor::block_on(OzzPlayback::new(
+                &skeleton, &animation,
+            )));
         }
 
         for p in &mut playbacks {
@@ -46,13 +48,22 @@ impl SkinnedModelNode {
             //let mut i = 0;
             for b in bone_transforms {
                 bone_matrices.push(BoneMatrix {
-                    data: (glam::Mat4::from_scale_rotation_translation(glam::Vec3::splat(b.scale), b.rotation, b.position))
+                    data: (glam::Mat4::from_scale_rotation_translation(
+                        glam::Vec3::splat(b.scale),
+                        b.rotation,
+                        b.position,
+                    ))
                     .to_cols_array_2d(),
                 });
             }
         }
 
-        println!("Bone matrices length: {}, Bone matrices size: {} MiB, num bones: {}", bone_matrices.len(), (bone_matrices.len() as f32 * 16.0 * 4.0)/(1024.0*1024.0), num_bones);
+        println!(
+            "Bone matrices length: {}, Bone matrices size: {} MiB, num bones: {}",
+            bone_matrices.len(),
+            (bone_matrices.len() as f32 * 16.0 * 4.0) / (1024.0 * 1024.0),
+            num_bones
+        );
         let storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Animation matrices storage buffer"),
             contents: bytemuck::cast_slice(&bone_matrices),
@@ -73,7 +84,7 @@ impl SkinnedModelNode {
             ],
             label: Some("Animation matrices bind Group"),
         });
-        
+
         Self {
             skinned_model_idx,
             instances,
@@ -101,12 +112,17 @@ impl SkinnedModelNode {
             let bone_transforms = p.bone_trans();
             for b in bone_transforms {
                 self.bone_matrices.push(BoneMatrix {
-                    data: glam::Mat4::from_scale_rotation_translation(glam::Vec3::splat(b.scale), b.rotation, b.position)
-                    .to_cols_array_2d(),
+                    // data: glam::Mat4::from_scale_rotation_translation(glam::Vec3::splat(b.scale), b.rotation, b.position)
+                    // .to_cols_array_2d(),
+                    data: glam::Mat4::IDENTITY.to_cols_array_2d(),
                 });
             }
         }
 
-        queue.write_buffer(&self.storage_buffer, 0, bytemuck::cast_slice(&self.bone_matrices));
+        queue.write_buffer(
+            &self.storage_buffer,
+            0,
+            bytemuck::cast_slice(&self.bone_matrices),
+        );
     }
 }
