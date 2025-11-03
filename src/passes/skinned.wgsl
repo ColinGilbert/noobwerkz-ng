@@ -70,7 +70,7 @@ fn vs_main(
     let world_matrix = bone_transform * model_matrix;
     let world_position = world_matrix * vec4<f32>(model.position, 1.0);
     let skinned_normal = normalize(mat3x3<f32>(world_matrix[0].xyz, world_matrix[1].xyz, world_matrix[2].xyz) * model.normal);
-    let transformed_tangent = bone_transform * vec4<f32>(model.tangent, 0.0);
+    let transformed_tangent = world_matrix * vec4<f32>(model.tangent, 0.0);
     let skinned_tangent = normalize(transformed_tangent.xyz);
 
     let skinned_bitangent = cross(skinned_normal, skinned_tangent);
