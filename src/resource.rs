@@ -226,7 +226,7 @@ pub fn load_skinned_model_from_serialized(
                 bi[ii] = j as u32;
             }
             // sv.bone_indices = bi;
-            sv.bone_indices = m.bone_indices;
+            sv.bone_indices = m.bone_indices[i];
             sv.bone_weights = m.bone_weights[i];
             skinned_verts.push(sv);
         }
