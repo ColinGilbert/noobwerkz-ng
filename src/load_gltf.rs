@@ -1,0 +1,1 @@
+pub fn load_model_from_gltf(filepath: String, filename: String) {}

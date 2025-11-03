@@ -35,3 +35,5 @@ rayon = "1.11.0"
 rmp-serde = "1.3.0"
 serde = { version = "1.0.228", features = ["derive"] }
 json = "0.12.4"
+gltf = "1.4.1"
+msgpacker = "0.4.8"

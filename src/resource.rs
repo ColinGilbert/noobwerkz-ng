@@ -227,13 +227,11 @@ pub fn load_model_from_json(filepath: String, filename: String) -> SerializedMod
 
         materials_index += 1;
     }
-    //println!("{:#}", parsed);
-
     o
 }
 
 // TODO: Robustify
-pub async fn load_skinned_model_from_serialized(
+pub fn load_skinned_model_from_serialized(
     model: SerializedModel,
     default_material: Material,
     path: String,
@@ -317,13 +315,11 @@ pub async fn load_skinned_model_from_serialized(
     }
 
     for m in model.materials {
-        //let mut mat = Material::new();
-        // for material_serialized in materials_serialized {
         let name = m.name;
         let diffuse_texture: Texture;
         if m.diffuse_texture_path != "" {
             let full_path: String = path.clone() + "/" + &m.diffuse_texture_path;
-            let diffuse_texture_result = load_texture(&full_path, false, device, queue).await;
+            let diffuse_texture_result = futures::executor::block_on(load_texture(&full_path, false, device, queue));
             match diffuse_texture_result {
                 Ok(value) => {
                     diffuse_texture = value;
@@ -344,7 +340,7 @@ pub async fn load_skinned_model_from_serialized(
         if m.normals_texture_path != "" {
             let full_path: String = path.clone() + "/" + &m.normals_texture_path;
 
-            let normal_texture_result = load_texture(&full_path, true, device, queue).await;
+            let normal_texture_result = futures::executor::block_on(load_texture(&full_path, true, device, queue));
             match normal_texture_result {
                 Ok(value) => {
                     normal_texture = value;
@@ -372,7 +368,7 @@ pub async fn load_skinned_model_from_serialized(
 
     Some(model_results)
 }
-pub async fn load_model_from_serialized(
+pub fn load_model_from_serialized(
     model: SerializedModel,
     default_material: Material,
     path: String,
@@ -436,13 +432,11 @@ pub async fn load_model_from_serialized(
     }
 
     for m in model.materials {
-        //let mut mat = Material::new();
-        // for material_serialized in materials_serialized {
         let name = m.name;
         let diffuse_texture: Texture;
         if m.diffuse_texture_path != "" {
             let diffuse_path = path.clone() + &"/".to_owned() + &m.diffuse_texture_path;
-            let diffuse_texture_result = load_texture(&diffuse_path, false, device, queue).await;
+            let diffuse_texture_result = futures::executor::block_on(load_texture(&diffuse_path, false, device, queue));
             match diffuse_texture_result {
                 Ok(value) => {
                     diffuse_texture = value;
@@ -462,7 +456,7 @@ pub async fn load_model_from_serialized(
         let normal_texture: texture::Texture;
         let normals_path = path.clone() + &"/".to_owned() + &m.normals_texture_path;
         if m.normals_texture_path != "" {
-            let normal_texture_result = load_texture(&normals_path, true, device, queue).await;
+            let normal_texture_result = futures::executor::block_on(load_texture(&normals_path, true, device, queue));
             match normal_texture_result {
                 Ok(value) => {
                     normal_texture = value;
@@ -490,99 +484,6 @@ pub async fn load_model_from_serialized(
 
     Some(model_results)
 }
-
-// //println!("Bone names: {:?}", bone_names);
-// result_skinned.meshes.push(SkinnedTexturedMesh {
-//     name,
-//     vertex_buffer,
-//     index_buffer,
-//     num_elements: indices.len() as u32,
-//     material: MaterialIndex::new(material_index as usize),
-//     translation,
-//     rotation,
-//     scale,
-//     dimensions,
-//     //matrices_texture: Option::None,
-// });
-
-//     let diffuse_texture: texture::Texture;
-//     if has_diffuse_map {
-// for material_serialized in materials_serialized {
-//     let name = material_serialized.get_name().unwrap().to_string().unwrap();
-//     let has_diffuse_map: bool;
-//     if material_serialized
-//         .get_diffuse_t
-//         let diffuse_texture_result = load_texture(&diffuse_path, false, device, queue).await;
-//         match diffuse_texture_result {
-//             Ok(value) => {
-//                 diffuse_texture = value;
-//             }
-//             Err(value) => {
-//                 println!(
-//                     "Could not load diffuse texture {}, error: {}",
-//                     diffuse_path, value
-//                 );
-//                 diffuse_texture = default_material.diffuse_texture.clone();
-//             }
-//         }
-//     } else {
-//         diffuse_texture = default_material.diffuse_texture.clone();
-//     }
-
-//     let normal_texture: texture::Texture;
-//     if has_normals_map {
-//         let normal_texture_result = load_texture(&normals_path, true, device, queue).await;
-//         match normal_texture_result {
-//             Ok(value) => {
-//                 normal_texture = value;
-//             }
-//             Err(value) => {
-//                 println!(
-//                     "Could not load normals texture {}, error: {}",
-//                     normals_path, value
-//                 );
-//                 normal_texture = default_material.normal_texture.clone();
-//             }
-//         }
-//     } else {
-//         normal_texture = default_material.normal_texture.clone();
-//     }
-//     let material = Material::new(
-//         device,
-//         &name,
-//         diffuse_texture,
-//         normal_texture,
-//         texture_layout,
-//     );
-//     if !has_bones {
-//         result_model.materials.push(material);
-//     } else {
-//         result_skinned.materials.push(material);
-//     }
-// }
-
-// if materials_serialized.len() == 0 {
-//     let material = default_material.clone();
-//     if !has_bones {
-//         result_model.materials.push(material);
-//     } else {
-//         result_skinned.materials.push(material);
-//     }
-// }
-// if !has_bones {
-//     result_model.name = filename;
-// } else {
-//     result_skinned.name = filename;
-// }
-
-// let result: GenericModel;
-// if !has_bones {
-//     result = GenericModel::Textured(result_model);
-// } else {
-//     result = GenericModel::SkinnedTextured(result_skinned);
-// }
-// Ok(result)
-// }
 
 fn calculate_tangents_and_bitangents(verts: &mut Vec<ModelVertex>, indices: &Vec<u32>) -> () {
     let mut triangles_included = vec![0; verts.len()];
