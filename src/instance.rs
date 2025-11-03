@@ -10,9 +10,7 @@ pub struct Instance {
 impl Instance {
     pub fn to_raw(&self) -> InstanceRaw {
         InstanceRaw {
-            model: (glam::Mat4::from_translation(self.position.into())
-                * glam::Mat4::from_quat(self.rotation)
-                * glam::Mat4::from_scale(self.scale.into()))
+            model: glam::Mat4::from_scale_rotation_translation(self.scale.into(), self.rotation, self.position.into())
             .to_cols_array_2d(),
             normal: glam::Mat3::from_quat(self.rotation).to_cols_array_2d(),
         }
@@ -20,9 +18,7 @@ impl Instance {
 
     pub fn to_skinned_raw(&self) -> SkinnedInstanceRaw {
         SkinnedInstanceRaw {
-            model: (glam::Mat4::from_translation(self.position.into())
-                * glam::Mat4::from_quat(self.rotation)
-                * glam::Mat4::from_scale(self.scale.into()))
+            model: glam::Mat4::from_scale_rotation_translation(self.scale.into(), self.rotation, self.position.into())
             .to_cols_array_2d(),
             normal: glam::Mat3::from_quat(self.rotation).to_cols_array_2d(),
         }
