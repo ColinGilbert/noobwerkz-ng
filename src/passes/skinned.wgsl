@@ -67,12 +67,12 @@ fn vs_main(
         (bone_matrices.values[offset + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.values[offset + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[offset + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[offset + model.bone_indices.w] * model.bone_weights.w )
     );
 
-    let world_matrix = bone_transform * model_matrix;
+    let world_matrix = model_matrix * bone_transform;
     let world_position = world_matrix * vec4<f32>(model.position, 1.0);
-    let skinned_normal = normalize(mat3x3<f32>(world_matrix[0].xyz, world_matrix[1].xyz, world_matrix[2].xyz) * model.normal);
-    let transformed_tangent = world_matrix * vec4<f32>(model.tangent, 0.0);
-    let skinned_tangent = normalize(transformed_tangent.xyz);
 
+    let skinned_normal = normalize(mat3x3<f32>(world_matrix[0].xyz, world_matrix[1].xyz, world_matrix[2].xyz) * model.normal);
+    let transformed_tangent = bone_transform * vec4<f32>(model.tangent, 0.0);
+    let skinned_tangent = normalize(transformed_tangent.xyz);
     let skinned_bitangent = cross(skinned_normal, skinned_tangent);
 
     let tbn_matrix = transpose(mat3x3<f32>(
