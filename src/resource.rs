@@ -2,6 +2,8 @@ use crate::index_types::*;
 use crate::material::*;
 use crate::model::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
 use crate::serialized_model::*;
+use crate::skeletal_context;
+use crate::skeletal_context::SkeletalContext;
 use crate::skinned_model::*;
 use crate::texture;
 use crate::texture::Texture;
@@ -177,6 +179,7 @@ pub fn load_skinned_model_from_serialized(
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
+    skeletal_context: &SkeletalContext
 ) -> Option<SkinnedModel> {
     let mut model_results = SkinnedModel::new();
     for m in model.meshes.iter_mut() {
@@ -219,7 +222,13 @@ pub fn load_skinned_model_from_serialized(
 
         for (i, v) in verts.iter().enumerate() {
             let mut sv = SkinnedModelVertex::from_vert(&v);
-            sv.bone_indices = m.bone_indices[i];
+            let mut bi = m.bone_indices[i];
+            for (ii, bone_index) in m.bone_indices[i].iter().enumerate() {
+                let bone_name = &model.bone_names[*bone_index as usize];
+                let j =     skeletal_context.skeleton.joint_by_name(&bone_name).unwrap();
+                bi[ii] = j as u32;
+            }
+            sv.bone_indices = bi;
             sv.bone_weights = m.bone_weights[i];
             skinned_verts.push(sv);
         }
@@ -311,7 +320,7 @@ pub fn load_skinned_model_from_serialized(
 }
 pub fn load_model_from_serialized(
     model: &mut SerializedModel,
-    default_material: &Material,
+    default_material: Material,
     path: String,
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,

@@ -19,5 +19,4 @@ pub mod skinned_model;
 pub mod index_types;
 pub mod skeletal_context;
 pub mod skeletal_animate;
-pub mod load_gltf;
 pub mod serialized_model;
