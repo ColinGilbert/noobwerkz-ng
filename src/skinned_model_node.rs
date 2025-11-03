@@ -106,13 +106,13 @@ impl SkinnedModelNode {
         _bone_matrices_bind_group_layout: &BindGroupLayout,
         dt: web_time::Duration,
     ) {
-        let bone_matrices = Vec::<BoneMatrix>::new();//.clear();
+        let mut bone_matrices = Vec::<BoneMatrix>::new();//.clear();
 
         for p in &mut self.playbacks {
             p.update(dt);
             let bone_transforms = p.bone_trans();
             for b in bone_transforms {
-                self.bone_matrices.push(BoneMatrix {
+                bone_matrices.push(BoneMatrix {
                     data: glam::Mat4::from_scale_rotation_translation(glam::Vec3::splat(b.scale), b.rotation, b.position)
                     .to_cols_array_2d(),
                     //data: glam::Mat4::IDENTITY.to_cols_array_2d(),
