@@ -176,7 +176,7 @@ pub fn load_skinned_model_from_serialized(
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
-    skeletal_context: &SkeletalContext
+    skeletal_context: &SkeletalContext,
 ) -> Option<SkinnedModel> {
     let mut model_results = SkinnedModel::new();
     for m in model.meshes.iter_mut() {
@@ -219,11 +219,10 @@ pub fn load_skinned_model_from_serialized(
 
         for (i, v) in verts.iter().enumerate() {
             let mut sv = SkinnedModelVertex::from_vert(&v);
-            let mut bi = [0;4];//m.bone_indices[i];
+            let mut bi = [0; 4]; //m.bone_indices[i];
             for (ii, bone_index) in m.bone_indices[i].iter().enumerate() {
                 let bone_name = &model.bone_names[*bone_index as usize].clone();
-                let j =     skeletal_context.skeleton.joint_by_name(bone_name).unwrap();
-                //keletal_context.skeleton.iter_depth_first(0, );
+                let j = skeletal_context.skeleton.joint_by_name(bone_name).unwrap();
                 bi[ii] = j as u32;
             }
             sv.bone_indices = bi;
@@ -305,6 +304,7 @@ pub fn load_skinned_model_from_serialized(
         } else {
             normal_texture = default_material.normal_texture.clone();
         }
+
         let material = Material::new(
             device,
             &name,
@@ -312,9 +312,25 @@ pub fn load_skinned_model_from_serialized(
             normal_texture,
             texture_layout,
         );
+
         model_results.materials.push(material);
     }
+    let mut inverse_bind_poses = Vec::<[[f32; 4]; 4]>::new();
+    inverse_bind_poses.resize(model.bone_names.len(), [[0.0; 4]; 4]);
+    for bone_idx in 0..model.bone_names.len() {
+        let bone_name = &model.bone_names[bone_idx].clone();
+        let bone_newpos = skeletal_context.skeleton.joint_by_name(bone_name).unwrap() as usize;
+        inverse_bind_poses[bone_newpos] = model.inverse_bind_matrices[bone_idx];
+    }
+    let inverse_bind_matrices_buffer =
+        device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Animation matrices storage buffer"),
+            contents: bytemuck::cast_slice(&inverse_bind_poses),
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+        });
 
+    model_results.inverse_bind_matrices = Some(inverse_bind_matrices_buffer);
+    
     Some(model_results)
 }
 
@@ -436,7 +452,6 @@ pub fn load_model_from_serialized(
 
     Some(model_results)
 }
-
 
 pub async fn load_texture(
     file_name: &str,
