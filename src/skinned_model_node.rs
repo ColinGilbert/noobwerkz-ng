@@ -18,7 +18,7 @@ impl SkinnedModelNode {
     pub fn new(
         device: &mut wgpu::Device,
         bone_matrices_bind_group_layout: &BindGroupLayout,
-        skinned_models: &Vec<SkinnedModel>,
+        skinned_model: &SkinnedModel,
         skinned_model_idx: usize,
         instances: Vec<Instance>,
         skeletal_context: &SkeletalContext,
@@ -87,7 +87,7 @@ impl SkinnedModelNode {
                 },
                 wgpu::BindGroupEntry {
                     binding: 2,
-                    resource: skinned_models[skinned_model_idx].inverse_bind_matrices.as_ref().unwrap().as_entire_binding(),
+                    resource: skinned_model.inverse_bind_matrices.as_ref().unwrap().as_entire_binding(),
                 }
              ],
             label: Some("Animation matrices bind Group"),
