@@ -20,9 +20,9 @@ struct BoneMatrix {
 @group(3) @binding(0)
 var<storage, read> bone_matrices: BoneMatrix;
 @group(3) @binding(1)
-var<uniform> num_bones: u32;
-@group(3) @binding(2)
 var<uniform> inverse_bind_poses: BoneMatrix;
+@group(3) @binding(2)
+var<uniform> num_bones: u32;
 
 struct VertexInput {
     @builtin(instance_index) instance_index: u32,
