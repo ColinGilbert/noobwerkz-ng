@@ -140,7 +140,7 @@ impl OzzTrait for OzzPlayback {
             self.bone_trans.push(OzzTransform {
                 scale,
                 rotation: bone_rot,
-                position: current_pos,
+                position: parent_pos,
             });
 
             let parent_rot = glam::Quat::from_mat4(parent);
