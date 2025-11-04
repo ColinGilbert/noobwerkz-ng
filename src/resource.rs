@@ -206,8 +206,19 @@ pub fn load_skinned_model_from_serialized(
         let mut i = 0;
         while i < m.positions.len() {
             let mut v = ModelVertex::new();
-            v.position = m.positions[i];
-            v.normal = m.normals[i];
+            let trans = glam::Mat4::from_quat(glam::Quat::from_array(m.rotation));
+            let transformed_pos = trans
+                * glam::Vec4::from_array([
+                    m.positions[i][0],
+                    m.positions[i][1],
+                    m.positions[i][2],
+                    1.0,
+                ]);
+            v.position = [transformed_pos[0], transformed_pos[1], transformed_pos[2]];
+            let transformed_norm = trans
+                * glam::Vec4::from_array([m.normals[i][0], m.normals[i][1], m.normals[i][2], 1.0]);
+
+            v.normal = [transformed_normal[0], transformed_normal[1], transformed_normal[2]];
             v.tex_coords = m.uvs[i];
             i += 1;
             verts.push(v);
