@@ -315,13 +315,18 @@ pub fn load_skinned_model_from_serialized(
 
         model_results.materials.push(material);
     }
+
     let mut inverse_bind_poses = Vec::<[[f32; 4]; 4]>::new();
     inverse_bind_poses.resize(model.bone_names.len(), [[0.0; 4]; 4]);
+
     for bone_idx in 0..model.bone_names.len() {
         let bone_name = &model.bone_names[bone_idx].clone();
         let bone_newpos = skeletal_context.skeleton.joint_by_name(bone_name).unwrap() as usize;
         inverse_bind_poses[bone_newpos] = model.inverse_bind_matrices[bone_idx];
     }
+
+    println!("Inverse bind matrices {:?}", inverse_bind_poses);
+
     let inverse_bind_matrices_buffer =
         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Animation matrices storage buffer"),
@@ -330,7 +335,7 @@ pub fn load_skinned_model_from_serialized(
         });
 
     model_results.inverse_bind_matrices = Some(inverse_bind_matrices_buffer);
-    
+
     Some(model_results)
 }
 
