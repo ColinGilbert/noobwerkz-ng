@@ -17,15 +17,14 @@ impl SkeletalContext {
         
         let mut ar_skeleton = block_on(load_archive(skeleton_filepath.as_str())).unwrap();
         let mut ar_animations = Vec::new();
-        
         for a in animation_filenames {
             let anim_filepath = filepath.clone() + &"/".to_owned() + a;
             //println!("Getting animation {}", anim_filepath);
             ar_animations.push(block_on(load_archive(anim_filepath.as_str())).unwrap());
         }
-
+        
         let skeleton =
-            Arc::new(ozz_animation_rs::Skeleton::from_archive(&mut ar_skeleton).unwrap());
+        Arc::new(ozz_animation_rs::Skeleton::from_archive(&mut ar_skeleton).unwrap());
         
         let mut animations = Vec::new();
 

@@ -9,7 +9,7 @@ pub struct SkinnedModelNode {
     pub playbacks: Vec<OzzPlayback>,
     pub bone_matrices: Vec<BoneMatrix>,
     pub num_bones: u32,
-    pub storage_buffer: wgpu::Buffer,
+    pub bones_storage_buffer: wgpu::Buffer,
     pub num_bones_buffer: wgpu::Buffer,
     pub bind_group: wgpu::BindGroup,
 }
@@ -65,23 +65,27 @@ impl SkinnedModelNode {
             (bone_matrices.len() as f32 * 16.0 * 4.0) / (1024.0 * 1024.0),
             num_bones
         );
-        let storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        let bones_storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Animation matrices storage buffer"),
             contents: bytemuck::cast_slice(&bone_matrices),
             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         });
 
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: bone_matrices_bind_group_layout,
             entries: &[
                 wgpu::BindGroupEntry {
                     binding: 0,
-                    resource: storage_buffer.as_entire_binding(),
+                    resource: bones_storage_buffer.as_entire_binding(),
                 },
                 wgpu::BindGroupEntry {
                     binding: 1,
                     resource: num_bones_buffer.as_entire_binding(),
                 },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: rest_pose_buffer.as_entire_binding(),
+                }
             ],
             label: Some("Animation matrices bind Group"),
         });
@@ -93,7 +97,7 @@ impl SkinnedModelNode {
             playbacks,
             bone_matrices,
             num_bones,
-            storage_buffer,
+            bones_storage_buffer,
             num_bones_buffer,
             bind_group,
         }
@@ -121,7 +125,7 @@ impl SkinnedModelNode {
         }
 
         queue.write_buffer(
-            &self.storage_buffer,
+            &self.bones_storage_buffer,
             0,
             bytemuck::cast_slice(&self.bone_matrices),
         );
