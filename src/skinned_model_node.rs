@@ -82,11 +82,7 @@ impl SkinnedModelNode {
                     binding: 1,
                     resource: num_bones_buffer.as_entire_binding(),
                 },
-                wgpu::BindGroupEntry {
-                    binding: 2,
-                    resource: rest_pose_buffer.as_entire_binding(),
-                }
-            ],
+             ],
             label: Some("Animation matrices bind Group"),
         });
 
