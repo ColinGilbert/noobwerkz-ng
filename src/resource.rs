@@ -218,7 +218,7 @@ pub fn load_skinned_model_from_serialized(
             let transformed_norm = trans
                 * glam::Vec4::from_array([m.normals[i][0], m.normals[i][1], m.normals[i][2], 1.0]);
 
-            v.normal = [transformed_normal[0], transformed_normal[1], transformed_normal[2]];
+            v.normal = [transformed_norm[0], transformed_norm[1], transformed_norm[2]];
             v.tex_coords = m.uvs[i];
             i += 1;
             verts.push(v);
