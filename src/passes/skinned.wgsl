@@ -63,16 +63,12 @@ fn vs_main(
         instance.model_matrix_2,
         instance.model_matrix_3,
     );
-
+ 
     let offset = num_bones * model.instance_index;
     let bone_transform = mat4x4<f32>(
-        (inverse_bind_poses.values[model.bone_indices.x] * bone_matrices.values[offset + model.bone_indices.x] * model.bone_weights.x) + (inverse_bind_poses.values[model.bone_indices.y] * bone_matrices.values[offset + model.bone_indices.y] * model.bone_weights.y) + (inverse_bind_poses.values[model.bone_indices.z] * bone_matrices.values[offset + model.bone_indices.z] * model.bone_weights.z) + (inverse_bind_poses.values[model.bone_indices.w] * bone_matrices.values[offset + model.bone_indices.w] * model.bone_weights.w )
+        (bone_matrices.values[offset + model.bone_indices.x] * inverse_bind_poses.values[model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.values[offset + model.bone_indices.y] * inverse_bind_poses.values[model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.values[offset + model.bone_indices.z] * inverse_bind_poses.values[model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.values[offset + model.bone_indices.w] * inverse_bind_poses.values[model.bone_indices.w] * model.bone_weights.w )
     );
-    let bone_mat1 = inverse_bind_poses.values[model.bone_indices.x] * bone_matrices.values[offset + model.bone_indices.x];
-    let bone_mat2 = inverse_bind_poses.values[model.bone_indices.y] * bone_matrices.values[offset + model.bone_indices.y];
-    let bone_mat3 = inverse_bind_poses.values[model.bone_indices.z] * bone_matrices.values[offset + model.bone_indices.z];
-    let bone_mat4 = inverse_bind_poses.values[model.bone_indices.w] * bone_matrices.values[offset + model.bone_indices.w];
-    let transformed_vert = (bone_mat1 * vec4(model.position, 1.0) * model.bone_weights.x) + (bone_mat2 * vec4(model.position, 1.0) * model.bone_weights.y) + (bone_mat3 * vec4(model.position, 1.0) * model.bone_weights.z) + (bone_mat4 * vec4(model.position, 1.0) * model.bone_weights.w);
+
     let world_matrix = model_matrix * bone_transform;
     let world_position = world_matrix * vec4<f32>(model.position, 1.0);
     let skinned_normal = normalize(mat3x3<f32>(world_matrix[0].xyz, world_matrix[1].xyz, world_matrix[2].xyz) * model.normal);
@@ -86,7 +82,7 @@ fn vs_main(
     ));
 
     var out: VertexOutput;
-    out.clip_position = camera.view_proj * model_matrix * transformed_vert;//world_position;
+    out.clip_position = camera.view_proj * world_position;
     out.tex_coords = model.tex_coords;
     out.tangent_position = tbn_matrix * world_position.xyz;
     out.tangent_view_position = tbn_matrix * camera.view_pos.xyz;
