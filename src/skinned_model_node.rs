@@ -85,7 +85,7 @@ impl SkinnedModelNode {
                 },
                 wgpu::BindGroupEntry {
                     binding: 2,
-                    resource: skinned_model.inverse_bind_matrices.as_ref().unwrap().as_entire_binding(),
+                    resource: skinned_model.inverse_bind_matrices_buffer.as_ref().unwrap().as_entire_binding(),
                 }
              ],
             label: Some("Animation matrices bind Group"),

@@ -7,7 +7,7 @@ pub struct SkinnedModel {
     pub meshes: SkinnedMeshes<SkinnedTexturedMesh>,
     pub materials: Materials<Material>,
     pub name: String,
-    pub inverse_bind_matrices: Option<wgpu::Buffer>,
+    pub inverse_bind_matrices_buffer: Option<wgpu::Buffer>,
     //pub num_bones: usize,
 }
 
@@ -17,7 +17,7 @@ impl SkinnedModel {
             meshes: SkinnedMeshes::new(),
             materials: Materials::new(),
             name: "".to_owned(),
-            inverse_bind_matrices: Option::None,
+            inverse_bind_matrices_buffer: Option::None,
             //num_bones: 0,
         }
     }
