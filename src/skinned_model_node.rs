@@ -72,8 +72,6 @@ impl SkinnedModelNode {
             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         });
 
-
-
          let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: bone_matrices_bind_group_layout,
             entries: &[
