@@ -193,7 +193,6 @@ pub fn load_skinned_model_from_serialized(
         if m.positions.len() != m.uvs.len() {
             println!("Not enough UVs");
             m.uvs.resize(m.positions.len(), [0.0, 0.0]);
-            //return Option::None;
         }
         if m.positions.len() != m.bone_indices.len() {
             println!("Not enough bone indices");
@@ -206,19 +205,8 @@ pub fn load_skinned_model_from_serialized(
         let mut i = 0;
         while i < m.positions.len() {
             let mut v = ModelVertex::new();
-            let trans = glam::Mat4::from_quat(glam::Quat::from_array(m.rotation));
-            let transformed_pos = trans
-                * glam::Vec4::from_array([
-                    m.positions[i][0],
-                    m.positions[i][1],
-                    m.positions[i][2],
-                    1.0,
-                ]);
-            v.position = [transformed_pos[0], transformed_pos[1], transformed_pos[2]];
-            let transformed_norm = trans
-                * glam::Vec4::from_array([m.normals[i][0], m.normals[i][1], m.normals[i][2], 1.0]);
-
-            v.normal = [transformed_norm[0], transformed_norm[1], transformed_norm[2]];
+            v.position = m.positions[i];
+            v.normal = m.normals[i];
             v.tex_coords = m.uvs[i];
             i += 1;
             verts.push(v);
