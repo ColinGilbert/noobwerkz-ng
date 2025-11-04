@@ -1,4 +1,4 @@
-use crate::{resource::*, model::*, serialized_model::SerializedMesh};
+use crate::{serialized_model::*};
 
 
 pub fn cube_serialized_mesh(scale: f32) {

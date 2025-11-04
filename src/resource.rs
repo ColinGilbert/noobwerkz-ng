@@ -19,6 +19,10 @@ pub fn load_serialized_model(filepath: String, filename: String) -> SerializedMo
     println!("Full path {}", full_path);
     let data = std::fs::read(full_path).unwrap();
     let (_n, deserialized) = SerializedModel::unpack(&data).unwrap();
+    println!("Dimensions {:?}", deserialized.meshes[0].dimensions);
+    println!("Scale {:?}", deserialized.meshes[0].scale);
+    println!("Translation {:?}", deserialized.meshes[0].translation);
+    println!("Rotation {:?}", deserialized.meshes[0].rotation);
     deserialized
 }
 
