@@ -21,7 +21,6 @@ impl SkinnedModelNode {
         skinned_models: &Vec<SkinnedModel>,
         skinned_model_idx: usize,
         instances: Vec<Instance>,
-        inverse_bind_poses: Vec<[[f32; 4]; 4]>,
         skeletal_context: &SkeletalContext,
     ) -> Self {
         let mut playbacks = Vec::new();
