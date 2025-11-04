@@ -21,7 +21,7 @@ impl SkinnedModelNode {
         bone_matrices_bind_group_layout: &BindGroupLayout,
         skinned_model_idx: usize,
         instances: Vec<Instance>,
-        inverse_bind_poses: Vec<[[f32; 4]; 4]>,
+        inverse_bind_poses: &Vec<[[f32; 4]; 4]>,
         skeletal_context: &SkeletalContext,
     ) -> Self {
         let mut playbacks = Vec::new();
