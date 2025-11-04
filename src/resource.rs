@@ -223,6 +223,7 @@ pub fn load_skinned_model_from_serialized(
             for (ii, bone_index) in m.bone_indices[i].iter().enumerate() {
                 let bone_name = &model.bone_names[*bone_index as usize].clone();
                 let j =     skeletal_context.skeleton.joint_by_name(bone_name).unwrap();
+                //keletal_context.skeleton.iter_depth_first(0, );
                 bi[ii] = j as u32;
             }
             sv.bone_indices = bi;
