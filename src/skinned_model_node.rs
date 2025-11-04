@@ -76,7 +76,7 @@ impl SkinnedModelNode {
         let inverse_bind_matrices_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Animation matrices storage buffer"),
             contents: bytemuck::cast_slice(&inverse_bind_poses),
-            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         });
 
          let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
