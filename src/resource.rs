@@ -326,7 +326,7 @@ pub fn load_skinned_model_from_serialized(
     for bone_idx in 0..model.bone_names.len() {
         let bone_name = &model.bone_names[bone_idx].clone();
         let bone_newpos = skeletal_context.skeleton.joint_by_name(bone_name).unwrap() as usize;
-        inverse_bind_poses[bone_newpos] = model.inverse_bind_matrices[bone_idx];
+        inverse_bind_poses[bone_newpos] = model.inverse_bind_matrices[bone_idx].inverse();
     }
 
     //println!("Inverse bind matrices {:?}", inverse_bind_poses);
