@@ -65,9 +65,9 @@ fn vs_main(
     );
 
     let offset = num_bones * model.instance_index;
-    // let bone_transform = mat4x4<f32>(
-    //     (inverse_bind_poses.values[model.bone_indices.x] * bone_matrices.values[offset + model.bone_indices.x] * model.bone_weights.x) + (inverse_bind_poses.values[model.bone_indices.y] * bone_matrices.values[offset + model.bone_indices.y] * model.bone_weights.y) + (inverse_bind_poses.values[model.bone_indices.z] * bone_matrices.values[offset + model.bone_indices.z] * model.bone_weights.z) + (inverse_bind_poses.values[model.bone_indices.w] * bone_matrices.values[offset + model.bone_indices.w] * model.bone_weights.w )
-    // );
+    let bone_transform = mat4x4<f32>(
+        (inverse_bind_poses.values[model.bone_indices.x] * bone_matrices.values[offset + model.bone_indices.x] * model.bone_weights.x) + (inverse_bind_poses.values[model.bone_indices.y] * bone_matrices.values[offset + model.bone_indices.y] * model.bone_weights.y) + (inverse_bind_poses.values[model.bone_indices.z] * bone_matrices.values[offset + model.bone_indices.z] * model.bone_weights.z) + (inverse_bind_poses.values[model.bone_indices.w] * bone_matrices.values[offset + model.bone_indices.w] * model.bone_weights.w )
+    );
     let bone_mat1 = inverse_bind_poses.values[model.bone_indices.x] * bone_matrices.values[offset + model.bone_indices.x];
     let bone_mat2 = inverse_bind_poses.values[model.bone_indices.y] * bone_matrices.values[offset + model.bone_indices.y];
     let bone_mat3 = inverse_bind_poses.values[model.bone_indices.z] * bone_matrices.values[offset + model.bone_indices.z];
