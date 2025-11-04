@@ -72,9 +72,9 @@ fn vs_main(
     let bone_mat2 = inverse_bind_poses.values[model.bone_indices.y] * bone_matrices.values[offset + model.bone_indices.y];
     let bone_mat3 = inverse_bind_poses.values[model.bone_indices.z] * bone_matrices.values[offset + model.bone_indices.z];
     let bone_mat4 = inverse_bind_poses.values[model.bone_indices.w] * bone_matrices.values[offset + model.bone_indices.w];
-    let bone_transform = (bone_mat1 * model.position * model.bone_weights.x) + (bone_mat2 * model.position * model.bone_weights.y) + (bone_mat3 * model.position * model.bone_weights.z) + (bone_mat4 * model.position * model.bone_weights.w);
+    let transformed_vert = (bone_mat1 * model.position * model.bone_weights.x) + (bone_mat2 * model.position * model.bone_weights.y) + (bone_mat3 * model.position * model.bone_weights.z) + (bone_mat4 * model.position * model.bone_weights.w);
     let world_matrix = model_matrix * bone_transform;
-    let world_position = world_matrix * vec4<f32>(model.position, 1.0);
+    //let world_position = world_matrix * vec4<f32>(model.position, 1.0);
     let skinned_normal = normalize(mat3x3<f32>(world_matrix[0].xyz, world_matrix[1].xyz, world_matrix[2].xyz) * model.normal);
     let transformed_tangent = bone_transform * vec4<f32>(model.tangent, 0.0);
     let skinned_tangent = normalize(transformed_tangent.xyz);
@@ -86,7 +86,7 @@ fn vs_main(
     ));
 
     var out: VertexOutput;
-    out.clip_position = camera.view_proj * world_position;
+    out.clip_position = camera.view_proj * model_matrix * transformed_vert;//world_position;
     out.tex_coords = model.tex_coords;
     out.tangent_position = tbn_matrix * world_position.xyz;
     out.tangent_view_position = tbn_matrix * camera.view_pos.xyz;
