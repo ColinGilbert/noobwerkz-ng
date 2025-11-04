@@ -330,7 +330,7 @@ pub fn load_skinned_model_from_serialized(
         // inverse_bind_poses[bone_newpos] = glam::Mat4::IDENTITY.to_cols_array_2d();
     }
 
-    println!("Inverse bind matrices {:?}", inverse_bind_poses);
+    //println!("Inverse bind matrices {:?}", inverse_bind_poses);
 
     let inverse_bind_matrices_buffer =
         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
