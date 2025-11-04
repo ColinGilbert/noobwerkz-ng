@@ -21,7 +21,7 @@ impl SkinnedModelNode {
         bone_matrices_bind_group_layout: &BindGroupLayout,
         skinned_model_idx: usize,
         instances: Vec<Instance>,
-        inverse_bind_poses: &Vec<glam::Mat4>,
+        inverse_bind_poses: Vec<[[f32; 4]; 4]>,
         skeletal_context: &SkeletalContext,
     ) -> Self {
         let mut playbacks = Vec::new();
@@ -73,9 +73,6 @@ impl SkinnedModelNode {
             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         });
 
-        let mut inverse_bind_poses = Vec::<[[f32;4];4]>::new();
-
-
         let inverse_bind_matrices_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Animation matrices storage buffer"),
             contents: bytemuck::cast_slice(&inverse_bind_poses),
@@ -93,6 +90,10 @@ impl SkinnedModelNode {
                     binding: 1,
                     resource: num_bones_buffer.as_entire_binding(),
                 },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: inverse_bind_matrices_buffer.as_entire_binding(),
+                }
              ],
             label: Some("Animation matrices bind Group"),
         });
