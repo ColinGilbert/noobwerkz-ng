@@ -41,8 +41,8 @@ impl SkinnedModelNode {
                 &skeleton, &animation,
             )));
         }
-        println!("Bone transforms length {}", p.bone_trans().len());
         for p in &mut playbacks {
+            println!("Bone transforms length {}", p.bone_trans().len());
             p.update(web_time::Duration::from_secs(0));
             let bone_transforms = p.bone_trans();
             //println!("Bone transform length {}", bone_transforms.len());
