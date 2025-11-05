@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use crate::skinned_model::*;
 use crate::{instance::Instance, skeletal_animate::*, skeletal_context::*};
 use wgpu::{BindGroupLayout, util::*};
@@ -86,7 +88,7 @@ impl SkinnedModelNode {
                     binding: 2,
                     resource: skinned_model
                         .inverse_bind_matrices_buffer
-                        .as_ref()
+                        .clone()
                         .unwrap()
                         .as_entire_binding(),
                 },
@@ -119,8 +121,6 @@ impl SkinnedModelNode {
         for p in &mut self.playbacks {
             p.update(dt);
             let bone_transforms = p.bone_trans();
-            println!("Bone transforms length {}", p.bone_trans().len());
-
             for b in bone_transforms {
                 self.bone_matrices.push(BoneMatrix {
                     data: glam::Mat4::from_scale_rotation_translation(
