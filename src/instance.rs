@@ -124,22 +124,22 @@ impl Vertex for SkinnedInstanceRaw {
                     shader_location: 10,
                     format: wgpu::VertexFormat::Float32x4,
                 },
-                // Normal matrix
-                wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 16]>() as wgpu::BufferAddress,
-                    shader_location: 11,
-                    format: wgpu::VertexFormat::Float32x3,
-                },
-                wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 19]>() as wgpu::BufferAddress,
-                    shader_location: 12,
-                    format: wgpu::VertexFormat::Float32x3,
-                },
-                wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 22]>() as wgpu::BufferAddress,
-                    shader_location: 13,
-                    format: wgpu::VertexFormat::Float32x3,
-                },
+                // // Normal matrix
+                // wgpu::VertexAttribute {
+                //     offset: mem::size_of::<[f32; 16]>() as wgpu::BufferAddress,
+                //     shader_location: 11,
+                //     format: wgpu::VertexFormat::Float32x3,
+                // },
+                // wgpu::VertexAttribute {
+                //     offset: mem::size_of::<[f32; 19]>() as wgpu::BufferAddress,
+                //     shader_location: 12,
+                //     format: wgpu::VertexFormat::Float32x3,
+                // },
+                // wgpu::VertexAttribute {
+                //     offset: mem::size_of::<[f32; 22]>() as wgpu::BufferAddress,
+                //     shader_location: 13,
+                //     format: wgpu::VertexFormat::Float32x3,
+                // },
             ],
         }
     }
