@@ -21,8 +21,6 @@ struct BoneMatrix {
 var<storage, read> bone_matrices: BoneMatrix;
 @group(3) @binding(1)
 var<uniform> num_bones: u32;
-@group(3) @binding(2)
-var<storage, read> inverse_bind_poses: BoneMatrix;
 
 struct VertexInput {
     @builtin(instance_index) instance_index: u32,
