@@ -63,7 +63,7 @@ fn vs_main(
  
     let offset = num_bones * model.instance_index;
     let bone_transform = mat4x4<f32>(
-        (inverse_bind_poses.data[model.bone_indices.x] * bone_matrices.data[offset + model.bone_indices.x] * model.bone_weights.x) + (inverse_bind_poses.data[model.bone_indices.y] * bone_matrices.data[offset + model.bone_indices.y] * model.bone_weights.y) + (inverse_bind_poses.data[model.bone_indices.z] * bone_matrices.data[offset + model.bone_indices.z] * model.bone_weights.z) + (inverse_bind_poses.data[model.bone_indices.w] * bone_matrices.data[offset + model.bone_indices.w] *model.bone_weights.w )
+        (inverse_bind_poses.data[model.bone_indices.x] * bone_matrices.data[offset + model.bone_indices.x] * model.bone_weights.x) + (inverse_bind_poses.data[model.bone_indices.y] * bone_matrices.data[offset + model.bone_indices.y] * model.bone_weights.y) + (inverse_bind_poses.data[model.bone_indices.z] * bone_matrices.data[offset + model.bone_indices.z] * model.bone_weights.z) + (inverse_bind_poses.data[model.bone_indices.w] * bone_matrices.data[offset + model.bone_indices.w] * model.bone_weights.w )
     );
 
     let world_matrix = model_matrix * bone_transform;

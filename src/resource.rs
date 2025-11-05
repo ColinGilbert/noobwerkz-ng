@@ -189,6 +189,7 @@ pub fn load_skinned_model_from_serialized(
         let mut indices = Vec::<u32>::new();
         if m.positions.len() != m.normals.len() {
             println!("Not enough normals");
+            // TODO: Generate normals
             return Option::None;
         }
         if m.positions.len() != m.uvs.len() {
@@ -204,9 +205,11 @@ pub fn load_skinned_model_from_serialized(
             return Option::None;
         }
         let mut i = 0;
+        let matrix = glam::Mat4::from_scale_rotation_translation(glam::Vec3::from_array(m.scale), glam::Quat::from_array(m.rotation), glam::Vec3::from_array(m.translation));
         while i < m.positions.len() {
             let mut v = ModelVertex::new();
-            v.position = m.positions[i];
+            let transformed_position = matrix * glam::Vec4::from_array([m.positions[i][0], m.positions[i][1], m.positions[i][2], 1.0]); 
+            v.position = [transformed_position[0], transformed_position[1], transformed_position[2]];
             v.normal = m.normals[i];
             v.tex_coords = m.uvs[i];
             i += 1;
@@ -330,7 +333,7 @@ pub fn load_skinned_model_from_serialized(
         // inverse_bind_poses[bone_newpos] = glam::Mat4::IDENTITY.to_cols_array_2d();
     }
 
-    //println!("Inverse bind matrices {:?}", inverse_bind_poses);
+    // println!("Inverse bind matrices {:?}", inverse_bind_poses);
 
     let inverse_bind_matrices_buffer =
         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
