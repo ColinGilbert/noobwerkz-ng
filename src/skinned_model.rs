@@ -8,7 +8,7 @@ pub struct SkinnedModel {
     pub materials: Materials<Material>,
     pub name: String,
     pub inverse_bind_matrices: Vec<glam::Mat4>,
-    pub inverse_bind_matrices_buffer: Option<wgpu::Buffer>,
+    // pub inverse_bind_matrices_buffer: Option<wgpu::Buffer>,
     //pub num_bones: usize,
 }
 
@@ -19,7 +19,7 @@ impl SkinnedModel {
             materials: Materials::new(),
             name: "".to_owned(),
             inverse_bind_matrices: Vec::new(),
-            inverse_bind_matrices_buffer: Option::None,
+            // inverse_bind_matrices_buffer: Option::None,
             //num_bones: 0,
         }
     }

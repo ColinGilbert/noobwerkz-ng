@@ -82,14 +82,14 @@ impl SkinnedModelNode {
                     binding: 1,
                     resource: num_bones_buffer.as_entire_binding(),
                 },
-                wgpu::BindGroupEntry {
-                    binding: 2,
-                    resource: skinned_model
-                        .inverse_bind_matrices_buffer
-                        .clone()
-                        .unwrap()
-                        .as_entire_binding(),
-                },
+                // wgpu::BindGroupEntry {
+                //     binding: 2,
+                //     resource: skinned_model
+                //         .inverse_bind_matrices_buffer
+                //         .clone()
+                //         .unwrap()
+                //         .as_entire_binding(),
+                // },
             ],
             label: Some("Animation matrices bind Group"),
         });

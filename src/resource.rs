@@ -348,7 +348,7 @@ pub fn load_skinned_model_from_serialized(
             .inverse_bind_matrices
             .push(glam::Mat4::from_cols_array_2d(&ibp));
     }
-    model_results.inverse_bind_matrices_buffer = Some(inverse_bind_matrices_buffer);
+    //model_results.inverse_bind_matrices_buffer = Some(inverse_bind_matrices_buffer);
 
     Some(model_results)
 }
