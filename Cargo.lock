@@ -2287,9 +2287,9 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "orbclient"
-version = "0.3.48"
+version = "0.3.49"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba0b26cec2e24f08ed8bb31519a9333140a6599b867dac464bb150bdb796fd43"
+checksum = "247ad146e19b9437f8604c21f8652423595cf710ad108af40e77d3ae6e96b827"
 dependencies = [
  "libredox",
 ]
@@ -2353,9 +2353,9 @@ dependencies = [
 
 [[package]]
 name = "parry3d"
-version = "0.25.1"
+version = "0.25.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "017be73f24c8ca8b10f9727616e5cb9af82b98488cc6d5eea468e727ffa780ca"
+checksum = "bb2b4291e3c8fcba5f514ed627228c92fa4c94c38bb202c35be7b3b021090193"
 dependencies = [
  "approx",
  "arrayvec",
