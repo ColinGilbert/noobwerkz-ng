@@ -337,12 +337,12 @@ pub fn load_skinned_model_from_serialized(
 
     // println!("Inverse bind matrices {:?}", inverse_bind_poses);
 
-    let inverse_bind_matrices_buffer =
-        device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Inverse bindpose matrices storage buffer"),
-            contents: bytemuck::cast_slice(&inverse_bind_poses),
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
-        });
+    // let inverse_bind_matrices_buffer =
+    //     device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+    //         label: Some("Inverse bindpose matrices storage buffer"),
+    //         contents: bytemuck::cast_slice(&inverse_bind_poses),
+    //         usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+    //     });
     for ibp in inverse_bind_poses {
         model_results
             .inverse_bind_matrices
