@@ -1,7 +1,8 @@
 use crate::{serialized_model::*};
 
 
-pub fn cube_serialized_mesh(scale: f32) -> SerializedMesh {
+pub fn cube_serialized(scale: f32) -> SerializedModel {
+    let mut results = SerializedModel::new();
     let mut m = SerializedMesh::new();
     // Front face
     m.positions.push([-scale, -scale, scale]);
@@ -109,7 +110,8 @@ pub fn cube_serialized_mesh(scale: f32) -> SerializedMesh {
     
     m.indices = cube_indices();
 
-    m
+    results.meshes.push(m);
+    results
 }
 
 pub fn cube_indices() -> Vec<u32> {
