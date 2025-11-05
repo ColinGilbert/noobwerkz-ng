@@ -228,8 +228,8 @@ pub fn load_skinned_model_from_serialized(
             let mut sv = SkinnedModelVertex::from_vert(&v);
             let mut bi = [0; 4]; //m.bone_indices[i];
             for (ii, bone_index) in m.bone_indices[i].iter().enumerate() {
-                let bone_name = &model.bone_names[*bone_index as usize].clone();
-                let j = skeletal_context.skeleton.joint_by_name(bone_name).unwrap();
+                let bone_name = model.bone_names[*bone_index as usize].clone();
+                let j = skeletal_context.skeleton.joint_by_name(&bone_name).unwrap();
                 bi[ii] = j as u32;
             }
             sv.bone_indices = bi;
