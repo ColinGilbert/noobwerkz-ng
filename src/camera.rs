@@ -77,7 +77,7 @@ impl Camera {
     }
 
     pub fn view_matrix(&self) -> glam::Mat4 {
-        let view_matrix = glam::Mat4::look_lh(self.eye, self.look_at, self.up);
+        let view_matrix = glam::Mat4::look_at_lh(self.eye, self.look_at, self.up);
         //println!("Getting view matrix");
         view_matrix
     }
