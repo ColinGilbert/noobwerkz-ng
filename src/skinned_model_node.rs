@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use crate::skinned_model::*;
 use crate::{instance::Instance, skeletal_animate::*, skeletal_context::*};
 use wgpu::{BindGroupLayout, util::*};

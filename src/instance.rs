@@ -20,7 +20,7 @@ impl Instance {
         SkinnedInstanceRaw {
             model: glam::Mat4::from_scale_rotation_translation(self.scale.into(), self.rotation, self.position.into())
             .to_cols_array_2d(),
-            normal: glam::Mat3::from_quat(self.rotation).to_cols_array_2d(),
+            //normal: glam::Mat3::from_quat(self.rotation).to_cols_array_2d(),
         }
     }
 }
@@ -38,7 +38,7 @@ pub struct InstanceRaw {
 #[allow(dead_code)]
 pub struct SkinnedInstanceRaw {
     pub model: [[f32; 4]; 4],
-    pub normal: [[f32; 3]; 3],
+    //pub normal: [[f32; 3]; 3],
 }
 
 impl Vertex for InstanceRaw {
