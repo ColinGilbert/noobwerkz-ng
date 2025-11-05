@@ -91,6 +91,7 @@ impl SkinnedModelNode {
             label: Some("Animation matrices bind Group"),
         });
 
+        
         Self {
             skinned_model_idx,
             instances,
