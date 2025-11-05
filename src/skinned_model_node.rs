@@ -29,7 +29,7 @@ impl SkinnedModelNode {
         let animation = skeletal_context.animations[0].clone();
         let len = instances.len();
         let mut bone_matrices = Vec::new();
-        
+
         let num_bones_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Num bones uniform buffer"),
             contents: bytemuck::cast_slice(&[num_bones]),
@@ -42,7 +42,6 @@ impl SkinnedModelNode {
             )));
         }
         for p in &mut playbacks {
-            println!("Bone transforms length {}", p.bone_trans().len());
             p.update(web_time::Duration::from_secs(0));
             let bone_transforms = p.bone_trans();
             //println!("Bone transform length {}", bone_transforms.len());
@@ -55,7 +54,7 @@ impl SkinnedModelNode {
                     //     b.position,
                     // ))
                     // .to_cols_array_2d(),
-                    data: glam::Mat4::IDENTITY.to_cols_array_2d()
+                    data: glam::Mat4::IDENTITY.to_cols_array_2d(),
                 });
             }
         }
@@ -72,7 +71,7 @@ impl SkinnedModelNode {
             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         });
 
-         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: bone_matrices_bind_group_layout,
             entries: &[
                 wgpu::BindGroupEntry {
@@ -85,13 +84,16 @@ impl SkinnedModelNode {
                 },
                 wgpu::BindGroupEntry {
                     binding: 2,
-                    resource: skinned_model.inverse_bind_matrices_buffer.as_ref().unwrap().as_entire_binding(),
-                }
-             ],
+                    resource: skinned_model
+                        .inverse_bind_matrices_buffer
+                        .as_ref()
+                        .unwrap()
+                        .as_entire_binding(),
+                },
+            ],
             label: Some("Animation matrices bind Group"),
         });
 
-        
         Self {
             skinned_model_idx,
             instances,
@@ -117,9 +119,15 @@ impl SkinnedModelNode {
         for p in &mut self.playbacks {
             p.update(dt);
             let bone_transforms = p.bone_trans();
+            println!("Bone transforms length {}", p.bone_trans().len());
+
             for b in bone_transforms {
                 self.bone_matrices.push(BoneMatrix {
-                    data: glam::Mat4::from_scale_rotation_translation(glam::Vec3::splat(b.scale), b.rotation, b.position)
+                    data: glam::Mat4::from_scale_rotation_translation(
+                        glam::Vec3::splat(b.scale),
+                        b.rotation,
+                        b.position,
+                    )
                     .to_cols_array_2d(),
                     // data: glam::Mat4::IDENTITY.to_cols_array_2d(),
                 });
