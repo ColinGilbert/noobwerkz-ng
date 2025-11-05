@@ -210,6 +210,7 @@ pub fn load_skinned_model_from_serialized(
             let mut v = ModelVertex::new();
             let transformed_position = matrix * glam::Vec4::from_array([m.positions[i][0], m.positions[i][1], m.positions[i][2], 1.0]); 
             v.position = [transformed_position[0], transformed_position[1], transformed_position[2]];
+            // v.position = m.positions[i];
             v.normal = m.normals[i];
             v.tex_coords = m.uvs[i];
             i += 1;
@@ -229,11 +230,11 @@ pub fn load_skinned_model_from_serialized(
             let mut bi = [0; 4]; //m.bone_indices[i];
             for (ii, bone_index) in m.bone_indices[i].iter().enumerate() {
                 let bone_name = model.bone_names[*bone_index as usize].clone();
-                let j = skeletal_context.skeleton.joint_by_name(&bone_name).unwrap();
-                bi[ii] = j as u32;
+                let new_index = skeletal_context.skeleton.joint_by_name(&bone_name).unwrap();
+                bi[ii] = new_index as u32;
             }
-            //sv.bone_indices = bi;
-            sv.bone_indices = m.bone_indices[i];
+            sv.bone_indices = bi;
+            //sv.bone_indices = m.bone_indices[i];
             sv.bone_weights = m.bone_weights[i];
             skinned_verts.push(sv);
         }
@@ -368,7 +369,9 @@ pub fn load_model_from_serialized(
         let mut i = 0;
         while i < m.positions.len() {
             let mut v = ModelVertex::new();
-            v.position = m.positions[i];
+            let transformed_position = matrix * glam::Vec4::from_array([m.positions[i][0], m.positions[i][1], m.positions[i][2], 1.0]); 
+            v.position = [transformed_position[0], transformed_position[1], transformed_position[2]];
+            //v.position = m.positions[i];
             v.normal = m.normals[i];
             v.tex_coords = m.uvs[i];
             i += 1;
