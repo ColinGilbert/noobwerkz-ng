@@ -97,15 +97,12 @@ impl Vertex for SkinnedInstanceRaw {
     fn desc() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
             array_stride: mem::size_of::<SkinnedInstanceRaw>() as wgpu::BufferAddress,
-            // We need to switch from using a step mode of Vertex to Instance
-            // This means that our shaders will only change to use the next
-            // instance when the shader starts processing a new instance
             step_mode: wgpu::VertexStepMode::Instance,
             attributes: &[
                 // Model matrix
                 wgpu::VertexAttribute {
                     offset: 0,
-                    // Our vertex shader uses slots 0-4. We start at 5.
+                    // Our skinned vertex shader uses slots 0-6. We start at 7.
                     shader_location: 7,
                     format: wgpu::VertexFormat::Float32x4,
                 },
