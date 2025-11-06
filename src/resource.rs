@@ -23,7 +23,7 @@ pub fn load_serialized_model(filepath: String, filename: String) -> SerializedMo
     println!("Scale {:?}", deserialized.meshes[0].scale);
     println!("Translation {:?}", deserialized.meshes[0].translation);
     println!("Rotation {:?}", deserialized.meshes[0].rotation);
-    println!("Inverse bind pose {:?}", deserialized.inverse_bind_matrices);
+    //println!("Inverse bind pose {:?}", deserialized.inverse_bind_matrices);
     deserialized
 }
 
@@ -205,13 +205,27 @@ pub fn load_skinned_model_from_serialized(
             return Option::None;
         }
         let mut i = 0;
-        //let matrix = glam::Mat4::from_scale_rotation_translation(glam::Vec3::from_array(m.scale), glam::Quat::from_array(m.rotation), glam::Vec3::from_array(m.translation));
+        let matrix = glam::Mat4::from_scale_rotation_translation(
+            glam::Vec3::from_array(m.scale),
+            glam::Quat::from_array(m.rotation),
+            glam::Vec3::from_array(m.translation),
+        );
         // let matrix = glam::Mat4::from_quat(glam::Quat::from_axis_angle(glam::Vec3{x: 1.0, y: 0.0, z: 0.0}, 90.0));
         while i < m.positions.len() {
             let mut v = ModelVertex::new();
-            // let transformed_position = matrix * glam::Vec4::from_array([m.positions[i][0], m.positions[i][1], m.positions[i][2], 1.0]);
-            // v.position = [transformed_position[0], transformed_position[1], transformed_position[2]];
-            v.position = m.positions[i];
+            let transformed_position = matrix
+                * glam::Vec4::from_array([
+                    m.positions[i][0],
+                    m.positions[i][1],
+                    m.positions[i][2],
+                    1.0,
+                ]);
+            v.position = [
+                transformed_position[0],
+                transformed_position[1],
+                transformed_position[2],
+            ];
+            // v.position = m.positions[i];
             v.normal = m.normals[i];
             v.tex_coords = m.uvs[i];
             i += 1;
@@ -373,12 +387,26 @@ pub fn load_model_from_serialized(
             m.uvs.resize(m.positions.len(), [0.0, 0.0]);
         }
         let mut i = 0;
-        //let matrix = glam::Mat4::from_scale_rotation_translation(glam::Vec3::from_array(m.scale), glam::Quat::from_array(m.rotation), glam::Vec3::from_array(m.translation));
+        let matrix = glam::Mat4::from_scale_rotation_translation(
+            glam::Vec3::from_array(m.scale),
+            glam::Quat::from_array(m.rotation),
+            glam::Vec3::from_array(m.translation),
+        );
         while i < m.positions.len() {
             let mut v = ModelVertex::new();
-            //let transformed_position = matrix * glam::Vec4::from_array([m.positions[i][0], m.positions[i][1], m.positions[i][2], 1.0]);
-            //v.position = [transformed_position[0], transformed_position[1], transformed_position[2]];
-            v.position = m.positions[i];
+            let transformed_position = matrix
+                * glam::Vec4::from_array([
+                    m.positions[i][0],
+                    m.positions[i][1],
+                    m.positions[i][2],
+                    1.0,
+                ]);
+            v.position = [
+                transformed_position[0],
+                transformed_position[1],
+                transformed_position[2],
+            ];
+            //v.position = m.positions[i];
             v.normal = m.normals[i];
             v.tex_coords = m.uvs[i];
             i += 1;
