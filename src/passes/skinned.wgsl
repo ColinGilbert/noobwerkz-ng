@@ -77,7 +77,7 @@ fn vs_main(
     let m2 = bone_matrices.data[i2];
     let m3 = bone_matrices.data[i3];
 
-    let local_position = vec4(0.0);
+    var local_position = vec4(0.0);
     local_position += m0 * vec4(model.position, 1.0) * model.bone_weights.x;
     local_position += m1 * vec4(model.position, 1.0) * model.bone_weights.y;
     local_position += m2 * vec4(model.position, 1.0) * model.bone_weights.z;
