@@ -123,7 +123,7 @@ impl SkinnedModelNode {
     ) {
         self.bone_matrices.clear();
         self.untransformed_bone_matrices.clear();
-        for (pi, p) in &mut self.playbacks.iter().enumerate() {
+        for (pi, p) in &mut self.playbacks.iter_mut().enumerate() {
             p.update(dt);
             let bone_transforms = p.bone_trans();
             for (i, b) in bone_transforms.iter().enumerate() {
