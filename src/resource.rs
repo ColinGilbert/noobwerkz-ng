@@ -249,7 +249,7 @@ pub fn load_skinned_model_from_serialized(
                 bi[ii] = new_index as u32;
             }
             sv.bone_indices = bi;
-            sv.bone_weights = m.bone_weights[i];
+            sv.bone_weights = glam::Vec4::from_array(m.bone_weights[i]).normalize().into();
             skinned_verts.push(sv);
         }
 
