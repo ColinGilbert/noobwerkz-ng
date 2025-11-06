@@ -131,7 +131,7 @@ impl SkinnedModelNode {
                     glam::Vec3::splat(b.scale),
                     b.rotation,
                     b.position,
-                ) * skinned_model.inverse_bind_matrices[i].inverse();
+                ) * skinned_model.inverse_bind_matrices[i];
                 m = glam::Mat4::from_quat(glam::Quat::from_array([0.5, 0.5, 0.5, -0.5]))
                     * m;
                 self.bone_matrices.push(BoneMatrix {
