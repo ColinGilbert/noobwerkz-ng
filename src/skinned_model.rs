@@ -3,6 +3,8 @@ use crate::material::*;
 use crate::model::*;
 use std::ops::Range;
 
+
+#[repr(C)]
 pub struct SkinnedModel {
     pub meshes: SkinnedMeshes<SkinnedTexturedMesh>,
     pub materials: Materials<Material>,
@@ -20,7 +22,7 @@ impl SkinnedModel {
         }
     }
 }
-
+#[repr(C)]
 pub struct SkinnedTexturedMesh {
     pub name: String,
     pub vertex_buffer: wgpu::Buffer,
