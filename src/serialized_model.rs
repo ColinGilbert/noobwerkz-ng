@@ -1,6 +1,6 @@
 use msgpacker::prelude::*;
 
-#[derive(Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedMesh {
     pub name: String,
     pub translation: [f32; 3],
@@ -37,7 +37,7 @@ impl SerializedMesh {
     }
 }
 
-#[derive(Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedMaterial {
     pub name: String,
     pub diffuse_texture_path: String,
@@ -56,7 +56,7 @@ impl SerializedMaterial {
     }
 }
 
-#[derive(Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedModel {
     pub meshes: Vec<SerializedMesh>,
     pub materials: Vec<SerializedMaterial>,
@@ -64,7 +64,6 @@ pub struct SerializedModel {
     pub inverse_bind_matrices: Vec<[[f32;4];4]>
 }
 
-#[derive(Copy, Clone)]
 impl SerializedModel {
     pub fn new() -> Self {
         Self {
