@@ -352,11 +352,16 @@ pub fn load_skinned_model_from_serialized(
     }
     println!("Bones              {:?}", model.bone_names);
     println!("Bones (reshuffled) {:?}", bone_names_reshuffled);
-    for ibp in inverse_bind_poses {
+    for ibp in &model.inverse_bind_matrices {
         model_results
             .inverse_bind_matrices
-            .push(glam::Mat4::from_cols_array_2d(&ibp));
+            .push(glam::Mat4::from_cols_array_2d(ibp));
     }
+    // for ibp in inverse_bind_poses {
+    //     model_results
+    //         .inverse_bind_matrices
+    //         .push(glam::Mat4::from_cols_array_2d(&ibp));
+    // }
 
     Some(model_results)
 }
