@@ -248,8 +248,8 @@ pub fn load_skinned_model_from_serialized(
                 let new_index = skeletal_context.skeleton.joint_by_name(&bone_name).unwrap();
                 bi[ii] = new_index as u32;
             }
-            sv.bone_indices = bi;
-            //sv.bone_indices = m.bone_indices[i];
+            //sv.bone_indices = bi;
+            sv.bone_indices = m.bone_indices[i];
             sv.bone_weights = m.bone_weights[i];
             skinned_verts.push(sv);
         }
@@ -352,16 +352,12 @@ pub fn load_skinned_model_from_serialized(
     }
     println!("Bones              {:?}", model.bone_names);
     println!("Bones (reshuffled) {:?}", bone_names_reshuffled);
-    for ibp in &model.inverse_bind_matrices {
+
+    for ibp in inverse_bind_poses {
         model_results
             .inverse_bind_matrices
-            .push(glam::Mat4::from_cols_array_2d(ibp));
+            .push(glam::Mat4::from_cols_array_2d(&ibp));
     }
-    // for ibp in inverse_bind_poses {
-    //     model_results
-    //         .inverse_bind_matrices
-    //         .push(glam::Mat4::from_cols_array_2d(&ibp));
-    // }
 
     Some(model_results)
 }
