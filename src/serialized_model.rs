@@ -62,8 +62,7 @@ pub struct SerializedModel {
     pub materials: Vec<SerializedMaterial>,
     pub bone_names: Vec<String>,
     pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
-    pub inverse_transform: [[f32; 4]; 4],
-
+    //pub inverse_transform: [[f32; 4]; 4],
 }
 
 impl SerializedModel {
@@ -73,7 +72,7 @@ impl SerializedModel {
             materials: Vec::new(),
             bone_names: Vec::new(),
             inverse_bind_matrices: Vec::new(),
-            inverse_transform: [[0.0;4];4],
+          //  inverse_transform: [[0.0;4];4],
         }
     }
 
