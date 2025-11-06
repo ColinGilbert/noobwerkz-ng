@@ -211,7 +211,7 @@ pub fn load_skinned_model_from_serialized(
             let mut v = ModelVertex::new();
             //let transformed_position = matrix * glam::Vec4::from_array([m.positions[i][0], m.positions[i][1], m.positions[i][2], 1.0]);
             // v.position = [transformed_position[0], transformed_position[1], transformed_position[2]];
-            v.position = [m.positions[i][2], m.positions[i][1], m.positions[i][0]];
+            v.position = m.positions[i];
             v.normal = m.normals[i];
             v.tex_coords = m.uvs[i];
             i += 1;
