@@ -72,10 +72,10 @@ fn vs_main(
     let i2 = offset + model.bone_indices.z;
     let i3 = offset + model.bone_indices.w;
 
-    let m0 = bone_matrices[i0];
-    let m1 = bone_matrices[i1];
-    let m2 = bone_matrices[i2];
-    let m3 = bone_matrices[i3];
+    let m0 = bone_matrices.data[i0];
+    let m1 = bone_matrices.data[i1];
+    let m2 = bone_matrices.data[i2];
+    let m3 = bone_matrices.data[i3];
 
     let local_position = vec4(0.0);
     local_position += m0 * vec4(model.position, 1.0) * model.bone_weights.x;
