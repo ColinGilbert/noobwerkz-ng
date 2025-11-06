@@ -67,10 +67,10 @@ fn vs_main(
         (bone_matrices.data[offset + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.data[offset + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.data[offset + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.data[offset + model.bone_indices.w] * model.bone_weights.w)
     );
 
-    let i0 = offset + mode.bone_indices.x;
+    let i0 = offset + model.bone_indices.x;
     let i1 = offset + model.bone_indices.y;
     let i2 = offset + model.bone_indices.z;
-    let i3 = offset + mode.bone_indices.w;
+    let i3 = offset + model.bone_indices.w;
 
     let m0 = bone_matrices[i0];
     let m1 = bone_matrices[i1];
