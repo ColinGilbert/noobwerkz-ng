@@ -157,7 +157,16 @@ pub struct Projection {
     pub znear: f32,
     pub zfar: f32,
 }
+pub const OPENGL_TO_WGPU_MATRIX : glam::Mat4 = glam::Mat4::from_cols(
+    glam::Vec4::new(1.0, 0.0, 0.0, 0.0),
+    glam::Vec4::new(0.0, 1.0, 0.0, 0.0),
+    glam::Vec4::new(0.0, 0.0, 0.5, 0.0),
+    glam::Vec4::new(0.0, 0.0, 0.5, 1.0),
+);
 
+ 
+
+ 
 impl Projection {
     pub fn new(height: u32, width: u32, fovy_rad: f32, znear: f32, zfar: f32) -> Self {
         Self {
@@ -175,7 +184,7 @@ impl Projection {
     pub fn calc_matrix(&self) -> glam::Mat4 {
         //OPENGL_TO_WGPU_MATRIX * glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
         let results =
-            glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
+            OPENGL_TO_WGPU_MATRIX * glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
         results
     }
 }
