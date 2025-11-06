@@ -128,12 +128,17 @@ impl SkinnedModelNode {
             let bone_transforms = p.bone_trans();
             for (i, b) in bone_transforms.iter().enumerate() {
                 self.bone_matrices.push(BoneMatrix {
-                    data: (
-                         glam::Mat4::from_scale_rotation_translation(
-                            glam::Vec3::splat(b.scale),
-                            b.rotation,
-                            b.position,
-                        ) * skinned_model.inverse_bind_matrices[i] * glam::Mat4::from_scale_rotation_translation(self.instances[pi].scale, self.instances[pi].rotation, self.instances[pi].position).inverse()
+                    data: (glam::Mat4::from_scale_rotation_translation(
+                        glam::Vec3::splat(b.scale),
+                        b.rotation,
+                        b.position,
+                    ) * skinned_model.inverse_bind_matrices[i]
+                        * glam::Mat4::from_scale_rotation_translation(
+                            self.instances[pi].scale.into(),
+                            self.instances[pi].rotation.into(),
+                            self.instances[pi].position.into(),
+                        )
+                        .inverse())
                     .to_cols_array_2d(),
                     // data: glam::Mat4::IDENTITY.to_cols_array_2d(),
                 });
