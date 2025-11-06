@@ -138,7 +138,7 @@ impl SkinnedModelNode {
                             self.instances[pi].rotation.into(),
                             self.instances[pi].position.into(),
                         )
-                        .inverse().transpose())
+                        .inverse())
                     .to_cols_array_2d(),
                     // data: glam::Mat4::IDENTITY.to_cols_array_2d(),
                 });
