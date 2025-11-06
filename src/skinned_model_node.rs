@@ -138,11 +138,11 @@ impl SkinnedModelNode {
                     // data: glam::Mat4::IDENTITY.to_cols_array_2d(),
                 });
                 self.untransformed_bone_matrices.push(BoneMatrix {
-                    data: (glam::Mat4::from_scale_rotation_translation(
+                    data: glam::Mat4::from_scale_rotation_translation(
                         glam::Vec3::splat(b.scale),
                         b.rotation,
                         b.position,
-                    )* skinned_model.inverse_bind_matrices[i])
+                    )
                     .to_cols_array_2d(),
                 });
             }
