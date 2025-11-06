@@ -380,26 +380,26 @@ pub fn load_model_from_serialized(
             m.uvs.resize(m.positions.len(), [0.0, 0.0]);
         }
         let mut i = 0;
-        // let matrix = glam::Mat4::from_scale_rotation_translation(
-        //     glam::Vec3::from_array(m.scale),
-        //     glam::Quat::from_array(m.rotation),
-        //     glam::Vec3::from_array(m.translation),
-        // );
+        let matrix = glam::Mat4::from_scale_rotation_translation(
+            glam::Vec3::from_array(m.scale),
+            glam::Quat::from_array(m.rotation),
+            glam::Vec3::from_array(m.translation),
+        );
         while i < m.positions.len() {
             let mut v = ModelVertex::new();
-            // let transformed_position = matrix
-            //     * glam::Vec4::from_array([
-            //         m.positions[i][0],
-            //         m.positions[i][1],
-            //         m.positions[i][2],
-            //         1.0,
-            //     ]);
-            // v.position = [
-            //     transformed_position[0],
-            //     transformed_position[1],
-            //     transformed_position[2],
-            // ];
-            v.position = m.positions[i];
+            let transformed_position = matrix
+                * glam::Vec4::from_array([
+                    m.positions[i][0],
+                    m.positions[i][1],
+                    m.positions[i][2],
+                    1.0,
+                ]);
+            v.position = [
+                transformed_position[0],
+                transformed_position[1],
+                transformed_position[2],
+            ];
+            // v.position = m.positions[i];
             v.normal = m.normals[i];
             v.tex_coords = m.uvs[i];
             i += 1;
