@@ -64,6 +64,7 @@ pub struct SerializedModel {
     pub inverse_bind_matrices: Vec<[[f32;4];4]>
 }
 
+#[derive(Copy, Clone)]
 impl SerializedModel {
     pub fn new() -> Self {
         Self {
