@@ -163,9 +163,6 @@ pub const OPENGL_TO_WGPU_MATRIX : glam::Mat4 = glam::Mat4::from_cols(
     glam::Vec4::new(0.0, 0.0, 0.5, 0.0),
     glam::Vec4::new(0.0, 0.0, 0.5, 1.0),
 );
-
- 
-
  
 impl Projection {
     pub fn new(height: u32, width: u32, fovy_rad: f32, znear: f32, zfar: f32) -> Self {
