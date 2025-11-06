@@ -343,7 +343,7 @@ pub fn load_skinned_model_from_serialized(
     //         contents: bytemuck::cast_slice(&inverse_bind_poses),
     //         usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
     //     });
-    model_results.inverse_bind_matrices.clear();
+    //model_results.inverse_bind_matrices.clear();
     for ibp in inverse_bind_poses {
         model_results
             .inverse_bind_matrices
