@@ -128,7 +128,7 @@ impl SkinnedModelNode {
             let bone_transforms = p.bone_trans();
             for (i, b) in bone_transforms.iter().enumerate() {
                 let mut m = glam::Mat4::from_scale_rotation_translation(
-                    glam::Vec3::splat(b.scale),
+                    glam::Vec3::splat(1.0),//b.scale),
                     b.rotation,
                     b.position,
                 ) * skinned_model.inverse_bind_matrices[i];
