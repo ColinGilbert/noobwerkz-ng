@@ -1,5 +1,5 @@
 use crate::{serialized_model::*};
-
+use glam::*;
 
 pub fn cube_serialized(scale: f32) -> SerializedModel {
     let mut results = SerializedModel::new();
