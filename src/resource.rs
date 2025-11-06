@@ -341,14 +341,16 @@ pub fn load_skinned_model_from_serialized(
 
     let mut inverse_bind_poses = Vec::<[[f32; 4]; 4]>::new();
     inverse_bind_poses.resize(model.bone_names.len(), [[0.0; 4]; 4]);
-
+    let mut bone_names = Vec::<String>::new();
+    bone_names.resize(model.bone_names.len(), "".to_owned());
     for bone_idx in 0..model.bone_names.len() {
         let bone_name = &model.bone_names[bone_idx].clone();
         let bone_newpos = skeletal_context.skeleton.joint_by_name(bone_name).unwrap() as usize;
         inverse_bind_poses[bone_newpos] = model.inverse_bind_matrices[bone_idx];
+        //bone_names[bone_newpos] = bone_name.to_string();
         // inverse_bind_poses[bone_newpos] = glam::Mat4::IDENTITY.to_cols_array_2d();
     }
-
+    //model_results.bone_names = bone_names;
     // println!("Inverse bind matrices {:?}", inverse_bind_poses);
 
     // let inverse_bind_matrices_buffer =
