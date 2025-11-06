@@ -122,7 +122,7 @@ impl SkinnedModelNode {
         dt: web_time::Duration,
     ) {
         self.bone_matrices.clear();
-
+        self.untransformed_bone_matrices.clear();
         for p in &mut self.playbacks {
             p.update(dt);
             let bone_transforms = p.bone_trans();
