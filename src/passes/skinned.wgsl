@@ -99,7 +99,7 @@ fn vs_main(
     var out: VertexOutput;
     out.clip_position = camera.view_proj * world_pos;
     out.tex_coords = model.tex_coords;
-    out.tangent_position = tbn_matrix * world_position.xyz;
+    out.tangent_position = tbn_matrix * world_pos.xyz;
     out.tangent_view_position = tbn_matrix * camera.view_pos.xyz;
     out.tangent_light_position = tbn_matrix * light.position;
     return out;
