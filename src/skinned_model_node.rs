@@ -132,7 +132,7 @@ impl SkinnedModelNode {
                     b.rotation,
                     b.position,
                 ) * skinned_model.inverse_bind_matrices[i];
-                m = glam::Mat4::from_quat(glam::Quat::from_array([0.5, 0.5, 0.5, -0.5])).inverse()
+                m = glam::Mat4::from_quat(glam::Quat::from_array([0.5, 0.5, 0.5, -0.5]))
                     * m;
                 self.bone_matrices.push(BoneMatrix {
                     data: (m).to_cols_array_2d(),
