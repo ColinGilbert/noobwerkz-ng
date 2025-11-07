@@ -110,58 +110,58 @@ impl OzzTrait for OzzPlayback {
         self.sample_job.run().unwrap();
         self.l2m_job.run().unwrap();
 
-        //println!("{:?}", self.bone_trans);
-        self.bone_trans.clear();
-        self.spine_trans.clear();
+        // //println!("{:?}", self.bone_trans);
+        // self.bone_trans.clear();
+        // self.spine_trans.clear();
 
-        let modals = self.models.buf().unwrap();
-        for (i, current) in modals.iter().enumerate() {
-            let parent_id = self.skeleton.joint_parent(i);
-            if parent_id as i32 == ozz_animation_rs::SKELETON_NO_PARENT {
-                continue;
-            }
-            let parent = &modals[parent_id as usize];
+        // let modals = self.models.buf().unwrap();
+        // for (i, current) in modals.iter().enumerate() {
+        //     let parent_id = self.skeleton.joint_parent(i);
+        //     if parent_id as i32 == ozz_animation_rs::SKELETON_NO_PARENT {
+        //         continue;
+        //     }
+        //     let parent = &modals[parent_id as usize];
 
-            let current_pos = current.w_axis.xyz();
-            let parent_pos = parent.w_axis.xyz();
-            let scale: f32 = (current_pos - parent_pos).length();
+        //     let current_pos = current.w_axis.xyz();
+        //     let parent_pos = parent.w_axis.xyz();
+        //     let scale: f32 = (current_pos - parent_pos).length();
 
-            let bone_dir = (current_pos - parent_pos).normalize();
-            let dot1 = glam::Vec3::dot(bone_dir, parent.x_axis.xyz());
-            let dot2 = glam::Vec3::dot(bone_dir, parent.z_axis.xyz());
-            let binormal = if dot1.abs() < dot2.abs() {
-                parent.x_axis.xyz()
-            } else {
-                parent.z_axis.xyz()
-            };
+        //     let bone_dir = (current_pos - parent_pos).normalize();
+        //     let dot1 = glam::Vec3::dot(bone_dir, parent.x_axis.xyz());
+        //     let dot2 = glam::Vec3::dot(bone_dir, parent.z_axis.xyz());
+        //     let binormal = if dot1.abs() < dot2.abs() {
+        //         parent.x_axis.xyz()
+        //     } else {
+        //         parent.z_axis.xyz()
+        //     };
 
-            let bone_rot_y = glam::Vec3::cross(binormal, bone_dir).normalize();
-            let bone_rot_z = glam::Vec3::cross(bone_dir, bone_rot_y).normalize();
-            let bone_rot =
-                glam::Quat::from_mat3(&glam::Mat3::from_cols(bone_dir, bone_rot_y, bone_rot_z));
+        //     let bone_rot_y = glam::Vec3::cross(binormal, bone_dir).normalize();
+        //     let bone_rot_z = glam::Vec3::cross(bone_dir, bone_rot_y).normalize();
+        //     let bone_rot =
+        //         glam::Quat::from_mat3(&glam::Mat3::from_cols(bone_dir, bone_rot_y, bone_rot_z));
 
-            self.bone_trans.push(OzzTransform {
-                scale,
-                rotation: bone_rot,
-                position: parent_pos,
-            });
+        //     self.bone_trans.push(OzzTransform {
+        //         scale,
+        //         rotation: bone_rot,
+        //         position: parent_pos,
+        //     });
 
-            let parent_rot = glam::Quat::from_mat4(parent);
-            self.spine_trans.push(OzzTransform {
-                scale,
-                rotation: parent_rot,
-                position: parent_pos,
-            });
+        //     let parent_rot = glam::Quat::from_mat4(parent);
+        //     self.spine_trans.push(OzzTransform {
+        //         scale,
+        //         rotation: parent_rot,
+        //         position: parent_pos,
+        //     });
 
-            if self.skeleton.is_leaf(i as i16) {
-                let current_rot = glam::Quat::from_mat4(current);
-                self.spine_trans.push(OzzTransform {
-                    scale,
-                    rotation: current_rot,
-                    position: current_pos,
-                });
-            }
-        }
+        //     if self.skeleton.is_leaf(i as i16) {
+        //         let current_rot = glam::Quat::from_mat4(current);
+        //         self.spine_trans.push(OzzTransform {
+        //             scale,
+        //             rotation: current_rot,
+        //             position: current_pos,
+        //         });
+        //     }
+        // }
     }
 
     fn models(&self) -> Arc<RwLock<Vec<glam::Mat4>>> {
