@@ -1,4 +1,4 @@
-use glam::Vec4Swizzles;
+// use glam::Vec4Swizzles;
 use ozz_animation_rs::OzzBuf;
 use std::sync::{Arc, RwLock};
 
@@ -22,6 +22,7 @@ where
 
 pub struct OzzPlayback {
     seek: f32,
+    #[allow(unused)]
     skeleton: Arc<ozz_animation_rs::Skeleton>,
     sample_job: ozz_animation_rs::SamplingJobArc,
     l2m_job: ozz_animation_rs::LocalToModelJobArc,
