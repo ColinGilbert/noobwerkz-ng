@@ -45,6 +45,7 @@ impl State {
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
         let mut lights = Vec::<LightUniform>::new();
         let mut user_ctx = UserContext::new();// { models: :, skinned_models: (), scenes: (), active_scene: () }
+        
         if let Some(cb) = *USER_SETUP_CALLBACK.lock().unwrap() {
             cb(&mut gfx_ctx, &mut user_ctx, &mut lights);
         }

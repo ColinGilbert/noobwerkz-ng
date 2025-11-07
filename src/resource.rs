@@ -349,8 +349,8 @@ pub fn load_skinned_model_from_serialized(
         bone_names_reshuffled[bone_newpos] = bone_name.to_string();
         // inverse_bind_poses[bone_newpos] = glam::Mat4::IDENTITY.to_cols_array_2d();
     }
-    println!("Bones              {:?}", model.bone_names);
-    println!("Bones (reshuffled) {:?}", bone_names_reshuffled);
+    // println!("Bones              {:?}", model.bone_names);
+    // !("Bones (reshuffled) {:?}", bone_names_reshuffled);
 
     for ibp in inverse_bind_poses {
         model_results
