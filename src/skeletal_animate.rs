@@ -24,7 +24,7 @@ pub struct OzzPlayback {
     skeleton: Arc<ozz_animation_rs::Skeleton>,
     sample_job: ozz_animation_rs::SamplingJobArc,
     l2m_job: ozz_animation_rs::LocalToModelJobArc,
-    models: Arc<RwLock<Vec<glam::Mat4>>>,
+    pub models: Arc<RwLock<Vec<glam::Mat4>>>,
     bone_trans: Vec<OzzTransform>,
     spine_trans: Vec<OzzTransform>,
 }
