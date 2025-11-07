@@ -2,13 +2,11 @@ use crate::graphics_context::create_render_pipeline;
 use crate::instance::*;
 use crate::model::*;
 use crate::skinned_model::*;
-// use crate::model_node::ModelNode;
 use crate::model_node::*;
 use crate::passes::Pass;
 use crate::skinned_model_node::*;
 use crate::texture::*;
 use std::iter::once;
-// use wgpu::BufferDescriptor;
 use wgpu::util::DeviceExt;
 
 pub struct ForwardRenderer {
@@ -68,7 +66,7 @@ impl Pass for ForwardRenderer {
 
             for m in model_nodes.iter() {
                 let mut count = 0;
-                let mut instance_data = Vec::<InstanceRaw>::new(); // = ;m.instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
+                let mut instance_data = Vec::<InstanceRaw>::new();
 
                 for i in &m.instances {
                     instance_data.push(i.to_raw());
