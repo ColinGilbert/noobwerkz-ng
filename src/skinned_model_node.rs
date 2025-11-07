@@ -126,8 +126,9 @@ impl SkinnedModelNode {
         for p in &mut self.playbacks {
             p.update(dt);
             let bone_transforms = p.bone_trans();
+            let inverse_root_mat = glam::Mat4::from_cols_array(& [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]).inverse();
             for (i, b) in bone_transforms.iter().enumerate() {
-                let m = glam::Mat4::from_scale_rotation_translation(
+                let m = inverse_root_mat * glam::Mat4::from_scale_rotation_translation(
                     glam::Vec3::splat(b.scale),
                     b.rotation,
                     b.position,
