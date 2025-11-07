@@ -44,9 +44,10 @@ impl SkinnedModelNode {
         }
         for p in &mut playbacks {
             p.update(web_time::Duration::from_secs(0));
-            let bone_transforms = p.bone_trans();
+            //et bone_transforms = p.bone_trans();
             println!("Bone transform length {}", bone_transforms.len(),);
-            for _b in bone_transforms {
+            //for _b in bone_transforms {
+            for m in *(p.models).read().unwrap() {
                 bone_matrices.push(BoneMatrix {
                     // data: (glam::Mat4::from_scale_rotation_translation(
                     //     glam::Vec3::splat(b.scale),
