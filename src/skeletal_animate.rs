@@ -17,6 +17,7 @@ where
     fn root(&self) -> glam::Mat4;
     fn bone_trans(&self) -> &[OzzTransform];
     fn spine_trans(&self) -> &[OzzTransform];
+    fn models(&self) -> Arc<RwLock<Vec<glam::Mat4>>>;
 }
 
 pub struct OzzPlayback {
@@ -52,7 +53,7 @@ impl OzzPlayback {
             .set_context(ozz_animation_rs::SamplingContext::new(
                 animation.num_tracks(),
             ));
-        
+
         let sample_out = Arc::new(RwLock::new(vec![
             ozz_animation_rs::SoaTransform::default();
             skeleton.num_soa_joints()
@@ -104,7 +105,7 @@ impl OzzTrait for OzzPlayback {
         self.seek %= duration;
         let ratio = self.seek / duration;
 
-       // println!("ratio {}", ratio);
+        // println!("ratio {}", ratio);
         self.sample_job.set_ratio(ratio);
         self.sample_job.run().unwrap();
         self.l2m_job.run().unwrap();
@@ -161,5 +162,9 @@ impl OzzTrait for OzzPlayback {
                 });
             }
         }
+    }
+
+    fn models(&self) -> Arc<RwLock<Vec<glam::Mat4>>> {
+        self.models.clone()
     }
 }
