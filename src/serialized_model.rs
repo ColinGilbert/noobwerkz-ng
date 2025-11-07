@@ -1,5 +1,5 @@
 use msgpacker::prelude::*;
-
+#[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedMesh {
     pub name: String,
@@ -37,6 +37,7 @@ impl SerializedMesh {
     }
 }
 
+#[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedMaterial {
     pub name: String,
@@ -56,6 +57,7 @@ impl SerializedMaterial {
     }
 }
 
+#[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedModel {
     pub meshes: Vec<SerializedMesh>,
