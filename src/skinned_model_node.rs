@@ -5,7 +5,6 @@ use wgpu::{BindGroupLayout, util::*};
 pub struct SkinnedModelNode {
     pub skinned_model_idx: usize,
     pub instances: Vec<Instance>,
-    //pub visible: Vec<bool>,
     pub playbacks: Vec<OzzPlayback>,
     pub untransformed_bone_matrices: Vec<BoneMatrix>, // for debug
     pub bone_matrices: Vec<BoneMatrix>,
@@ -46,7 +45,7 @@ impl SkinnedModelNode {
         for p in &mut playbacks {
             p.update(web_time::Duration::from_secs(0));
             let bone_transforms = p.bone_trans();
-            println!("Bone transform length {}", bone_transforms.len());
+            println!("Bone transform length {}", bone_transforms.len(), );
             //let mut i = 0;
             for _b in bone_transforms {
                 bone_matrices.push(BoneMatrix {
@@ -102,7 +101,6 @@ impl SkinnedModelNode {
         Self {
             skinned_model_idx,
             instances,
-            //visible: vec![true; len],
             playbacks,
             untransformed_bone_matrices,
             bone_matrices,
@@ -125,6 +123,7 @@ impl SkinnedModelNode {
         self.untransformed_bone_matrices.clear();
         for p in &mut self.playbacks {
             p.update(dt);
+            println!("Num spines {}", p.spine_trans().len());
             let bone_transforms = p.bone_trans();
             //let inverse_root_mat = glam::Mat4::from_cols_array(& [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]).inverse();
             for (i, b) in bone_transforms.iter().enumerate() {

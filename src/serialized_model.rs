@@ -74,7 +74,6 @@ impl SerializedModel {
             materials: Vec::new(),
             bone_names: Vec::new(),
             inverse_bind_matrices: Vec::new(),
-          //  inverse_transform: [[0.0;4];4],
         }
     }
 
