@@ -1,4 +1,5 @@
 use crate::graphics_context::create_render_pipeline;
+use crate::index_types::*;
 use crate::instance::*;
 use crate::model::*;
 use crate::model_node::*;
@@ -6,9 +7,9 @@ use crate::passes::Pass;
 use crate::skinned_model::*;
 use crate::skinned_model_node::*;
 use crate::texture::*;
-use crate::index_types::*;
 use std::iter::once;
 use wgpu::util::DeviceExt;
+use wgpu::wgc::instance;
 
 pub struct ForwardRenderer {
     pub render_pipeline_layout: wgpu::PipelineLayout,
@@ -67,35 +68,60 @@ impl Pass for ForwardRenderer {
 
             for m in model_nodes.iter() {
                 let mut count = 0;
-                let mut instance_data = Vec::<InstanceRaw>::new();
-
+                let mut model_instance_data = Vec::<InstanceRaw>::new();
+                let model = &models[m.model_idx];
                 for i in &m.instances {
-                    instance_data.push(i.to_raw());
+                    model_instance_data.push(i.to_raw());
                     count += 1;
                 }
 
-                let instance_buffer =
-                    device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                        label: Some("Instance Buffer"),
-                        contents: bytemuck::cast_slice(&instance_data),
-                        usage: wgpu::BufferUsages::VERTEX,
-                    });
-
-                render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
-                // render_pass.set_pipeline(&self.light_render_pipeline);
-                // render_pass.draw_light_model(
-                //     &models[0],
-                //     &self.camera_bind_group,
-                //     &self.light_bind_group,
-                // );
-
                 render_pass.set_pipeline(&self.render_pipeline);
-                render_pass.draw_model_instanced(
-                    &models[m.model_idx],
-                    0..count,
-                    &self.camera_bind_group,
-                    &self.light_bind_group,
-                );
+
+                for (i,mesh) in model.meshes.iter().enumerate() {
+                    let mesh_model_matrix = glam::Mat4::from_scale_rotation_translation(
+                        mesh.scale,
+                        mesh.rotation,
+                        mesh.translation,
+                    );
+                    let mesh_normal_matrix = glam::Mat3::from_quat(mesh.rotation);
+
+                    let mut mesh_instance_data = Vec::<InstanceRaw>::new();
+
+                    for instance_raw in model_instance_data.iter() {
+                        let model_model_matrix =
+                            glam::Mat4::from_cols_array_2d(&instance_raw.model);
+                        let model_normal_matrix =
+                            glam::Mat3::from_cols_array_2d(&instance_raw.normal);
+                        let temp = InstanceRaw {
+                            model: (model_model_matrix * mesh_model_matrix).to_cols_array_2d(),
+                            normal: (model_normal_matrix * mesh_normal_matrix).to_cols_array_2d(),
+                        };
+                        mesh_instance_data.push(temp)
+                    }
+
+                    let instance_buffer =
+                        device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                            label: Some("Instance Buffer"),
+                            contents: bytemuck::cast_slice(&mesh_instance_data),
+                            usage: wgpu::BufferUsages::VERTEX,
+                        });
+
+                    render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
+                    // render_pass.set_pipeline(&self.light_render_pipeline);
+                    // render_pass.draw_light_model(
+                    //     &models[0],
+                    //     &self.camera_bind_group,
+                    //     &self.light_bind_group,
+                    // );
+
+                    render_pass.draw_mesh_instanced(
+                        &mesh,
+                        &model.materials[mesh.material],
+                        0..count,
+                        &self.camera_bind_group,
+                        &self.light_bind_group,
+                    );
+                }
             }
 
             for m in skinned_model_nodes.iter() {
@@ -111,14 +137,19 @@ impl Pass for ForwardRenderer {
                 }
 
                 for (i, mesh) in model.meshes.iter().enumerate() {
-
                     let mut mesh_instance_data = Vec::<SkinnedInstanceRaw>::new();
 
-                    let mesh_mat = glam::Mat4::from_scale_rotation_translation(mesh.scale, mesh.rotation, mesh.translation);
+                    let mesh_mat = glam::Mat4::from_scale_rotation_translation(
+                        mesh.scale,
+                        mesh.rotation,
+                        mesh.translation,
+                    );
                     let model_mat = glam::Mat4::from_cols_array_2d(&model_instance_data[i].model);
-                    let temp = SkinnedInstanceRaw { model: (model_mat * mesh_mat).to_cols_array_2d()};
+                    let temp = SkinnedInstanceRaw {
+                        model: (model_mat * mesh_mat).to_cols_array_2d(),
+                    };
                     mesh_instance_data.push(temp);
-                    
+
                     let instance_buffer =
                         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                             label: Some("Instance Buffer"),
