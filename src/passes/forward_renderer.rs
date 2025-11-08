@@ -158,8 +158,10 @@ impl Pass for ForwardRenderer {
                         });
 
                     render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
+                    
                     let skinned_mesh_idx = SkinnedMeshIndex::new(i);
                     let mesh = &model.meshes[skinned_mesh_idx];
+
                     render_pass.draw_skinned_mesh_instanced(
                         mesh,
                         &model.materials[mesh.material],
@@ -232,6 +234,7 @@ impl ForwardRenderer {
                 label: Some("Normal Shader"),
                 source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
             };
+            
             create_render_pipeline(
                 &device,
                 &render_pipeline_layout,

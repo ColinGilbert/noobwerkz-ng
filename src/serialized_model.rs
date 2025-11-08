@@ -77,17 +77,17 @@ impl SerializedModel {
         }
     }
 
-    pub fn rotate(&mut self, rotation: glam::Quat) {
-        let matrix = glam::Mat4::from_quat(rotation);
-        for m in self.meshes.iter_mut() {
-            let mut i = 0;
-            while i < m.positions.len() {
-                let p = m.positions[i];
-                let mut pp = glam::Vec4::from_array([p[0], p[1], p[2], 1.0]);
-                pp = matrix * pp;
-                m.positions[i] = [pp[0], pp[1], pp[2]];
-                i += 1;
-            }
-        }
-    }
+    // pub fn rotate(&mut self, rotation: glam::Quat) {
+    //     let matrix = glam::Mat4::from_quat(rotation);
+    //     for m in self.meshes.iter_mut() {
+    //         let mut i = 0;
+    //         while i < m.positions.len() {
+    //             let p = m.positions[i];
+    //             let mut pp = glam::Vec4::from_array([p[0], p[1], p[2], 1.0]);
+    //             pp = matrix * pp;
+    //             m.positions[i] = [pp[0], pp[1], pp[2]];
+    //             i += 1;
+    //         }
+    //     }
+    // }
 }

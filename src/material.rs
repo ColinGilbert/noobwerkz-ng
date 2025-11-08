@@ -1,5 +1,5 @@
 use crate::texture;
-
+#[repr(C)]
 #[derive(Clone)]
 pub struct Material {
     pub name: String,
