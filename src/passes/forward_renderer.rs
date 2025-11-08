@@ -9,7 +9,7 @@ use crate::skinned_model_node::*;
 use crate::texture::*;
 use std::iter::once;
 use wgpu::util::DeviceExt;
-use wgpu::wgc::instance;
+// use wgpu::wgc::instance;
 
 pub struct ForwardRenderer {
     pub render_pipeline_layout: wgpu::PipelineLayout,
@@ -77,7 +77,7 @@ impl Pass for ForwardRenderer {
 
                 render_pass.set_pipeline(&self.render_pipeline);
 
-                for (i,mesh) in model.meshes.iter().enumerate() {
+                for mesh in &model.meshes {
                     let mesh_model_matrix = glam::Mat4::from_scale_rotation_translation(
                         mesh.scale,
                         mesh.rotation,
