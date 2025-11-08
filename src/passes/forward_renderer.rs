@@ -101,6 +101,8 @@ impl Pass for ForwardRenderer {
                 let mut count = 0;
                 let mut instance_data = Vec::<SkinnedInstanceRaw>::new();
                 let model = &skinned_models[m.skinned_model_idx];
+                
+                render_pass.set_pipeline(&self.skinned_render_pipeline);
 
                 for i in &m.instances {
                     instance_data.push(i.to_skinned_raw());
@@ -116,7 +118,6 @@ impl Pass for ForwardRenderer {
 
                 render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
 
-                render_pass.set_pipeline(&self.skinned_render_pipeline);
 
                 render_pass.draw_skinned_model_instanced(
                     &model,
