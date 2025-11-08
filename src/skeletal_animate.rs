@@ -115,8 +115,6 @@ impl OzzTrait for OzzPlayback {
     }
 
     fn update_skeleton(&mut self) {
-        
-        // //println!("{:?}", self.bone_trans);
         self.bone_trans.clear();
         self.spine_trans.clear();
 
