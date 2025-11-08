@@ -10,7 +10,6 @@ pub struct SkinnedModel {
     pub materials: Materials<Material>,
     pub name: String,
     pub inverse_bind_matrices: Vec<glam::Mat4>,
-    pub inverse_root_matrix: glam::Mat4,
 }
 
 impl SkinnedModel {
@@ -20,10 +19,10 @@ impl SkinnedModel {
             materials: Materials::new(),
             name: "".to_owned(),
             inverse_bind_matrices: Vec::new(),
-            inverse_root_matrix: glam::Mat4::from_cols_array_2d(&[[0.0; 4]; 4]),
         }
     }
 }
+
 #[repr(C)]
 pub struct SkinnedTexturedMesh {
     pub name: String,
