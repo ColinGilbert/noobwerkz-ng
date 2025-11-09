@@ -25,6 +25,9 @@ pub fn cube(scale: f64) -> SerializedModel {
         result.meshes[0].uvs.push([t.x as f32, t.y as f32])
     }
 
+    result.meshes[0].scale = [1.0, 1.0, 1.0];
+    result.meshes[0].rotation = glam::Quat::IDENTITY.to_array();
+
     result
 
     //     let mut results = SerializedModel::new();
