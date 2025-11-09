@@ -78,16 +78,19 @@ impl Pass for ForwardRenderer {
                 render_pass.set_pipeline(&self.render_pipeline);
 
                 for (i, mesh) in model.meshes.iter().enumerate() {
-                    let mut mesh_instance_data = Vec::<SkinnedInstanceRaw>::new();
+                    let mut mesh_instance_data = Vec::<InstanceRaw>::new();
 
-                    let mesh_mat = glam::Mat4::from_scale_rotation_translation(
+                    let mesh_m_mat = glam::Mat4::from_scale_rotation_translation(
                         mesh.scale,
                         mesh.rotation,
                         mesh.translation,
                     );
-                    let model_mat = glam::Mat4::from_cols_array_2d(&model_instance_data[i].model);
-                    let temp = SkinnedInstanceRaw {
-                        model: (model_mat * mesh_mat).to_cols_array_2d(),
+                    let mesh_n_mat = glam::Mat3::from_quat(mesh.rotation);
+                    let model_m_mat = glam::Mat4::from_cols_array_2d(&model_instance_data[i].model);
+                    let model_n_mat = glam::Mat3::from_cols_array_2d(&model_instance_data[i].normal);
+                    let temp = InstanceRaw {
+                        model: (model_m_mat * mesh_m_mat).to_cols_array_2d(),
+                        normal: (model_n_mat * mesh_n_mat).to_cols_array_2d() 
                     };
                     mesh_instance_data.push(temp);
 
