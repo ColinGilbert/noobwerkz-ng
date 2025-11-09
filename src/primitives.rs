@@ -39,7 +39,7 @@ pub fn cone(height: f64, radius: f64) -> SerializedModel {
     let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
     let cone = Solid::new(vec![shell]);
 
-    get_model(cone)
+    get_model(&cone)
 }
 
 fn get_model(solid: &Solid) -> SerializedModel {
