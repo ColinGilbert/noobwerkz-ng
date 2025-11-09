@@ -1,20 +1,30 @@
 use crate::serialized_model::*;
 use glam::*;
 use truck_meshalgo::{
-    prelude::{Splitting, StructuringFilter},
-    tessellation::*,
+    prelude::*
 };
 use truck_modeling::*;
+use std::f64::consts::PI;
 
 pub fn cube(scale: f64) -> SerializedModel {
     let v = builder::vertex(Point3::new(-scale / 2.0, -scale / 2.0, -scale / 2.0));
     let e = builder::tsweep(&v, Vector3::new(scale, 0.0, 0.0));
     let f = builder::tsweep(&e, Vector3::new(0.0, scale, 0.0));
-    let cube   = builder::tsweep(&f, Vector3::new(0.0, 0.0, scale));
+    let cube = builder::tsweep(&f, Vector3::new(0.0, 0.0, scale));
 
     get_mesh(&cube)
 }
-fn get_mesh(solid: & Solid) -> SerializedModel {
+
+pub fn sphere(scale: f64) -> SerializedModel {
+    let v0 = builder::vertex(Point3::new(0.0, scale/2.0, 0.0));
+    let wire: Wire = builder::rsweep(&v0, Point3::origin(), Vector3::unit_x(), Rad(PI));
+    let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
+    let sphere = Solid::new(vec![shell]);
+
+    get_mesh(&sphere)
+}
+
+fn get_mesh(solid: &Solid) -> SerializedModel {
     let mut polygon_mesh = solid.triangulation(0.005).to_polygon();
     let triangulation = polygon_mesh.triangulate();
     let mut result = SerializedModel::new();
@@ -50,124 +60,4 @@ fn get_mesh(solid: & Solid) -> SerializedModel {
     result.meshes[0].rotation = glam::Quat::IDENTITY.to_array();
 
     result
-
-    //     let mut results = SerializedModel::new();
-    //     let mut m = SerializedMesh::new();
-    //     // Front face
-    //     m.positions.push([-scale, -scale, scale]);
-    //     m.normals.push([0.0, 0.0, 1.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([scale, -scale, scale]);
-    //     m.normals.push([0.0, 0.0, -1.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([scale, scale, scale]);
-    //     m.normals.push([1.0, 0.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([-scale, scale, scale]);
-    //     m.normals.push([-1.0, 0.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     // Back face
-    //     m.positions.push([-scale, -scale, -scale]);
-    //     m.normals.push([0.0, 1.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([-scale, scale, -scale]);
-    //     m.normals.push([0.0, -1.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([scale, scale, -scale]);
-    //     m.normals.push([0.0, 0.0, 1.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([scale, -scale, -scale]);
-    //     m.normals.push([0.0, 0.0, -1.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     // Top face
-    //     m.positions.push([-scale, scale, -scale]);
-    //     m.normals.push([1.0, 0.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([-scale, scale, scale]);
-    //     m.normals.push([-1.0, 0.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([scale, scale, scale]);
-    //     m.normals.push([0.0, 1.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([scale, scale, -scale]);
-    //     m.normals.push([0.0, -1.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     // Bottom face
-    //     m.positions.push([-scale, -scale, -scale]);
-    //     m.normals.push([0.0, 0.0, 1.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([scale, -scale, -scale]);
-    //     m.normals.push([0.0, 0.0, -1.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([scale, -scale, scale]);
-    //     m.normals.push([1.0, 0.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([-scale, -scale, scale]);
-    //     m.normals.push([-1.0, 0.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     // Right face
-    //     m.positions.push([scale, -scale, -scale]);
-    //     m.normals.push([0.0, 1.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([scale, scale, -scale]);
-    //     m.normals.push([0.0, -1.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([scale, scale, scale]);
-    //     m.normals.push([0.0, 0.0, 1.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([scale, -scale, scale]);
-    //     m.normals.push([0.0, 0.0, -1.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     // Left face
-    //     m.positions.push([-scale, -scale, -scale]);
-    //     m.normals.push([1.0, 0.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([-scale, -scale, scale]);
-    //     m.normals.push([-1.0, 0.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([-scale, scale, scale]);
-    //     m.normals.push([0.0, 1.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.positions.push([-scale, scale, -scale]);
-    //     m.normals.push([0.0, -1.0, 0.0]);
-    //     m.uvs.push([0.0, 0.5]);
-
-    //     m.indices = cube_indices();
-
-    //     results.meshes.push(m);
-    //     results
-    // }
-
-    // pub fn cube_indices() -> Vec<u32> {
-    //     vec![
-    //         0, 1, 2, 0, 2, 3, // front
-    //         4, 5, 6, 4, 6, 7, // back
-    //         8, 9, 10, 8, 10, 11, // top
-    //         12, 13, 14, 12, 14, 15, // bottom
-    //         16, 17, 18, 16, 18, 19, // right
-    //         20, 21, 22, 20, 22, 23, // left
-    //     ]
 }
