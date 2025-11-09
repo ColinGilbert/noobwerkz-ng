@@ -77,36 +77,15 @@ impl Pass for ForwardRenderer {
 
                 render_pass.set_pipeline(&self.render_pipeline);
 
-<<<<<<< HEAD
-                for mesh in &model.meshes {
-                    let mesh_model_matrix = glam::Mat4::from_scale_rotation_translation(
-=======
                 for (i, mesh) in model.meshes.iter().enumerate() {
                     let mut mesh_instance_data = Vec::<InstanceRaw>::new();
 
                     let mesh_m_mat = glam::Mat4::from_scale_rotation_translation(
->>>>>>> dev
                         mesh.scale,
                         mesh.rotation,
                         mesh.translation,
                     );
-<<<<<<< HEAD
-                    let mesh_normal_matrix = glam::Mat3::from_quat(mesh.rotation);
 
-                    let mut mesh_instance_data = Vec::<InstanceRaw>::new();
-
-                    for instance_raw in model_instance_data.iter() {
-                        let model_model_matrix =
-                            glam::Mat4::from_cols_array_2d(&instance_raw.model);
-                        let model_normal_matrix =
-                            glam::Mat3::from_cols_array_2d(&instance_raw.normal);
-                        let temp = InstanceRaw {
-                            model: (model_model_matrix * mesh_model_matrix).to_cols_array_2d(),
-                            normal: (model_normal_matrix * mesh_normal_matrix).to_cols_array_2d(),
-                        };
-                        mesh_instance_data.push(temp)
-                    }
-=======
                     let mesh_n_mat = glam::Mat3::from_quat(mesh.rotation);
                     let model_m_mat = glam::Mat4::from_cols_array_2d(&model_instance_data[i].model);
                     let model_n_mat = glam::Mat3::from_cols_array_2d(&model_instance_data[i].normal);
@@ -115,7 +94,7 @@ impl Pass for ForwardRenderer {
                         normal: (model_n_mat * mesh_n_mat).to_cols_array_2d() 
                     };
                     mesh_instance_data.push(temp);
->>>>>>> dev
+
 
                     let instance_buffer =
                         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -176,15 +155,10 @@ impl Pass for ForwardRenderer {
                         });
 
                     render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
-<<<<<<< HEAD
-                    let skinned_mesh_idx = SkinnedMeshIndex::new(i);
-                    let mesh = &model.meshes[skinned_mesh_idx];
-=======
-                    
+
                     let skinned_mesh_idx = SkinnedMeshIndex::new(i);
                     let mesh = &model.meshes[skinned_mesh_idx];
 
->>>>>>> dev
                     render_pass.draw_skinned_mesh_instanced(
                         mesh,
                         &model.materials[mesh.material],

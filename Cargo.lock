@@ -1653,7 +1653,10 @@ dependencies = [
 
 [[package]]
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> dev
 name = "itertools"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1731,7 +1734,10 @@ dependencies = [
 
 [[package]]
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> dev
 name = "katexit"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2175,14 +2181,20 @@ dependencies = [
  "rayon",
  "rerecast",
 <<<<<<< HEAD
+<<<<<<< HEAD
  "safe_index",
 =======
+=======
+>>>>>>> dev
  "rusty_enet",
  "safe_index",
  "serde",
  "truck-meshalgo",
  "truck-modeling",
  "truck-stepio",
+<<<<<<< HEAD
+>>>>>>> dev
+=======
 >>>>>>> dev
  "web-time",
  "wgpu",
@@ -3174,7 +3186,11 @@ dependencies = [
  "proc-macro2",
  "quote",
 <<<<<<< HEAD
+<<<<<<< HEAD
  "syn",
+=======
+ "syn 2.0.109",
+>>>>>>> dev
 =======
  "syn 2.0.109",
 >>>>>>> dev
@@ -3282,7 +3298,10 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 
 [[package]]
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> dev
 name = "rusty_enet"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3384,7 +3403,11 @@ dependencies = [
  "proc-macro2",
  "quote",
 <<<<<<< HEAD
+<<<<<<< HEAD
  "syn",
+=======
+ "syn 2.0.109",
+>>>>>>> dev
 =======
  "syn 2.0.109",
 >>>>>>> dev
@@ -3955,7 +3978,10 @@ checksum = "b4ac048d71ede7ee76d585517add45da530660ef4390e49b098733c6e897f254"
 
 [[package]]
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> dev
 name = "unty"
 version = "0.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
