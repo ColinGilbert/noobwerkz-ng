@@ -1,35 +1,50 @@
 use crate::serialized_model::*;
 use glam::*;
-use truck_meshalgo::{prelude::{Splitting, StructuringFilter}, tessellation::*};
+use truck_meshalgo::{
+    prelude::{Splitting, StructuringFilter},
+    tessellation::*,
+};
 use truck_modeling::*;
 
 pub fn cube(scale: f64) -> SerializedModel {
-    let v = builder::vertex(Point3::new(-scale/2.0, -scale/2.0, -scale/2.0));
+    let v = builder::vertex(Point3::new(-scale / 2.0, -scale / 2.0, -scale / 2.0));
     let e = builder::tsweep(&v, Vector3::new(scale, 0.0, 0.0));
     let f = builder::tsweep(&e, Vector3::new(0.0, scale, 0.0));
     let cube = builder::tsweep(&f, Vector3::new(0.0, 0.0, scale));
     let mut polygon_mesh = cube.triangulation(0.005).to_polygon();
-    let triangulation = polygon_mesh;
+    let triangulation = polygon_mesh.triangulate();
     let mut result = SerializedModel::new();
     result.meshes.push(SerializedMesh::new());
 
-    for (i,p) in triangulation.positions().iter().enumerate() {
-        result.meshes[0].positions.push([p.x as f32, p.y as f32, p.z as f32]);
-        result.meshes[0].indices.push(i as u32);
+    for p in triangulation.positions() {
+        result.meshes[0]
+            .positions
+            .push([p.x as f32, p.y as f32, p.z as f32]);
     }
-    
+
     for n in triangulation.normals() {
-        result.meshes[0].normals.push([n.x as f32, n.y as f32, n.z as f32]);
+        result.meshes[0]
+            .normals
+            .push([n.x as f32, n.y as f32, n.z as f32]);
     }
 
     for t in triangulation.uv_coords() {
         result.meshes[0].uvs.push([t.x as f32, t.y as f32])
     }
 
+    let faces = triangulation.faces();
+
+    let triangles = faces.tri_faces();
+
+    for t in triangles {
+        result.meshes[0].indices.push(t[0].pos as u32);
+        result.meshes[0].indices.push(t[1].pos as u32);
+        result.meshes[0].indices.push(t[2].pos as u32);
+    }
 
     result.meshes[0].scale = [1.0, 1.0, 1.0];
     result.meshes[0].rotation = glam::Quat::IDENTITY.to_array();
-    
+
     result
 
     //     let mut results = SerializedModel::new();
