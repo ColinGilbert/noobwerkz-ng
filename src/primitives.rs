@@ -1,10 +1,8 @@
 use crate::serialized_model::*;
 use glam::*;
-use truck_meshalgo::{
-    prelude::*
-};
-use truck_modeling::*;
 use std::f64::consts::PI;
+use truck_meshalgo::prelude::*;
+use truck_modeling::*;
 
 pub fn cube(scale: f64) -> SerializedModel {
     let v = builder::vertex(Point3::new(-scale / 2.0, -scale / 2.0, -scale / 2.0));
@@ -16,7 +14,7 @@ pub fn cube(scale: f64) -> SerializedModel {
 }
 
 pub fn sphere(scale: f64) -> SerializedModel {
-    let v0 = builder::vertex(Point3::new(0.0, scale/2.0, 0.0));
+    let v0 = builder::vertex(Point3::new(0.0, scale / 2.0, 0.0));
     let wire: Wire = builder::rsweep(&v0, Point3::origin(), Vector3::unit_x(), Rad(PI));
     let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
     let sphere = Solid::new(vec![shell]);
@@ -25,12 +23,23 @@ pub fn sphere(scale: f64) -> SerializedModel {
 }
 
 pub fn cylinder(height: f64, radius: f64) -> SerializedModel {
-   let vertex = builder::vertex(Point3::new(0.0, -height / 2.0, radius));
+    let vertex = builder::vertex(Point3::new(0.0, -height / 2.0, radius));
     let circle = builder::rsweep(&vertex, Point3::origin(), Vector3::unit_y(), Rad(7.0));
     let disk = builder::try_attach_plane(&[circle]).unwrap();
     let cylinder = builder::tsweep(&disk, Vector3::new(0.0, height, 0.0));
 
     get_model(&cylinder)
+}
+
+pub fn cone(height: f64, radius: f64) -> SerializedModel {
+    let v0 = builder::vertex(Point3::new(0.0, height / 2.0, 0.0));
+    let v1 = builder::vertex(Point3::new(0.0, height / 2.0, radius));
+    let v2 = builder::vertex(Point3::new(0.0, -height / 2.0, 0.0));
+    let wire: Wire = vec![builder::line(&v0, &v1), builder::line(&v1, &v2)].into();
+    let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
+    let cone = Solid::new(vec![shell]);
+
+    get_model(&cone)
 }
 
 fn get_model(solid: &Solid) -> SerializedModel {
