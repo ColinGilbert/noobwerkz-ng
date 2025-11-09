@@ -10,8 +10,12 @@ pub fn cube(scale: f64) -> SerializedModel {
     let v = builder::vertex(Point3::new(-scale / 2.0, -scale / 2.0, -scale / 2.0));
     let e = builder::tsweep(&v, Vector3::new(scale, 0.0, 0.0));
     let f = builder::tsweep(&e, Vector3::new(0.0, scale, 0.0));
-    let cube = builder::tsweep(&f, Vector3::new(0.0, 0.0, scale));
-    let mut polygon_mesh = cube.triangulation(0.005).to_polygon();
+    let cube   = builder::tsweep(&f, Vector3::new(0.0, 0.0, scale));
+
+    get_mesh(&cube)
+}
+fn get_mesh(solid: & Solid) -> SerializedModel {
+    let mut polygon_mesh = solid.triangulation(0.005).to_polygon();
     let triangulation = polygon_mesh.triangulate();
     let mut result = SerializedModel::new();
     result.meshes.push(SerializedMesh::new());
