@@ -93,8 +93,8 @@ impl Pass for ForwardRenderer {
                         let model_normal_matrix =
                             glam::Mat3::from_cols_array_2d(&instance_raw.normal);
                         let temp = InstanceRaw {
-                            model: (model_model_matrix * mesh_model_matrix).to_cols_array_2d(),
-                            normal: (model_normal_matrix * mesh_normal_matrix).to_cols_array_2d(),
+                            model: (mesh_model_matrix * model_model_matrix).to_cols_array_2d(),
+                            normal: (mesh_normal_matrix * model_normal_matrix).to_cols_array_2d(),
                         };
                         mesh_instance_data.push(temp)
                     }
