@@ -12,7 +12,7 @@ pub fn cube(scale: f64) -> SerializedModel {
     let f = builder::tsweep(&e, Vector3::new(0.0, scale, 0.0));
     let cube = builder::tsweep(&f, Vector3::new(0.0, 0.0, scale));
 
-    get_mesh(&cube)
+    get_model(&cube)
 }
 
 pub fn sphere(scale: f64) -> SerializedModel {
@@ -21,10 +21,19 @@ pub fn sphere(scale: f64) -> SerializedModel {
     let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
     let sphere = Solid::new(vec![shell]);
 
-    get_mesh(&sphere)
+    get_model(&sphere)
 }
 
-fn get_mesh(solid: &Solid) -> SerializedModel {
+pub fn cylinder(height: f64, radius: f64) -> SerializedModel {
+   let vertex = builder::vertex(Point3::new(0.0, -height / 2.0, radius));
+    let circle = builder::rsweep(&vertex, Point3::origin(), Vector3::unit_y(), Rad(7.0));
+    let disk = builder::try_attach_plane(&[circle]).unwrap();
+    let cylinder = builder::tsweep(&disk, Vector3::new(0.0, height, 0.0));
+
+    get_model(&cylinder)
+}
+
+fn get_model(solid: &Solid) -> SerializedModel {
     let mut polygon_mesh = solid.triangulation(0.005).to_polygon();
     let triangulation = polygon_mesh.triangulate();
     let mut result = SerializedModel::new();
