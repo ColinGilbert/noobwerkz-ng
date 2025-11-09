@@ -1,6 +1,6 @@
 use crate::serialized_model::*;
 use glam::*;
-use truck_meshalgo::{prelude::StructuringFilter, tessellation::*};
+use truck_meshalgo::{prelude::{Splitting, StructuringFilter}, tessellation::*};
 use truck_modeling::*;
 
 pub fn cube(scale: f64) -> SerializedModel {
@@ -13,8 +13,9 @@ pub fn cube(scale: f64) -> SerializedModel {
     let mut result = SerializedModel::new();
     result.meshes.push(SerializedMesh::new());
 
-    for p in triangulation.positions() {
+    for (i,p) in triangulation.positions().iter().enumerate() {
         result.meshes[0].positions.push([p.x as f32, p.y as f32, p.z as f32]);
+        result.meshes[0].indices.push(i as u32);
     }
     
     for n in triangulation.normals() {
@@ -25,9 +26,10 @@ pub fn cube(scale: f64) -> SerializedModel {
         result.meshes[0].uvs.push([t.x as f32, t.y as f32])
     }
 
+
     result.meshes[0].scale = [1.0, 1.0, 1.0];
     result.meshes[0].rotation = glam::Quat::IDENTITY.to_array();
-
+    
     result
 
     //     let mut results = SerializedModel::new();
