@@ -9,7 +9,7 @@ pub fn cube(scale: f64) -> SerializedModel {
     let f = builder::tsweep(&e, Vector3::new(0.0, scale, 0.0));
     let cube = builder::tsweep(&f, Vector3::new(0.0, 0.0, scale));
     let mut polygon_mesh = cube.triangulation(0.005).to_polygon();
-    let triangulation = polygon_mesh.triangulate();
+    let triangulation = polygon_mesh;
     let mut result = SerializedModel::new();
     result.meshes.push(SerializedMesh::new());
 
