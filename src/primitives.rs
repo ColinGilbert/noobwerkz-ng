@@ -1,6 +1,7 @@
 use crate::{serialized_model::*};
 use glam::*;
 
+
 pub fn cube_serialized(scale: f32) -> SerializedModel {
     let mut results = SerializedModel::new();
     let mut m = SerializedMesh::new();
@@ -106,7 +107,6 @@ pub fn cube_serialized(scale: f32) -> SerializedModel {
     m.positions.push([-scale, scale, -scale]);
     m.normals.push([0.0, -1.0, 0.0]);
     m.uvs.push([0.0, 0.5]);
-    
     
     m.indices = cube_indices();
 
