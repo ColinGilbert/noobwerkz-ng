@@ -1,126 +1,113 @@
-use crate::{serialized_model::*};
+use crate::serialized_model::*;
 use glam::*;
+use std::f64::consts::PI;
+use truck_meshalgo::prelude::*;
+use truck_modeling::*;
 
-pub fn cube_serialized(scale: f32) -> SerializedModel {
-    let mut results = SerializedModel::new();
-    let mut m = SerializedMesh::new();
-    // Front face
-    m.positions.push([-scale, -scale, scale]);
-    m.normals.push([0.0, 0.0, 1.0]);
-    m.uvs.push([0.0, 0.5]);
+pub fn cube(scale: f64) -> SerializedModel {
+    let v = builder::vertex(Point3::new(-scale / 2.0, -scale / 2.0, -scale / 2.0));
+    let e = builder::tsweep(&v, Vector3::new(scale, 0.0, 0.0));
+    let f = builder::tsweep(&e, Vector3::new(0.0, scale, 0.0));
+    let cube = builder::tsweep(&f, Vector3::new(0.0, 0.0, scale));
 
-    m.positions.push([scale, -scale, scale]);
-    m.normals.push([0.0, 0.0, -1.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([scale, scale, scale]);
-    m.normals.push([1.0, 0.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([-scale, scale, scale]);
-    m.normals.push([-1.0, 0.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    // Back face
-    m.positions.push([-scale, -scale, -scale]);
-    m.normals.push([0.0, 1.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([-scale, scale, -scale]);
-    m.normals.push([0.0, -1.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([scale, scale, -scale]);
-    m.normals.push([0.0, 0.0, 1.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([scale, -scale, -scale]);
-    m.normals.push([0.0, 0.0, -1.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    // Top face
-    m.positions.push([-scale, scale, -scale]);
-    m.normals.push([1.0, 0.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([-scale, scale, scale]);
-    m.normals.push([-1.0, 0.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([scale, scale, scale]);
-    m.normals.push([0.0, 1.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([scale, scale, -scale]);
-    m.normals.push([0.0, -1.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    // Bottom face
-    m.positions.push([-scale, -scale, -scale]);
-    m.normals.push([0.0, 0.0, 1.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([scale, -scale, -scale]);
-    m.normals.push([0.0, 0.0, -1.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([scale, -scale, scale]);
-    m.normals.push([1.0, 0.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([-scale, -scale, scale]);
-    m.normals.push([-1.0, 0.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    // Right face
-    m.positions.push([scale, -scale, -scale]);
-    m.normals.push([0.0, 1.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([scale, scale, -scale]);
-    m.normals.push([0.0, -1.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([scale, scale, scale]);
-    m.normals.push([0.0, 0.0, 1.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([scale, -scale, scale]);
-    m.normals.push([0.0, 0.0, -1.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    
-    // Left face
-    m.positions.push([-scale, -scale, -scale]);
-    m.normals.push([1.0, 0.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-    
-    m.positions.push([-scale, -scale, scale]);
-    m.normals.push([-1.0, 0.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-
-    m.positions.push([-scale, scale, scale]);
-    m.normals.push([0.0, 1.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-    
-    m.positions.push([-scale, scale, -scale]);
-    m.normals.push([0.0, -1.0, 0.0]);
-    m.uvs.push([0.0, 0.5]);
-    
-    
-    m.indices = cube_indices();
-
-    results.meshes.push(m);
-    results
+    get_model(&cube)
 }
 
-pub fn cube_indices() -> Vec<u32> {
-    vec![
-        0, 1, 2, 0, 2, 3, // front
-        4, 5, 6, 4, 6, 7, // back
-        8, 9, 10, 8, 10, 11, // top
-        12, 13, 14, 12, 14, 15, // bottom
-        16, 17, 18, 16, 18, 19, // right
-        20, 21, 22, 20, 22, 23, // left
-    ]
+pub fn sphere(scale: f64) -> SerializedModel {
+    let v0 = builder::vertex(Point3::new(0.0, scale / 2.0, 0.0));
+    let wire: Wire = builder::rsweep(&v0, Point3::origin(), Vector3::unit_x(), Rad(PI));
+    let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
+    let sphere = Solid::new(vec![shell]);
+
+    get_model(&sphere)
+}
+
+pub fn cylinder(height: f64, radius: f64) -> SerializedModel {
+    let vertex = builder::vertex(Point3::new(0.0, -height / 2.0, radius));
+    let circle = builder::rsweep(&vertex, Point3::origin(), Vector3::unit_y(), Rad(7.0));
+    let disk = builder::try_attach_plane(&[circle]).unwrap();
+    let cylinder = builder::tsweep(&disk, Vector3::new(0.0, height, 0.0));
+
+    get_model(&cylinder)
+}
+
+pub fn cone(height: f64, radius: f64) -> SerializedModel {
+    let v0 = builder::vertex(Point3::new(0.0, height / 2.0, 0.0));
+    let v1 = builder::vertex(Point3::new(0.0, -height / 2.0, radius));
+    let v2 = builder::vertex(Point3::new(0.0, -height / 2.0, 0.0));
+    let wire: Wire = vec![builder::line(&v0, &v1), builder::line(&v1, &v2)].into();
+    let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
+    let cone = Solid::new(vec![shell]);
+
+    get_model(&cone)
+}
+
+pub fn get_model(solid: &Solid) -> SerializedModel {
+    let mut polygon_mesh = solid.triangulation(0.005).to_polygon();
+    let triangulation = polygon_mesh.triangulate();
+    let mut result = SerializedModel::new();
+    result.meshes.push(SerializedMesh::new());
+    let mut max_extents = [0.0 as f32; 3];
+    let mut min_extents = [0.0 as f32; 3];
+    for p in triangulation.positions() {
+        result.meshes[0]
+            .positions
+            .push([p.x as f32, p.y as f32, p.z as f32]);
+        let mut i = 0;
+        while i < 3 {
+            let biggest: f32;
+            if max_extents[i] > p[i] as f32 {
+                biggest = max_extents[i] as f32;
+            } else {
+                biggest = p[i] as f32;
+            }
+            max_extents[i] = biggest;
+
+            let smallest: f32;
+            if min_extents[i] < p[i] as f32 {
+                smallest = min_extents[i];
+            } else {
+                smallest = p[i] as f32;
+            }
+            min_extents[i] = smallest;
+
+            i += 1;
+        }
+    }
+
+    result.meshes[0].max_extents = max_extents;
+    result.meshes[0].min_extents = min_extents;
+
+    let mut dims = [0.0 as f32; 3];
+    let mut i = 0;
+    while i < 3 {
+        dims[i] = max_extents[i] - min_extents[i];
+        i += 1;
+    }
+    result.meshes[0].dimensions = dims;
+
+    for n in triangulation.normals() {
+        result.meshes[0]
+            .normals
+            .push([n.x as f32, n.y as f32, n.z as f32]);
+    }
+
+    for t in triangulation.uv_coords() {
+        result.meshes[0].uvs.push([t.x as f32, t.y as f32])
+    }
+
+    let faces = triangulation.faces();
+
+    let triangles = faces.tri_faces();
+
+    for t in triangles {
+        result.meshes[0].indices.push(t[0].pos as u32);
+        result.meshes[0].indices.push(t[1].pos as u32);
+        result.meshes[0].indices.push(t[2].pos as u32);
+    }
+
+    result.meshes[0].scale = [1.0, 1.0, 1.0];
+    result.meshes[0].rotation = glam::Quat::IDENTITY.to_array();
+
+    result
 }

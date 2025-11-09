@@ -137,7 +137,6 @@ impl State {
             } // true},
             _ => {} //false }
         }
-        // }
     }
 
     pub fn handle_mouse_button(&mut self, button: MouseButton, pressed: bool) {

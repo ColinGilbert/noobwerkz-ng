@@ -5,6 +5,8 @@ pub struct SerializedMesh {
     pub name: String,
     pub translation: [f32; 3],
     pub scale: [f32; 3],
+    pub max_extents: [f32; 3],
+    pub min_extents: [f32; 3],
     pub dimensions: [f32; 3],
     pub rotation: [f32; 4],
     pub positions: Vec<[f32; 3]>,
@@ -23,6 +25,8 @@ impl SerializedMesh {
             name: "".to_string(),
             translation: [0.0; 3],
             scale: [0.0; 3],
+            max_extents: [0.0; 3],
+            min_extents: [0.0; 3],
             dimensions: [0.0; 3],
             rotation: [0.0; 4],
             positions: Vec::new(),
@@ -77,17 +81,17 @@ impl SerializedModel {
         }
     }
 
-    pub fn rotate(&mut self, rotation: glam::Quat) {
-        let matrix = glam::Mat4::from_quat(rotation);
-        for m in self.meshes.iter_mut() {
-            let mut i = 0;
-            while i < m.positions.len() {
-                let p = m.positions[i];
-                let mut pp = glam::Vec4::from_array([p[0], p[1], p[2], 1.0]);
-                pp = matrix * pp;
-                m.positions[i] = [pp[0], pp[1], pp[2]];
-                i += 1;
-            }
-        }
-    }
+    // pub fn rotate(&mut self, rotation: glam::Quat) {
+    //     let matrix = glam::Mat4::from_quat(rotation);
+    //     for m in self.meshes.iter_mut() {
+    //         let mut i = 0;
+    //         while i < m.positions.len() {
+    //             let p = m.positions[i];
+    //             let mut pp = glam::Vec4::from_array([p[0], p[1], p[2], 1.0]);
+    //             pp = matrix * pp;
+    //             m.positions[i] = [pp[0], pp[1], pp[2]];
+    //             i += 1;
+    //         }
+    //     }
+    // }
 }

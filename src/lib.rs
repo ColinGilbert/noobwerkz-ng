@@ -21,3 +21,4 @@ pub mod skeletal_context;
 pub mod skeletal_animate;
 pub mod serialized_model;
 pub mod primitives;
+pub mod physics_context;
