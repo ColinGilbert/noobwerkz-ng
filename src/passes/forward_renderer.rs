@@ -101,36 +101,6 @@ impl Pass for ForwardRenderer {
                             usage: wgpu::BufferUsages::VERTEX,
                         });
 
-
-                // for mesh in &model.meshes {
-                //     let mesh_model_matrix = glam::Mat4::from_scale_rotation_translation(
-                //         mesh.scale,
-                //         mesh.rotation,
-                //         mesh.translation,
-                //     );
-                //     let mesh_normal_matrix = glam::Mat3::from_quat(mesh.rotation);u
-
-                //     let mut mesh_instance_data = Vec::<InstanceRaw>::new();
-
-                //     for instance_raw in model_instance_data.iter() {
-                //         let model_model_matrix =
-                //             glam::Mat4::from_cols_array_2d(&instance_raw.model);
-                //         let model_normal_matrix =
-                //             glam::Mat3::from_cols_array_2d(&instance_raw.normal);
-                //         let temp = InstanceRaw {
-                //             model: (model_model_matrix * mesh_model_matrix).to_cols_array_2d(),
-                //             normal: (model_normal_matrix * mesh_normal_matrix).to_cols_array_2d(),
-                //         };
-                //         mesh_instance_data.push(temp)
-                //     }
-
-                //     let instance_buffer =
-                //         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                //             label: Some("Instance Buffer"),
-                //             contents: bytemuck::cast_slice(&mesh_instance_data),
-                //             usage: wgpu::BufferUsages::VERTEX,
-                //         });
-
                     render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
                     // render_pass.set_pipeline(&self.light_render_pipeline);
                     // render_pass.draw_light_model(
