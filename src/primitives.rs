@@ -47,12 +47,44 @@ fn get_model(solid: &Solid) -> SerializedModel {
     let triangulation = polygon_mesh.triangulate();
     let mut result = SerializedModel::new();
     result.meshes.push(SerializedMesh::new());
-
+    let mut max_extents = [0.0 as f32; 3];
+    let mut min_extents = [0.0 as f32; 3];
     for p in triangulation.positions() {
         result.meshes[0]
             .positions
             .push([p.x as f32, p.y as f32, p.z as f32]);
+        let mut i = 0;
+        while i < 3 {
+            let biggest: f32;
+            if max_extents[i] > p[i] as f32 {
+                biggest = max_extents[i] as f32;
+            } else {
+                biggest = p[i] as f32;
+            }
+            max_extents[i] = biggest;
+
+            let smallest: f32;
+            if min_extents[i] < p[i] as f32 {
+                smallest = min_extents[i];
+            } else {
+                smallest = p[i] as f32;
+            }
+            min_extents[i] = smallest;
+
+            i += 1;
+        }
     }
+
+    result.meshes[0].max_extents = max_extents;
+    result.meshes[0].min_extents = min_extents;
+
+    let mut dims = [0.0 as f32; 3];
+    let mut i = 0;
+    while i < 3 {
+        dims[i] = max_extents[i] - min_extents[i];
+        i += 1;
+    }
+    result.meshes[0].dimensions = dims;
 
     for n in triangulation.normals() {
         result.meshes[0]

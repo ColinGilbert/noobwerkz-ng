@@ -5,7 +5,7 @@ pub struct SerializedMesh {
     pub name: String,
     pub translation: [f32; 3],
     pub scale: [f32; 3],
-    pub max_extents: [f32;3],
+    pub max_extents: [f32; 3],
     pub min_extents: [f32; 3],
     pub dimensions: [f32; 3],
     pub rotation: [f32; 4],
