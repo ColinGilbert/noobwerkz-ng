@@ -60,7 +60,7 @@ pub fn capsule(height: f64, radius: f64) -> Option<SerializedModel> {
     let v1 = builder::vertex(Point3::new(0.0, (height / 2.0) - radius, radius ));
     let v2 = builder::vertex(Point3::new(0.0, (-height / 2.0) + radius, radius ));
     let v3 = builder::vertex(Point3::new(0.0, -height / 2.0, 0.0));
-    let wire = vec![builder::circle_arc(&v0, &v1, Point3::new(0.0, (height / 2.0) - (libm::sqrt(2.0)/2.0)*radius, (libm::sqrt(2.0)/2.0)*radius)), builder::line(&v1, &v2), builder::circle_arc(&v2, &v3, Point3::new(0.0, (-height / 2.0) + (libm::sqrt(2.0)/2.0)*radius, (libm::sqrt(2.0)/2.0)*radius)))].into();
+    let wire = vec![builder::circle_arc(&v0, &v1, Point3::new(0.0, (height / 2.0) - (libm::sqrt(2.0)/2.0)*radius, (libm::sqrt(2.0)/2.0)*radius)), builder::line(&v1, &v2), builder::circle_arc(&v2, &v3, Point3::new(0.0, (-height / 2.0) + (libm::sqrt(2.0)/2.0)*radius, (libm::sqrt(2.0)/2.0)*radius))].into();
     let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
     let capsule = Solid::new(vec![shell]);
 
