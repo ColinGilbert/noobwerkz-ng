@@ -52,9 +52,6 @@ pub fn cone(height: f64, radius: f64) -> SerializedModel {
 }
 
 pub fn capsule(height: f64, radius: f64) -> Option<SerializedModel> {
-    if height <= radius * 2.0 {
-        return None
-    }
     let v0 = builder::vertex(Point3::new(0.0, height / 2.0, 0.0));
     let v1 = builder::vertex(Point3::new(0.0, (height / 2.0) - radius, radius ));
     let v2 = builder::vertex(Point3::new(0.0, (-height / 2.0) + radius, radius ));
@@ -63,7 +60,7 @@ pub fn capsule(height: f64, radius: f64) -> Option<SerializedModel> {
     let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
     let capsule = Solid::new(vec![shell]);
 
-    Some(get_model(&capsule))
+   get_model(&capsule)
 }
 
 pub fn get_model(solid: &Solid) -> SerializedModel {
