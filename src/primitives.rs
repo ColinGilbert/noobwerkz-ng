@@ -51,7 +51,7 @@ pub fn cone(height: f64, radius: f64) -> SerializedModel {
     get_model(&cone)
 }
 
-pub fn capsule(height: f64, radius: f64) -> Option<SerializedModel> {
+pub fn capsule(height: f64, radius: f64) -> SerializedModel {
     let v0 = builder::vertex(Point3::new(0.0, height / 2.0, 0.0));
     let v1 = builder::vertex(Point3::new(0.0, (height / 2.0) - radius, radius ));
     let v2 = builder::vertex(Point3::new(0.0, (-height / 2.0) + radius, radius ));
