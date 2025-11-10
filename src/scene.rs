@@ -1,7 +1,7 @@
 // This is where our game world resides.
 
 use crate::{
-    camera::Camera, model_node::ModelNode, physics_context::PhysicsContext, skinned_model_node::SkinnedModelNode,
+    camera::Camera, model_node::ModelNode, physics_context::PhysicsContext, skinned_model_node::SkinnedModelNode, character::*,
 };
 
 pub struct Scene {
@@ -10,6 +10,7 @@ pub struct Scene {
     pub skinned_model_nodes: Vec<SkinnedModelNode>,
     pub active_camera: usize,
     pub physics_context: PhysicsContext,
+    pub characters: Vec<Character>
 }
 
 impl Scene {
@@ -20,6 +21,7 @@ impl Scene {
             skinned_model_nodes: Vec::<SkinnedModelNode>::new(),
             active_camera: 0,
             physics_context: PhysicsContext::new(gravity),
+            characters: Vec::new()
         }
     }
 

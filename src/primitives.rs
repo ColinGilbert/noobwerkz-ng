@@ -13,9 +13,18 @@ pub fn cube(scale: f64) -> SerializedModel {
     get_model(&cube)
 }
 
+pub fn cuboid(x: f64, y: f64, z: f64) -> SerializedModel {
+    let v = builder::vertex(Point3::new(-x / 2.0, -y / 2.0, -z / 2.0));
+    let e = builder::tsweep(&v, Vector3::new(x, 0.0, 0.0));
+    let f = builder::tsweep(&e, Vector3::new(0.0, y, 0.0));
+    let cube = builder::tsweep(&f, Vector3::new(0.0, 0.0, z));
+
+    get_model(&cube)
+}
+
 pub fn sphere(scale: f64) -> SerializedModel {
     let v0 = builder::vertex(Point3::new(0.0, scale / 2.0, 0.0));
-    let wire: Wire = builder::rsweep(&v0, Point3::origin(), Vector3::unit_x(), Rad(PI));
+    let wire = builder::rsweep(&v0, Point3::origin(), Vector3::unit_x(), Rad(PI));
     let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
     let sphere = Solid::new(vec![shell]);
 
@@ -35,7 +44,7 @@ pub fn cone(height: f64, radius: f64) -> SerializedModel {
     let v0 = builder::vertex(Point3::new(0.0, height / 2.0, 0.0));
     let v1 = builder::vertex(Point3::new(0.0, -height / 2.0, radius));
     let v2 = builder::vertex(Point3::new(0.0, -height / 2.0, 0.0));
-    let wire: Wire = vec![builder::line(&v0, &v1), builder::line(&v1, &v2)].into();
+    let wire = vec![builder::line(&v0, &v1), builder::line(&v1, &v2)].into();
     let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
     let cone = Solid::new(vec![shell]);
 
