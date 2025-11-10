@@ -9,10 +9,6 @@ use crate::texture::Texture;
 use msgpacker::prelude::*;
 use wgpu::util::DeviceExt;
 
-pub enum GenericModel {
-    Textured(Model),
-    SkinnedTextured(SkinnedModel),
-}
 
 pub fn load_serialized_model(filepath: String, filename: String) -> SerializedModel {
     let full_path = filepath.clone() + "/" + &filename;

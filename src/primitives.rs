@@ -1,5 +1,6 @@
 use crate::serialized_model::*;
 use glam::*;
+use core::f64::math::sqrt;
 use std::f64::consts::PI;
 use truck_meshalgo::prelude::*;
 use truck_modeling::*;
@@ -17,9 +18,9 @@ pub fn cuboid(x: f64, y: f64, z: f64) -> SerializedModel {
     let v = builder::vertex(Point3::new(-x / 2.0, -y / 2.0, -z / 2.0));
     let e = builder::tsweep(&v, Vector3::new(x, 0.0, 0.0));
     let f = builder::tsweep(&e, Vector3::new(0.0, y, 0.0));
-    let cube = builder::tsweep(&f, Vector3::new(0.0, 0.0, z));
+    let cuboid = builder::tsweep(&f, Vector3::new(0.0, 0.0, z));
 
-    get_model(&cube)
+    get_model(&cuboid)
 }
 
 pub fn sphere(scale: f64) -> SerializedModel {
@@ -49,6 +50,21 @@ pub fn cone(height: f64, radius: f64) -> SerializedModel {
     let cone = Solid::new(vec![shell]);
 
     get_model(&cone)
+}
+
+pub fn capsule(height: f64, radius: f64) -> Option<SerializedModel> {
+    if height <= radius * 2.0 {
+        return None
+    }
+    let v0 = builder::vertex(Point3::new(0.0, height / 2.0, 0.0));
+    let v1 = builder::vertex(Point3::new(0.0, (height / 2.0) - radius, radius ));
+    let v2 = builder::vertex(Point3::new(0.0, (-height / 2.0) + radius, radius ));
+    let v3 = builder::vertex(Point3::new(0.0, -height / 2.0, 0.0));
+    let wire = vec![builder::circle_arc(&v0, &v1, Point3::new(0.0, (height / 2.0) - (libm::sqrt(2.0)/2.0)*radius, (libm::sqrt(2.0)/2.0)*radius)), builder::line(&v1, &v2), builder::circle_arc(&v2, &v3, Point3::new(0.0, (-height / 2.0) + (libm::sqrt(2.0)/2.0)*radius, (libm::sqrt(2.0)/2.0)*radius)))].into();
+    let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
+    let capsule = Solid::new(vec![shell]);
+
+    Some(get_model(&capsule))
 }
 
 pub fn get_model(solid: &Solid) -> SerializedModel {
