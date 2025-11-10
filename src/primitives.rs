@@ -1,6 +1,5 @@
 use crate::serialized_model::*;
 use glam::*;
-use core::f64::math::sqrt;
 use std::f64::consts::PI;
 use truck_meshalgo::prelude::*;
 use truck_modeling::*;
