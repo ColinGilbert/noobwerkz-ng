@@ -22,8 +22,8 @@ pub fn cuboid(x: f64, y: f64, z: f64) -> SerializedModel {
     get_model(&cuboid)
 }
 
-pub fn sphere(scale: f64) -> SerializedModel {
-    let v0 = builder::vertex(Point3::new(0.0, scale / 2.0, 0.0));
+pub fn sphere(radius: f64) -> SerializedModel {
+    let v0 = builder::vertex(Point3::new(0.0, radius, 0.0));
     let wire = builder::rsweep(&v0, Point3::origin(), Vector3::unit_x(), Rad(PI));
     let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
     let sphere = Solid::new(vec![shell]);
@@ -52,39 +52,37 @@ pub fn cone(height: f64, radius: f64) -> SerializedModel {
 }
 
 pub fn capsule(height: f64, radius: f64) -> SerializedModel {
-    // let v0 = builder::vertex(Point3::new(0.0, height / 2.0, 0.0));
-    // let v1 = builder::vertex(Point3::new(0.0, (height / 2.0) - radius, radius ));
-    // let v2 = builder::vertex(Point3::new(0.0, (-height / 2.0) + radius, radius ));
-    // let v3 = builder::vertex(Point3::new(0.0, -height / 2.0, 0.0));
-    // let arc1 = builder::circle_arc(&v0, &v1, Point3::new(0.0, (height / 2.0) - (libm::sqrt(2.0)/2.0)*radius, (libm::sqrt(2.0)/2.0)*radius));
-    // let arc2 = builder::circle_arc(&v2, &v3, Point3::new(0.0, (-height / 2.0) + (libm::sqrt(2.0)/2.0)*radius, (libm::sqrt(2.0)/2.0)*radius));
-
-    let v0 = builder::vertex(Point3::new(0.0, 1.0, 0.0));
-    let v1 = builder::vertex(Point3::new(0.0, 0.5, 0.5));
-    let v2 = builder::vertex(Point3::new(0.0, -0.5, 0.5));
-    let v3 = builder::vertex(Point3::new(0.0, -1.0, 0.0));
-    let arc1 = builder::circle_arc(
-        &v0,
-        &v1,
-        Point3::new(
-            0.0,
-            libm::sqrt(2.0) / 2.0 + 0.5,
-            libm::sqrt(2.0) / 2.0 + 0.5,
-        ),
+    let top_sphere_vertex = builder::vertex(Point3::new(0.0, (height / 2.0) + radius, 0.0));
+    let top_sphere_wire = builder::rsweep(
+        &top_sphere_vertex,
+        Point3::origin(),
+        Vector3::unit_x(),
+        Rad(PI),
     );
-    let arc2 = builder::circle_arc(
-        &v2,
-        &v3,
-        Point3::new(
-            0.0,
-            -libm::sqrt(2.0) / 2.0 - 0.5,
-            libm::sqrt(2.0) / 2.0 - 0.5,
-        ),
-    );
+    let top_sphere_shell = builder::cone(&top_sphere_wire, Vector3::unit_y(), Rad(7.0));
+    let top_sphere = Solid::new(vec![top_sphere_shell]);
 
-    let wire = vec![arc1, builder::line(&v1, &v2), arc2].into();
-    let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
-    let capsule = Solid::new(vec![shell]);
+    let bottom_sphere_vertex = builder::vertex(Point3::new(0.0, (-height / 2.0) + radius, 0.0));
+    let bottom_sphere_wire = builder::rsweep(
+        &bottom_sphere_vertex,
+        Point3::origin(),
+        Vector3::unit_x(),
+        Rad(PI),
+    );
+    let bottom_sphere_shell = builder::cone(&bottom_sphere_wire, Vector3::unit_y(), Rad(7.0));
+    let bottom_sphere = Solid::new(vec![bottom_sphere_shell]);
+
+    let cylinder_vertex = builder::vertex(Point3::new(0.0, -height / 2.0, radius));
+    let circle = builder::rsweep(
+        &cylinder_vertex,
+        Point3::origin(),
+        Vector3::unit_y(),
+        Rad(7.0),
+    );
+    let disk = builder::try_attach_plane(&[circle]).unwrap();
+    let cylinder = builder::tsweep(&disk, Vector3::new(0.0, height, 0.0));
+    let temp = truck_shapeops::and(&top_sphere, &cylinder, 0.05).unwrap();
+    let capsule = truck_shapeops::and(&bottom_sphere, &temp, 0.05).unwrap();
 
     get_model(&capsule)
 }
