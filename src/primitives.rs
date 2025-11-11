@@ -69,7 +69,7 @@ pub fn capsule(height: f64, radius: f64) -> SerializedModel {
         &v1,
         Point3::new(
             0.0,
-            (residual_height /2.0) + (libm::sqrt(2.0) / 2.0) * radius,
+            (residual_height / 2.0) + (libm::sqrt(2.0) / 2.0) * radius,
             (libm::sqrt(2.0) / 2.0) * radius,
         ),
     );
@@ -78,12 +78,12 @@ pub fn capsule(height: f64, radius: f64) -> SerializedModel {
         &v3,
         Point3::new(
             0.0,
-            -libm::sqrt(2.0) / 2.0 - 0.5,
-            libm::sqrt(2.0) / 2.0 - 0.5,
+            -(residual_height / 2.0) - (libm::sqrt(2.0) / 2.0) * radius,
+            libm::sqrt(2.0) / 2.0 * radius,
         ),
     );
 
-    let wire = vec![arc1, builder::line(&v1, &v2), builder::line(&v2, &v3)].into();
+    let wire = vec![arc1, builder::line(&v1, &v2), arc2].into();
     let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
     let capsule = Solid::new(vec![shell]);
 
