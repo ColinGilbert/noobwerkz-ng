@@ -61,9 +61,9 @@ pub fn capsule(height: f64, radius: f64) -> SerializedModel {
     let residual_height = height - 2.0 * radius;
 
     let v0 = builder::vertex(Point3::new(0.0, height / 2.0, 0.0));
-    let v1 = builder::vertex(Point3::new(0.0, 0.0, radius));
-    let v2 = builder::vertex(Point3::new(0.0, -0.5, radius));
-    let v3 = builder::vertex(Point3::new(0.0, -residual_height / 2.0, 0.0));
+    let v1 = builder::vertex(Point3::new(0.0, residual_height / 2.0, radius));
+    let v2 = builder::vertex(Point3::new(0.0, -residual_height / 2.0, radius));
+    let v3 = builder::vertex(Point3::new(0.0, -height / 2.0, 0.0));
     let arc1 = builder::circle_arc(
         &v0,
         &v1,
