@@ -59,10 +59,10 @@ pub fn capsule(height: f64, radius: f64) -> SerializedModel {
     // let arc1 = builder::circle_arc(&v0, &v1, Point3::new(0.0, (height / 2.0) - (libm::sqrt(2.0)/2.0)*radius, (libm::sqrt(2.0)/2.0)*radius));
     // let arc2 = builder::circle_arc(&v2, &v3, Point3::new(0.0, (-height / 2.0) + (libm::sqrt(2.0)/2.0)*radius, (libm::sqrt(2.0)/2.0)*radius));
 
-    let v0 = builder::vertex(Point3::new(0.0, 0.5 , 0.0));
+    let v0 = builder::vertex(Point3::new(0.0, 1.0, 0.0));
     let v1 = builder::vertex(Point3::new(0.0, 0.5, 0.5));
     let v2 = builder::vertex(Point3::new(0.0, -0.5, 0.5));
-    let v3 = builder::vertex(Point3::new(0.0, -0.5, 0.0));
+    let v3 = builder::vertex(Point3::new(0.0, -1.0, 0.0));
     let arc1 = builder::circle_arc(
         &v0,
         &v1,
