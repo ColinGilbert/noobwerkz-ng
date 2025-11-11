@@ -81,8 +81,9 @@ pub fn capsule(height: f64, radius: f64) -> SerializedModel {
     );
     let disk = builder::try_attach_plane(&[circle]).unwrap();
     let cylinder = builder::tsweep(&disk, Vector3::new(0.0, height, 0.0));
-    let temp = truck_shapeops::and(&top_sphere, &cylinder, 0.05).unwrap();
-    let capsule = truck_shapeops::and(&bottom_sphere, &temp, 0.05).unwrap();
+
+    let temp = truck_shapeops::and(&cylinder, &top_sphere, 0.05).unwrap();
+    let capsule = truck_shapeops::and(&temp, &bottom_sphere, 0.05).unwrap();
 
     get_model(&capsule)
 }
