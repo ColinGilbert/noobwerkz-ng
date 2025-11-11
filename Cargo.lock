@@ -3888,7 +3888,6 @@ dependencies = [
  "truck-geometry",
  "truck-geotrait",
  "truck-meshalgo",
- "truck-stepio",
  "truck-topology",
 ]
 
