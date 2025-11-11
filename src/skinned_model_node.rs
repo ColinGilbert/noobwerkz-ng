@@ -123,30 +123,10 @@ impl SkinnedModelNode {
         self.untransformed_bone_matrices.clear();
         for p in &mut self.playbacks {
             p.update(dt);
-            //println!("Num bones {}", p.bone_trans().len());
-            //let bone_transforms = p.bone_trans();
-            //let inverse_root_mat = glam::Mat4::from_cols_array(& [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]).inverse();
-            //            for (i, b) in bone_transforms.iter().enumerate() {
             for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
-                // m = glam::Mat4::from_scale_rotation_translation(
-
-                //     glam::Vec3::splat(b.scale),
-                //     b.rotation,
-                //     b.position,
-                // )
                 let m = mat * skinned_model.inverse_bind_matrices[i];
                 self.bone_matrices.push(BoneMatrix {
                     data: (m).to_cols_array_2d(),
-                    // data: glam::Mat4::IDENTITY.to_cols_array_2d(),
-                });
-                self.untransformed_bone_matrices.push(BoneMatrix {
-                    data: mat
-                    // glam::Mat4::from_scale_rotation_translation(
-                    //     glam::Vec3::splat(b.scale),
-                    //     b.rotation,
-                    //     b.position,
-                    // )
-                    .to_cols_array_2d(),
                 });
             }
         }
