@@ -69,7 +69,7 @@ pub fn capsule(height: f64, radius: f64) -> SerializedModel {
         &v1,
         Point3::new(
             0.0,
-            (libm::sqrt(2.0) / 2.0) * radius,
+            (residual_height /2.0) + (libm::sqrt(2.0) / 2.0) * radius,
             (libm::sqrt(2.0) / 2.0) * radius,
         ),
     );
