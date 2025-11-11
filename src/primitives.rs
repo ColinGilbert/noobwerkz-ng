@@ -22,8 +22,8 @@ pub fn cuboid(x: f64, y: f64, z: f64) -> SerializedModel {
     get_model(&cuboid)
 }
 
-pub fn sphere(scale: f64) -> SerializedModel {
-    let v0 = builder::vertex(Point3::new(0.0,  2.0, 0.0));
+pub fn sphere(radius: f64) -> SerializedModel {
+    let v0 = builder::vertex(Point3::new(0.0, radius, 0.0));
     let wire = builder::rsweep(&v0, Point3::origin(), Vector3::unit_x(), Rad(PI));
     let shell = builder::cone(&wire, Vector3::unit_y(), Rad(7.0));
     let sphere = Solid::new(vec![shell]);

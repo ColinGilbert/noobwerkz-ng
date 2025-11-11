@@ -6,7 +6,6 @@ pub struct SkinnedModelNode {
     pub skinned_model_idx: usize,
     pub instances: Vec<Instance>,
     pub playbacks: Vec<OzzPlayback>,
-    pub untransformed_bone_matrices: Vec<BoneMatrix>, // for debug
     pub bone_matrices: Vec<BoneMatrix>,
     pub num_bones: u32,
     pub bones_storage_buffer: wgpu::Buffer,
@@ -28,7 +27,6 @@ impl SkinnedModelNode {
         let num_bones = skeleton.num_joints() as u32;
         let animation = skeletal_context.animations[0].clone();
         let len = instances.len();
-        let mut untransformed_bone_matrices = Vec::<BoneMatrix>::new();
         let mut bone_matrices = Vec::new();
 
         let num_bones_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -43,23 +41,10 @@ impl SkinnedModelNode {
             )));
         }
         for p in &mut playbacks {
-            p.update(web_time::Duration::from_secs(0));
-            //et bone_transforms = p.bone_trans();
-           // println!("Bone transform length {}", bone_transforms.len(),);
-            //for _b in bone_transforms {
             for _m in &*(p.models).read().unwrap() {
                 bone_matrices.push(BoneMatrix {
-                    // data: (glam::Mat4::from_scale_rotation_translation(
-                    //     glam::Vec3::splat(b.scale),
-                    //     b.rotation,
-                    //     b.position,
-                    // ))
-                    // .to_cols_array_2d(),
                     data: glam::Mat4::IDENTITY.to_cols_array_2d(),
                 });
-                untransformed_bone_matrices.push(BoneMatrix {
-                    data: glam::Mat4::IDENTITY.to_cols_array_2d(),
-                })
             }
         }
 
@@ -86,14 +71,6 @@ impl SkinnedModelNode {
                     binding: 1,
                     resource: num_bones_buffer.as_entire_binding(),
                 },
-                // wgpu::BindGroupEntry {
-                //     binding: 2,
-                //     resource: skinned_model
-                //         .inverse_bind_matrices_buffer
-                //         .clone()
-                //         .unwrap()
-                //         .as_entire_binding(),
-                // },
             ],
             label: Some("Animation matrices bind Group"),
         });
@@ -102,7 +79,6 @@ impl SkinnedModelNode {
             skinned_model_idx,
             instances,
             playbacks,
-            untransformed_bone_matrices,
             bone_matrices,
             num_bones,
             bones_storage_buffer,
@@ -120,7 +96,6 @@ impl SkinnedModelNode {
         dt: web_time::Duration,
     ) {
         self.bone_matrices.clear();
-        self.untransformed_bone_matrices.clear();
         for p in &mut self.playbacks {
             p.update(dt);
             for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
