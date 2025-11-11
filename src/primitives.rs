@@ -68,8 +68,8 @@ pub fn capsule(height: f64, radius: f64) -> SerializedModel {
         &v1,
         Point3::new(
             0.0,
-            libm::sqrt(2.0) / 2.0,
-            libm::sqrt(2.0) / 2.0,
+            libm::sqrt(2.0) / 2.0 + 0.5,
+            libm::sqrt(2.0) / 2.0 + 0.5,
         ),
     );
     let arc2 = builder::circle_arc(
@@ -77,8 +77,8 @@ pub fn capsule(height: f64, radius: f64) -> SerializedModel {
         &v3,
         Point3::new(
             0.0,
-            -libm::sqrt(2.0) / 2.0,
-            libm::sqrt(2.0) / 2.0,
+            -libm::sqrt(2.0) / 2.0 - 0.5,
+            libm::sqrt(2.0) / 2.0 - 0.5,
         ),
     );
 
