@@ -86,16 +86,17 @@ impl Pass for ForwardRenderer {
                         mesh.translation,
                     );
 
-                    let mesh_n_mat = glam::Mat3::from_quat(mesh.rotation);
-                    let model_m_mat = glam::Mat4::from_cols_array_2d(&model_instance_data[i].model);
-                    let model_n_mat =
-                        glam::Mat3::from_cols_array_2d(&model_instance_data[i].normal);
-                    let temp = InstanceRaw {
-                        model: (model_m_mat * mesh_m_mat).to_cols_array_2d(),
-                        normal: (model_n_mat * mesh_n_mat).to_cols_array_2d(),
-                    };
-                    mesh_instance_data.push(temp);
+                    for instance in model_instance_data {
+                        let mesh_n_mat = glam::Mat3::from_quat(mesh.rotation);
+                        let model_m_mat = glam::Mat4::from_cols_array_2d(&instance.model);
+                        let model_n_mat = glam::Mat3::from_cols_array_2d(&instance.normal);
+                        let temp = InstanceRaw {
+                            model: (model_m_mat * mesh_m_mat).to_cols_array_2d(),
+                            normal: (model_n_mat * mesh_n_mat).to_cols_array_2d(),
+                        };
 
+                        mesh_instance_data.push(temp);
+                    }
                     let instance_buffer =
                         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                             label: Some("Instance Buffer"),
@@ -151,7 +152,7 @@ impl Pass for ForwardRenderer {
 
                         mesh_instance_data.push(temp);
                     }
-                    
+
                     let instance_buffer =
                         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                             label: Some("Instance Buffer"),
