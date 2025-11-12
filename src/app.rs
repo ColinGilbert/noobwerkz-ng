@@ -122,16 +122,15 @@ impl ApplicationHandler<State> for App {
             WindowEvent::Resized(size) => state.resize(size.width, size.height),
             WindowEvent::RedrawRequested => {
                 let dt = self.last_time.elapsed();
+                self.last_time = web_time::Instant::now();
                 state.update(dt);
                 match state.render() {
                     Ok(_) => {
-                        self.last_time = web_time::Instant::now();
                     }
                     // Reconfigure the surface if it's lost or outdated
                     Err(wgpu::SurfaceError::Lost | wgpu::SurfaceError::Outdated) => {
                         let size = state.window.inner_size();
                         state.resize(size.width, size.height);
-                        self.last_time = web_time::Instant::now();
                     }
                     Err(e) => {
                         println!("Unable to render {}", e);
