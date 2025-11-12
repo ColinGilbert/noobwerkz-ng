@@ -107,8 +107,8 @@ impl SkinnedModelNode {
         //         });
         //     }
         // }
-        println!("DT {}", dt.as_nanos());
-        let bone_matrices = self.playbacks.par_iter_mut().map(|p| {
+        self.bone_matrices.clear();
+        self.bone_matrices = self.playbacks.par_iter_mut().map(|p| {
             p.update(dt);
             let mut bones = Vec::<BoneMatrix>::new();
             for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
@@ -123,7 +123,7 @@ impl SkinnedModelNode {
         queue.write_buffer(
             &self.bones_storage_buffer,
             0,
-            bytemuck::cast_slice(&bone_matrices),
+            bytemuck::cast_slice(&self.bone_matrices),
         );
     }
 }
