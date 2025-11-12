@@ -133,7 +133,7 @@ impl Pass for ForwardRenderer {
                     model_instance_data.push(i.to_skinned_raw());
                     count += 1;
                 }
-                println!("Count {}", count);
+               //println!("Count {}", count);
 
                 for (i, mesh) in model.meshes.iter().enumerate() {
                     let mut mesh_instance_data = Vec::<SkinnedInstanceRaw>::new();
@@ -161,9 +161,8 @@ impl Pass for ForwardRenderer {
                     let skinned_mesh_idx = SkinnedMeshIndex::new(i);
                     let mesh = &model.meshes[skinned_mesh_idx];
 
-                    render_pass.draw_skinned_mesh_instanced(
+                    render_pass.draw_skinned_model_instanced(
                         mesh,
-                        &model.materials[mesh.material],
                         0..count,
                         &self.camera_bind_group,
                         &self.light_bind_group,
