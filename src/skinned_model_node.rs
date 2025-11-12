@@ -97,33 +97,31 @@ impl SkinnedModelNode {
         dt: web_time::Duration,
     ) {
         self.bone_matrices.clear();
-        // for p in &mut self.playbacks {
-        //     p.update(dt);
-        //     for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
-        //         let m = mat * skinned_model.inverse_bind_matrices[i];
-        //         self.bone_matrices.push(BoneMatrix {
-        //             data: (m).to_cols_array_2d(),
-        //         });
-        //     }
-        // }
-
-        self.bone_matrices = self.playbacks.par_iter_mut().map(|p| {
+        for p in &mut self.playbacks {
             p.update(dt);
-            let mut bones = Vec::<BoneMatrix>::new();
             for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
                 let m = mat * skinned_model.inverse_bind_matrices[i];
-                bones.push(BoneMatrix {
+                self.bone_matrices.push(BoneMatrix {
                     data: (m).to_cols_array_2d(),
                 });
             }
-            bones
-        }).flatten().collect::<Vec<BoneMatrix>>();
-        println!("Bone matrices size: {}", self.bone_matrices.len());
+        }
+
+        // self.bone_matrices = self.playbacks.par_iter_mut().map(|p| {
+        //     p.update(dt);
+        //     let mut bones = Vec::<BoneMatrix>::new();
+        //     for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
+        //         let m = mat * skinned_model.inverse_bind_matrices[i];
+        //         bones.push(BoneMatrix {
+        //             data: (m).to_cols_array_2d(),
+        //         });
+        //     }
+        //     bones
+        // }).flatten().collect::<Vec<BoneMatrix>>();
         queue.write_buffer(
             &self.bones_storage_buffer,
             0,
             bytemuck::cast_slice(&self.bone_matrices),
         );
-        println!("Bone matrices uploaded");
     }
 }
