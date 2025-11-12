@@ -96,7 +96,7 @@ impl SkinnedModelNode {
         _bone_matrices_bind_group_layout: &BindGroupLayout,
         dt: web_time::Duration,
     ) {
-        self.bone_matrices.clear();
+        // self.bone_matrices.clear();
         // for p in &mut self.playbacks {
         //     p.update(dt);
         //     for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
@@ -106,7 +106,8 @@ impl SkinnedModelNode {
         //         });
         //     }
         // }
-        self.bone_matrices = self.playbacks.par_iter_mut().map(|p| {
+
+        let bone_matrices = self.playbacks.par_iter_mut().map(|p| {
             p.update(dt);
             let mut bones = Vec::<BoneMatrix>::new();
             for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
@@ -121,7 +122,7 @@ impl SkinnedModelNode {
         queue.write_buffer(
             &self.bones_storage_buffer,
             0,
-            bytemuck::cast_slice(&self.bone_matrices),
+            bytemuck::cast_slice(&bone_matrices),
         );
     }
 }
