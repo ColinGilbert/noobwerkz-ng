@@ -40,3 +40,5 @@ truck-meshalgo = { version = "0.4.0", default-features = false, features = ["ana
 truck-stepio = "0.3.0"
 rusty_enet = "0.4.0"
 futures-signals = "0.3.34"
+cpal = "0.16.0"
+symphonia = "0.5.5"

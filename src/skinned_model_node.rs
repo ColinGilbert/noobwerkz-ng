@@ -97,7 +97,7 @@ impl SkinnedModelNode {
         dt: web_time::Duration,
         scale: f32
     ) {
-        //  self.bone_matrices.clear();
+        // self.bone_matrices.clear();
         // for p in &mut self.playbacks {
         //     p.update(dt);
         //     for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {

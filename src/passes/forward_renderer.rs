@@ -83,7 +83,6 @@ impl Pass for ForwardRenderer {
                     count += 1;
                 }
 
-
                 for mesh in model.meshes.iter() {
                     let mut mesh_instance_data = Vec::<InstanceRaw>::new();
 
@@ -123,7 +122,7 @@ impl Pass for ForwardRenderer {
                     );
                 }
             }
-            
+
             render_pass.set_pipeline(&self.skinned_render_pipeline);
 
             for m in skinned_model_nodes.iter() {
@@ -135,7 +134,6 @@ impl Pass for ForwardRenderer {
                     model_instance_data.push(i.to_skinned_raw());
                     count += 1;
                 }
-                //println!("Count {}", count);
 
                 for (i, mesh) in model.meshes.iter().enumerate() {
                     let mut mesh_instance_data = Vec::<SkinnedInstanceRaw>::new();

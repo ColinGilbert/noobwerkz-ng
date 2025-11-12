@@ -109,7 +109,6 @@ impl State {
     }
 
     pub fn handle_key(&mut self, event_loop: &ActiveEventLoop, key: KeyCode, pressed: bool) {
-        // if !self.cam_ctx.controller.handle_key(key) {
         let u = &mut self.user_ctx;
         let scene_idx = u.active_scene;
         let s = &mut u.scenes[scene_idx];
@@ -134,8 +133,8 @@ impl State {
             }
             (KeyCode::Escape, true) => {
                 event_loop.exit();
-            } // true},
-            _ => {} //false }
+            } // true,
+            _ => {} //false
         }
     }
 
@@ -166,7 +165,6 @@ impl State {
         let cam_idx = s.active_camera;
         let c = &mut s.cameras[cam_idx];
         match delta {
-            //     // I'm assuming a line is about 100 pixels
             MouseScrollDelta::LineDelta(_, s) => {
                 if *s < 0.0 {
                     c.move_backward();
@@ -185,6 +183,7 @@ impl State {
     }
 
     pub fn update(&mut self, dt: std::time::Duration) {
+        // Here, we call our user update callback
         if let Some(cb) = *USER_UPDATE_CALLBACK.lock().unwrap() {
             cb(
                 &mut self.gfx_ctx,
