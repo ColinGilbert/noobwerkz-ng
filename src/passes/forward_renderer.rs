@@ -77,7 +77,7 @@ impl Pass for ForwardRenderer {
 
                 render_pass.set_pipeline(&self.render_pipeline);
 
-                for (i, mesh) in model.meshes.iter().enumerate() {
+                for mesh in model.meshes.iter() {
                     let mut mesh_instance_data = Vec::<InstanceRaw>::new();
 
                     let mesh_m_mat = glam::Mat4::from_scale_rotation_translation(
