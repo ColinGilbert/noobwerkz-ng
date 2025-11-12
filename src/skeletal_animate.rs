@@ -101,10 +101,10 @@ impl OzzTrait for OzzPlayback {
         &self.spine_trans
     }
 
-    fn update(&mut self, dt: web_time::Duration, scale: f32) {
+    fn update(&mut self, dt: web_time::Duration, speed: f32) {
         let duration = self.sample_job.animation().unwrap().duration();
         //println!("Duration {}, dt {}", duration, dt.as_secs_f32());
-        self.seek += dt.as_secs_f32() * scale;
+        self.seek += dt.as_secs_f32() * speed;
         self.seek %= duration;
         let ratio = self.seek / duration;
 
