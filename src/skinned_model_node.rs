@@ -96,7 +96,7 @@ impl SkinnedModelNode {
         _bone_matrices_bind_group_layout: &BindGroupLayout,
         dt: web_time::Duration,
     ) {
-        // self.bone_matrices.clear();
+        self.bone_matrices.clear();
         // for p in &mut self.playbacks {
         //     p.update(dt);
         //     for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
@@ -117,6 +117,7 @@ impl SkinnedModelNode {
             }
             bones
         }).flatten().collect::<Vec<BoneMatrix>>();
+
         queue.write_buffer(
             &self.bones_storage_buffer,
             0,
