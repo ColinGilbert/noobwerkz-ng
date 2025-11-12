@@ -74,7 +74,7 @@ impl Pass for ForwardRenderer {
                     model_instance_data.push(i.to_raw());
                     count += 1;
                 }
-                println!("Count {}", count);
+
 
                 render_pass.set_pipeline(&self.render_pipeline);
 
@@ -133,6 +133,7 @@ impl Pass for ForwardRenderer {
                     model_instance_data.push(i.to_skinned_raw());
                     count += 1;
                 }
+                println!("Count {}", count);
 
                 for (i, mesh) in model.meshes.iter().enumerate() {
                     let mut mesh_instance_data = Vec::<SkinnedInstanceRaw>::new();
