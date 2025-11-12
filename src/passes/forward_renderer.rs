@@ -76,9 +76,9 @@ impl Pass for ForwardRenderer {
                 }
 
 
+                render_pass.set_pipeline(&self.render_pipeline);
                 
                 for (i, mesh) in model.meshes.iter().enumerate() {
-                    render_pass.set_pipeline(&self.render_pipeline);
                     let mut mesh_instance_data = Vec::<InstanceRaw>::new();
 
                     let mesh_m_mat = glam::Mat4::from_scale_rotation_translation(
@@ -121,13 +121,13 @@ impl Pass for ForwardRenderer {
                     );
                 }
             }
+            render_pass.set_pipeline(&self.skinned_render_pipeline);
 
             for m in skinned_model_nodes.iter() {
                 let mut count = 0;
                 let mut model_instance_data = Vec::<SkinnedInstanceRaw>::new();
                 let model = &skinned_models[m.skinned_model_idx];
 
-                render_pass.set_pipeline(&self.skinned_render_pipeline);
 
                 for i in &m.instances {
                     model_instance_data.push(i.to_skinned_raw());
