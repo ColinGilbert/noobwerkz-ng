@@ -106,7 +106,7 @@ impl SkinnedModelNode {
                 });
             }
         }
-
+        println!("Count {}", count)
         // self.bone_matrices = self.playbacks.par_iter_mut().map(|p| {
         //     p.update(dt);
         //     let mut bones = Vec::<BoneMatrix>::new();

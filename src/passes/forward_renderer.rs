@@ -74,6 +74,7 @@ impl Pass for ForwardRenderer {
                     model_instance_data.push(i.to_raw());
                     count += 1;
                 }
+                println!("Count {}", count);
 
                 render_pass.set_pipeline(&self.render_pipeline);
 
@@ -88,13 +89,13 @@ impl Pass for ForwardRenderer {
 
                     let mesh_n_mat = glam::Mat3::from_quat(mesh.rotation);
                     let model_m_mat = glam::Mat4::from_cols_array_2d(&model_instance_data[i].model);
-                    let model_n_mat = glam::Mat3::from_cols_array_2d(&model_instance_data[i].normal);
+                    let model_n_mat =
+                        glam::Mat3::from_cols_array_2d(&model_instance_data[i].normal);
                     let temp = InstanceRaw {
                         model: (model_m_mat * mesh_m_mat).to_cols_array_2d(),
-                        normal: (model_n_mat * mesh_n_mat).to_cols_array_2d() 
+                        normal: (model_n_mat * mesh_n_mat).to_cols_array_2d(),
                     };
                     mesh_instance_data.push(temp);
-
 
                     let instance_buffer =
                         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -231,7 +232,7 @@ impl ForwardRenderer {
                 label: Some("Normal Shader"),
                 source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
             };
-            
+
             create_render_pipeline(
                 &device,
                 &render_pipeline_layout,
