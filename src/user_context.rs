@@ -3,6 +3,7 @@ use crate::{
     model::*, scene::*, skeletal_context::SkeletalContext, skinned_model::*
 };
 
+#[derive(Copy)]
 pub struct UserContext {
     pub models: Vec<Model>,
     pub skinned_models: Vec<SkinnedModel>,
