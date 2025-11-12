@@ -153,7 +153,7 @@ impl Pass for ForwardRenderer {
                         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                             label: Some("Instance Buffer"),
                             contents: bytemuck::cast_slice(&mesh_instance_data),
-                            usage: wgpu::BufferUsages::VERTEX,
+                            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
                         });
 
                     render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
