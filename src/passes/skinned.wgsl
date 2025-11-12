@@ -32,6 +32,7 @@ struct VertexInput {
     @location(5) bone_indices: vec4<u32>,
     @location(6) bone_weights: vec4<f32>,
 }
+
 struct InstanceInput {
     @location(7) model_matrix_0: vec4<f32>,
     @location(8) model_matrix_1: vec4<f32>,
