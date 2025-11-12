@@ -9,7 +9,7 @@ pub struct UserContext {
     pub skeletals: Vec<SkeletalContext>,
     pub scenes: Vec<Scene>,
     pub active_scene: usize,
-    pub animation_time_elapsed: f32,
+    pub animation_time_elapsed: u128,
 }
 
 impl UserContext {
