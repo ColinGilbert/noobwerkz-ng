@@ -162,7 +162,7 @@ impl Pass for ForwardRenderer {
                     let mesh = &model.meshes[skinned_mesh_idx];
 
                     render_pass.draw_skinned_model_instanced(
-                        mesh,
+                        &model,
                         0..count,
                         &self.camera_bind_group,
                         &self.light_bind_group,
