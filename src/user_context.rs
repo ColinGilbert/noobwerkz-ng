@@ -25,7 +25,7 @@ impl UserContext {
             skeletals,
             scenes,
             active_scene: 0,
-            animation_time_elapsed: 0.0,
+            animation_time_elapsed: 0,
         }
     }
 }
