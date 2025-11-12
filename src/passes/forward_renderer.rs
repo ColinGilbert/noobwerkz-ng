@@ -86,7 +86,7 @@ impl Pass for ForwardRenderer {
                         mesh.translation,
                     );
 
-                    for instance in model_instance_data {
+                    for instance in &model_instance_data {
                         let mesh_n_mat = glam::Mat3::from_quat(mesh.rotation);
                         let model_m_mat = glam::Mat4::from_cols_array_2d(&instance.model);
                         let model_n_mat = glam::Mat3::from_cols_array_2d(&instance.normal);
@@ -97,6 +97,7 @@ impl Pass for ForwardRenderer {
 
                         mesh_instance_data.push(temp);
                     }
+
                     let instance_buffer =
                         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                             label: Some("Instance Buffer"),
