@@ -14,7 +14,7 @@ pub trait OzzTrait
 where
     Self: Send + Sync,
 {
-    fn update(&mut self, time: web_time::Duration, scale: f32);
+    fn update(&mut self, time: web_time::Duration, speed: f32);
     fn update_skeleton(&mut self);
     fn root(&self) -> glam::Mat4;
     fn bone_trans(&self) -> &[OzzTransform];

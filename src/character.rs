@@ -6,5 +6,5 @@ pub struct Character {
     pub position: glam::Vec3,
     pub orientation: glam::Quat,
     // TODO:
-    // Colliders, animations, pathfinding, AI
+    // Colliders, animation blending, IK, pathfinding, AI
 }

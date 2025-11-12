@@ -95,7 +95,7 @@ impl SkinnedModelNode {
         skinned_model: &SkinnedModel,
         _bone_matrices_bind_group_layout: &BindGroupLayout,
         dt: web_time::Duration,
-        scale: f32
+        speed: f32
     ) {
         // self.bone_matrices.clear();
         // for p in &mut self.playbacks {
@@ -109,7 +109,7 @@ impl SkinnedModelNode {
         // }
         self.bone_matrices.clear();
         self.bone_matrices = self.playbacks.par_iter_mut().map(|p| {
-            p.update(dt, scale);
+            p.update(dt, speed);
             let mut bones = Vec::<BoneMatrix>::new();
             for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
                 let m = mat * skinned_model.inverse_bind_matrices[i];
