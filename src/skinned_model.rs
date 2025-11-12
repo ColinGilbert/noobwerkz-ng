@@ -212,7 +212,7 @@ where
         self.set_bind_group(1, camera_bind_group, &[]);
         self.set_bind_group(2, light_bind_group, &[]);
         self.set_bind_group(3, bone_matrices_bind_group, &[]);
-        self.draw_indexed(0..mesh.num_elements, 0, instances);
+        self.draw_indexed(0..mesh.num_elements, 0, instances.clone());
     }
 
     fn draw_skinned_model(
