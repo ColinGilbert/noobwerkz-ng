@@ -75,9 +75,8 @@ impl Pass for ForwardRenderer {
                     count += 1;
                 }
 
-
                 render_pass.set_pipeline(&self.render_pipeline);
-                
+
                 for (i, mesh) in model.meshes.iter().enumerate() {
                     let mut mesh_instance_data = Vec::<InstanceRaw>::new();
 
@@ -128,12 +127,11 @@ impl Pass for ForwardRenderer {
                 let mut model_instance_data = Vec::<SkinnedInstanceRaw>::new();
                 let model = &skinned_models[m.skinned_model_idx];
 
-
                 for i in &m.instances {
                     model_instance_data.push(i.to_skinned_raw());
                     count += 1;
                 }
-               //println!("Count {}", count);
+                //println!("Count {}", count);
 
                 for (i, mesh) in model.meshes.iter().enumerate() {
                     let mut mesh_instance_data = Vec::<SkinnedInstanceRaw>::new();
@@ -143,20 +141,25 @@ impl Pass for ForwardRenderer {
                         mesh.rotation,
                         mesh.translation,
                     );
-                    let model_mat = glam::Mat4::from_cols_array_2d(&model_instance_data[i].model);
-                    let temp = SkinnedInstanceRaw {
-                        model: (model_mat * mesh_mat).to_cols_array_2d(),
-                    };
-                    mesh_instance_data.push(temp);
 
+                    for instance_raw in &model_instance_data {
+                        let model_mat = glam::Mat4::from_cols_array_2d(&instance_raw.model);
+
+                        let temp = SkinnedInstanceRaw {
+                            model: (model_mat * mesh_mat).to_cols_array_2d(),
+                        };
+
+                        mesh_instance_data.push(temp);
+                    }
+                    
                     let instance_buffer =
                         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                             label: Some("Instance Buffer"),
                             contents: bytemuck::cast_slice(&mesh_instance_data),
-                            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+                            usage: wgpu::BufferUsages::VERTEX,
                         });
 
-                    render_pass.set_vertex_buffer(0, instance_buffer.slice(..));
+                    render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
 
                     let skinned_mesh_idx = SkinnedMeshIndex::new(i);
                     let mesh = &model.meshes[skinned_mesh_idx];

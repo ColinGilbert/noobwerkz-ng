@@ -171,7 +171,7 @@ where
         self.set_bind_group(0, &material.bind_group, &[]);
         self.set_bind_group(1, camera_bind_group, &[]);
         self.set_bind_group(2, light_bind_group, &[]);
-        self.draw_indexed(0..mesh.num_elements, 0, instances.clone());
+        self.draw_indexed(0..mesh.num_elements, 0, instances);
     }
 
     fn draw_model(
