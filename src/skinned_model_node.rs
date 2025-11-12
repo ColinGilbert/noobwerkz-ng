@@ -112,9 +112,9 @@ impl SkinnedModelNode {
             let mut bones = Vec::<BoneMatrix>::new();
             for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
                 let m = mat * skinned_model.inverse_bind_matrices[i];
-                BoneMatrix {
+                bones.push(BoneMatrix {
                     data: (m).to_cols_array_2d(),
-                };
+                });
             }
             bones
         }).flatten().collect::<Vec<BoneMatrix>>();
