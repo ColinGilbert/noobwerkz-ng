@@ -156,7 +156,7 @@ impl Pass for ForwardRenderer {
                             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
                         });
 
-                    render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
+                    render_pass.set_vertex_buffer(2, instance_buffer.slice(..));
 
                     let skinned_mesh_idx = SkinnedMeshIndex::new(i);
                     let mesh = &model.meshes[skinned_mesh_idx];
