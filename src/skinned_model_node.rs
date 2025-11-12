@@ -124,5 +124,6 @@ impl SkinnedModelNode {
             0,
             bytemuck::cast_slice(&self.bone_matrices),
         );
+        println!("Bone matrices uploaded");
     }
 }
