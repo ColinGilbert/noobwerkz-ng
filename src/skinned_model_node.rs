@@ -96,29 +96,29 @@ impl SkinnedModelNode {
         _bone_matrices_bind_group_layout: &BindGroupLayout,
         dt: web_time::Duration,
     ) {
-        let mut bone_matrices = Vec::<BoneMatrix>::new();
-        // self.bone_matrices.clear();
-        for p in &mut self.playbacks {
-            p.update(dt);
-            for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
-                let m = mat * skinned_model.inverse_bind_matrices[i];
-                bone_matrices.push(BoneMatrix {
-                    data: (m).to_cols_array_2d(),
-                });
-            }
-        }
-
-        // let bone_matrices = self.playbacks.par_iter_mut().map(|p| {
+        // let mut bone_matrices = Vec::<BoneMatrix>::new();
+        // // self.bone_matrices.clear();
+        // for p in &mut self.playbacks {
         //     p.update(dt);
-        //     let mut bones = Vec::<BoneMatrix>::new();
         //     for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
         //         let m = mat * skinned_model.inverse_bind_matrices[i];
-        //         bones.push(BoneMatrix {
+        //         bone_matrices.push(BoneMatrix {
         //             data: (m).to_cols_array_2d(),
         //         });
         //     }
-        //     bones
-        // }).flatten().collect::<Vec<BoneMatrix>>();
+        // }
+
+        let bone_matrices = self.playbacks.par_iter_mut().map(|p| {
+            p.update(dt);
+            let mut bones = Vec::<BoneMatrix>::new();
+            for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
+                let m = mat * skinned_model.inverse_bind_matrices[i];
+                bones.push(BoneMatrix {
+                    data: (m).to_cols_array_2d(),
+                });
+            }
+            bones
+        }).flatten().collect::<Vec<BoneMatrix>>();
 
         queue.write_buffer(
             &self.bones_storage_buffer,
