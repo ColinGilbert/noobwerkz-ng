@@ -14,7 +14,7 @@ pub trait OzzTrait
 where
     Self: Send + Sync,
 {
-    fn update(&mut self, time: web_time::Duration);
+    fn update(&mut self, time: web_time::Duration, scale: f32);
     fn update_skeleton(&mut self);
     fn root(&self) -> glam::Mat4;
     fn bone_trans(&self) -> &[OzzTransform];
@@ -101,10 +101,10 @@ impl OzzTrait for OzzPlayback {
         &self.spine_trans
     }
 
-    fn update(&mut self, dt: web_time::Duration) {
+    fn update(&mut self, dt: web_time::Duration, scale: f32) {
         let duration = self.sample_job.animation().unwrap().duration();
         //println!("Duration {}, dt {}", duration, dt.as_secs_f32());
-        self.seek += dt.as_secs_f32() * 10.0;
+        self.seek += dt.as_secs_f32() * scale;
         self.seek %= duration;
         let ratio = self.seek / duration;
 
