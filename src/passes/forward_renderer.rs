@@ -66,6 +66,14 @@ impl Pass for ForwardRenderer {
                 timestamp_writes: None,
             });
 
+            // render_pass.set_pipeline(&self.light_render_pipeline);
+            // render_pass.draw_light_model(
+            //     &models[0],
+            //     &self.camera_bind_group,
+            //     &self.light_bind_group,
+            // );
+            render_pass.set_pipeline(&self.render_pipeline);
+            
             for m in model_nodes.iter() {
                 let mut count = 0;
                 let mut model_instance_data = Vec::<InstanceRaw>::new();
@@ -75,7 +83,6 @@ impl Pass for ForwardRenderer {
                     count += 1;
                 }
 
-                render_pass.set_pipeline(&self.render_pipeline);
 
                 for mesh in model.meshes.iter() {
                     let mut mesh_instance_data = Vec::<InstanceRaw>::new();
@@ -106,12 +113,6 @@ impl Pass for ForwardRenderer {
                         });
 
                     render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
-                    // render_pass.set_pipeline(&self.light_render_pipeline);
-                    // render_pass.draw_light_model(
-                    //     &models[0],
-                    //     &self.camera_bind_group,
-                    //     &self.light_bind_group,
-                    // );
 
                     render_pass.draw_mesh_instanced(
                         &mesh,
@@ -122,6 +123,7 @@ impl Pass for ForwardRenderer {
                     );
                 }
             }
+            
             render_pass.set_pipeline(&self.skinned_render_pipeline);
 
             for m in skinned_model_nodes.iter() {
