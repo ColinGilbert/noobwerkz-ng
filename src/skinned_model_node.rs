@@ -118,7 +118,7 @@ impl SkinnedModelNode {
             }
             bones
         }).flatten().collect::<Vec<BoneMatrix>>();
-
+        println!("Bone matrices size: {}", self.bone_matrices.len());
         queue.write_buffer(
             &self.bones_storage_buffer,
             0,
