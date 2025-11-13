@@ -180,7 +180,6 @@ pub fn load_skinned_model_from_serialized(
     for bone_idx in 0..model.bone_names.len() {
         let bone_name = &model.bone_names[bone_idx].clone();
         let bone_newpos = skeletal_context.skeleton.joint_by_name(&bone_name).unwrap() as usize;
-        println!("Bone new pose {}, joints size {}", bone_newpos, skeletal_context.skeleton.num_joints());
         inverse_bind_poses[bone_newpos] = model.inverse_bind_matrices[bone_idx];
         bone_names_reshuffled[bone_newpos] = bone_name.to_string();
     }
