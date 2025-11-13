@@ -46,6 +46,8 @@ impl SerializedMesh {
 pub struct SerializedMaterial {
     pub name: String,
     pub base_colour: [f32; 4],
+    pub metallic: f32,
+    pub roughness: f32,
     pub diffuse_texture_path: String,
     pub normals_texture_path: String,
     pub specular_texture_path: String,
@@ -55,7 +57,9 @@ impl SerializedMaterial {
     pub fn new() -> Self {
         Self {
             name: "".to_owned(),
-            base_colour: [0.0; 4],
+            base_colour: [1.0; 4],
+            metallic: 0.0,
+            roughness: 0.0,
             diffuse_texture_path: "".to_owned(),
             normals_texture_path: "".to_owned(),
             specular_texture_path: "".to_owned(),
