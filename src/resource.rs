@@ -48,11 +48,11 @@ pub fn load_skinned_model_from_serialized(
         }
         if m.positions.len() != m.bone_indices.len() {
             println!("Not enough bone indices. Indices: {}. Needed: {}.", m.bone_indices.len(), m.positions.len());
-            return Option::None;
+            //return Option::None;
         }
         if m.positions.len() != m.bone_weights.len() {
             println!("Not enough bone weights");
-            return Option::None;
+            //return Option::None;
         }
         let mut i = 0;
         
