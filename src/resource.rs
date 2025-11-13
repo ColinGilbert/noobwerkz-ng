@@ -172,10 +172,10 @@ pub fn load_skinned_model_from_serialized(
     }
 
     let mut inverse_bind_poses = Vec::<[[f32; 4]; 4]>::new();
-    inverse_bind_poses.resize(model.bone_names.len(), [[0.0; 4]; 4]);
+    inverse_bind_poses.resize( skeletal_context.skeleton.num_joints(), [[0.0; 4]; 4]);
 
     let mut bone_names_reshuffled = Vec::<String>::new();
-    bone_names_reshuffled.resize(model.bone_names.len(), "".to_owned());
+    bone_names_reshuffled.resize(, skeletal_context.skeleton.num_joints(), "".to_owned());
 
     for bone_idx in 0..model.bone_names.len() {
         let bone_name = &model.bone_names[bone_idx].clone();
