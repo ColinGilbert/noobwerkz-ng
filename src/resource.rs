@@ -43,16 +43,13 @@ pub fn load_skinned_model_from_serialized(
             return Option::None;
         }
         if m.positions.len() != m.uvs.len() {
-            println!("Not enough UVs");
             m.uvs.resize(m.positions.len(), [0.0, 0.0]);
         }
         if m.positions.len() != m.bone_indices.len() {
-            println!("Not enough bone indices. Indices: {}. Needed: {}.", m.bone_indices.len(), m.positions.len());
             m.bone_indices.resize(m.positions.len(), [0, 0, 0,0 ]);
             //return Option::None;
         }
         if m.positions.len() != m.bone_weights.len() {
-            println!("Not enough bone weights");
             m.bone_weights.resize(m.positions.len(), [0.0, 0.0, 0.0, 0.0]);
             //return Option::None;
         }
