@@ -45,6 +45,7 @@ impl SerializedMesh {
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedMaterial {
     pub name: String,
+    pub base_colour: [f32; 4],
     pub diffuse_texture_path: String,
     pub normals_texture_path: String,
     pub specular_texture_path: String,
@@ -54,6 +55,7 @@ impl SerializedMaterial {
     pub fn new() -> Self {
         Self {
             name: "".to_owned(),
+            base_colour: [0.0; 4],
             diffuse_texture_path: "".to_owned(),
             normals_texture_path: "".to_owned(),
             specular_texture_path: "".to_owned(),
