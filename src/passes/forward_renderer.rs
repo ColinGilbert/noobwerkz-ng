@@ -127,16 +127,16 @@ impl Pass for ForwardRenderer {
 
             for m in skinned_model_nodes.iter() {
                 let mut count= 0;
-                let mut model_instance_data = Vec::<SkinnedInstanceRaw>::new();
+                let mut model_instances = Vec::<SkinnedInstanceRaw>::new();
                 let model = &skinned_models[m.skinned_model_idx];
 
                 for i in &m.instances {
-                    model_instance_data.push(i.to_skinned_raw());
+                    model_instances.push(i.to_skinned_raw());
                     count += 1;
                 }
-                let mut meshes_count = 0;
+
                 for mesh in model.meshes.iter() {
-                    let mut mesh_instance_data = Vec::<SkinnedInstanceRaw>::new();
+                    let mut mesh_instances = Vec::<SkinnedInstanceRaw>::new();
 
                     let mesh_mat = glam::Mat4::from_scale_rotation_translation(
                         mesh.scale,
@@ -144,20 +144,20 @@ impl Pass for ForwardRenderer {
                         mesh.translation,
                     );
 
-                    for instance_raw in &model_instance_data {
+                    for instance_raw in &model_instances {
                         let instance_model_mat = glam::Mat4::from_cols_array_2d(&instance_raw.model);
 
                         let temp = SkinnedInstanceRaw {
                             model: (instance_model_mat * mesh_mat).to_cols_array_2d(),
                         };
 
-                        mesh_instance_data.push(temp);
+                        mesh_instances.push(temp);
                     }
 
                     let instance_buffer =
                         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                             label: Some("Instance Buffer"),
-                            contents: bytemuck::cast_slice(&mesh_instance_data),
+                            contents: bytemuck::cast_slice(&mesh_instances),
                             usage: wgpu::BufferUsages::VERTEX,
                         });
 
@@ -171,9 +171,7 @@ impl Pass for ForwardRenderer {
                         &self.light_bind_group,
                         &m.bind_group,
                     );
-                    meshes_count += 1;
                 }
-                println!("Meshes count: {}", meshes_count);
             }
         }
         queue.submit(once(encoder.finish()));
