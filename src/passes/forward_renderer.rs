@@ -126,7 +126,7 @@ impl Pass for ForwardRenderer {
             render_pass.set_pipeline(&self.skinned_render_pipeline);
 
             for m in skinned_model_nodes.iter() {
-                let mut count= 0;
+                let mut count = 0;
                 let mut model_instances = Vec::<SkinnedInstanceRaw>::new();
                 let model = &skinned_models[m.skinned_model_idx];
 
