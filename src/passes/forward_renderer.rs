@@ -126,7 +126,7 @@ impl Pass for ForwardRenderer {
             render_pass.set_pipeline(&self.skinned_render_pipeline);
 
             for m in skinned_model_nodes.iter() {
-                let mut count = 0;
+                let mut count= 0;
                 let mut model_instance_data = Vec::<SkinnedInstanceRaw>::new();
                 let model = &skinned_models[m.skinned_model_idx];
 
@@ -134,8 +134,8 @@ impl Pass for ForwardRenderer {
                     model_instance_data.push(i.to_skinned_raw());
                     count += 1;
                 }
-
-                for (i, mesh) in model.meshes.iter().enumerate() {
+                let mut count = 0;
+                for mesh in model.meshes.iter() {
                     let mut mesh_instance_data = Vec::<SkinnedInstanceRaw>::new();
 
                     let mesh_mat = glam::Mat4::from_scale_rotation_translation(
@@ -148,7 +148,7 @@ impl Pass for ForwardRenderer {
                         let instance_model_mat = glam::Mat4::from_cols_array_2d(&instance_raw.model);
 
                         let temp = SkinnedInstanceRaw {
-                            model: (mesh_mat * instance_model_mat).to_cols_array_2d(),
+                            model: (instance_model_mat * mesh_mat).to_cols_array_2d(),
                         };
 
                         mesh_instance_data.push(temp);
@@ -163,18 +163,17 @@ impl Pass for ForwardRenderer {
 
                     render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
 
-                    //let skinned_mesh_idx = SkinnedMeshIndex::new(i);
-                    //let mesh = &model.meshes[skinned_mesh_idx];
-
                     render_pass.draw_skinned_mesh_instanced(
                         mesh,
                         &model.materials[mesh.material],
-                        0..count as u32,
+                        0..count,
                         &self.camera_bind_group,
                         &self.light_bind_group,
                         &m.bind_group,
                     );
+                    count += 1;
                 }
+                println!("Meshes count: {}", count);
             }
         }
         queue.submit(once(encoder.finish()));
