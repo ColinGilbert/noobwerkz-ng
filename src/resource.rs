@@ -35,6 +35,7 @@ pub fn load_skinned_model_from_serialized(
 ) -> Option<SkinnedModel> {
     let mut model_results = SkinnedModel::new();
     for m in model.meshes.iter_mut() {
+        println!("Mesh {}", m.name);
         let mut verts = Vec::<ModelVertex>::new();
         let mut indices = Vec::<u32>::new();
         if m.positions.len() != m.normals.len() {
