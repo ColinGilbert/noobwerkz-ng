@@ -134,7 +134,7 @@ impl Pass for ForwardRenderer {
                     model_instance_data.push(i.to_skinned_raw());
                     count += 1;
                 }
-                let mut count = 0;
+                let mut meshes_count = 0;
                 for mesh in model.meshes.iter() {
                     let mut mesh_instance_data = Vec::<SkinnedInstanceRaw>::new();
 
@@ -171,9 +171,9 @@ impl Pass for ForwardRenderer {
                         &self.light_bind_group,
                         &m.bind_group,
                     );
-                    count += 1;
+                    meshes_count += 1;
                 }
-                println!("Meshes count: {}", count);
+                println!("Meshes count: {}", meshes_count);
             }
         }
         queue.submit(once(encoder.finish()));
