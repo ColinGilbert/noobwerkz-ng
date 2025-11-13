@@ -96,16 +96,6 @@ impl SkinnedModelNode {
         dt: web_time::Duration,
         speed: f32
     ) {
-        // self.bone_matrices.clear();
-        // for p in &mut self.playbacks {
-        //     p.update(dt);
-        //     for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
-        //         let m = mat * skinned_model.inverse_bind_matrices[i];
-        //         self.bone_matrices.push(BoneMatrix {
-        //             data: (m).to_cols_array_2d(),
-        //         });
-        //     }
-        // }
         self.bone_matrices.clear();
         self.bone_matrices = self.playbacks.par_iter_mut().map(|p| {
             p.update(dt, speed);
