@@ -47,7 +47,7 @@ pub fn load_skinned_model_from_serialized(
             m.uvs.resize(m.positions.len(), [0.0, 0.0]);
         }
         if m.positions.len() != m.bone_indices.len() {
-            println!("Not enough bone indices");
+            println!("Not enough bone indices. Indices: {}. Needed: {}.", m.bone_indices.len(), m.positions.len());
             return Option::None;
         }
         if m.positions.len() != m.bone_weights.len() {
@@ -177,7 +177,7 @@ pub fn load_skinned_model_from_serialized(
 
     let mut bone_names_reshuffled = Vec::<String>::new();
     bone_names_reshuffled.resize(model.bone_names.len(), "".to_owned());
-    
+
     for bone_idx in 0..model.bone_names.len() {
         let bone_name = &model.bone_names[bone_idx].clone();
         let bone_newpos = skeletal_context.skeleton.joint_by_name(bone_name).unwrap() as usize;
