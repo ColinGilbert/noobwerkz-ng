@@ -163,8 +163,8 @@ impl Pass for ForwardRenderer {
 
                     render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
 
-                    let skinned_mesh_idx = SkinnedMeshIndex::new(i);
-                    let mesh = &model.meshes[skinned_mesh_idx];
+                    //let skinned_mesh_idx = SkinnedMeshIndex::new(i);
+                    //let mesh = &model.meshes[skinned_mesh_idx];
 
                     render_pass.draw_skinned_mesh_instanced(
                         mesh,
