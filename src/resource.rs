@@ -9,6 +9,7 @@ use crate::texture::Texture;
 use msgpacker::prelude::*;
 use wgpu::util::DeviceExt;
 
+
 pub fn load_serialized_model(filepath: String, filename: String) -> SerializedModel {
     let full_path = filepath.clone() + "/" + &filename;
     println!("Full path {}", full_path);
@@ -45,16 +46,15 @@ pub fn load_skinned_model_from_serialized(
             m.uvs.resize(m.positions.len(), [0.0, 0.0]);
         }
         if m.positions.len() != m.bone_indices.len() {
-            m.bone_indices.resize(m.positions.len(), [0, 0, 0, 0]);
+            m.bone_indices.resize(m.positions.len(), [0, 0, 0,0 ]);
             //return Option::None;
         }
         if m.positions.len() != m.bone_weights.len() {
-            m.bone_weights
-                .resize(m.positions.len(), [0.0, 0.0, 0.0, 0.0]);
+            m.bone_weights.resize(m.positions.len(), [0.0, 0.0, 0.0, 0.0]);
             //return Option::None;
         }
         let mut i = 0;
-
+        
         // let matrix = glam::Mat4::from_quat(glam::Quat::from_axis_angle(glam::Vec3{x: 1.0, y: 0.0, z: 0.0}, 90.0));
         while i < m.positions.len() {
             let mut v = ModelVertex::new();
@@ -176,13 +176,12 @@ pub fn load_skinned_model_from_serialized(
 
     let mut bone_names_reshuffled = Vec::<String>::new();
     bone_names_reshuffled.resize(model.bone_names.len(), "".to_owned());
-    let mut bone_idx = 0;
-    while bone_idx < model.bone_names.len() {
+
+    for bone_idx in 0..model.bone_names.len() {
         let bone_name = &model.bone_names[bone_idx].clone();
-        let bone_newpos = skeletal_context.skeleton.joint_by_name(bone_name).unwrap() as usize;
+        let bone_newpos = skeletal_context.skeleton.joint_by_name(&bone_name).unwrap() as usize;
         inverse_bind_poses[bone_newpos] = model.inverse_bind_matrices[bone_idx];
         bone_names_reshuffled[bone_newpos] = bone_name.to_string();
-        bone_idx += 1;
     }
     // println!("Bones              {:?}", model.bone_names);
     // !("Bones (reshuffled) {:?}", bone_names_reshuffled);
