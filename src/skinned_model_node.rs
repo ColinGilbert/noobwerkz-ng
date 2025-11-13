@@ -93,6 +93,8 @@ impl SkinnedModelNode {
         _device: &mut wgpu::Device,
         queue: &mut wgpu::Queue,
         skinned_model: &SkinnedModel,
+        dt: web_time::Duration,
+        speed: f32
     ) {
         // self.bone_matrices.clear();
         // for p in &mut self.playbacks {
@@ -106,6 +108,7 @@ impl SkinnedModelNode {
         // }
         self.bone_matrices.clear();
         self.bone_matrices = self.playbacks.par_iter_mut().map(|p| {
+            p.update(dt, speed);
             let mut bones = Vec::<BoneMatrix>::new();
             for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
                 let m = mat * skinned_model.inverse_bind_matrices[i];
