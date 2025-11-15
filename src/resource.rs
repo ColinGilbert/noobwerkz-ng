@@ -67,12 +67,13 @@ pub fn load_skinned_model_from_serialized(
             i += 1;
             verts.push(v);
         }
+        
         i = 0;
         while i < m.indices.len() {
             indices.push(m.indices[i]);
             i += 1;
         }
-        
+
         calculate_tangents_and_bitangents(&mut verts, &indices);
 
         let mut skinned_verts = Vec::<SkinnedModelVertex>::new();
