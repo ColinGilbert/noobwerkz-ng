@@ -28,7 +28,7 @@ impl SerializedMesh {
             max_extents: [0.0; 3],
             min_extents: [0.0; 3],
             dimensions: [0.0; 3],
-            rotation: [0.0; 4],
+            rotation: [0.0, 0.0, 0.0, 1.0],
             positions: Vec::new(),
             normals: Vec::new(),
             uvs: Vec::new(),
