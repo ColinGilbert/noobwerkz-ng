@@ -24,7 +24,7 @@ impl SerializedMesh {
         Self {
             name: "".to_string(),
             translation: [0.0; 3],
-            scale: [0.0; 3],
+            scale: [1.0; 3],
             max_extents: [0.0; 3],
             min_extents: [0.0; 3],
             dimensions: [0.0; 3],
