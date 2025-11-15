@@ -63,7 +63,7 @@ pub fn load_skinned_model_from_serialized(
             let mut v = ModelVertex::new();
             v.position = m.positions[i];
             v.normal = m.normals[i];
-            v.tex_coords = m.uvs[i];
+            v.tex_coords = [m.uvs[i][0], 1.0 as f32 - m.uvs[i][1]];
             i += 1;
             verts.push(v);
         }
