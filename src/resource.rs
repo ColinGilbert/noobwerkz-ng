@@ -19,6 +19,7 @@ pub fn load_serialized_model(filepath: String, filename: String) -> SerializedMo
     println!("Scale {:?}", deserialized.meshes[0].scale);
     println!("Translation {:?}", deserialized.meshes[0].translation);
     println!("Rotation {:?}", deserialized.meshes[0].rotation);
+    println!("Diffuse texture {}", deserialized.materials[0].diffuse_texture_path);
     //println!("Inverse bind pose {:?}", deserialized.inverse_bind_matrices);
     deserialized
 }
