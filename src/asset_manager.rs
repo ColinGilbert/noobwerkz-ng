@@ -58,7 +58,7 @@ impl AssetManager {
         let model = load_model_from_serialized(
             &mut serialized,
             default_material,
-            path.as_path(),
+            &path.as_path(),
             device,
             queue,
             texture_layout,
@@ -82,7 +82,7 @@ impl AssetManager {
 
     pub fn load_skinned_model_from_file(
         &mut self,
-        filepath: &std::path::Path,
+        filepath: &std::path::PathBuf,
         name: &str,
         device: &mut wgpu::Device,
         queue: &mut wgpu::Queue,
@@ -90,12 +90,13 @@ impl AssetManager {
         texture_layout: &wgpu::BindGroupLayout,
         skeletal_context: &skeletal_context::SkeletalContext,
     ) -> anyhow::Result<usize> {
-        let mut path = PathBuf::new();
-        let mut serialized = load_serialized_model(filepath);
+        let mut serialized = load_serialized_model(filepath.as_path());
+        let mut path = filepath.clone();
+        path.pop();
         let model = load_skinned_model_from_serialized(
             &mut serialized,
             default_material,
-            filepath,
+            &path.as_path(),
             device,
             queue,
             texture_layout,
