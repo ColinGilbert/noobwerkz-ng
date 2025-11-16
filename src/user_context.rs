@@ -1,6 +1,6 @@
 //use std::sync::*;
 use crate::{
-    model::*, scene::*, skeletal_context::SkeletalContext, skinned_model::*
+    asset_manager::AssetManager, model::*, scene::*, skeletal_context::SkeletalContext, skinned_model::*
 };
 
 pub struct UserContext {
@@ -9,6 +9,7 @@ pub struct UserContext {
     pub skeletals: Vec<SkeletalContext>,
     pub scenes: Vec<Scene>,
     pub active_scene: usize,
+    pub asset_mgr: AssetManager,
     pub animation_time_elapsed: u128,
 }
 
@@ -25,6 +26,7 @@ impl UserContext {
             skeletals,
             scenes,
             active_scene: 0,
+            asset_mgr: AssetManager::new(),
             animation_time_elapsed: 0,
         }
     }

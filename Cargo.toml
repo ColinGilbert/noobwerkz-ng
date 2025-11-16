@@ -43,3 +43,5 @@ futures-signals = "0.3.34"
 cpal = "0.16.0"
 symphonia = "0.5.5"
 taffy = { version = "0.9.1", features = ["strict_provenance", "serde"] }
+slotmap = "1.0.7"
+harfrust = "0.4.0"

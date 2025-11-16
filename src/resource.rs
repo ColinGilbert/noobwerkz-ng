@@ -10,7 +10,7 @@ use msgpacker::prelude::*;
 use std::path::*;
 use wgpu::util::DeviceExt;
 
-pub fn load_serialized_model(filepath: &Vec<&str>) -> SerializedModel {
+pub fn load_serialized_model(filepath: &std::path::Path) -> SerializedModel {
     let mut path = PathBuf::new();
     for p in filepath {
         path.push(p);
@@ -36,8 +36,8 @@ pub fn load_serialized_model(filepath: &Vec<&str>) -> SerializedModel {
 // TODO: Robustify
 pub fn load_skinned_model_from_serialized(
     model: &mut SerializedModel,
-    default_material: Material,
-    path: &Vec<&str>,
+    default_material: &Material,
+    path: &std::path::Path,
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
@@ -220,8 +220,8 @@ pub fn load_skinned_model_from_serialized(
 
 pub fn load_model_from_serialized(
     model: &mut SerializedModel,
-    default_material: Material,
-    filepath: &Vec<&str>,
+    default_material: &Material,
+    filepath: &std::path::Path,
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,

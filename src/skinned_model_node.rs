@@ -73,7 +73,7 @@ impl SkinnedModelNode {
                     resource: num_bones_buffer.as_entire_binding(),
                 },
             ],
-            label: Some("Animation matrices bind Group"),
+            label: Some("Bone matrices bind group"),
         });
 
         Self {
