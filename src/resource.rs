@@ -7,8 +7,8 @@ use crate::skinned_model::*;
 use crate::texture;
 use crate::texture::Texture;
 use msgpacker::prelude::*;
-use wgpu::util::DeviceExt;
 use std::path::*;
+use wgpu::util::DeviceExt;
 
 pub fn load_serialized_model(filepath: &Vec<&str>) -> SerializedModel {
     let mut path = PathBuf::new();
@@ -22,8 +22,14 @@ pub fn load_serialized_model(filepath: &Vec<&str>) -> SerializedModel {
     println!("Scale {:?}", deserialized.meshes[0].scale);
     println!("Translation {:?}", deserialized.meshes[0].translation);
     println!("Rotation {:?}", deserialized.meshes[0].rotation);
-    println!("Diffuse texture {}", deserialized.materials[0].diffuse_texture_path);
-    println!("Normals texture {}", deserialized.materials[0].normals_texture_path);
+    println!(
+        "Diffuse texture {}",
+        deserialized.materials[0].diffuse_texture_path
+    );
+    println!(
+        "Normals texture {}",
+        deserialized.materials[0].normals_texture_path
+    );
     deserialized
 }
 
@@ -31,7 +37,7 @@ pub fn load_serialized_model(filepath: &Vec<&str>) -> SerializedModel {
 pub fn load_skinned_model_from_serialized(
     model: &mut SerializedModel,
     default_material: Material,
-    path: String,
+    path: &Vec<&str>,
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
@@ -56,11 +62,12 @@ pub fn load_skinned_model_from_serialized(
             //return Option::None;
         }
         if m.positions.len() != m.bone_weights.len() {
-            m.bone_weights.resize(m.positions.len(), [0.0, 0.0, 0.0, 0.0]);
+            m.bone_weights
+                .resize(m.positions.len(), [0.0, 0.0, 0.0, 0.0]);
             //return Option::None;
         }
         let mut i = 0;
-        
+
         // let matrix = glam::Mat4::from_quat(glam::Quat::from_axis_angle(glam::Vec3{x: 1.0, y: 0.0, z: 0.0}, 90.0));
         while i < m.positions.len() {
             let mut v = ModelVertex::new();
@@ -70,7 +77,7 @@ pub fn load_skinned_model_from_serialized(
             i += 1;
             verts.push(v);
         }
-        
+
         i = 0;
         while i < m.indices.len() {
             indices.push(m.indices[i]);
@@ -127,7 +134,11 @@ pub fn load_skinned_model_from_serialized(
         let name = &m.name;
         let diffuse_texture: Texture;
         if m.diffuse_texture_path != "" {
-            let full_path: String = path.clone() + "/" + &m.diffuse_texture_path;
+            let mut full_path = PathBuf::new();
+            for p in path {
+                full_path.push(p);
+            }
+            full_path.push(&m.diffuse_texture_path);
             let diffuse_texture_result =
                 futures::executor::block_on(load_texture(&full_path, false, device, queue));
             match diffuse_texture_result {
@@ -148,8 +159,11 @@ pub fn load_skinned_model_from_serialized(
 
         let normal_texture: texture::Texture;
         if m.normals_texture_path != "" {
-            let full_path: String = path.clone() + "/" + &m.normals_texture_path;
-
+            let mut full_path = PathBuf::new();
+            for p in path {
+                full_path.push(p);
+            }
+            full_path.push(&m.normals_texture_path);
             let normal_texture_result =
                 futures::executor::block_on(load_texture(&full_path, true, device, queue));
             match normal_texture_result {
@@ -207,7 +221,7 @@ pub fn load_skinned_model_from_serialized(
 pub fn load_model_from_serialized(
     model: &mut SerializedModel,
     default_material: Material,
-    path: String,
+    filepath: &Vec<&str>,
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
@@ -271,7 +285,12 @@ pub fn load_model_from_serialized(
         let name = &m.name;
         let diffuse_texture: Texture;
         if m.diffuse_texture_path != "" {
-            let diffuse_path = path.clone() + &"/".to_owned() + &m.diffuse_texture_path;
+            let mut path = PathBuf::new();
+            for p in filepath {
+                path.push(p);
+            }
+            path.push(&m.diffuse_texture_path);
+            let diffuse_path = path.as_path();
             let diffuse_texture_result =
                 futures::executor::block_on(load_texture(&diffuse_path, false, device, queue));
             match diffuse_texture_result {
@@ -291,10 +310,15 @@ pub fn load_model_from_serialized(
         }
 
         let normal_texture: texture::Texture;
-        let normals_path = path.clone() + &"/".to_owned() + &m.normals_texture_path;
+        // let normals_path = path.clone() + &"/".to_owned() + &m.normals_texture_path;
         if m.normals_texture_path != "" {
+            let mut path = PathBuf::new();
+            for p in filepath {
+                path.push(p);
+            }
+            path.push(&m.normals_texture_path);
             let normal_texture_result =
-                futures::executor::block_on(load_texture(&normals_path, true, device, queue));
+                futures::executor::block_on(load_texture(path.as_path(), true, device, queue));
             match normal_texture_result {
                 Ok(value) => {
                     normal_texture = value;
@@ -312,7 +336,7 @@ pub fn load_model_from_serialized(
         }
         let material = Material::new(
             device,
-            &name,
+            name,
             diffuse_texture,
             normal_texture,
             texture_layout,
@@ -324,23 +348,23 @@ pub fn load_model_from_serialized(
 }
 
 pub async fn load_texture(
-    filepath: &Vec<&str>,
+    filepath: &Path,
     is_normal_map: bool,
     device: &wgpu::Device,
     queue: &wgpu::Queue,
 ) -> anyhow::Result<texture::Texture> {
     let data = load_binary(filepath).await?;
-    texture::Texture::from_bytes(device, queue, &data, filepath[filepath.len() -1], is_normal_map)
+    texture::Texture::from_bytes(
+        device,
+        queue,
+        &data,
+        filepath.to_str().expect("Filepath must exist"),
+        is_normal_map,
+    )
 }
 
-pub async fn load_binary(filepath: &Vec<&str>) -> anyhow::Result<Vec<u8>> {
-    let mut path = PathBuf::new();
-    for p in filepath {
-        path.push(p);
-    }
-    let data = {
-        std::fs::read(path.as_path())?
-    };
+pub async fn load_binary(filepath: &Path) -> anyhow::Result<Vec<u8>> {
+    let data = { std::fs::read(filepath)? };
 
     Ok(data)
 }
