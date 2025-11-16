@@ -324,19 +324,22 @@ pub fn load_model_from_serialized(
 }
 
 pub async fn load_texture(
-    file_name: &str,
+    filepath: &Vec<&str>,
     is_normal_map: bool,
     device: &wgpu::Device,
     queue: &wgpu::Queue,
 ) -> anyhow::Result<texture::Texture> {
-    let data = load_binary(file_name).await?;
-    texture::Texture::from_bytes(device, queue, &data, file_name, is_normal_map)
+    let data = load_binary(filepath).await?;
+    texture::Texture::from_bytes(device, queue, &data, filepath[filepath.len() -1], is_normal_map)
 }
 
-pub async fn load_binary(file_name: &str) -> anyhow::Result<Vec<u8>> {
+pub async fn load_binary(filepath: &Vec<&str>) -> anyhow::Result<Vec<u8>> {
+    let mut path = PathBuf::new();
+    for p in filepath {
+        path.push(p);
+    }
     let data = {
-        let path = std::path::Path::new(file_name);
-        std::fs::read(path)?
+        std::fs::read(path.as_path())?
     };
 
     Ok(data)
