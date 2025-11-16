@@ -1,6 +1,7 @@
 use futures::executor::*;
 use std::io::Cursor;
 use std::sync::*;
+use std::path::*;
 
 pub struct SkeletalContext {
     pub skeleton: Arc<ozz_animation_rs::Skeleton>,
@@ -9,18 +10,25 @@ pub struct SkeletalContext {
 
 impl SkeletalContext {
     pub fn new(
-        filepath: String,
-        skeleton_filename: String,
-        animation_filenames: &Vec<String>,
+        filepath: &Vec<&str>,
+        skeleton_filename: &str,
+        animation_filenames: &Vec<&str>,
     ) -> Self {
-        let skeleton_filepath = filepath.clone() + &"/".to_owned() + &skeleton_filename;
-        
-        let mut ar_skeleton = block_on(load_archive(skeleton_filepath.as_str())).unwrap();
+        let mut skeleton_filepath = PathBuf::new();
+        for p in filepath {
+            skeleton_filepath.push(p);
+        }
+        skeleton_filepath.push(skeleton_filename);
+        let mut ar_skeleton = block_on(load_archive(skeleton_filepath.as_path())).unwrap();
         let mut ar_animations = Vec::new();
         for a in animation_filenames {
-            let anim_filepath = filepath.clone() + &"/".to_owned() + a;
+            let mut anim_filepath = PathBuf::new();
+            for p in filepath {
+                anim_filepath.push(p);
+            }
+            anim_filepath.push(a);
             //println!("Getting animation {}", anim_filepath);
-            ar_animations.push(block_on(load_archive(anim_filepath.as_str())).unwrap());
+            ar_animations.push(block_on(load_archive(anim_filepath.as_path())).unwrap());
         }
         
         let skeleton =
@@ -31,7 +39,7 @@ impl SkeletalContext {
         for mut a in ar_animations {
             animations.push(Arc::new(ozz_animation_rs::Animation::from_archive(&mut a).unwrap()));
         }
-        
+
         Self {
             skeleton,
             animations,
@@ -40,7 +48,7 @@ impl SkeletalContext {
 }
 
 async fn load_archive(
-    path: &str,
+    path: &Path,
 ) -> Result<ozz_animation_rs::Archive<Cursor<Vec<u8>>>, ozz_animation_rs::OzzError> {
     use std::fs::File;
     use std::io::Read;
