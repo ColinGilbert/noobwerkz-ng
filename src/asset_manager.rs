@@ -1,9 +1,13 @@
 // This code serves as a simplified way for asset loading.
 use crate::{
-    index_types::*, material::Material, model::*, resource::{self, *}, skeletal_context, skinned_model::*, texture::*
+    material::Material,
+    model::*,
+    skeletal_context,
+    skinned_model::*,
+    texture::*,
+    resource::*,
 };
 use anyhow::*;
-use std::sync::Arc;
 use std::{collections::*, path::*, result::Result::*};
 
 pub struct AssetManager {
@@ -18,8 +22,8 @@ pub struct AssetManager {
     pub models: Vec<Model>,
     pub skinned_models: Vec<SkinnedModel>,
     pub textures: Vec<Texture>,
-    pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
-    pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
+    // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
+    // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
 }
 
 impl AssetManager {
@@ -34,8 +38,8 @@ impl AssetManager {
             models: Vec::<Model>::new(),
             skinned_models: Vec::<SkinnedModel>::new(),
             textures: Vec::<Texture>::new(),
-            skeletons: Vec::<Arc<ozz_animation_rs::Skeleton>>::new(),
-            animations: Vec::<Arc<ozz_animation_rs::Animation>>::new(),
+            // skeletons: Vec::<Arc<ozz_animation_rs::Skeleton>>::new(),
+            // animations: Vec::<Arc<ozz_animation_rs::Animation>>::new(),
         }
     }
 
@@ -48,8 +52,8 @@ impl AssetManager {
         default_material: &Material,
         texture_layout: &wgpu::BindGroupLayout,
     ) -> anyhow::Result<usize> {
-        let mut serialized = resource::load_serialized_model(filepath);
-        let model = resource::load_model_from_serialized(
+        let mut serialized = load_serialized_model(filepath);
+        let model = load_model_from_serialized(
             &mut serialized,
             default_material,
             filepath,
@@ -84,15 +88,15 @@ impl AssetManager {
         texture_layout: &wgpu::BindGroupLayout,
         skeletal_context: &skeletal_context::SkeletalContext,
     ) -> anyhow::Result<usize> {
-        let mut serialized = resource::load_serialized_model(filepath);
-        let model = resource::load_skinned_model_from_serialized(
+        let mut serialized = load_serialized_model(filepath);
+        let model = load_skinned_model_from_serialized(
             &mut serialized,
             default_material,
             filepath,
             device,
             queue,
             texture_layout,
-            skeletal_context
+            skeletal_context,
         );
         match model {
             Some(val) => {
@@ -119,7 +123,7 @@ impl AssetManager {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> anyhow::Result<usize> {
-        let tex = futures::executor::block_on(resource::load_texture(
+        let tex = futures::executor::block_on(load_texture(
             filepath,
             is_normal_map,
             device,
@@ -142,21 +146,21 @@ impl AssetManager {
         }
     }
 
-    pub fn load_skeleton_from_file(
-        &mut self,
-        filepath: &std::path::Path,
-        name: &str,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-    ) {
-    }
+    // pub fn load_skeleton_from_file(
+    //     &mut self,
+    //     filepath: &std::path::Path,
+    //     name: &str,
+    //     device: &wgpu::Device,
+    //     queue: &wgpu::Queue,
+    // ) {
+    // }
 
-    pub fn load_animation_from_file(
-        &mut self,
-        filepath: &std::path::Path,
-        name: &str,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-    ) {
-    }
+    // pub fn load_animation_from_file(
+    //     &mut self,
+    //     filepath: &std::path::Path,
+    //     name: &str,
+    //     device: &wgpu::Device,
+    //     queue: &wgpu::Queue,
+    // ) {
+    // }
 }
