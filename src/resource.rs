@@ -317,6 +317,7 @@ pub fn load_model_from_serialized(
                 path.push(p);
             }
             path.push(&m.normals_texture_path);
+            println!("Normal texture path {:?}", path);
             let normal_texture_result =
                 futures::executor::block_on(load_texture(path.as_path(), true, device, queue));
             match normal_texture_result {
