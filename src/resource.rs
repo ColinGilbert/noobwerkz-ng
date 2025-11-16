@@ -8,12 +8,15 @@ use crate::texture;
 use crate::texture::Texture;
 use msgpacker::prelude::*;
 use wgpu::util::DeviceExt;
+use std::path::*;
 
-
-pub fn load_serialized_model(filepath: String, filename: String) -> SerializedModel {
-    let full_path = filepath.clone() + "/" + &filename;
-    println!("Full path {}", full_path);
-    let data = std::fs::read(full_path).unwrap();
+pub fn load_serialized_model(filepath: Vec<String>) -> SerializedModel {
+    let mut path = PathBuf::new();
+    for p in filepath {
+        path.push(p);
+    }
+    println!("Full path {:?}", path.as_path());
+    let data = std::fs::read(path.as_path()).unwrap();
     let (_n, deserialized) = SerializedModel::unpack(&data).unwrap();
     println!("Dimensions {:?}", deserialized.meshes[0].dimensions);
     println!("Scale {:?}", deserialized.meshes[0].scale);
