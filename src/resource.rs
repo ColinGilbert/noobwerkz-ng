@@ -10,7 +10,7 @@ use msgpacker::prelude::*;
 use wgpu::util::DeviceExt;
 use std::path::*;
 
-pub fn load_serialized_model(filepath: &Vec<String>) -> SerializedModel {
+pub fn load_serialized_model(filepath: &Vec<&str>) -> SerializedModel {
     let mut path = PathBuf::new();
     for p in filepath {
         path.push(p);
