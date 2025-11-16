@@ -214,8 +214,8 @@ impl State {
         self.forward_renderer.draw(
             &self.gfx_ctx.device,
             &self.gfx_ctx.queue,
-            &u.models,
-            &u.skinned_models,
+            &u.asset_mgr.models,
+            &u.asset_mgr.skinned_models,
             &s.model_nodes,
             &s.skinned_model_nodes,
             &self.gfx_ctx.depth_texture.view,
