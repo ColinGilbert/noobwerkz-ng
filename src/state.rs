@@ -1,12 +1,12 @@
 use crate::callbacks::*;
-use crate::camera_context::*;
 use crate::camera::*;
+use crate::camera_context::*;
 use crate::graphics_context::*;
 use crate::light::*;
 use crate::passes::{Pass, forward_renderer::*};
 use crate::texture::*;
-use crate::user_context::*;
 use crate::ui::*;
+use crate::user_context::*;
 
 use std::f64;
 use std::sync::*;
@@ -45,8 +45,8 @@ impl State {
         let surface = instance.create_surface(window.clone()).unwrap();
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
         let mut lights = Vec::<LightUniform>::new();
-        let mut user_ctx = UserContext::new();// { models: :, skinned_models: (), scenes: (), active_scene: () }
-        
+        let mut user_ctx = UserContext::new(); // { models: :, skinned_models: (), scenes: (), active_scene: () }
+
         if let Some(cb) = *USER_SETUP_CALLBACK.lock().unwrap() {
             cb(&mut gfx_ctx, &mut user_ctx, &mut lights);
         }
@@ -69,7 +69,7 @@ impl State {
             &gfx_ctx.config,
         );
 
-        u.ui.yak_renderer =Some(yakui_wgpu::YakuiWgpu::new(&gfx_ctx.device, &gfx_ctx.queue));
+        u.ui.yak_renderer = Some(yakui_wgpu::YakuiWgpu::new(&gfx_ctx.device, &gfx_ctx.queue));
         u.ui.yak_window = Some(yakui_winit::YakuiWinit::new(&window.clone()));
 
         Ok(Self {
@@ -80,7 +80,7 @@ impl State {
             user_ctx,
             cam_ctx,
             forward_renderer,
-           // ui,
+            // ui,
             is_surface_configured: false,
             mouse_pressed: false,
         })
@@ -197,7 +197,6 @@ impl State {
                 &mut self.user_ctx,
                 dt,
             );
-
         }
     }
 
@@ -227,10 +226,28 @@ impl State {
             &self.gfx_ctx.depth_texture.view,
             &view,
         );
-        let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
-        let multi_surface = u.ui.surface.surface_info(&self.gfx_ctx.device, &view, size, self.gfx_ctx.surface_format, 1);
 
-        let paint_yak = u.ui.yak_renderer.as_mut().unwrap().paint(&mut u.ui.yak, &self.gfx_ctx.device, &self.gfx_ctx.queue, multi_surface);
+        let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
+        let multi_surface = u.ui.surface.surface_info(
+            &self.gfx_ctx.device,
+            &view,
+            size,
+            self.gfx_ctx.surface_format,
+            1,
+        );
+
+        u.ui.yak.start();
+        if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
+            cb();
+        }
+        u.ui.yak.finish();
+
+        let paint_yak = u.ui.yak_renderer.as_mut().unwrap().paint(
+            &mut u.ui.yak,
+            &self.gfx_ctx.device,
+            &self.gfx_ctx.queue,
+            multi_surface,
+        );
 
         self.gfx_ctx.queue.submit([paint_yak]);
 
