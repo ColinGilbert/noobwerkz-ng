@@ -228,7 +228,7 @@ impl State {
             &view,
         );
         let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
-        let multi_surface = u.ui.surface.surface_info(&self.gfx_ctx.device, &view, size, self.gfx_ctx.surface_format, 4);
+        let multi_surface = u.ui.surface.surface_info(&self.gfx_ctx.device, &view, size, self.gfx_ctx.surface_format, 1);
 
         let paint_yak = u.ui.yak_renderer.as_mut().unwrap().paint(&mut u.ui.yak, &self.gfx_ctx.device, &self.gfx_ctx.queue, multi_surface);
 
