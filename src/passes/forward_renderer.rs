@@ -174,7 +174,7 @@ impl Pass for ForwardRenderer {
                 }
             }
         }
-        queue.submit(once(encoder));
+        queue.submit(once(encoder.finish()));
     }
 }
 
