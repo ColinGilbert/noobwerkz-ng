@@ -250,7 +250,7 @@ impl State {
             multi_surface,
         );
 
-        self.gfx_ctx.queue.submit([paint_yak.finish()]);
+        self.gfx_ctx.queue.submit([paint_yak]);
 
         output.present();
 
