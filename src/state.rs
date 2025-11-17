@@ -74,8 +74,6 @@ impl State {
         let egui_renderer = EguiRenderer::new(
             &gfx_ctx.device,
             gfx_ctx.surface_format,
-            None,
-            1,
             &window.clone(),
         );
 
