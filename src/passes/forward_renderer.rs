@@ -31,7 +31,7 @@ impl Pass for ForwardRenderer {
         skinned_model_nodes: &Vec<SkinnedModelNode>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
-    ) -> wgpu::CommandBuffer {
+    ) {
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Render Encoder"),
         });
@@ -173,8 +173,7 @@ impl Pass for ForwardRenderer {
             }
         }
         
-        encoder.finish()
-        //queue.submit([encoder.finish()]);
+        queue.submit([encoder.finish()]);
     }
 }
 

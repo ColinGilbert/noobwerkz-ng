@@ -216,19 +216,16 @@ impl State {
         let u = &mut self.user_ctx;
         let s = &u.scenes[u.active_scene];
 
-        let forward_pass = self.forward_renderer.draw(
-            &self.gfx_ctx.device,
-            &self.gfx_ctx.queue,
-            &u.asset_mgr.models,
-            &u.asset_mgr.skinned_models,
-            &s.model_nodes,
-            &s.skinned_model_nodes,
-            &self.gfx_ctx.depth_texture.view,
-            &view,
-        );
-
-        let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
-
+        // self.forward_renderer.draw(
+        //     &self.gfx_ctx.device,
+        //     &self.gfx_ctx.queue,
+        //     &u.asset_mgr.models,
+        //     &u.asset_mgr.skinned_models,
+        //     &s.model_nodes,
+        //     &s.skinned_model_nodes,
+        //     &self.gfx_ctx.depth_texture.view,
+        //     &view,
+        // );
         let yak_surface = u.ui.surface.surface_info(
             &self.gfx_ctx.device,
             &view,
@@ -236,6 +233,33 @@ impl State {
             self.gfx_ctx.surface_format,
             1,
         );
+
+        let mut encoder = 
+            self.gfx_ctx.device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Render Encoder"),
+            });
+
+        {
+            let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("Render Pass"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: yak_surface.color_attachment,
+                    depth_slice: None,
+                    resolve_target: yak_surface.resolve_target,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(bg),
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                ..Default::default()
+            });
+        }
+
+        let clear = encoder.finish();
+
+        let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
+
 
         u.ui.yak.start();
         if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
@@ -250,7 +274,7 @@ impl State {
             yak_surface,
         );
 
-        self.gfx_ctx.queue.submit([paint_yak, forward_pass]);
+        self.gfx_ctx.queue.submit([clear, paint_yak]);
 
         output.present();
 
