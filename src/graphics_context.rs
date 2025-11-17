@@ -225,7 +225,7 @@ pub fn create_render_pipeline(
             bias: wgpu::DepthBiasState::default(),
         }),
         multisample: wgpu::MultisampleState {
-            count: 4,
+            count: 1,
             mask: !0,
             alpha_to_coverage_enabled: false,
         },
