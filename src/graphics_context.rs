@@ -224,10 +224,11 @@ pub fn create_render_pipeline(
             stencil: wgpu::StencilState::default(),
             bias: wgpu::DepthBiasState::default(),
         }),
+
         multisample: wgpu::MultisampleState {
             count: 1,
             mask: !0,
-            alpha_to_coverage_enabled: false,
+            alpha_to_coverage_enabled: true,
         },
         // If the pipeline will be used with a multiview render pass, this
         // indicates how many array layers the attachments will have.
