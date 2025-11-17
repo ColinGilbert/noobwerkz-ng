@@ -69,9 +69,6 @@ impl State {
             &gfx_ctx.config,
         );
 
-        u.ui.yak_renderer = Some(yakui_wgpu::YakuiWgpu::new(&gfx_ctx.device, &gfx_ctx.queue));
-        u.ui.yak_window = Some(yakui_winit::YakuiWinit::new(&window.clone()));
-
         Ok(Self {
             window,
             surface,
@@ -227,7 +224,6 @@ impl State {
             &view,
         );
 
-        let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
         let multi_surface = u.ui.surface.surface_info(
             &self.gfx_ctx.device,
             &view,
@@ -236,18 +232,10 @@ impl State {
             1,
         );
 
-        u.ui.yak.start();
         if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
             cb();
         }
-        u.ui.yak.finish();
 
-        let paint_yak = u.ui.yak_renderer.as_mut().unwrap().paint(
-            &mut u.ui.yak,
-            &self.gfx_ctx.device,
-            &self.gfx_ctx.queue,
-            multi_surface,
-        );
 
         self.gfx_ctx.queue.submit([paint_yak]);
 

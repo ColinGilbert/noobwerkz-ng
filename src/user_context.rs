@@ -6,7 +6,6 @@ pub struct UserContext {
     pub asset_mgr: AssetManager,
     pub skeletals: Vec<SkeletalContext>,
     pub scenes: Vec<Scene>,
-    pub ui: UI,
     pub active_scene: usize,
     pub time_elapsed: u128,
 }
@@ -16,12 +15,10 @@ impl UserContext {
         let asset_mgr = AssetManager::new();
         let skeletals = Vec::new();
         let scenes = Vec::<Scene>::new();
-        let ui = UI::new();
         Self {
             asset_mgr,
             skeletals,
             scenes,
-            ui,
             active_scene: 0,
             time_elapsed: 0,
         }
