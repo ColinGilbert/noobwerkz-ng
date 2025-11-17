@@ -1,12 +1,12 @@
 use crate::callbacks::*;
-use crate::camera::*;
 use crate::camera_context::*;
+use crate::camera::*;
 use crate::graphics_context::*;
 use crate::light::*;
 use crate::passes::{Pass, forward_renderer::*};
 use crate::texture::*;
 use crate::user_context::*;
-use yakui::{button, row, widgets::List, CrossAxisAlignment};
+use crate::ui::*;
 
 use std::f64;
 use std::sync::*;
@@ -45,8 +45,8 @@ impl State {
         let surface = instance.create_surface(window.clone()).unwrap();
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
         let mut lights = Vec::<LightUniform>::new();
-        let mut user_ctx = UserContext::new(); // { models: :, skinned_models: (), scenes: (), active_scene: () }
-
+        let mut user_ctx = UserContext::new();// { models: :, skinned_models: (), scenes: (), active_scene: () }
+        
         if let Some(cb) = *USER_SETUP_CALLBACK.lock().unwrap() {
             cb(&mut gfx_ctx, &mut user_ctx, &mut lights);
         }
@@ -69,7 +69,7 @@ impl State {
             &gfx_ctx.config,
         );
 
-        u.ui.yak_renderer = Some(yakui_wgpu::YakuiWgpu::new(&gfx_ctx.device, &gfx_ctx.queue));
+        u.ui.yak_renderer =Some(yakui_wgpu::YakuiWgpu::new(&gfx_ctx.device, &gfx_ctx.queue));
         u.ui.yak_window = Some(yakui_winit::YakuiWinit::new(&window.clone()));
 
         Ok(Self {
@@ -80,7 +80,7 @@ impl State {
             user_ctx,
             cam_ctx,
             forward_renderer,
-            // ui,
+           // ui,
             is_surface_configured: false,
             mouse_pressed: false,
         })
@@ -158,8 +158,8 @@ impl State {
             let cam_idx = s.active_camera;
             let c = &mut s.cameras[cam_idx];
 
-            c.change_yaw(degrees_to_radians(dx as f32));
-            c.change_pitch(degrees_to_radians(dy as f32));
+            c.change_yaw(degrees_to_radians(dx as f32)); //rotate_horizontal = mouse_dx ;
+            c.change_pitch(degrees_to_radians(dy as f32)); //)rotate_vertical = mouse_dy ;
         }
     }
 
@@ -169,7 +169,6 @@ impl State {
         let s = &mut u.scenes[scene_idx];
         let cam_idx = s.active_camera;
         let c = &mut s.cameras[cam_idx];
-
         match delta {
             MouseScrollDelta::LineDelta(_, s) => {
                 if *s < 0.0 {
@@ -198,6 +197,7 @@ impl State {
                 &mut self.user_ctx,
                 dt,
             );
+
         }
     }
 
@@ -217,74 +217,22 @@ impl State {
         let u = &mut self.user_ctx;
         let s = &u.scenes[u.active_scene];
 
-        // self.forward_renderer.draw(
-        //     &self.gfx_ctx.device,
-        //     &self.gfx_ctx.queue,
-        //     &u.asset_mgr.models,
-        //     &u.asset_mgr.skinned_models,
-        //     &s.model_nodes,
-        //     &s.skinned_model_nodes,
-        //     &self.gfx_ctx.depth_texture.view,
-        //     &view,
-        // );
-        let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
-        
-        let yak_surface = u.ui.surface.surface_info(
-            &self.gfx_ctx.device,
-            &view,
-            size,
-            self.gfx_ctx.surface_format,
-            1,
-        );
-
-        let mut encoder = 
-            self.gfx_ctx.device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("Render Encoder"),
-            });
-
-        {
-            let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("Render Pass"),
-                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: yak_surface.color_attachment,
-                    depth_slice: None,
-                    resolve_target: yak_surface.resolve_target,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color::GREEN),
-                        store: wgpu::StoreOp::Store,
-                    },
-                })],
-                ..Default::default()
-            });
-        }
-
-        let clear = encoder.finish();
-
-        u.ui.yak.start();
-        // if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
-        //     cb();
-        // }
-                row(|| {
-        button("Not stretched");
-        let mut col = List::column();
-        col.cross_axis_alignment = CrossAxisAlignment::Stretch;
-        col.show(|| {
-            button("Button 1");
-            button("Button 2");
-            button("Button 3");
-        });
-    });
-        u.ui.yak.finish();
-
-        let paint_yak = u.ui.yak_renderer.as_mut().unwrap().paint(
-            &mut u.ui.yak,
+        self.forward_renderer.draw(
             &self.gfx_ctx.device,
             &self.gfx_ctx.queue,
-            yak_surface,
+            &u.asset_mgr.models,
+            &u.asset_mgr.skinned_models,
+            &s.model_nodes,
+            &s.skinned_model_nodes,
+            &self.gfx_ctx.depth_texture.view,
+            &view,
         );
+        let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
+        let multi_surface = u.ui.surface.surface_info(&self.gfx_ctx.device, &view, size, self.gfx_ctx.surface_format, 4);
 
-        self.gfx_ctx.queue.submit([clear, paint_yak]);
+        let paint_yak = u.ui.yak_renderer.as_mut().unwrap().paint(&mut u.ui.yak, &self.gfx_ctx.device, &self.gfx_ctx.queue, multi_surface);
+
+        self.gfx_ctx.queue.submit([paint_yak]);
 
         output.present();
 
