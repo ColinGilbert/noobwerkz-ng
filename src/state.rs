@@ -1,12 +1,14 @@
 use crate::callbacks::*;
 use crate::camera::*;
 use crate::camera_context::*;
+use crate::egui_tools::EguiRenderer;
 use crate::graphics_context::*;
 use crate::light::*;
 use crate::passes::{Pass, forward_renderer::*};
 use crate::texture::*;
 use crate::ui::*;
 use crate::user_context::*;
+use egui_wgpu::ScreenDescriptor;
 
 use std::f64;
 use std::sync::*;
@@ -25,6 +27,7 @@ pub struct State {
     pub cam_ctx: CameraContext,
     pub user_ctx: UserContext,
     pub forward_renderer: ForwardRenderer,
+    pub egui_renderer: EguiRenderer,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
     pub mouse_pressed: bool,
@@ -69,6 +72,13 @@ impl State {
             &gfx_ctx.config,
         );
 
+        let egui_renderer = EguiRenderer::new(
+            &gfx_ctx.device,
+            gfx_ctx.surface_format,
+            None,
+            1,
+            &window.clone(),
+        );
         Ok(Self {
             window,
             surface,
@@ -77,6 +87,7 @@ impl State {
             user_ctx,
             cam_ctx,
             forward_renderer,
+            egui_renderer,
             // ui,
             is_surface_configured: false,
             mouse_pressed: false,
@@ -206,11 +217,13 @@ impl State {
         }
 
         let output = self.surface.get_current_texture()?;
+
         let view = output
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
 
         let u = &mut self.user_ctx;
+
         let s = &u.scenes[u.active_scene];
 
         self.forward_renderer.draw(
@@ -223,14 +236,58 @@ impl State {
             &self.gfx_ctx.depth_texture.view,
             &view,
         );
+        let screen_descriptor = ScreenDescriptor {
+            size_in_pixels: [self.gfx_ctx.config.width, self.gfx_ctx.config.height],
+            pixels_per_point: self.window.scale_factor() as f32
+        };
+        let mut encoder = self
+            .gfx_ctx
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
+        self.egui_renderer.begin_frame(&self.window);
 
+        egui::Window::new("winit + egui + wgpu says hello!")
+            .resizable(true)
+            .vscroll(true)
+            .default_open(false)
+            .show(self.egui_renderer.context(), |ui| {
+                ui.label("Label!");
 
-        if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
-            cb();
-        }
+                if ui.button("Button!").clicked() {
+                    println!("boom!")
+                }
 
+                ui.separator();
+                ui.horizontal(|ui| {
+                    ui.label(format!(
+                        "Pixels per point: {}",
+                        self.egui_renderer.context().pixels_per_point()
+                    ));
+                    if ui.button("-").clicked() {
+                        // state.scale_factor = (state.scale_factor - 0.1).max(0.3);
+                    }
+                    if ui.button("+").clicked() {
+                        // state.scale_factor = (state.scale_factor + 0.1).min(3.0);
+                    }
+                });
+            });
 
+        self.egui_renderer.end_frame_and_draw(
+            &self.gfx_ctx.device,
+            &self.gfx_ctx.queue,
+            &mut encoder,
+            &self.window,
+            &view,
+            screen_descriptor,
+        );
+
+        self.gfx_ctx.queue.submit(Some(encoder.finish()));
+        // }
+
+        // if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
+        //     cb();
+        // }
 
         output.present();
 

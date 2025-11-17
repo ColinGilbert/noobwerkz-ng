@@ -45,5 +45,6 @@ symphonia = "0.5.5"
 taffy = { version = "0.9.1", features = ["strict_provenance", "serde"] }
 slotmap = "1.0.7"
 harfrust = "0.4.0"
-egui-wgpu = { version = "0.33.2", features = ["winit"] }
+egui-wgpu = { version = "0.33.2" }
+egui-winit = "0.33.2"
 
