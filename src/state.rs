@@ -240,7 +240,7 @@ impl State {
         u.ui.yak.start();
         if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
             cb();
-            println("Calling GUI callback")
+            println!("Calling GUI callback")
         }
         u.ui.yak.finish();
 
