@@ -16,7 +16,7 @@ dodgy_2d = "0.5.5"
 #sampled-dmc = "0.1.2"
 glam = { version = "0.30", features=["bytemuck", "core-simd"]}
 rapier3d = { version = "0.30.0", features = ["serde-serialize", "enhanced-determinism"] }
-wgpu = "27.0.1"
+wgpu = "27.0"
 winit = "0.30.12"
 pollster = "0.4.0"
 env_logger = "0.11.8"
@@ -45,3 +45,7 @@ symphonia = "0.5.5"
 taffy = { version = "0.9.1", features = ["strict_provenance", "serde"] }
 slotmap = "1.0.7"
 harfrust = "0.4.0"
+iced = { git = "https://github.com/iced-rs/iced" }
+iced_wgpu = { git = "https://github.com/iced-rs/iced" }
+iced_winit = { git = "https://github.com/iced-rs/iced" }
+iced_widget = { git = "https://github.com/iced-rs/iced" }

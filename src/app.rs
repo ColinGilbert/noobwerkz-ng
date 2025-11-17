@@ -51,8 +51,7 @@ impl ApplicationHandler<State> for App {
 
         #[cfg(not(target_arch = "wasm32"))]
         {
-            // If we are not on web we can use pollster to
-            // await the
+            // If we are not on web we can use pollster to block
             self.state = Some(pollster::block_on(State::new(window)).unwrap());
         }
 
@@ -102,7 +101,7 @@ impl ApplicationHandler<State> for App {
             DeviceEvent::MouseMotion { delta: (dx, dy) } => {
                 state.handle_mouse_motion(dx, dy);
             }
-            _ => {}
+             _ => {}
         }
     }
 

@@ -24,6 +24,7 @@ pub struct State {
     pub cam_ctx: CameraContext,
     pub user_ctx: UserContext,
     pub forward_renderer: ForwardRenderer,
+    //pub ui: UI,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
     pub mouse_pressed: bool,
@@ -67,6 +68,7 @@ impl State {
             &gfx_ctx.bone_matrices_bind_group_layout,
             &gfx_ctx.config,
         );
+        //let ui = UI::new(&gfx_ctx.device, &gfx_ctx.queue, &window);
 
         Ok(Self {
             window,
@@ -76,6 +78,7 @@ impl State {
             user_ctx,
             cam_ctx,
             forward_renderer,
+           // ui,
             is_surface_configured: false,
             mouse_pressed: false,
         })
