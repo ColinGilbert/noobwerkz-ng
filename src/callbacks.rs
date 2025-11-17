@@ -1,6 +1,6 @@
 use once_cell::sync::Lazy;
 use std::sync::*;
-use crate::{camera_context::CameraContext, graphics_context::*, light::*, user_context::*};
+use crate::{camera_context::CameraContext, egui_tools::EguiRenderer, graphics_context::*, light::*, user_context::*};
 
 
 pub static USER_SETUP_CALLBACK: Lazy<Mutex<Option<fn(&mut GraphicsContext, &mut UserContext, &mut Vec<LightUniform>)>>> = Lazy::new(|| Mutex::new(None));
@@ -17,6 +17,6 @@ pub fn init_user_update_callback(callback: fn (gfx_ctx: &mut GraphicsContext, &m
 
 pub static USER_GUI_CALLBACK: Lazy<Mutex<Option<fn()>>> = Lazy::new(|| Mutex::new(None));
 
-pub fn init_user_gui_callback(callback: fn ()) {
+pub fn init_user_gui_callback(callback: fn (&mut EguiRendereri)) {
     *USER_GUI_CALLBACK.lock().unwrap() = Some(callback);
 }

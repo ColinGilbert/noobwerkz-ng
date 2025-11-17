@@ -1,4 +1,4 @@
-// From https://github.com/kaphula/winit-egui-wgpu-template
+// Adapted from https://github.com/kaphula/winit-egui-wgpu-template
 
 use egui::Context;
 use egui_wgpu::wgpu::{CommandEncoder, Device, Queue, StoreOp, TextureFormat, TextureView};
