@@ -250,7 +250,7 @@ impl State {
             yak_surface,
         );
 
-        self.gfx_ctx.queue.submit([forward_pass, paint_yak]);
+        self.gfx_ctx.queue.submit([paint_yak, forward_pass]);
 
         output.present();
 
