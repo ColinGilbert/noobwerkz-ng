@@ -152,9 +152,11 @@ impl State {
     }
 
     pub fn handle_mouse_button(&mut self, button: MouseButton, pressed: bool) {
-        match button {
-            MouseButton::Left => self.mouse_pressed = pressed,
-            _ => {}
+        if !self.egui_renderer.state.egui_ctx().wants_pointer_input() {
+            match button {
+                MouseButton::Left => self.mouse_pressed = pressed,
+                _ => {}
+            }
         }
     }
 
@@ -238,7 +240,7 @@ impl State {
         );
         let screen_descriptor = ScreenDescriptor {
             size_in_pixels: [self.gfx_ctx.config.width, self.gfx_ctx.config.height],
-            pixels_per_point: self.window.scale_factor() as f32
+            pixels_per_point: self.window.scale_factor() as f32,
         };
         let mut encoder = self
             .gfx_ctx
@@ -262,8 +264,6 @@ impl State {
 
         self.gfx_ctx.queue.submit(Some(encoder.finish()));
         // }
-
-
 
         output.present();
 
