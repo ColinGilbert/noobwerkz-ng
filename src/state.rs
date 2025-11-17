@@ -157,8 +157,8 @@ impl State {
             let cam_idx = s.active_camera;
             let c = &mut s.cameras[cam_idx];
 
-            c.change_yaw(degrees_to_radians(dx as f32)); //rotate_horizontal = mouse_dx ;
-            c.change_pitch(degrees_to_radians(dy as f32)); //)rotate_vertical = mouse_dy ;
+            c.change_yaw(degrees_to_radians(dx as f32));
+            c.change_pitch(degrees_to_radians(dy as f32));
         }
     }
 
@@ -168,6 +168,7 @@ impl State {
         let s = &mut u.scenes[scene_idx];
         let cam_idx = s.active_camera;
         let c = &mut s.cameras[cam_idx];
+
         match delta {
             MouseScrollDelta::LineDelta(_, s) => {
                 if *s < 0.0 {
@@ -227,17 +228,19 @@ impl State {
         );
 
         let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
-        let multi_surface = u.ui.multisampled_surface.surface_info(
+
+        let yak_surface = u.ui.surface.surface_info(
             &self.gfx_ctx.device,
             &view,
             size,
             self.gfx_ctx.surface_format,
-            4,
+            1,
         );
 
         u.ui.yak.start();
         if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
             cb();
+            println("Calling GUI callback")
         }
         u.ui.yak.finish();
 
@@ -245,7 +248,7 @@ impl State {
             &mut u.ui.yak,
             &self.gfx_ctx.device,
             &self.gfx_ctx.queue,
-            multi_surface,
+            yak_surface,
         );
 
         self.gfx_ctx.queue.submit([paint_yak]);

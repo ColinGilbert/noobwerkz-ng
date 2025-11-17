@@ -5,7 +5,7 @@ pub struct UI {
     pub yak: Yakui,
     pub yak_window: Option<YakuiWinit>,
     pub yak_renderer: Option<YakuiWgpu>,
-    pub multisampled_surface: Multisampling,
+    pub surface: Multisampling,
 }
 
 impl UI {
@@ -14,7 +14,7 @@ impl UI {
             yak: Yakui::new(),
             yak_window: None,
             yak_renderer: None,
-            multisampled_surface: Multisampling::new(),
+            surface: Multisampling::new(),
         }
     }
 }
