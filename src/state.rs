@@ -6,7 +6,6 @@ use crate::graphics_context::*;
 use crate::light::*;
 use crate::passes::{Pass, forward_renderer::*};
 use crate::texture::*;
-use crate::ui::*;
 use crate::user_context::*;
 use egui_wgpu::ScreenDescriptor;
 
@@ -79,6 +78,19 @@ impl State {
             1,
             &window.clone(),
         );
+
+        egui_renderer.context().style_mut(|style| {
+            // Disable shadows for popups, context menus, and combo boxes
+            style.visuals.popup_shadow = egui::Shadow::NONE;
+
+            // Disable shadows for windows
+            style.visuals.window_shadow = egui::Shadow::NONE;
+
+            // Optional: Also set the a faint, "hover" and "open" shadows to none if needed
+            style.visuals.faint_bg_color = egui::Color32::TRANSPARENT;
+            style.visuals.extreme_bg_color = egui::Color32::TRANSPARENT;
+        });
+
         Ok(Self {
             window,
             surface,

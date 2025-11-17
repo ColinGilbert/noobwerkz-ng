@@ -24,5 +24,4 @@ pub mod primitives;
 pub mod physics_context;
 pub mod character;
 pub mod asset_manager;
-pub mod ui;
 pub mod egui_tools;
