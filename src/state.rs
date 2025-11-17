@@ -234,7 +234,7 @@ impl State {
             &view,
             size,
             self.gfx_ctx.surface_format,
-            4,
+            1,
         );
 
         u.ui.yak.start();
