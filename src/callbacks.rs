@@ -17,6 +17,6 @@ pub fn init_user_update_callback(callback: fn (gfx_ctx: &mut GraphicsContext, &m
 
 pub static USER_GUI_CALLBACK: Lazy<Mutex<Option<fn()>>> = Lazy::new(|| Mutex::new(None));
 
-pub fn init_user_gui_callback(callback: fn (&mut EguiRendereri)) {
+pub fn init_user_gui_callback(callback: fn (&mut EguiRenderer)) {
     *USER_GUI_CALLBACK.lock().unwrap() = Some(callback);
 }
