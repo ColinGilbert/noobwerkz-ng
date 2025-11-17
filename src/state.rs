@@ -6,6 +6,7 @@ use crate::light::*;
 use crate::passes::{Pass, forward_renderer::*};
 use crate::texture::*;
 use crate::user_context::*;
+use yakui::{button, row, widgets::List, CrossAxisAlignment};
 
 use std::f64;
 use std::sync::*;
@@ -260,12 +261,20 @@ impl State {
 
         let clear = encoder.finish();
 
-
-
         u.ui.yak.start();
-        if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
-            cb();
-        }
+        // if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
+        //     cb();
+        // }
+                row(|| {
+        button("Not stretched");
+        let mut col = List::column();
+        col.cross_axis_alignment = CrossAxisAlignment::Stretch;
+        col.show(|| {
+            button("Button 1");
+            button("Button 2");
+            button("Button 3");
+        });
+    });
         u.ui.yak.finish();
 
         let paint_yak = u.ui.yak_renderer.as_mut().unwrap().paint(
