@@ -260,7 +260,7 @@ impl State {
         self.egui_renderer.begin_frame(&self.window);
 
         if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
-            cb(&mut self.egui_renderer);
+            cb(&mut self.egui_renderer, &mut self.user_ctx);
         }
 
         self.egui_renderer.end_frame_and_draw(
