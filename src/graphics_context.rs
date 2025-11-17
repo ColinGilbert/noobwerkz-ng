@@ -123,16 +123,6 @@ impl GraphicsContext {
                         },
                         count: None,
                     },
-                    // wgpu::BindGroupLayoutEntry {
-                    //     binding: 2,
-                    //     visibility: wgpu::ShaderStages::VERTEX,
-                    //     ty: wgpu::BindingType::Buffer {
-                    //         ty: wgpu::BufferBindingType::Storage { read_only: true },
-                    //         has_dynamic_offset: false,
-                    //         min_binding_size: None,
-                    //     },
-                    //     count: None,
-                    // },
                 ],
                 label: Some("Bone matrices storage buffer bind group layout"),
             });
@@ -147,6 +137,8 @@ impl GraphicsContext {
             view_formats: vec![],
             desired_maximum_frame_latency: 2,
         };
+        
+        surface.configure(&device, &config);
 
         let depth_texture = Texture::create_depth_texture(&device, &config, "depth_texture");
 

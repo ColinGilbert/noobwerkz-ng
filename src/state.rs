@@ -241,7 +241,6 @@ impl State {
         if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
             cb();
         }
-
         u.ui.yak.finish();
 
         let paint_yak = u.ui.yak_renderer.as_mut().unwrap().paint(
