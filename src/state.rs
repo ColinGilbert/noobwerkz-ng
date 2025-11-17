@@ -215,7 +215,16 @@ impl State {
         let u = &mut self.user_ctx;
         let s = &u.scenes[u.active_scene];
 
- 
+        self.forward_renderer.draw(
+            &self.gfx_ctx.device,
+            &self.gfx_ctx.queue,
+            &u.asset_mgr.models,
+            &u.asset_mgr.skinned_models,
+            &s.model_nodes,
+            &s.skinned_model_nodes,
+            &self.gfx_ctx.depth_texture.view,
+            &view,
+        );
 
         let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
         let multi_surface = u.ui.multisampled_surface.surface_info(
@@ -227,11 +236,9 @@ impl State {
         );
 
         u.ui.yak.start();
-        
         if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
             cb();
         }
-
         u.ui.yak.finish();
 
         let paint_yak = u.ui.yak_renderer.as_mut().unwrap().paint(
@@ -242,17 +249,7 @@ impl State {
         );
 
         self.gfx_ctx.queue.submit([paint_yak]);
-        
-       self.forward_renderer.draw(
-            &self.gfx_ctx.device,
-            &self.gfx_ctx.queue,
-            &u.asset_mgr.models,
-            &u.asset_mgr.skinned_models,
-            &s.model_nodes,
-            &s.skinned_model_nodes,
-            &self.gfx_ctx.depth_texture.view,
-            &view,
-        );
+
         output.present();
 
         Ok(())
