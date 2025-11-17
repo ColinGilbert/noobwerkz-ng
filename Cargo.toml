@@ -45,7 +45,8 @@ symphonia = "0.5.5"
 taffy = { version = "0.9.1", features = ["strict_provenance", "serde"] }
 slotmap = "1.0.7"
 harfrust = "0.4.0"
-iced = { git = "https://github.com/iced-rs/iced" }
-iced_wgpu = { git = "https://github.com/iced-rs/iced" }
-iced_winit = { git = "https://github.com/iced-rs/iced" }
-iced_widget = { git = "https://github.com/iced-rs/iced" }
+yakui = { git= "https://github.com/SecondHalfGames/yakui", branch="main" }
+yakui-winit = { git = "https://github.com/SecondHalfGames/yakui", branch="main" }
+yakui-wgpu = { git= "https://github.com/SecondHalfGames/yakui", branch="main" }
+yakui-app = { git= "https://github.com/SecondHalfGames/yakui", branch="main" }
+

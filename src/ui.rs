@@ -1,41 +1,87 @@
-// use iced_wgpu::graphics::*;
-use iced_wgpu::Renderer;
-use iced_widget::{bottom, column}; // row, slider, text, text_input};
-// use iced_winit::Clipboard;
-// use iced_winit::conversion;
-// use iced_winit::core::mouse;
-use iced_winit::core::{Element, Theme};
-// use iced_winit::core::time::Instant;
-// use iced_winit::core::window;
-// use iced_winit::core::*;
-// use iced_winit::futures;
-// use iced_winit::runtime::user_interface::{self, UserInterface};
-// use iced_winit::winit;
-pub struct UI {}
+use yakui::*;
+use yakui_wgpu::*;
+use yakui_winit::*;
+pub struct UI {
+    pub yak: Yakui,
+    pub yak_window: Option<YakuiWinit>,
+    pub yak_renderer: Option<YakuiWgpu>,
+    pub multisampled_surface: Multisampling,
+}
 
 impl UI {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            yak: Yakui::new(),
+            yak_window: None,
+            yak_renderer: None,
+            multisampled_surface: Multisampling::new(),
+        }
     }
 }
-#[derive(Debug, Clone)]
-pub enum UIMessage {
-    ButtonPressed(usize),
-    TextEntered(usize, String),
-    SliderValueChanged(usize, f32),
+
+// From the Yakui bootstrap example
+pub struct Multisampling {
+    sample_count: u32,
+    format: wgpu::TextureFormat,
+    size: UVec2,
+    ms_view: Option<wgpu::TextureView>,
 }
 
-pub trait UIControls {
-    fn update(&mut self, message: UIMessage);
-    fn view(&self) -> Element<'_, UIMessage, Theme, Renderer>;
-}
+impl Multisampling {
+    pub fn new() -> Self {
+        Self {
+            sample_count: 4,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            size: UVec2::new(800, 600),
+            ms_view: None,
+        }
+    }
 
-// A null UI we use to initialize the app.
-pub struct NullUIControls {}
+    pub fn surface_info<'a>(
+        &'a mut self,
+        device: &wgpu::Device,
+        view: &'a wgpu::TextureView,
+        size: UVec2,
+        format: wgpu::TextureFormat,
+        sample_count: u32,
+    ) -> SurfaceInfo<'a> {
+        if size != self.size || format != self.format || sample_count != self.sample_count {
+            self.ms_view = None;
+        }
 
-impl UIControls for NullUIControls {
-    fn update(&mut self, _message: UIMessage) {}
-    fn view(&self) -> Element<'_, UIMessage, Theme, Renderer> {
-        bottom(column![]).into()
+        if sample_count == 1 {
+            return SurfaceInfo {
+                format,
+                sample_count,
+                color_attachment: view,
+                resolve_target: None,
+            };
+        }
+
+        let ms_view = self.ms_view.get_or_insert_with(|| {
+            let texture = device.create_texture(&wgpu::TextureDescriptor {
+                label: Some("Multisampled Target"),
+                size: wgpu::Extent3d {
+                    width: size.x,
+                    height: size.y,
+                    depth_or_array_layers: 1,
+                },
+                sample_count,
+                dimension: wgpu::TextureDimension::D2,
+                format,
+                usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+                mip_level_count: 1,
+                view_formats: &[],
+            });
+
+            texture.create_view(&Default::default())
+        });
+
+        SurfaceInfo {
+            format,
+            sample_count,
+            color_attachment: ms_view,
+            resolve_target: Some(view),
+        }
     }
 }

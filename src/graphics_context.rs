@@ -11,7 +11,7 @@ pub struct GraphicsContext {
     pub config: wgpu::SurfaceConfiguration,
     pub surface_format: wgpu::TextureFormat,
     pub depth_texture: Texture,
-    pub texture_bind_group_layout: wgpu::BindGroupLayout,
+    pub texture_bind_group_layout_3d: wgpu::BindGroupLayout,
     pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
     pub debug_material: Material,
 }
@@ -59,7 +59,7 @@ impl GraphicsContext {
             .find(|f| f.is_srgb())
             .unwrap_or(surface_caps.formats[0]);
 
-        let texture_bind_group_layout =
+        let texture_bind_group_layout_3d =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 entries: &[
                     // diffuse map
@@ -164,7 +164,7 @@ impl GraphicsContext {
                 "alt-material",
                 diffuse_texture,
                 normal_texture,
-                &texture_bind_group_layout,
+                &texture_bind_group_layout_3d,
             )
         };
 
@@ -174,7 +174,7 @@ impl GraphicsContext {
             queue,
             surface_format,
             depth_texture,
-            texture_bind_group_layout,
+            texture_bind_group_layout_3d,
             bone_matrices_bind_group_layout,
             debug_material,
         }

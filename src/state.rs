@@ -1,6 +1,6 @@
 use crate::callbacks::*;
-use crate::camera_context::*;
 use crate::camera::*;
+use crate::camera_context::*;
 use crate::graphics_context::*;
 use crate::light::*;
 use crate::passes::{Pass, forward_renderer::*};
@@ -24,7 +24,6 @@ pub struct State {
     pub cam_ctx: CameraContext,
     pub user_ctx: UserContext,
     pub forward_renderer: ForwardRenderer,
-    //pub ui: UI,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
     pub mouse_pressed: bool,
@@ -45,13 +44,13 @@ impl State {
         let surface = instance.create_surface(window.clone()).unwrap();
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
         let mut lights = Vec::<LightUniform>::new();
-        let mut user_ctx = UserContext::new();// { models: :, skinned_models: (), scenes: (), active_scene: () }
-        
+        let mut user_ctx = UserContext::new(); // { models: :, skinned_models: (), scenes: (), active_scene: () }
+
         if let Some(cb) = *USER_SETUP_CALLBACK.lock().unwrap() {
             cb(&mut gfx_ctx, &mut user_ctx, &mut lights);
         }
 
-        let u = &user_ctx;
+        let u = &mut user_ctx;
         let s = &u.scenes[u.active_scene];
         let c = &s.cameras[s.active_camera];
 
@@ -62,13 +61,15 @@ impl State {
             &gfx_ctx.device,
             &light_ctx.light_buffer,
             &cam_ctx.buffer,
-            &gfx_ctx.texture_bind_group_layout,
+            &gfx_ctx.texture_bind_group_layout_3d,
             &cam_ctx.bind_group_layout,
             &light_ctx.light_bind_group_layout,
             &gfx_ctx.bone_matrices_bind_group_layout,
             &gfx_ctx.config,
         );
-        //let ui = UI::new(&gfx_ctx.device, &gfx_ctx.queue, &window);
+
+        u.ui.yak_renderer = Some(yakui_wgpu::YakuiWgpu::new(&gfx_ctx.device, &gfx_ctx.queue));
+        u.ui.yak_window = Some(yakui_winit::YakuiWinit::new(&window.clone()));
 
         Ok(Self {
             window,
@@ -78,7 +79,7 @@ impl State {
             user_ctx,
             cam_ctx,
             forward_renderer,
-           // ui,
+            // ui,
             is_surface_configured: false,
             mouse_pressed: false,
         })
@@ -195,7 +196,6 @@ impl State {
                 &mut self.user_ctx,
                 dt,
             );
-
         }
     }
 
@@ -211,6 +211,7 @@ impl State {
         let view = output
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
+
         let u = &mut self.user_ctx;
         let s = &u.scenes[u.active_scene];
 
@@ -224,6 +225,32 @@ impl State {
             &self.gfx_ctx.depth_texture.view,
             &view,
         );
+
+        let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
+        let multi_surface = u.ui.multisampled_surface.surface_info(
+            &self.gfx_ctx.device,
+            &view,
+            size,
+            self.gfx_ctx.surface_format,
+            4,
+        );
+
+        u.ui.yak.start();
+        
+        if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
+            cb();
+        }
+
+        u.ui.yak.finish();
+        
+        let paint_yak = u.ui.yak_renderer.as_mut().unwrap().paint(
+            &mut u.ui.yak,
+            &self.gfx_ctx.device,
+            &self.gfx_ctx.queue,
+            multi_surface,
+        );
+
+        self.gfx_ctx.queue.submit([paint_yak]);
 
         output.present();
 

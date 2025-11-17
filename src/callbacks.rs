@@ -14,3 +14,9 @@ pub static USER_UPDATE_CALLBACK: Lazy<Mutex<Option<fn(&mut GraphicsContext, &mut
 pub fn init_user_update_callback(callback: fn (gfx_ctx: &mut GraphicsContext, &mut CameraContext, &mut LightContext, &mut UserContext, dt: std::time::Duration)) {
     *USER_UPDATE_CALLBACK.lock().unwrap() = Some(callback);
 }
+
+pub static USER_GUI_CALLBACK: Lazy<Mutex<Option<fn()>>> = Lazy::new(|| Mutex::new(None));
+
+pub fn init_user_gui_callback(callback: fn ()) {
+    *USER_GUI_CALLBACK.lock().unwrap() = Some(callback);
+}
