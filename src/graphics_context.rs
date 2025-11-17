@@ -138,7 +138,7 @@ impl GraphicsContext {
             desired_maximum_frame_latency: 2,
         };
         
-        surface.configure(&device, &config);
+        //surface.configure(&device, &config);
 
         let depth_texture = Texture::create_depth_texture(&device, &config, "depth_texture");
 
@@ -225,7 +225,7 @@ pub fn create_render_pipeline(
             bias: wgpu::DepthBiasState::default(),
         }),
         multisample: wgpu::MultisampleState {
-            count: 1,
+            count: 4,
             mask: !0,
             alpha_to_coverage_enabled: false,
         },
