@@ -226,6 +226,8 @@ impl State {
         //     &self.gfx_ctx.depth_texture.view,
         //     &view,
         // );
+        let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
+        
         let yak_surface = u.ui.surface.surface_info(
             &self.gfx_ctx.device,
             &view,
@@ -248,7 +250,7 @@ impl State {
                     depth_slice: None,
                     resolve_target: yak_surface.resolve_target,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(bg),
+                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
                         store: wgpu::StoreOp::Store,
                     },
                 })],
@@ -258,7 +260,6 @@ impl State {
 
         let clear = encoder.finish();
 
-        let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
 
 
         u.ui.yak.start();
