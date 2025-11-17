@@ -7,9 +7,7 @@ use crate::passes::Pass;
 use crate::skinned_model::*;
 use crate::skinned_model_node::*;
 use crate::texture::*;
-use std::iter::once;
 use wgpu::util::DeviceExt;
-// use wgpu::wgc::instance;
 
 pub struct ForwardRenderer {
     pub render_pipeline_layout: wgpu::PipelineLayout,
@@ -33,7 +31,7 @@ impl Pass for ForwardRenderer {
         skinned_model_nodes: &Vec<SkinnedModelNode>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
-    ) {
+    ) -> wgpu::CommandBuffer {
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Render Encoder"),
         });
@@ -175,7 +173,8 @@ impl Pass for ForwardRenderer {
             }
         }
         
-        queue.submit([encoder.finish()]);
+        encoder.finish()
+        //queue.submit([encoder.finish()]);
     }
 }
 

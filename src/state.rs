@@ -216,7 +216,7 @@ impl State {
         let u = &mut self.user_ctx;
         let s = &u.scenes[u.active_scene];
 
-        self.forward_renderer.draw(
+        let forward_pass = self.forward_renderer.draw(
             &self.gfx_ctx.device,
             &self.gfx_ctx.queue,
             &u.asset_mgr.models,
@@ -250,7 +250,7 @@ impl State {
             yak_surface,
         );
 
-        self.gfx_ctx.queue.submit([paint_yak]);
+        self.gfx_ctx.queue.submit([forward_pass, paint_yak]);
 
         output.present();
 
