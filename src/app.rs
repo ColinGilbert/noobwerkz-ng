@@ -116,12 +116,15 @@ impl ApplicationHandler<State> for App {
             None => return,
         };
 
+        state.egui_renderer.handle_input(&state.window, &event);
+
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),
             WindowEvent::Resized(size) => state.resize(size.width, size.height),
             WindowEvent::RedrawRequested => {
                 let dt = self.last_time.elapsed();
                 self.last_time = web_time::Instant::now();
+                
                 state.update(dt);
                 match state.render() {
                     Ok(_) => {
