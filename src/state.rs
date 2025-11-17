@@ -248,7 +248,7 @@ impl State {
         self.egui_renderer.begin_frame(&self.window);
 
         if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
-            cb();
+            cb(&mut self.egui_renderer);
         }
 
         self.egui_renderer.end_frame_and_draw(
