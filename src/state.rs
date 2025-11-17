@@ -242,7 +242,7 @@ impl State {
         }
 
         u.ui.yak.finish();
-        
+
         let paint_yak = u.ui.yak_renderer.as_mut().unwrap().paint(
             &mut u.ui.yak,
             &self.gfx_ctx.device,
@@ -250,7 +250,7 @@ impl State {
             multi_surface,
         );
 
-        self.gfx_ctx.queue.submit([paint_yak]);
+        self.gfx_ctx.queue.submit([paint_yak.finish()]);
 
         output.present();
 
