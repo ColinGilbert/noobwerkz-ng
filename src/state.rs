@@ -216,16 +216,16 @@ impl State {
         let u = &mut self.user_ctx;
         let s = &u.scenes[u.active_scene];
 
-        self.forward_renderer.draw(
-            &self.gfx_ctx.device,
-            &self.gfx_ctx.queue,
-            &u.asset_mgr.models,
-            &u.asset_mgr.skinned_models,
-            &s.model_nodes,
-            &s.skinned_model_nodes,
-            &self.gfx_ctx.depth_texture.view,
-            &view,
-        );
+        // self.forward_renderer.draw(
+        //     &self.gfx_ctx.device,
+        //     &self.gfx_ctx.queue,
+        //     &u.asset_mgr.models,
+        //     &u.asset_mgr.skinned_models,
+        //     &s.model_nodes,
+        //     &s.skinned_model_nodes,
+        //     &self.gfx_ctx.depth_texture.view,
+        //     &view,
+        // );
 
         let size = yakui::UVec2::new(self.gfx_ctx.config.width, self.gfx_ctx.config.height);
 
