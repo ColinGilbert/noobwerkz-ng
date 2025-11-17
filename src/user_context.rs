@@ -8,7 +8,7 @@ pub struct UserContext {
     pub scenes: Vec<Scene>,
     pub ui: UI,
     pub active_scene: usize,
-    // pub animation_time_elapsed: u128,
+    pub time_elapsed: u128,
 }
 
 impl UserContext {
@@ -23,7 +23,7 @@ impl UserContext {
             scenes,
             ui,
             active_scene: 0,
-            // animation_time_elapsed: 0,
+            time_elapsed: 0,
         }
     }
 }
