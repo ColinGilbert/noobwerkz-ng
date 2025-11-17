@@ -224,20 +224,13 @@ impl State {
             &view,
         );
 
-        let multi_surface = u.ui.surface.surface_info(
-            &self.gfx_ctx.device,
-            &view,
-            size,
-            self.gfx_ctx.surface_format,
-            1,
-        );
+
 
         if let Some(cb) = *USER_GUI_CALLBACK.lock().unwrap() {
             cb();
         }
 
 
-        self.gfx_ctx.queue.submit([paint_yak]);
 
         output.present();
 
