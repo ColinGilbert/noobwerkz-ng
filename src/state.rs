@@ -1,7 +1,7 @@
 use crate::callbacks::*;
 use crate::camera::*;
 use crate::camera_context::*;
-use crate::egui_tools::EguiRenderer;
+use crate::egui_renderer::EguiRenderer;
 use crate::graphics_context::*;
 use crate::light::*;
 use crate::passes::{Pass, forward_renderer::*};
