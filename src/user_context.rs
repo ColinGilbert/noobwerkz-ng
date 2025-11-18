@@ -19,7 +19,7 @@ impl UserContext {
         let asset_mgr = AssetManager::new();
         let skeletals = Vec::new();
         let scenes = Vec::<Scene>::new();
-        let audio_mgr =  AudioManager::<DefaultBackend>::new(AudioManagerSettings::default())?;
+        let audio_mgr =  AudioManager::<DefaultBackend>::new(AudioManagerSettings::default()).unwrap();
         Self {
             asset_mgr,
             skeletals,
