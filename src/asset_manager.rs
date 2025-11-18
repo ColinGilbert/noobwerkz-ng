@@ -1,14 +1,11 @@
 // This code serves as a simplified way for asset loading.
 use crate::{
-    material::Material,
-    model::*,
-    skeletal_context,
-    skinned_model::*,
-    texture::*,
-    resource::*,
+    material::Material, model::*, resource::*, skeletal_context, skinned_model::*, texture::*,
 };
 use anyhow::*;
-use std::{collections::*, path::*, result::Result::*};
+use std::{collections::*, fs::*, path::*, result::Result::*};
+use symphonia::core::audio::*;
+use symphonia::core::units::Duration;
 
 pub struct AssetManager {
     pub models_by_name: HashMap<String, usize>,
@@ -24,9 +21,8 @@ pub struct AssetManager {
     pub models: Vec<Model>,
     pub skinned_models: Vec<SkinnedModel>,
     pub textures: Vec<Texture>,
-    pub audio_clips: Vec<Vec<u8>>
-    // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
-    // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
+    pub audio_clips: Vec<Vec<u8>>, // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
+                                   // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
 }
 
 impl AssetManager {
@@ -133,12 +129,7 @@ impl AssetManager {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> anyhow::Result<usize> {
-        let tex = futures::executor::block_on(load_texture(
-            filepath,
-            is_normal_map,
-            device,
-            queue,
-        ));
+        let tex = futures::executor::block_on(load_texture(filepath, is_normal_map, device, queue));
         match tex {
             anyhow::Result::Ok(val) => {
                 self.textures.push(val);
@@ -152,6 +143,26 @@ impl AssetManager {
                     "Could not load texture file {}",
                     msg
                 )));
+            }
+        }
+    }
+
+    pub fn load_audio_clip_from_file(
+        &mut self,
+        filepath: &Path,
+        name: &str,
+    ) -> anyhow::Result<usize> {
+        let audio_bytes = std::fs::read(filepath);
+        match audio_bytes {
+            anyhow::Result::Ok(val) => {
+                self.audio_clips.push(val);
+                let idx = self.audio_clips.len() - 1;
+                self.audio_clip_names.insert(idx, name.to_owned());
+                self.audio_clips_by_name.insert(name.to_owned(), idx);
+                return anyhow::Result::Ok(idx);
+            }
+            Err(msg) => {
+                return anyhow::Result::Err(anyhow!(format!("Could not load audio file {}", msg)));
             }
         }
     }
