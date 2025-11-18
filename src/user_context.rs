@@ -20,10 +20,12 @@ impl UserContext {
         let scenes = Vec::<Scene>::new();
         let audio_mgr_res =  AudioManager::<DefaultBackend>::new(AudioManagerSettings::default());
         let mut audio_mgr: Option<AudioManager> = None;
+
         match audio_mgr_res {
             Ok(val) => { audio_mgr = Some(val) }
             Err(err) => { println!("Could not create audio manager. Error: {}", err) }
         }
+        
         Self {
             asset_mgr,
             skeletals,
