@@ -3,6 +3,7 @@ use crate::{
     material::Material, model::*, resource::*, skeletal_context, skinned_model::*, texture::*,
 };
 use anyhow::*;
+use kira::sound::static_sound::StaticSoundData;
 use std::{collections::*, path::*, result::Result::*};
 
 
@@ -20,7 +21,7 @@ pub struct AssetManager {
     pub models: Vec<Model>,
     pub skinned_models: Vec<SkinnedModel>,
     pub textures: Vec<Texture>,
-    pub audio_clips: Vec<Vec<u8>>, // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
+    pub audio_clips: Vec<StaticSoundData>, // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
                                    // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
 }
 
@@ -38,7 +39,7 @@ impl AssetManager {
             models: Vec::<Model>::new(),
             skinned_models: Vec::<SkinnedModel>::new(),
             textures: Vec::<Texture>::new(),
-            audio_clips: Vec::<Vec<u8>>::new(),
+            audio_clips: Vec::<StaticSoundData>::new(),
             // skeletons: Vec::<Arc<ozz_animation_rs::Skeleton>>::new(),
             // animations: Vec::<Arc<ozz_animation_rs::Animation>>::new(),
         }
@@ -151,7 +152,7 @@ impl AssetManager {
         filepath: &Path,
         name: &str,
     ) -> anyhow::Result<usize> {
-        let audio_bytes = std::fs::read(filepath);
+        let audio_bytes = StaticSoundData::from_file(filepath);
         match audio_bytes {
             anyhow::Result::Ok(val) => {
                 self.audio_clips.push(val);
