@@ -14,14 +14,17 @@ pub struct AssetManager {
     pub models_by_name: HashMap<String, usize>,
     pub skinned_models_by_name: HashMap<String, usize>,
     pub textures_by_name: HashMap<String, usize>,
+    pub audio_clips_by_name: HashMap<String, usize>,
 
     pub model_names: HashMap<usize, String>,
     pub skinned_model_names: HashMap<usize, String>,
     pub texture_names: HashMap<usize, String>,
+    pub audio_clip_names: HashMap<usize, String>,
 
     pub models: Vec<Model>,
     pub skinned_models: Vec<SkinnedModel>,
     pub textures: Vec<Texture>,
+    pub audio_clips: Vec<Vec<u8>>
     // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
     // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
 }
@@ -32,12 +35,15 @@ impl AssetManager {
             models_by_name: HashMap::new(),
             skinned_models_by_name: HashMap::new(),
             textures_by_name: HashMap::new(),
+            audio_clips_by_name: HashMap::new(),
             model_names: HashMap::new(),
             skinned_model_names: HashMap::new(),
             texture_names: HashMap::new(),
+            audio_clip_names: HashMap::new(),
             models: Vec::<Model>::new(),
             skinned_models: Vec::<SkinnedModel>::new(),
             textures: Vec::<Texture>::new(),
+            audio_clips: Vec::<Vec<u8>>::new(),
             // skeletons: Vec::<Arc<ozz_animation_rs::Skeleton>>::new(),
             // animations: Vec::<Arc<ozz_animation_rs::Animation>>::new(),
         }
