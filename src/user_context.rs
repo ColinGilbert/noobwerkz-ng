@@ -2,7 +2,6 @@
 use crate::{asset_manager::*, scene::*, skeletal_context::SkeletalContext};
 use kira::{
 	AudioManager, AudioManagerSettings, DefaultBackend,
-	sound::static_sound::{StaticSoundData, StaticSoundSettings},
 };
 
 pub struct UserContext {
