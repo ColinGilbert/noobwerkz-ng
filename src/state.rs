@@ -98,7 +98,6 @@ impl State {
             cam_ctx,
             forward_renderer,
             egui_renderer,
-            // ui,
             is_surface_configured: false,
             mouse_pressed: false,
         })
@@ -184,11 +183,15 @@ impl State {
     }
 
     pub fn handle_mouse_scroll(&mut self, delta: &MouseScrollDelta) {
+
         let u = &mut self.user_ctx;
+
         let scene_idx = u.active_scene;
         let s = &mut u.scenes[scene_idx];
+
         let cam_idx = s.active_camera;
         let c = &mut s.cameras[cam_idx];
+
         match delta {
             MouseScrollDelta::LineDelta(_, s) => {
                 if *s < 0.0 {
@@ -273,7 +276,6 @@ impl State {
         );
 
         self.gfx_ctx.queue.submit(Some(encoder.finish()));
-        // }
 
         output.present();
 
