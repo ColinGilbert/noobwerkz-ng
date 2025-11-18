@@ -8,7 +8,7 @@ pub struct UserContext {
     pub asset_mgr: AssetManager,
     pub skeletals: Vec<SkeletalContext>,
     pub scenes: Vec<Scene>,
-    pub audio_mgr: AudioManager,
+    pub audio_mgr: Option<AudioManager>,
     pub active_scene: usize,
     pub time_elapsed: u128,
 }
@@ -18,7 +18,12 @@ impl UserContext {
         let asset_mgr = AssetManager::new();
         let skeletals = Vec::new();
         let scenes = Vec::<Scene>::new();
-        let audio_mgr =  AudioManager::<DefaultBackend>::new(AudioManagerSettings::default()).unwrap();
+        let audio_mgr_res =  AudioManager::<DefaultBackend>::new(AudioManagerSettings::default());
+        let mut audio_mgr: Option<AudioManager> = None;
+        match audio_mgr_res {
+            Ok(val) => { audio_mgr = Some(val) }
+            Err(err) => { println!("Could not create audio manager")}
+        }
         Self {
             asset_mgr,
             skeletals,
