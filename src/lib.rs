@@ -25,6 +25,7 @@ pub mod physics_context;
 pub mod character;
 pub mod asset_manager;
 pub mod egui_renderer;
+pub mod particle_system;
 
 pub use bytemuck;
 pub use egui;
