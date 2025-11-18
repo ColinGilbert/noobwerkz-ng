@@ -22,7 +22,7 @@ impl UserContext {
         let mut audio_mgr: Option<AudioManager> = None;
         match audio_mgr_res {
             Ok(val) => { audio_mgr = Some(val) }
-            Err(err) => { println!("Could not create audio manager")}
+            Err(err) => { println!("Could not create audio manager. Error: {}", err) }
         }
         Self {
             asset_mgr,
