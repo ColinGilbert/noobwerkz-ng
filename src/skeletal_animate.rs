@@ -10,18 +10,6 @@ pub struct OzzTransform {
     pub position: glam::Vec3,
 }
 
-pub trait OzzTrait
-where
-    Self: Send + Sync,
-{
-    fn update(&mut self, time: web_time::Duration, speed: f32);
-    fn update_skeleton(&mut self);
-    fn root(&self) -> glam::Mat4;
-    fn bone_trans(&self) -> &[OzzTransform];
-    fn spine_trans(&self) -> &[OzzTransform];
-    fn models(&self) -> Arc<RwLock<Vec<glam::Mat4>>>;
-}
-
 pub struct OzzPlayback {
     pub seek: f32,
     #[allow(unused)]
@@ -86,22 +74,20 @@ impl OzzPlayback {
         o.spine_trans.reserve(spine_count);
         o
     }
-}
 
-impl OzzTrait for OzzPlayback {
-    fn root(&self) -> glam::Mat4 {
+    pub fn root(&self) -> glam::Mat4 {
         self.models.buf().unwrap()[0]
     }
 
-    fn bone_trans(&self) -> &[OzzTransform] {
+    pub fn bone_trans(&self) -> &[OzzTransform] {
         &self.bone_trans
     }
 
-    fn spine_trans(&self) -> &[OzzTransform] {
+    pub fn spine_trans(&self) -> &[OzzTransform] {
         &self.spine_trans
     }
 
-    fn update(&mut self, dt: web_time::Duration, speed: f32) {
+    pub fn update(&mut self, dt: web_time::Duration, speed: f32) {
         let duration = self.sample_job.animation().unwrap().duration();
         //println!("Duration {}, dt {}", duration, dt.as_secs_f32());
         self.seek += dt.as_secs_f32() * speed;
@@ -114,7 +100,7 @@ impl OzzTrait for OzzPlayback {
         self.l2m_job.run().unwrap();
     }
 
-    fn update_skeleton(&mut self) {
+    pub fn update_skeleton(&mut self) {
         self.bone_trans.clear();
         self.spine_trans.clear();
 
@@ -166,9 +152,5 @@ impl OzzTrait for OzzPlayback {
                 });
             }
         }
-    }
-
-    fn models(&self) -> Arc<RwLock<Vec<glam::Mat4>>> {
-        self.models.clone()
     }
 }

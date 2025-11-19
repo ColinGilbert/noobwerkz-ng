@@ -18,7 +18,6 @@ impl SkinnedModelNode {
     pub fn new(
         device: &mut wgpu::Device,
         bone_matrices_bind_group_layout: &BindGroupLayout,
-        //skinned_model: &SkinnedModel,
         skinned_model_idx: usize,
         instances: Vec<Instance>,
         skeletal_context: &SkeletalContext,
