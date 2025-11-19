@@ -1,6 +1,6 @@
 use once_cell::sync::Lazy;
 use std::sync::*;
-use crate::{camera_context::CameraContext, egui_renderer::EguiRenderer, graphics_context::*, light::*, user_context::*};
+use crate::{camera::CameraContext, egui_renderer::EguiRenderer, graphics::*, light::*, user_context::*};
 
 
 pub static USER_SETUP_CALLBACK: Lazy<Mutex<Option<fn(&mut GraphicsContext, &mut UserContext, &mut Vec<LightUniform>)>>> = Lazy::new(|| Mutex::new(None));

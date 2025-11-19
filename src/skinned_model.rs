@@ -3,7 +3,6 @@ use crate::material::*;
 use crate::model::*;
 use std::ops::Range;
 
-
 #[repr(C)]
 pub struct SkinnedModel {
     pub meshes: SkinnedMeshes<SkinnedTexturedMesh>,

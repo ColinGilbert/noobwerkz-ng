@@ -1,7 +1,7 @@
 use std::ops::Range;
 
-use crate::material::*;
 use crate::index_types::*;
+use crate::material::*;
 
 pub trait Vertex {
     fn desc() -> wgpu::VertexBufferLayout<'static>;
@@ -71,7 +71,6 @@ impl Vertex for ModelVertex {
     }
 }
 
-
 pub struct TexturedMesh {
     pub name: String,
     pub vertex_buffer: wgpu::Buffer,
@@ -83,7 +82,6 @@ pub struct TexturedMesh {
     pub scale: glam::Vec3,
     pub dimensions: glam::Vec3,
 }
-
 
 pub struct Model {
     pub meshes: TexturedMeshes<TexturedMesh>,
@@ -142,7 +140,6 @@ pub trait DrawModel<'a> {
         light_bind_group: &'a wgpu::BindGroup,
     );
 }
-
 
 impl<'a, 'b> DrawModel<'b> for wgpu::RenderPass<'a>
 where
@@ -221,7 +218,6 @@ where
         }
     }
 }
-
 
 pub trait DrawLight<'a> {
     #[allow(unused)]

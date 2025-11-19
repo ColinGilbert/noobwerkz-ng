@@ -6,7 +6,6 @@ use anyhow::*;
 use kira::sound::static_sound::StaticSoundData;
 use std::{collections::*, path::*, result::Result::*};
 
-
 pub struct AssetManager {
     pub models_by_name: HashMap<String, usize>,
     pub skinned_models_by_name: HashMap<String, usize>,
@@ -22,7 +21,7 @@ pub struct AssetManager {
     pub skinned_models: Vec<SkinnedModel>,
     pub textures: Vec<Texture>,
     pub audio_clips: Vec<StaticSoundData>, // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
-                                   // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
+                                           // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
 }
 
 impl AssetManager {
@@ -121,31 +120,31 @@ impl AssetManager {
         }
     }
 
-    pub fn load_texture_from_file(
-        &mut self,
-        filepath: &Path,
-        name: &str,
-        is_normal_map: bool,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-    ) -> anyhow::Result<usize> {
-        let tex = futures::executor::block_on(load_texture(filepath, is_normal_map, device, queue));
-        match tex {
-            anyhow::Result::Ok(val) => {
-                self.textures.push(val);
-                let idx = self.textures.len() - 1;
-                self.texture_names.insert(idx, name.to_owned());
-                self.textures_by_name.insert(name.to_owned(), idx);
-                return anyhow::Result::Ok(idx);
-            }
-            Err(msg) => {
-                return anyhow::Result::Err(anyhow!(format!(
-                    "Could not load texture file {}",
-                    msg
-                )));
-            }
-        }
-    }
+    // pub fn load_texture_from_file(
+    //     &mut self,
+    //     filepath: &Path,
+    //     name: &str,
+    //     is_normal_map: bool,
+    //     device: &wgpu::Device,
+    //     queue: &wgpu::Queue,
+    // ) -> anyhow::Result<usize> {
+    //     let tex = futures::executor::block_on(load_texture(filepath, is_normal_map, device, queue));
+    //     match tex {
+    //         anyhow::Result::Ok(val) => {
+    //             self.textures.push(val);
+    //             let idx = self.textures.len() - 1;
+    //             self.texture_names.insert(idx, name.to_owned());
+    //             self.textures_by_name.insert(name.to_owned(), idx);
+    //             return anyhow::Result::Ok(idx);
+    //         }
+    //         Err(msg) => {
+    //             return anyhow::Result::Err(anyhow!(format!(
+    //                 "Could not load texture file {}",
+    //                 msg
+    //             )));
+    //         }
+    //     }
+    // }
 
     pub fn load_audio_clip_from_file(
         &mut self,

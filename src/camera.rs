@@ -1,10 +1,12 @@
 use std::f32::consts::PI;
 use std::ops::*;
+use wgpu::util::DeviceExt;
 
-const PI_2: f32 = PI * 2.0;
+
+const PI_TIMES_2: f32 = PI * 2.0;
 
 pub fn degrees_to_radians(degrees: f32) -> f32 {
-    degrees * std::f32::consts::PI / 180.0
+    degrees * PI / 180.0
 }
 
 pub struct Camera {
@@ -97,10 +99,10 @@ impl Camera {
         self.pitch = self.pitch + (temp * self.heading_speed);
 
         //Check bounds for the camera pitch
-        if self.pitch > PI_2 {
-            self.pitch -= PI_2;
-        } else if self.pitch < -PI_2 {
-            self.pitch += PI_2;
+        if self.pitch > PI_TIMES_2 {
+            self.pitch -= PI_TIMES_2;
+        } else if self.pitch < -PI_TIMES_2 {
+            self.pitch += PI_TIMES_2;
         }
     }
 
@@ -115,10 +117,10 @@ impl Camera {
         self.yaw = self.yaw + (temp * self.heading_speed);
 
         //Check bounds for the camera pitch
-        if self.yaw > PI_2 {
-            self.yaw -= PI_2;
-        } else if self.yaw < -PI_2 {
-            self.yaw += PI_2;
+        if self.yaw > PI_TIMES_2 {
+            self.yaw -= PI_TIMES_2;
+        } else if self.yaw < -PI_TIMES_2 {
+            self.yaw += PI_TIMES_2;
         }
     }
 
@@ -157,13 +159,13 @@ pub struct Projection {
     pub znear: f32,
     pub zfar: f32,
 }
-pub const OPENGL_TO_WGPU_MATRIX : glam::Mat4 = glam::Mat4::from_cols(
-    glam::Vec4::new(1.0, 0.0, 0.0, 0.0),
-    glam::Vec4::new(0.0, 1.0, 0.0, 0.0),
-    glam::Vec4::new(0.0, 0.0, 0.5, 0.0),
-    glam::Vec4::new(0.0, 0.0, 0.5, 1.0),
-);
- 
+// pub const OPENGL_TO_WGPU_MATRIX : glam::Mat4 = glam::Mat4::from_cols(
+//     glam::Vec4::new(1.0, 0.0, 0.0, 0.0),
+//     glam::Vec4::new(0.0, 1.0, 0.0, 0.0),
+//     glam::Vec4::new(0.0, 0.0, 0.5, 0.0),
+//     glam::Vec4::new(0.0, 0.0, 0.5, 1.0),
+// );
+
 impl Projection {
     pub fn new(height: u32, width: u32, fovy_rad: f32, znear: f32, zfar: f32) -> Self {
         Self {
@@ -180,7 +182,8 @@ impl Projection {
 
     pub fn calc_matrix(&self) -> glam::Mat4 {
         //OPENGL_TO_WGPU_MATRIX * glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
-        let results = glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
+        let results =
+            glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
         results
     }
 }
@@ -205,5 +208,57 @@ impl CameraUniform {
     pub fn update_view_proj(&mut self, camera: &Camera, projection: &Projection) {
         self.view_position = [camera.eye.x, camera.eye.y, camera.eye.z, 1.0];
         self.view_projection = (projection.calc_matrix() * camera.view_matrix()).to_cols_array_2d();
+    }
+}
+
+pub struct CameraContext {
+    pub uniform: CameraUniform,
+    pub buffer: wgpu::Buffer,
+    pub bind_group_layout: wgpu::BindGroupLayout,
+    pub bind_group: wgpu::BindGroup,
+}
+
+impl CameraContext {
+    pub fn new(device: &wgpu::Device, cam: &Camera) -> Self {
+        let mut uniform = CameraUniform::new();
+
+        uniform.update_view_proj(cam, &cam.projection);
+
+        let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Camera Buffer"),
+            contents: bytemuck::cast_slice(&[uniform]),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+
+        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+            label: Some("camera_bind_group_layout"),
+        });
+
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: buffer.as_entire_binding(),
+            }],
+            label: Some("camera_bind_group"),
+        });
+
+        Self {
+            // controller,
+            uniform,
+            buffer,
+            bind_group_layout,
+            bind_group,
+        }
     }
 }

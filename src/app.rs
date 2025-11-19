@@ -101,7 +101,7 @@ impl ApplicationHandler<State> for App {
             DeviceEvent::MouseMotion { delta: (dx, dy) } => {
                 state.handle_mouse_motion(dx, dy);
             }
-             _ => {}
+            _ => {}
         }
     }
 
@@ -124,11 +124,10 @@ impl ApplicationHandler<State> for App {
             WindowEvent::RedrawRequested => {
                 let dt = self.last_time.elapsed();
                 self.last_time = web_time::Instant::now();
-                
+
                 state.update(dt);
                 match state.render() {
-                    Ok(_) => {
-                    }
+                    Ok(_) => {}
                     // Reconfigure the surface if it's lost or outdated
                     Err(wgpu::SurfaceError::Lost | wgpu::SurfaceError::Outdated) => {
                         let size = state.window.inner_size();

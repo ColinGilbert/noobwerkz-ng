@@ -55,12 +55,7 @@ impl Texture {
         }
     }
 
-
-    pub fn create_mat4f_texture(
-        device: &wgpu::Device,
-        label: &str,
-        num_matrices: u32
-    ) -> Self {
+    pub fn create_mat4f_texture(device: &wgpu::Device, label: &str, num_matrices: u32) -> Self {
         let size = wgpu::Extent3d {
             width: 4,
             height: 4,

@@ -1,8 +1,7 @@
 use crate::callbacks::*;
 use crate::camera::*;
-use crate::camera_context::*;
 use crate::egui_renderer::EguiRenderer;
-use crate::graphics_context::*;
+use crate::graphics::*;
 use crate::light::*;
 use crate::passes::{Pass, forward_renderer::*};
 use crate::texture::*;
@@ -71,11 +70,8 @@ impl State {
             &gfx_ctx.config,
         );
 
-        let egui_renderer = EguiRenderer::new(
-            &gfx_ctx.device,
-            gfx_ctx.surface_format,
-            &window.clone(),
-        );
+        let egui_renderer =
+            EguiRenderer::new(&gfx_ctx.device, gfx_ctx.surface_format, &window.clone());
 
         egui_renderer.context().style_mut(|style| {
             // Disable shadows for popups, context menus, and combo boxes
@@ -183,7 +179,6 @@ impl State {
     }
 
     pub fn handle_mouse_scroll(&mut self, delta: &MouseScrollDelta) {
-
         let u = &mut self.user_ctx;
 
         let scene_idx = u.active_scene;
@@ -251,10 +246,12 @@ impl State {
             &self.gfx_ctx.depth_texture.view,
             &view,
         );
+
         let screen_descriptor = ScreenDescriptor {
             size_in_pixels: [self.gfx_ctx.config.width, self.gfx_ctx.config.height],
             pixels_per_point: self.window.scale_factor() as f32,
         };
+
         let mut encoder = self
             .gfx_ctx
             .device

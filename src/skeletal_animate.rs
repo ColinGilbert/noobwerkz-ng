@@ -1,7 +1,7 @@
 // use glam::Vec4Swizzles;
+use glam::Vec4Swizzles;
 use ozz_animation_rs::OzzBuf;
 use std::sync::{Arc, RwLock};
-use glam::Vec4Swizzles;
 
 #[derive(Debug, Clone, Copy)]
 pub struct OzzTransform {
@@ -23,14 +23,14 @@ where
 }
 
 pub struct OzzPlayback {
-    seek: f32,
+    pub seek: f32,
     #[allow(unused)]
-    skeleton: Arc<ozz_animation_rs::Skeleton>,
-    sample_job: ozz_animation_rs::SamplingJobArc,
-    l2m_job: ozz_animation_rs::LocalToModelJobArc,
+    pub skeleton: Arc<ozz_animation_rs::Skeleton>,
+    pub sample_job: ozz_animation_rs::SamplingJobArc,
+    pub l2m_job: ozz_animation_rs::LocalToModelJobArc,
     pub models: Arc<RwLock<Vec<glam::Mat4>>>,
-    bone_trans: Vec<OzzTransform>,
-    spine_trans: Vec<OzzTransform>,
+    pub bone_trans: Vec<OzzTransform>,
+    pub spine_trans: Vec<OzzTransform>,
 }
 
 impl OzzPlayback {
