@@ -1,7 +1,3 @@
-safe_index::new! {
-  PipelineIndex,
-  map: Pipelines
-}
 use crate::material::*;
 use crate::texture::*;
 

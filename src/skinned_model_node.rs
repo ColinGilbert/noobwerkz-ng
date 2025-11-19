@@ -40,6 +40,7 @@ impl SkinnedModelNode {
                 &skeleton, &animation,
             )));
         }
+
         for p in &mut playbacks {
             for _m in &*(p.models).read().unwrap() {
                 bone_matrices.push(BoneMatrix {
@@ -89,7 +90,6 @@ impl SkinnedModelNode {
 
     pub fn update(
         &mut self,
-        _device: &mut wgpu::Device,
         queue: &mut wgpu::Queue,
         skinned_model: &SkinnedModel,
         dt: web_time::Duration,
