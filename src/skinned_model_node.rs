@@ -1,5 +1,5 @@
 use crate::skinned_model::*;
-use crate::{instance::Instance, skeletal_animate::*, skeletal_context::*};
+use crate::{instance::Instance, playback::*, skeletal_context::*};
 use rayon::prelude::*;
 use wgpu::{BindGroupLayout, util::*};
 

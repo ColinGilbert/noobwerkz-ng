@@ -17,7 +17,7 @@ pub mod material;
 pub mod skinned_model;
 pub mod index_types;
 pub mod skeletal_context;
-pub mod skeletal_animate;
+pub mod playback;
 pub mod serialized_model;
 pub mod primitives;
 pub mod physics_context;
@@ -25,6 +25,7 @@ pub mod character;
 pub mod asset_manager;
 pub mod egui_renderer;
 pub mod particle_system;
+pub mod animation_graph;
 
 pub use bytemuck;
 pub use egui;
