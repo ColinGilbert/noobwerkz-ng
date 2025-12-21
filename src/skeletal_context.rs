@@ -1,11 +1,11 @@
 use futures::executor::*;
 use std::io::Cursor;
-use std::sync::*;
+use std::rc::*;
 use std::path::*;
 
 pub struct SkeletalContext {
-    pub skeleton: Arc<ozz_animation_rs::Skeleton>,
-    pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
+    pub skeleton: Rc<ozz_animation_rs::Skeleton>,
+    pub animations: Vec<Rc<ozz_animation_rs::Animation>>,
 }
 
 impl SkeletalContext {
@@ -32,12 +32,12 @@ impl SkeletalContext {
         }
         
         let skeleton =
-        Arc::new(ozz_animation_rs::Skeleton::from_archive(&mut ar_skeleton).unwrap());
+        Rc::new(ozz_animation_rs::Skeleton::from_archive(&mut ar_skeleton).unwrap());
         
         let mut animations = Vec::new();
 
         for mut a in ar_animations {
-            animations.push(Arc::new(ozz_animation_rs::Animation::from_archive(&mut a).unwrap()));
+            animations.push(Rc::new(ozz_animation_rs::Animation::from_archive(&mut a).unwrap()));
         }
 
         Self {

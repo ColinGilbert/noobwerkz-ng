@@ -25,7 +25,6 @@ pub mod character;
 pub mod asset_manager;
 pub mod egui_renderer;
 pub mod particle_system;
-pub mod animation_graph;
 
 pub use bytemuck;
 pub use egui;

@@ -1,7 +1,7 @@
 // use glam::Vec4Swizzles;
 use glam::Vec4Swizzles;
 use ozz_animation_rs::OzzBuf;
-use std::sync::{Arc, RwLock};
+use std::{cell::RefCell, rc::*};
 
 #[derive(Debug, Clone, Copy)]
 pub struct OzzTransform {
@@ -13,25 +13,25 @@ pub struct OzzTransform {
 pub struct OzzPlayback {
     pub seek: f32,
     #[allow(unused)]
-    pub skeleton: Arc<ozz_animation_rs::Skeleton>,
-    pub sample_job: ozz_animation_rs::SamplingJobArc,
-    pub l2m_job: ozz_animation_rs::LocalToModelJobArc,
-    pub models: Arc<RwLock<Vec<glam::Mat4>>>,
+    pub skeleton: Rc<ozz_animation_rs::Skeleton>,
+    pub sample_job: ozz_animation_rs::SamplingJobRc,
+    pub l2m_job: ozz_animation_rs::LocalToModelJobRc,
+    pub models: Rc<RefCell<Vec<glam::Mat4>>>,
     pub bone_trans: Vec<OzzTransform>,
     pub spine_trans: Vec<OzzTransform>,
 }
 
 impl OzzPlayback {
     pub async fn new(
-        skeleton: &Arc<ozz_animation_rs::Skeleton>,
-        animation: &Arc<ozz_animation_rs::Animation>,
+        skeleton: &Rc<ozz_animation_rs::Skeleton>,
+        animation: &Rc<ozz_animation_rs::Animation>,
     ) -> Self {
         let mut o = OzzPlayback {
             seek: 0.0,
             skeleton: skeleton.clone(),
             sample_job: ozz_animation_rs::SamplingJob::default(),
             l2m_job: ozz_animation_rs::LocalToModelJob::default(),
-            models: Arc::new(RwLock::new(vec![
+            models: Rc::new(RefCell::new(vec![
                 glam::Mat4::default();
                 skeleton.num_joints()
             ])),
@@ -45,7 +45,7 @@ impl OzzPlayback {
                 animation.num_tracks(),
             ));
 
-        let sample_out = Arc::new(RwLock::new(vec![
+        let sample_out = Rc::new(RefCell::new(vec![
             ozz_animation_rs::SoaTransform::default();
             skeleton.num_soa_joints()
         ]));

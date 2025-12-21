@@ -1,6 +1,6 @@
 use crate::skinned_model::*;
 use crate::{instance::Instance, playback::*, skeletal_context::*};
-use rayon::prelude::*;
+// use rayon::prelude::*;
 use wgpu::{BindGroupLayout, util::*};
 
 pub struct SkinnedModelNode {
@@ -42,7 +42,7 @@ impl SkinnedModelNode {
         }
 
         for p in &mut playbacks {
-            for _m in &*(p.models).read().unwrap() {
+            for _m in &*(p.models).borrow() {
                 bone_matrices.push(BoneMatrix {
                     data: glam::Mat4::IDENTITY.to_cols_array_2d(),
                 });
@@ -96,22 +96,35 @@ impl SkinnedModelNode {
         speed: f32,
     ) {
         self.bone_matrices.clear();
-        self.bone_matrices = self
-            .playbacks
-            .par_iter_mut()
-            .map(|p| {
-                p.update(dt, speed);
-                let mut bones = Vec::<BoneMatrix>::new();
-                for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
-                    let m = mat * skinned_model.inverse_bind_matrices[i];
-                    bones.push(BoneMatrix {
-                        data: (m).to_cols_array_2d(),
-                    });
-                }
-                bones
-            })
-            .flatten()
-            .collect::<Vec<BoneMatrix>>();
+        //
+        // This is for the multithreaded version
+        //
+        // self.bone_matrices = self
+        //     .playbacks
+        //     .par_iter_mut()
+        //     .map(|p: &mut OzzPlayback| {
+        //         p.update(dt, speed);
+        //         let mut bones = Vec::<BoneMatrix>::new();
+        //         for (i, mat) in (*p.models).read().unwrap().iter().enumerate() {
+        //             let m = mat * skinned_model.inverse_bind_matrices[i];
+        //             bones.push(BoneMatrix {
+        //                 data: (m).to_cols_array_2d(),
+        //             });
+        //         }
+        //         bones
+        //     })
+        //     .flatten()
+        //     .collect::<Vec<BoneMatrix>>();
+
+        for p in self.playbacks.iter_mut() {
+            p.update(dt, speed);
+            for (i, mat) in (*p.models).borrow().iter().enumerate() {
+                let m = mat * skinned_model.inverse_bind_matrices[i];
+                self.bone_matrices.push(BoneMatrix {
+                    data: m.to_cols_array_2d(),
+                });
+            }
+        }
 
         queue.write_buffer(
             &self.bones_storage_buffer,

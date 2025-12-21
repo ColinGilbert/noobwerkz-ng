@@ -1,8 +1,7 @@
 // This is where our game world resides.
 
 use crate::{
-    camera::Camera, character::*, model_node::ModelNode, physics_context::PhysicsContext,
-    skinned_model_node::SkinnedModelNode,
+    camera::Camera, character::*, model_node::ModelNode, physics_context::PhysicsContext, skinned_model_node::SkinnedModelNode
 };
 
 pub struct Scene {
