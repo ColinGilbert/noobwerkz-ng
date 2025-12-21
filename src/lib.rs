@@ -1,4 +1,4 @@
-pub mod state;
+pub mod window_state;
 pub mod app;
 pub mod graphics;
 pub mod camera;

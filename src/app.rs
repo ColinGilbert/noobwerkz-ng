@@ -1,4 +1,4 @@
-use crate::state::State;
+use crate::window_state::WindowState;
 
 use std::sync::Arc;
 use winit::{
@@ -11,13 +11,13 @@ use winit::{
 
 pub struct App {
     #[cfg(target_arch = "wasm32")]
-    proxy: Option<winit::event_loop::EventLoopProxy<State>>,
-    state: Option<State>,
+    proxy: Option<winit::event_loop::EventLoopProxy<WindowState>>,
+    state: Option<WindowState>,
     last_time: web_time::Instant,
 }
 
 impl App {
-    pub fn new(#[cfg(target_arch = "wasm32")] event_loop: &EventLoop<State>) -> Self {
+    pub fn new(#[cfg(target_arch = "wasm32")] event_loop: &EventLoop<WindowState>) -> Self {
         #[cfg(target_arch = "wasm32")]
         let proxy = Some(event_loop.create_proxy());
         Self {
@@ -29,7 +29,7 @@ impl App {
     }
 }
 
-impl ApplicationHandler<State> for App {
+impl ApplicationHandler<WindowState> for App {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         #[allow(unused_mut)]
         let mut window_attributes = Window::default_attributes();
@@ -52,7 +52,7 @@ impl ApplicationHandler<State> for App {
         #[cfg(not(target_arch = "wasm32"))]
         {
             // If we are not on web we can use pollster to block
-            self.state = Some(pollster::block_on(State::new(window)).unwrap());
+            self.state = Some(pollster::block_on(WindowState::new(window)).unwrap());
         }
 
         #[cfg(target_arch = "wasm32")]
@@ -62,7 +62,7 @@ impl ApplicationHandler<State> for App {
                     assert!(
                         proxy
                             .send_event(
-                                State::new(window)
+                                WindowState::new(window)
                                     .await
                                     .expect("Unable to create canvas!!!")
                             )
@@ -74,7 +74,7 @@ impl ApplicationHandler<State> for App {
     }
 
     #[allow(unused)]
-    fn user_event(&mut self, _event_loop: &ActiveEventLoop, mut event: State) {
+    fn user_event(&mut self, _event_loop: &ActiveEventLoop, mut event: WindowState) {
         #[cfg(target_arch = "wasm32")]
         {
             event.window.request_redraw();

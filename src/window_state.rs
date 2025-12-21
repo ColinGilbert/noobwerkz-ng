@@ -17,7 +17,7 @@ use winit::{
     window::Window,
 };
 
-pub struct State {
+pub struct WindowState {
     pub window: Arc<Window>,
     pub surface: wgpu::Surface<'static>,
     pub gfx_ctx: GraphicsContext,
@@ -31,8 +31,8 @@ pub struct State {
     pub mouse_pressed: bool,
 }
 
-impl State {
-    pub async fn new(window: Arc<Window>) -> anyhow::Result<State> {
+impl WindowState {
+    pub async fn new(window: Arc<Window>) -> anyhow::Result<WindowState> {
         // The instance is a handle to our GPU
         // BackendBit::PRIMARY => Vulkan + Metal + DX12 + Browser WebGPU
         let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
