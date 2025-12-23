@@ -1,14 +1,8 @@
 use std::rc::Rc;
 
-use crate::{instance::Instance, skeletal_context::*};
+use crate::{instance::Instance};
 // use rayon::prelude::*;
 use wgpu::{BindGroupLayout, util::*};
-
-
-// pub struct CharacterInstance {
-//     pub pos_rot_scale: Instance,
-//     pub character_idx: usize,
-// }
 
 pub struct SkinnedModelNode {
     pub skinned_model_idx: usize,
@@ -53,14 +47,6 @@ impl SkinnedModelNode {
                 bone_matrices.push(glam::Mat4::IDENTITY);
             }
         }
-
-        // for p in &mut playbacks {
-        //     for _m in &*(p.models).borrow() {
-        //         bone_matrices.push(BoneMatrix {
-        //             data: glam::Mat4::IDENTITY.to_cols_array_2d(),
-        //         });
-        //     }
-        // }
 
         // println!(
         //     "Bone matrices length: {}, Bone matrices size: {} MiB, num bones: {}",

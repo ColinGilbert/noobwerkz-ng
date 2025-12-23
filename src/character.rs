@@ -35,4 +35,5 @@ impl Character {
             None => None,
         }
     }
+
 }

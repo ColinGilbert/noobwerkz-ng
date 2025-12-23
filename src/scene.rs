@@ -49,7 +49,12 @@ impl Scene {
         self.physics_context.step()
     }
 
-    pub fn eval_characters(&mut self, dt: web_time::Duration) {
+    pub fn update_characters(
+        &mut self,
+        dt: web_time::Duration,
+        queue: &wgpu::Queue,
+        bones_storage_buffer: &wgpu::Buffer,
+    ) {
         let mut output = Vec::<glam::Mat4>::new();
         for c in self.characters.iter_mut() {
             output.clear();
@@ -75,6 +80,8 @@ impl Scene {
                     .push(o);
             }
         }
+        
+        queue.write_buffer(bones_storage_buffer, 0, bytemuck::cast_slice(&output));
     }
 
     pub fn add_characters(
@@ -89,11 +96,6 @@ impl Scene {
         name: String,
     ) -> Option<std::ops::Range<usize>> {
         let start_idx = self.characters.len();
-        // device: &mut wgpu::Device,
-        // bone_matrices_bind_group_layout: &BindGroupLayout,
-        // skinned_model_idx: usize,
-        // instances: Vec<Instance>,
-        // skeleton: Rc<ozz_animation_rs::Skeleton>,
         self.skinned_model_nodes.push(SkinnedModelNode::new(
             device,
             bone_matrices_bind_group_layout,
@@ -114,9 +116,6 @@ impl Scene {
             match character {
                 Some(val) => {
                     self.characters.push(val);
-                    //self.skinned_model_nodes[skinned_model_node_idx]
-                    //    .instances
-                    //    .push(character_instance);
                 }
                 None => {
                     println!("[Scene] add_character: Could not create anim graph from definition");
