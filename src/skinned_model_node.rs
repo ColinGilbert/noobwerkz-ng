@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{instance::Instance, skeletal_context::*};
 // use rayon::prelude::*;
 use wgpu::{BindGroupLayout, util::*};
@@ -23,16 +25,20 @@ impl SkinnedModelNode {
         device: &mut wgpu::Device,
         bone_matrices_bind_group_layout: &BindGroupLayout,
         skinned_model_idx: usize,
-        instances: Vec<Instance>,
-        skeletal_context: &SkeletalContext,
+        instances_arg: &Vec<Instance>,
+        skeleton: Rc<ozz_animation_rs::Skeleton>,
     ) -> Self {
         // let mut playbacks = Vec::new();
-        let skeleton = skeletal_context.skeleton.clone();
+        let skeleton = skeleton.clone();
         let num_bones = skeleton.num_joints() as u32;
         // let animation = skeletal_context.animations[0].clone();
         // let len = instances.len();
         let mut bone_matrices = Vec::<glam::Mat4>::new();
-
+        let mut instances = Vec::new();
+        for instance in instances_arg {
+            let i = Instance{ position: instance.position, rotation: instance.rotation, scale: instance.scale};
+            instances.push(i);
+        }
         let num_bones_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Num bones uniform buffer"),
             contents: bytemuck::cast_slice(&[num_bones]),
