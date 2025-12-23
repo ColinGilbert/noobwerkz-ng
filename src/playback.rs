@@ -1,4 +1,5 @@
-// use glam::Vec4Swizzles;
+// TODO: Turn this file into a skeleton debug renderer, as the playback is now handled by the anim-graph library
+
 use glam::Vec4Swizzles;
 use ozz_animation_rs::OzzBuf;
 use std::{cell::RefCell, rc::*};
