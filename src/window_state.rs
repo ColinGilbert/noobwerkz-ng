@@ -242,7 +242,7 @@ impl WindowState {
             &u.asset_mgr.models,
             &u.asset_mgr.skinned_models,
             &s.model_nodes,
-            &s.skinned_model_nodes,
+            &s.characters_contexts,
             &self.gfx_ctx.depth_texture.view,
             &view,
         );

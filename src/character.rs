@@ -3,7 +3,6 @@ use ozz_animation_rs::*;
 use std::{collections::HashMap, rc::Rc};
 
 pub struct Character {
-    pub skinned_model_node_idx: usize,
     //pub instance_idx: usize,
     pub position: glam::Vec3,
     pub orientation: glam::Quat,
@@ -15,8 +14,6 @@ pub struct Character {
 impl Character {
     pub fn new(
         skeleton: Rc<Skeleton>,
-        skinned_model_node_idx: usize,
-        //instance_idx: usize,
         position: glam::Vec3,
         orientation: glam::Quat,
         animgraph_definition: &AnimGraphDefinition,
@@ -26,7 +23,6 @@ impl Character {
             AnimGraph::create_from_definition(skeleton, animgraph_definition, animations_by_name);
         match anim_graph {
             Some(val) => Some(Self {
-                skinned_model_node_idx,
                 //instance_idx,
                 position,
                 orientation,

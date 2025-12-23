@@ -5,18 +5,21 @@ use std::{collections::HashMap, rc::Rc};
 use anim_graph_rs::{animgraph::AnimGraph, animgraph_definitions::AnimGraphDefinition};
 
 use crate::{
-    camera::Camera, character::*, instance::Instance, model_node::ModelNode,
+    camera::Camera, character::Character, instance::Instance, model_node::ModelNode,
     physics_context::PhysicsContext, skinned_model_node::SkinnedModelNode,
 };
 
+pub struct CharactersContext {
+    pub characters: Vec<Character>,
+    pub skinned_model_node: SkinnedModelNode,
+}
 pub struct Scene {
     pub cameras: Vec<Camera>,
     pub model_nodes: Vec<ModelNode>,
-    pub skinned_model_nodes: Vec<SkinnedModelNode>,
     pub active_camera: usize,
     pub physics_context: PhysicsContext,
-    pub characters: Vec<Character>,
-    pub characters_by_name: HashMap<String, std::ops::Range<usize>>,
+    pub characters_contexts: Vec<CharactersContext>,
+    pub character_types_by_name: HashMap<String, usize>,
 }
 
 impl Scene {
@@ -24,11 +27,10 @@ impl Scene {
         Self {
             cameras: Vec::<Camera>::new(),
             model_nodes: Vec::<ModelNode>::new(),
-            skinned_model_nodes: Vec::<SkinnedModelNode>::new(),
             active_camera: 0,
             physics_context: PhysicsContext::new(gravity),
-            characters: Vec::new(),
-            characters_by_name: HashMap::new(),
+            characters_contexts: Vec::new(),
+            character_types_by_name: HashMap::new(),
         }
     }
 
@@ -49,39 +51,36 @@ impl Scene {
         self.physics_context.step()
     }
 
-    pub fn update_characters(
-        &mut self,
-        dt: web_time::Duration,
-        queue: &wgpu::Queue,
-        bones_storage_buffer: &wgpu::Buffer,
-    ) {
+    pub fn update_characters(&mut self, dt: web_time::Duration, queue: &wgpu::Queue) {
         let mut output = Vec::<glam::Mat4>::new();
-        for c in self.characters.iter_mut() {
+        for characters_ctx in self.characters_contexts.iter_mut() {
+            let bones_storage_buffer = &characters_ctx.skinned_model_node.bones_storage_buffer;
+
             output.clear();
-            self.skinned_model_nodes[c.skinned_model_node_idx]
-                .instances
-                .clear();
-            self.skinned_model_nodes[c.skinned_model_node_idx]
-                .bone_matrices
-                .clear();
-            c.anim_graph.evaluate(dt);
-            let instance = Instance {
-                position: c.position.into(),
-                rotation: c.orientation,
-                scale: glam::Vec3A::splat(1.0),
-            };
-            self.skinned_model_nodes[c.skinned_model_node_idx]
-                .instances
-                .push(instance);
-            c.anim_graph.get_output(&mut output);
-            for o in output.clone() {
-                self.skinned_model_nodes[c.skinned_model_node_idx]
-                    .bone_matrices
-                    .push(o);
+
+            for c in &mut characters_ctx.characters {
+                characters_ctx.skinned_model_node.instances.clear();
+                characters_ctx.skinned_model_node.bone_matrices.clear();
+
+                c.anim_graph.evaluate(dt);
+
+                let instance = Instance {
+                    position: c.position.into(),
+                    rotation: c.orientation,
+                    scale: glam::Vec3A::splat(1.0),
+                };
+
+                characters_ctx.skinned_model_node.instances.push(instance);
+
+                c.anim_graph.get_output(&mut output);
+
+                for o in output.clone() {
+                    characters_ctx.skinned_model_node.bone_matrices.push(o);
+                }
             }
+
+            queue.write_buffer(&bones_storage_buffer, 0, bytemuck::cast_slice(&output));
         }
-        
-        queue.write_buffer(bones_storage_buffer, 0, bytemuck::cast_slice(&output));
     }
 
     pub fn add_characters(
@@ -94,20 +93,22 @@ impl Scene {
         skeleton: Rc<ozz_animation_rs::Skeleton>,
         animations_by_name: &HashMap<String, Rc<ozz_animation_rs::Animation>>,
         name: String,
-    ) -> Option<std::ops::Range<usize>> {
-        let start_idx = self.characters.len();
-        self.skinned_model_nodes.push(SkinnedModelNode::new(
-            device,
-            bone_matrices_bind_group_layout,
-            skinned_model_idx,
-            instances,
-            skeleton.clone(),
-        ));
-        let skinned_model_node_idx = self.skinned_model_nodes.len() - 1;
+    ) -> Option<usize> {
+        self.characters_contexts.push(CharactersContext {
+            characters: Vec::new(),
+            skinned_model_node: SkinnedModelNode::new(
+                device,
+                bone_matrices_bind_group_layout,
+                skinned_model_idx,
+                instances,
+                skeleton.clone(),
+            ),
+        });
+
+        let characters_ctx_idx = self.characters_contexts.len() - 1;
         for instance in instances {
             let character = Character::new(
                 skeleton.clone(),
-                skinned_model_node_idx,
                 instance.position.into(),
                 instance.rotation,
                 animgraph_definition,
@@ -115,7 +116,7 @@ impl Scene {
             );
             match character {
                 Some(val) => {
-                    self.characters.push(val);
+                    self.characters_contexts[characters_ctx_idx].characters.push(val);
                 }
                 None => {
                     println!("[Scene] add_character: Could not create anim graph from definition");
@@ -124,28 +125,23 @@ impl Scene {
             }
         }
 
-        let results = std::ops::Range {
-            start: start_idx,
-            end: self.characters.len() - 1,
-        };
+        self.character_types_by_name.insert(name, characters_ctx_idx);
 
-        self.characters_by_name.insert(name, results.clone());
-
-        Some(results)
+        Some(characters_ctx_idx)
     }
 
     pub fn change_anim_graphs(
         &mut self,
-        range: std::ops::Range<usize>,
+        character_type_idx: usize,
         definition: &AnimGraphDefinition,
         skeleton: Rc<ozz_animation_rs::Skeleton>,
         animations_by_name: &HashMap<String, Rc<ozz_animation_rs::Animation>>,
     ) -> bool {
-        for i in range {
+        for c in self.characters_contexts[character_type_idx].characters.iter_mut() {
             let updated_anim_graph =
                 AnimGraph::create_from_definition(skeleton.clone(), definition, animations_by_name);
             match updated_anim_graph {
-                Some(val) => self.characters[i].anim_graph = val,
+                Some(val) => c.anim_graph = val,
                 None => {
                     println!(
                         "[Scene] Trying to change anim graph with an invalid animation graph definition"

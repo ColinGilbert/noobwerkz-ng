@@ -4,10 +4,13 @@ use crate::instance::*;
 use crate::model::*;
 use crate::model_node::*;
 use crate::passes::Pass;
+use crate::scene::CharactersContext;
 use crate::skinned_model::*;
-use crate::skinned_model_node::*;
+// use crate::skinned_model_node::*;
 use crate::texture::*;
+// use crate::character::Character;
 use wgpu::util::DeviceExt;
+
 
 pub struct ForwardRenderer {
     pub render_pipeline_layout: wgpu::PipelineLayout,
@@ -28,7 +31,7 @@ impl Pass for ForwardRenderer {
         models: &Vec<Model>,
         skinned_models: &Vec<SkinnedModel>,
         model_nodes: &Vec<ModelNode>,
-        skinned_model_nodes: &Vec<SkinnedModelNode>,
+        characters_contexts: &Vec<CharactersContext>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
     ) {
@@ -123,12 +126,12 @@ impl Pass for ForwardRenderer {
 
             render_pass.set_pipeline(&self.skinned_render_pipeline);
 
-            for m in skinned_model_nodes.iter() {
+            for c in characters_contexts.iter() {
                 let mut count = 0;
                 let mut model_instances = Vec::<SkinnedInstanceRaw>::new();
-                let model = &skinned_models[m.skinned_model_idx];
+                let model = &skinned_models[c.skinned_model_node.skinned_model_idx];
 
-                for i in &m.instances {
+                for i in &c.skinned_model_node.instances {
                     model_instances.push(i.to_skinned_raw());
                     count += 1;
                 }
@@ -167,7 +170,7 @@ impl Pass for ForwardRenderer {
                         0..count,
                         &self.camera_bind_group,
                         &self.light_bind_group,
-                        &m.bind_group,
+                        &c.skinned_model_node.bind_group,
                     );
                 }
             }
