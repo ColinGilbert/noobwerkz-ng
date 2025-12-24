@@ -54,6 +54,7 @@ impl Scene {
     pub fn update_characters(&mut self, dt: web_time::Duration, queue: &wgpu::Queue) {
         let mut output = Vec::<glam::Mat4>::new();
         for characters_ctx in self.characters_contexts.iter_mut() {
+            let bones_storage_buffer = &characters_ctx.skinned_model_node.bones_storage_buffer;
             
             output.clear();
 
@@ -70,17 +71,15 @@ impl Scene {
                 };
 
                 characters_ctx.skinned_model_node.instances.push(instance);
-                
+
                 c.anim_graph.get_output(&mut output);
-                
+
                 for o in output.clone() {
                     characters_ctx.skinned_model_node.bone_matrices.push(o);
-                    //println!("{}", o);
                 }
             }
-            
-            let bones_storage_buffer = &characters_ctx.skinned_model_node.bones_storage_buffer;
-            queue.write_buffer(bones_storage_buffer, 0, bytemuck::cast_slice(&output));
+
+            queue.write_buffer(&bones_storage_buffer, 0, bytemuck::cast_slice(&output));
         }
     }
 
