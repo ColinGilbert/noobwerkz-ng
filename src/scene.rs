@@ -81,7 +81,7 @@ impl Scene {
                 offset += output.len();
             }
 
-            queue.write_buffer(&bones_storage_buffer, offset, bytemuck::cast_slice(&output));
+            queue.write_buffer(&bones_storage_buffer, offset as u64, bytemuck::cast_slice(&output));
         }
     }
 
