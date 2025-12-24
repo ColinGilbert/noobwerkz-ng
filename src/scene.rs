@@ -78,7 +78,7 @@ impl Scene {
                 for o in output.clone() {
                     characters_ctx.skinned_model_node.bone_matrices.push(o);
                 }
-                offset += output.len();
+                offset += output.len() * 16 * 4;
             }
 
             queue.write_buffer(&bones_storage_buffer, offset as u64, bytemuck::cast_slice(&output));
