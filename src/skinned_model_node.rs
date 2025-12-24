@@ -43,7 +43,7 @@ impl SkinnedModelNode {
             // playbacks.push(futures::executor::block_on(OzzPlayback::new(
             //     &skeleton, &animation,
             // )));
-            for i in 0..num_bones + 1 {
+            for _ in 0..num_bones + 1 {
                 bone_matrices.push(glam::Mat4::IDENTITY);
             }
         }

@@ -76,6 +76,7 @@ impl Scene {
 
                 for o in output.clone() {
                     characters_ctx.skinned_model_node.bone_matrices.push(o);
+                    println!("{:?}", o)
                 }
             }
 
