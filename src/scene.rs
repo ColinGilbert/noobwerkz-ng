@@ -53,6 +53,7 @@ impl Scene {
 
     pub fn update_characters(&mut self, dt: web_time::Duration, queue: &wgpu::Queue) {
         let mut output = Vec::<glam::Mat4>::new();
+        let mut offset = 0;
         for characters_ctx in self.characters_contexts.iter_mut() {
             let bones_storage_buffer = &characters_ctx.skinned_model_node.bones_storage_buffer;
 
@@ -76,12 +77,12 @@ impl Scene {
 
                 for o in output.clone() {
                     characters_ctx.skinned_model_node.bone_matrices.push(o);
-                    println!("{:?}", o)
                 }
+                offset += output.len();
             }
 
+            queue.write_buffer(&bones_storage_buffer, offset, bytemuck::cast_slice(&output));
         }
-        queue.write_buffer(&bones_storage_buffer, 0, bytemuck::cast_slice(&characters_ctx.skinned_model_node.bone_matrices));
     }
 
     pub fn add_characters(
