@@ -104,7 +104,7 @@ impl Scene {
                 skeleton.clone(),
             ),
         });
-
+        println!("ADDING CHARACTERS: Instance count: {}", instances.len())'
         let characters_ctx_idx = self.characters_contexts.len() - 1;
         for instance in instances {
             let character = Character::new(
