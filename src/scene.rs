@@ -58,9 +58,9 @@ impl Scene {
 
             output.clear();
 
+            characters_ctx.skinned_model_node.instances.clear();
+            characters_ctx.skinned_model_node.bone_matrices.clear();
             for c in &mut characters_ctx.characters {
-                characters_ctx.skinned_model_node.instances.clear();
-                characters_ctx.skinned_model_node.bone_matrices.clear();
 
                 c.anim_graph.evaluate(dt);
 
