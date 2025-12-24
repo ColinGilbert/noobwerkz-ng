@@ -39,7 +39,7 @@ impl SkinnedModelNode {
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
 
-        for _ in 0..instances.len().saturating_sub(1) {
+        for _ in 0..instances.len() {
             // playbacks.push(futures::executor::block_on(OzzPlayback::new(
             //     &skeleton, &animation,
             // )));
