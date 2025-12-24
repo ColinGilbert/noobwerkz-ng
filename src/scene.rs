@@ -80,7 +80,7 @@ impl Scene {
             }
             
             let bones_storage_buffer = &characters_ctx.skinned_model_node.bones_storage_buffer;
-            queue.write_buffer(&bones_storage_buffer, 0, bytemuck::cast_slice(&output));
+            queue.write_buffer(bones_storage_buffer, 0, bytemuck::cast_slice(&output));
         }
     }
 
