@@ -59,6 +59,7 @@ impl Scene {
             
             characters_ctx.skinned_model_node.instances.clear();
             characters_ctx.skinned_model_node.bone_matrices.clear();
+            
             for c in &mut characters_ctx.characters {
                 
                 let mut output = Vec::<glam::Mat4>::new();
@@ -72,11 +73,11 @@ impl Scene {
                 characters_ctx.skinned_model_node.instances.push(instance);
                 
                 c.anim_graph.evaluate(dt);
-                c.anim_graph.get_output(&mut characters_ctx.skinned_model_node.bone_matrices);
+                c.anim_graph.get_output(&mut output);
 
-                // for o in output {
-                //     characters_ctx.skinned_model_node.bone_matrices.push(o);
-                // }
+                for o in output {
+                    characters_ctx.skinned_model_node.bone_matrices.push(o);
+                }
             }
 
             queue.write_buffer(&bones_storage_buffer, 0, bytemuck::cast_slice(&characters_ctx.skinned_model_node.bone_matrices));
