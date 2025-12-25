@@ -79,7 +79,7 @@ impl Scene {
                 }
             }
 
-            queue.write_buffer(&bones_storage_buffer, 0, bytemuck::cast_slice(&output));
+            queue.write_buffer(&bones_storage_buffer, 0, bytemuck::cast_slice(&characters_ctx.skinned_model_node.bone_matrices));
         }
     }
 
