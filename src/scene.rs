@@ -53,14 +53,11 @@ impl Scene {
 
     pub fn update_characters(&mut self, dt: web_time::Duration, queue: &wgpu::Queue) {
         for characters_ctx in self.characters_contexts.iter_mut() {
-            let bones_storage_buffer = &characters_ctx.skinned_model_node.bones_storage_buffer;
-                        
+            
             characters_ctx.skinned_model_node.instances.clear();
             characters_ctx.skinned_model_node.bone_matrices.clear();
-
+            
             for c in &mut characters_ctx.characters {
-                
-                let mut output = Vec::<glam::Mat4>::new();
                 c.anim_graph.evaluate(dt);
                 
                 let instance = Instance {
@@ -71,13 +68,15 @@ impl Scene {
                 
                 characters_ctx.skinned_model_node.instances.push(instance);
                 
+                let mut output = Vec::<glam::Mat4>::new();
                 c.anim_graph.get_output(&mut output);
-
+                
                 for o in output {
                     characters_ctx.skinned_model_node.bone_matrices.push(o);
                 }
             }
-
+            
+            let bones_storage_buffer = &characters_ctx.skinned_model_node.bones_storage_buffer;
             queue.write_buffer(&bones_storage_buffer, 0, bytemuck::cast_slice(&characters_ctx.skinned_model_node.bone_matrices));
         }
     }
@@ -143,7 +142,7 @@ impl Scene {
                 Some(val) => c.anim_graph = val,
                 None => {
                     println!(
-                        "[Scene] Trying to change anim graph with an invalid animation graph definition"
+                        "[Scene] Trying to change character to use an anim graph with an invalid definition"
                     );
                     return false;
                 }
