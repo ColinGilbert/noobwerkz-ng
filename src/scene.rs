@@ -72,11 +72,11 @@ impl Scene {
                 characters_ctx.skinned_model_node.instances.push(instance);
                 
                 c.anim_graph.evaluate(dt);
-                c.anim_graph.get_output(&mut output);
+                c.anim_graph.get_output(&mut characters_ctx.skinned_model_node.bone_matrices);
 
-                for o in output {
-                    characters_ctx.skinned_model_node.bone_matrices.push(o);
-                }
+                // for o in output {
+                //     characters_ctx.skinned_model_node.bone_matrices.push(o);
+                // }
             }
 
             queue.write_buffer(&bones_storage_buffer, 0, bytemuck::cast_slice(&characters_ctx.skinned_model_node.bone_matrices));
