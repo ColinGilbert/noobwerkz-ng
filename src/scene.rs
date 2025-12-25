@@ -74,7 +74,7 @@ impl Scene {
                 c.anim_graph.evaluate(dt);
                 c.anim_graph.get_output(&mut output);
 
-                for o in output.clone() {
+                for o in output {
                     characters_ctx.skinned_model_node.bone_matrices[i] = o;
                 }
             }
