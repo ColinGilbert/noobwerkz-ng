@@ -60,7 +60,7 @@ impl Scene {
 
             characters_ctx.skinned_model_node.instances.clear();
             characters_ctx.skinned_model_node.bone_matrices.clear();
-            for c in &mut characters_ctx.characters {
+            for (i, c) in &mut characters_ctx.characters.iter_mut().enumerate() {
                 
                 
                 let instance = Instance {
@@ -69,13 +69,13 @@ impl Scene {
                     scale: glam::Vec3A::splat(1.0),
                 };
                 
-                characters_ctx.skinned_model_node.instances.push(instance);
+                characters_ctx.skinned_model_node.instances[i] = instance;
                 
                 c.anim_graph.evaluate(dt);
                 c.anim_graph.get_output(&mut output);
 
                 for o in output.clone() {
-                    characters_ctx.skinned_model_node.bone_matrices.push(o);
+                    characters_ctx.skinned_model_node.bone_matrices[i] = o;
                 }
             }
 
