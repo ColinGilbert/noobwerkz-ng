@@ -55,13 +55,13 @@ impl Scene {
         for characters_ctx in self.characters_contexts.iter_mut() {
             let bones_storage_buffer = &characters_ctx.skinned_model_node.bones_storage_buffer;
             
-            let mut output = Vec::<glam::Mat4>::new();
             // output.clear();
-
+            
             //characters_ctx.skinned_model_node.instances.clear();
             //characters_ctx.skinned_model_node.bone_matrices.clear();
             for (i, c) in &mut characters_ctx.characters.iter_mut().enumerate() {
                 
+                let mut output = Vec::<glam::Mat4>::new();
                 
                 let instance = Instance {
                     position: c.position.into(),
