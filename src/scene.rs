@@ -6,7 +6,7 @@ use anim_graph_rs::{animgraph::AnimGraph, animgraph_definitions::AnimGraphDefini
 
 use crate::{
     camera::Camera, character::Character, instance::Instance, model_node::ModelNode,
-    physics_context::PhysicsContext, skinned_model_node::SkinnedModelNode,
+    physics_context::PhysicsContext, skinned_model_node::SkinnedModelNode, skinned_model::SkinnedModel
 };
 
 pub struct CharactersContext {
@@ -51,7 +51,7 @@ impl Scene {
         self.physics_context.step()
     }
 
-    pub fn update_characters(&mut self, dt: web_time::Duration, queue: &wgpu::Queue) {
+    pub fn update_characters(&mut self, dt: web_time::Duration, skinned_model: &SkinnedModel, queue: &wgpu::Queue) {
         for characters_ctx in self.characters_contexts.iter_mut() {
             
             characters_ctx.skinned_model_node.instances.clear();
@@ -71,8 +71,8 @@ impl Scene {
                 let mut output = Vec::<glam::Mat4>::new();
                 c.anim_graph.get_output(&mut output);
                 
-                for o in output {
-                    characters_ctx.skinned_model_node.bone_matrices.push(o);
+                for (i, o) in output.iter().enumerate() {
+                    characters_ctx.skinned_model_node.bone_matrices.push(o * skinned_model.inverse_bind_matrices[i]);
                 }
             }
             
