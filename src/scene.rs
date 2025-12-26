@@ -51,7 +51,7 @@ impl Scene {
         self.physics_context.step()
     }
 
-    pub fn update_characters(&mut self, dt: web_time::Duration, skinned_model: &SkinnedModel, queue: &wgpu::Queue) {
+    pub fn update_characters(&mut self, dt: web_time::Duration, skinned_models: &Vec<SkinnedModel>, queue: &wgpu::Queue) {
         for characters_ctx in self.characters_contexts.iter_mut() {
             
             characters_ctx.skinned_model_node.instances.clear();
@@ -72,7 +72,7 @@ impl Scene {
                 c.anim_graph.get_output(&mut output);
                 
                 for (i, o) in output.iter().enumerate() {
-                    characters_ctx.skinned_model_node.bone_matrices.push(o * skinned_model.inverse_bind_matrices[i]);
+                    characters_ctx.skinned_model_node.bone_matrices.push(o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx].inverse_bind_matrices[i]);
                 }
             }
             
