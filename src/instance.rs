@@ -3,24 +3,24 @@ use std::mem;
 
 pub struct Instance {
     pub position: glam::Vec3A,
-    pub rotation: glam::Quat,
+    pub orientation: glam::Quat,
     pub scale: glam::Vec3A,
 }
 
 impl Instance {
     pub fn to_raw(&self) -> InstanceRaw {
         InstanceRaw {
-            model: glam::Mat4::from_scale_rotation_translation(self.scale.into(), self.rotation, self.position.into())
+            model: glam::Mat4::from_scale_rotation_translation(self.scale.into(), self.orientation, self.position.into())
             .to_cols_array_2d(),
-            normal: glam::Mat3::from_quat(self.rotation).to_cols_array_2d(),
+            normal: glam::Mat3::from_quat(self.orientation).to_cols_array_2d(),
         }
     }
 
     pub fn to_skinned_raw(&self) -> SkinnedInstanceRaw {
         SkinnedInstanceRaw {
-            model: glam::Mat4::from_scale_rotation_translation(self.scale.into(), self.rotation, self.position.into())
+            model: glam::Mat4::from_scale_rotation_translation(self.scale.into(), self.orientation, self.position.into())
             .to_cols_array_2d(),
-            //normal: glam::Mat3::from_quat(self.rotation).to_cols_array_2d(),
+            //normal: glam::Mat3::from_quat(self.orientation).to_cols_array_2d(),
         }
     }
 }

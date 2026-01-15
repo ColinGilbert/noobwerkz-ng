@@ -13,6 +13,7 @@ pub struct CharactersContext {
     pub characters: Vec<Character>,
     pub skinned_model_node: SkinnedModelNode,
 }
+
 pub struct Scene {
     pub cameras: Vec<Camera>,
     pub model_nodes: Vec<ModelNode>,
@@ -62,7 +63,7 @@ impl Scene {
                 
                 let instance = Instance {
                     position: c.position.into(),
-                    rotation: c.orientation,
+                    orientation: c.orientation,
                     scale: glam::Vec3A::splat(1.0),
                 };
                 
@@ -108,7 +109,7 @@ impl Scene {
             let character = Character::new(
                 skeleton.clone(),
                 instance.position.into(),
-                instance.rotation,
+                instance.orientation,
                 animgraph_definition,
                 animations_by_name,
             );

@@ -30,7 +30,7 @@ impl SkinnedModelNode {
         let mut bone_matrices = Vec::<glam::Mat4>::new();
         let mut instances = Vec::new();
         for instance in instances_arg {
-            let i = Instance{ position: instance.position, rotation: instance.rotation, scale: instance.scale};
+            let i = Instance{ position: instance.position, orientation: instance.orientation, scale: instance.scale};
             instances.push(i);
         }
         let num_bones_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
