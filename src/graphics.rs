@@ -226,9 +226,7 @@ pub fn create_render_pipeline(
             mask: !0,
             alpha_to_coverage_enabled: false,
         },
-        // If the pipeline will be used with a multiview render pass, this
-        // indicates how many array layers the attachments will have.
-    multiview_mask: Some(std::num::NonZeroU32::new(0b11).unwrap()),
-            cache: None,
+        multiview_mask: None,
+        cache: None,
     })
 }
