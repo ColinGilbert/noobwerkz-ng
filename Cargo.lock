@@ -4021,7 +4021,7 @@ checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
 [[package]]
 name = "simple-animgraph"
 version = "0.1.0"
-source = "git+https://github.com/colingilbert/simple-anim-graph.git?branch=main#3c7cd732ca9a1c3e9cd59b5f7b31d08b2f71f5b4"
+source = "git+https://github.com/colingilbert/simple-anim-graph.git?branch=main#ccadcffb9a9f667c1680e3448d2b3a076ebc6ab1"
 dependencies = [
  "anyhow",
  "glam 0.33.2",
