@@ -64,7 +64,7 @@ impl Pass for ForwardRenderer {
                 }),
                 occlusion_query_set: None,
                 timestamp_writes: None,
-                multiview_mask: std::num::NonZero::<u32>::new(1),
+                multiview_mask: None
             });
 
             // render_pass.set_pipeline(&self.light_render_pipeline);
