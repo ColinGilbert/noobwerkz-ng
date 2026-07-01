@@ -30,3 +30,4 @@ pub use egui;
 pub use futures;
 pub use glam;
 pub use web_time;
+pub use simple_animgraph;
