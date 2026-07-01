@@ -215,8 +215,8 @@ pub fn create_render_pipeline(
         },
         depth_stencil: depth_format.map(|format| wgpu::DepthStencilState {
             format,
-            depth_write_enabled: true,
-            depth_compare: wgpu::CompareFunction::Less,
+            depth_write_enabled: Some(true),
+            depth_compare: Some(wgpu::CompareFunction::Less),
             stencil: wgpu::StencilState::default(),
             bias: wgpu::DepthBiasState::default(),
         }),
@@ -228,7 +228,7 @@ pub fn create_render_pipeline(
         },
         // If the pipeline will be used with a multiview render pass, this
         // indicates how many array layers the attachments will have.
-        multiview: None,
-        cache: None,
+    multiview_mask: Some(std::num::NonZeroU32::new(0b11).unwrap()),
+            cache: None,
     })
 }

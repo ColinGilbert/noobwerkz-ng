@@ -17,7 +17,6 @@ pub mod material;
 pub mod skinned_model;
 pub mod index_types;
 pub mod skeletal_context;
-pub mod playback;
 pub mod serialized_model;
 pub mod primitives;
 pub mod physics_context;

@@ -79,7 +79,7 @@ impl Camera {
     }
 
     pub fn view_matrix(&self) -> glam::Mat4 {
-        let view_matrix = glam::Mat4::look_at_rh(self.eye, self.look_at, self.up);
+        let view_matrix = glam::camera::rh::view::look_at_mat4(self.eye, self.look_at, self.up);
         //println!("Getting view matrix");
         view_matrix
     }
@@ -183,7 +183,7 @@ impl Projection {
     pub fn calc_matrix(&self) -> glam::Mat4 {
         //OPENGL_TO_WGPU_MATRIX * glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
         let results =
-            glam::Mat4::perspective_rh(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
+            glam::camera::rh::proj::directx::perspective(self.fovy_rad, self.aspect_ratio, self.znear, self.zfar);
         results
     }
 }

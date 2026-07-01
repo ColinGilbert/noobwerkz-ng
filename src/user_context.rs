@@ -1,4 +1,3 @@
-//use std::sync::*;
 use crate::{asset_manager::*, scene::*, skeletal_context::SkeletalContext};
 use kira::{
 	AudioManager, AudioManagerSettings, DefaultBackend,

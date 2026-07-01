@@ -11,7 +11,6 @@ use crate::texture::*;
 // use crate::character::Character;
 use wgpu::util::DeviceExt;
 
-
 pub struct ForwardRenderer {
     pub render_pipeline_layout: wgpu::PipelineLayout,
     pub skinned_render_pipeline_layout: wgpu::PipelineLayout,
@@ -65,6 +64,7 @@ impl Pass for ForwardRenderer {
                 }),
                 occlusion_query_set: None,
                 timestamp_writes: None,
+                multiview_mask: std::num::NonZero::<u32>::new(1),
             });
 
             // render_pass.set_pipeline(&self.light_render_pipeline);
@@ -74,7 +74,7 @@ impl Pass for ForwardRenderer {
             //     &self.light_bind_group,
             // );
             render_pass.set_pipeline(&self.render_pipeline);
-            
+
             for m in model_nodes.iter() {
                 let mut count = 0;
                 let mut model_instance_data = Vec::<InstanceRaw>::new();
@@ -146,7 +146,8 @@ impl Pass for ForwardRenderer {
                     );
 
                     for instance_raw in &model_instances {
-                        let instance_model_mat = glam::Mat4::from_cols_array_2d(&instance_raw.model);
+                        let instance_model_mat =
+                            glam::Mat4::from_cols_array_2d(&instance_raw.model);
 
                         let temp = SkinnedInstanceRaw {
                             model: (instance_model_mat * mesh_mat).to_cols_array_2d(),
@@ -175,7 +176,7 @@ impl Pass for ForwardRenderer {
                 }
             }
         }
-        
+
         queue.submit([encoder.finish()]);
     }
 }
@@ -213,23 +214,23 @@ impl ForwardRenderer {
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
                 bind_group_layouts: &[
-                    &texture_bind_group_layout,
-                    &camera_bind_group_layout,
-                    &light_bind_group_layout,
+                    Some(texture_bind_group_layout),
+                    Some(camera_bind_group_layout),
+                    Some(light_bind_group_layout),
                 ],
-                push_constant_ranges: &[],
+                immediate_size: 0,
             });
 
         let skinned_render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Skinned Pipeline Layout"),
                 bind_group_layouts: &[
-                    &texture_bind_group_layout,
-                    &camera_bind_group_layout,
-                    &light_bind_group_layout,
-                    &bone_matrices_bind_group_layout,
+                    Some(texture_bind_group_layout),
+                    Some(camera_bind_group_layout),
+                    Some(light_bind_group_layout),
+                    Some(bone_matrices_bind_group_layout),
                 ],
-                push_constant_ranges: &[],
+                immediate_size: 0,
             });
 
         let render_pipeline = {
@@ -266,8 +267,11 @@ impl ForwardRenderer {
         let light_render_pipeline = {
             let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Light Pipeline Layout"),
-                bind_group_layouts: &[&camera_bind_group_layout, &light_bind_group_layout],
-                push_constant_ranges: &[],
+                bind_group_layouts: &[
+                    Some(camera_bind_group_layout),
+                    Some(light_bind_group_layout),
+                ],
+                immediate_size: 0,
             });
             let shader = wgpu::ShaderModuleDescriptor {
                 label: Some("Light Shader"),

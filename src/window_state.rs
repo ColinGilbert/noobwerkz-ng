@@ -35,12 +35,16 @@ impl WindowState {
     pub async fn new(window: Arc<Window>) -> anyhow::Result<WindowState> {
         // The instance is a handle to our GPU
         // BackendBit::PRIMARY => Vulkan + Metal + DX12 + Browser WebGPU
-        let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             #[cfg(not(target_arch = "wasm32"))]
             backends: wgpu::Backends::PRIMARY,
             #[cfg(target_arch = "wasm32")]
             backends: wgpu::Backends::GL,
-            ..Default::default()
+            flags: Default::default(),
+            memory_budget_thresholds: Default::default(),
+            backend_options: Default::default(),
+            display: None,
+
         });
 
         let surface = instance.create_surface(window.clone()).unwrap();
@@ -73,17 +77,17 @@ impl WindowState {
         let egui_renderer =
             EguiRenderer::new(&gfx_ctx.device, gfx_ctx.surface_format, &window.clone());
 
-        egui_renderer.context().style_mut(|style| {
-            // Disable shadows for popups, context menus, and combo boxes
-            style.visuals.popup_shadow = egui::Shadow::NONE;
+        // egui_renderer.context().style_mut_of(|style| {
+        //     // Disable shadows for popups, context menus, and combo boxes
+        //     style.visuals.popup_shadow = egui::Shadow::NONE;
 
-            // Disable shadows for windows
-            style.visuals.window_shadow = egui::Shadow::NONE;
+        //     // Disable shadows for windows
+        //     style.visuals.window_shadow = egui::Shadow::NONE;
 
-            // Optional: Also set the a faint, "hover" and "open" shadows to none if needed
-            style.visuals.faint_bg_color = egui::Color32::TRANSPARENT;
-            style.visuals.extreme_bg_color = egui::Color32::TRANSPARENT;
-        });
+        //     // Optional: Also set the a faint, "hover" and "open" shadows to none if needed
+        //     style.visuals.faint_bg_color = egui::Color32::TRANSPARENT;
+        //     style.visuals.extreme_bg_color = egui::Color32::TRANSPARENT;
+        // });
 
         Ok(Self {
             window,
@@ -157,7 +161,7 @@ impl WindowState {
     }
 
     pub fn handle_mouse_button(&mut self, button: MouseButton, pressed: bool) {
-        if !self.egui_renderer.state.egui_ctx().wants_pointer_input() {
+        if !self.egui_renderer.state.egui_ctx().egui_wants_pointer_input() {
             match button {
                 MouseButton::Left => self.mouse_pressed = pressed,
                 _ => {}
@@ -218,7 +222,7 @@ impl WindowState {
         }
     }
 
-    pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self) -> anyhow::Result<()> {
         self.window.request_redraw();
 
         // We can't render unless the surface is configured
@@ -226,7 +230,27 @@ impl WindowState {
             return Ok(());
         }
 
-        let output = self.surface.get_current_texture()?;
+        let output = match self.surface.get_current_texture() {
+            wgpu::CurrentSurfaceTexture::Success(surface_texture) => surface_texture,
+            wgpu::CurrentSurfaceTexture::Suboptimal(surface_texture) => {
+                self.surface.configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
+                surface_texture
+            }
+            wgpu::CurrentSurfaceTexture::Timeout
+            | wgpu::CurrentSurfaceTexture::Occluded
+            | wgpu::CurrentSurfaceTexture::Validation => {
+                // Skip this frame
+                return Ok(());
+            }
+            wgpu::CurrentSurfaceTexture::Outdated => {
+                self.surface.configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
+                return Ok(());
+            }
+            wgpu::CurrentSurfaceTexture::Lost => {
+                // TODO: Fix
+                anyhow::bail!("Lost device");
+            }
+        };
 
         let view = output
             .texture

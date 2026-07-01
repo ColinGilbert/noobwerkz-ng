@@ -2,10 +2,10 @@
 
 use std::{collections::HashMap, rc::Rc};
 
-use anim_graph_rs::{animgraph::AnimGraph, animgraph_definitions::AnimGraphDefinition};
+use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 
 use crate::{
-    camera::Camera, character::Character, instance::Instance, model_node::ModelNode,
+    camera::Camera, instance::Instance, model_node::ModelNode, character::Character, 
     physics_context::PhysicsContext, skinned_model_node::SkinnedModelNode, skinned_model::SkinnedModel
 };
 
@@ -35,18 +35,18 @@ impl Scene {
         }
     }
 
-    pub fn load_physics(&mut self, data: &Vec<u8>) {
-        self.physics_context = bincode::serde::decode_from_slice(data, bincode::config::standard())
-            .unwrap()
-            .0;
-    }
+    // pub fn load_physics(&mut self, data: &Vec<u8>) {
+    //     self.physics_context = wincode::decode_from_slice(data)
+    //         .unwrap()
+    //         .0;
+    // }
 
-    pub fn save_physics(&self) -> Vec<u8> {
-        let serialized =
-            bincode::serde::encode_to_vec(&self.physics_context, bincode::config::standard())
-                .unwrap();
-        serialized
-    }
+    // pub fn save_physics(&self) -> Vec<u8> {
+    //     let serialized =
+    //         wincode::encode_to_vec(&self.physics_context, wincode::config::standard())
+    //             .unwrap();
+    //     serialized
+    // }
 
     pub fn step_physics(&mut self) {
         self.physics_context.step()
@@ -59,8 +59,11 @@ impl Scene {
             characters_ctx.skinned_model_node.bone_matrices.clear();
             
             for c in &mut characters_ctx.characters {
-                c.anim_graph.evaluate(dt);
-                
+                let r = c.anim_graph.evaluate(dt);
+                match r {
+                    Ok(_) => {}
+                    Err(err) => {println!("Could not evaluate character's anim graph: {}", err)}
+                }
                 let instance = Instance {
                     position: c.position.into(),
                     orientation: c.orientation,
@@ -69,10 +72,9 @@ impl Scene {
                 
                 characters_ctx.skinned_model_node.instances.push(instance);
                 
-                let mut output = Vec::<glam::Mat4>::new();
-                c.anim_graph.get_output(&mut output);
+                let output = c.anim_graph.get_skeletal_matrices();
                 
-                for (i, o) in output.iter().enumerate() {
+                for (i, o) in output.borrow().iter().enumerate() {
                     characters_ctx.skinned_model_node.bone_matrices.push(o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx].inverse_bind_matrices[i]);
                 }
             }
@@ -138,12 +140,12 @@ impl Scene {
     ) -> bool {
         for c in self.characters_contexts[character_type_idx].characters.iter_mut() {
             let updated_anim_graph =
-                AnimGraph::create_from_definition(skeleton.clone(), definition, animations_by_name);
+                AnimGraph::new(skeleton.clone(), definition, animations_by_name);
             match updated_anim_graph {
-                Some(val) => c.anim_graph = val,
-                None => {
+                Ok(val) => c.anim_graph = val,
+                Err(err) => {
                     println!(
-                        "[Scene] Trying to change character to use an anim graph with an invalid definition"
+                        "[Scene] Trying to change character to use an anim graph with an invalid definition, {}", err
                     );
                     return false;
                 }

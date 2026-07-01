@@ -1,4 +1,4 @@
-use msgpacker::prelude::*;
+use msgpacker::*;
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedMesh {

@@ -5,7 +5,7 @@ use serde::*;
 pub struct PhysicsContext {
     pub rigid_body_set: RigidBodySet,
     pub collider_set: ColliderSet,
-    pub gravity: nalgebra::Vector3<f32>,
+    pub gravity: rapier3d::math::Vector,
     pub integration_parameters: IntegrationParameters,
     #[serde(skip_serializing)]
     #[serde(skip_deserializing)]
@@ -25,7 +25,7 @@ impl PhysicsContext {
         Self {
             rigid_body_set: RigidBodySet::new(),
             collider_set: ColliderSet::new(),
-            gravity: vector![gravity[0], gravity[1], gravity[2]],
+            gravity: rapier3d::math::Vector::new(gravity[0], gravity[1], gravity[2]),
             integration_parameters: IntegrationParameters::default(),
             physics_pipeline: PhysicsPipeline::new(),
             island_manager: IslandManager::new(),
@@ -40,7 +40,7 @@ impl PhysicsContext {
     }
     pub fn step(&mut self) {
         self.physics_pipeline.step(
-            &self.gravity,
+            self.gravity,
             &self.integration_parameters,
             &mut self.island_manager,
             &mut self.broad_phase,

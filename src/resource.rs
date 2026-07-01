@@ -6,7 +6,7 @@ use crate::skeletal_context::SkeletalContext;
 use crate::skinned_model::*;
 use crate::texture;
 use crate::texture::Texture;
-use msgpacker::prelude::*;
+use msgpacker::*;
 use std::path::*;
 use wgpu::util::DeviceExt;
 
@@ -17,7 +17,7 @@ pub fn load_serialized_model(filepath: &std::path::Path) -> SerializedModel {
     }
     println!("Full path {:?}", path.as_path());
     let data = std::fs::read(path.as_path()).unwrap();
-    let (_n, deserialized) = SerializedModel::unpack(&data).unwrap();
+    let deserialized = SerializedModel::unpack(&data).unwrap();
     println!("Dimensions {:?}", deserialized.meshes[0].dimensions);
     println!("Scale {:?}", deserialized.meshes[0].scale);
     println!("Translation {:?}", deserialized.meshes[0].translation);

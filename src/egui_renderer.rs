@@ -104,6 +104,7 @@ impl EguiRenderer {
             timestamp_writes: None,
             label: Some("egui main render pass"),
             occlusion_query_set: None,
+                multiview_mask: Some(std::num::NonZeroU32::new(0b0).unwrap()), 
         });
 
         self.renderer

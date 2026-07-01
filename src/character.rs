@@ -1,4 +1,4 @@
-use anim_graph_rs::{animgraph::AnimGraph, animgraph_definitions::AnimGraphDefinition};
+use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 use ozz_animation_rs::*;
 use std::{collections::HashMap, rc::Rc};
 
@@ -20,15 +20,15 @@ impl Character {
         animations_by_name: &HashMap<String, Rc<Animation>>,
     ) -> Option<Self> {
         let anim_graph =
-            AnimGraph::create_from_definition(skeleton, animgraph_definition, animations_by_name);
+            AnimGraph::new(skeleton, animgraph_definition, animations_by_name);
         match anim_graph {
-            Some(val) => Some(Self {
+            Ok(val) => { Some(Self {
                 //instance_idx,
                 position,
                 orientation,
                 anim_graph: val,
-            }),
-            None => None,
+            })}
+            Err(err) => { println!("Failed to create character. Anim graph couldn't be created: {}", err); return None }
         }
     }
 
