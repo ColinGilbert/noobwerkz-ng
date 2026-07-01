@@ -33,11 +33,8 @@ impl EguiRenderer {
             None,
             Some(2 * 1024), // default dimension is 2048
         );
-        let egui_renderer = Renderer::new(
-            device,
-            output_color_format,
-            RendererOptions::PREDICTABLE,
-        );
+        let egui_renderer =
+            Renderer::new(device, output_color_format, RendererOptions::PREDICTABLE);
 
         EguiRenderer {
             state: egui_state,
@@ -98,13 +95,13 @@ impl EguiRenderer {
                     load: egui_wgpu::wgpu::LoadOp::Load,
                     store: StoreOp::Store,
                 },
-                depth_slice: None
+                depth_slice: None,
             })],
             depth_stencil_attachment: None,
             timestamp_writes: None,
             label: Some("egui main render pass"),
             occlusion_query_set: None,
-                multiview_mask: None, 
+            multiview_mask: None,
         });
 
         self.renderer
