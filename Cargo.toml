@@ -11,9 +11,9 @@ path = "src/lib.rs"
 ozz-animation-rs = { git = "https://github.com/colingilbert/ozz-animation-rs.git", branch = "master" }
 simple-animgraph = { git = "https://github.com/colingilbert/simple-anim-graph.git", branch = "main" }
 #smartcore = "0.4.3"
-#rerecast = "0.3.2"
-#dodgy_3d = "0.5"
-#dodgy_2d = "0.5"
+rerecast = "0.3.2"
+dodgy_3d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
+dodgy_2d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 #sampled-dmc = "0.1.2"
 glam = { version = "0.33", features=["bytemuck", "core-simd"]}
 rapier3d = { version = "0.33.0", features = ["serde-serialize", "enhanced-determinism"] }
@@ -44,5 +44,12 @@ dogoap = "0.5.0"
 egui-snarl = "0.11.0"
 mapgraph = "0.12.0"
 wincode = "0.5.5"
-tri-mesh = "0.6.1"
+mesh-graph = "0.8.0"
+#truck-base = { git = "https://github.com/ricosjp/truck.git", branch = "master" }
+#truck-geotrait = { git = "https://github.com/ricosjp/truck.git", branch = "master" }
+#truck-geometry = { git = "https://github.com/ricosjp/truck.git", branch = "master" }
+#truck-topology = { git = "https://github.com/ricosjp/truck.git", branch = "master" }
+#truck-polymesh = { git = "https://github.com/ricosjp/truck.git", branch = "master" }
+#truck-meshalgo = { git = "https://github.com/ricosjp/truck.git", branch = "master" }
+#truck-modeling = { git = "https://github.com/ricosjp/truck.git", branch = "master" }
 
