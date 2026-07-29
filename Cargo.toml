@@ -44,4 +44,5 @@ dogoap = "0.5.0"
 egui-snarl = "0.11.0"
 mapgraph = "0.12.0"
 wincode = "0.5.5"
+tri-mesh = "0.6.1"
 
