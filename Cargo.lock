@@ -1508,6 +1508,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af9673d8203fcb076b19dfd17e38b3d4ae9f44959416ea532ce72415a6020365"
 
 [[package]]
+name = "fastnoise-lite"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3e5f3c3cc9081e5d0e18bcd50e80cd33cba47fc22f88a9da9c33ecd1c87ea5c0"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "fax"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2810,6 +2819,7 @@ dependencies = [
  "serde",
  "simple-animgraph",
  "slotmap",
+ "voxelis",
  "web-time",
  "wgpu",
  "wincode",
@@ -3778,7 +3788,7 @@ dependencies = [
  "simba",
  "static_assertions",
  "thiserror 2.0.19",
- "wide",
+ "wide 1.5.0",
 ]
 
 [[package]]
@@ -4106,6 +4116,15 @@ checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 
 [[package]]
 name = "safe_arch"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96b02de82ddbe1b636e6170c21be622223aea188ef2e139be0a5b219ec215323"
+dependencies = [
+ "bytemuck",
+]
+
+[[package]]
+name = "safe_arch"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a52ec151f024d703f9fd65abb7cbe81e7cdb39f18917a3a37e3014470dc7c59"
@@ -4226,7 +4245,7 @@ dependencies = [
  "libm",
  "num-complex",
  "num-traits",
- "wide",
+ "wide 1.5.0",
 ]
 
 [[package]]
@@ -4977,6 +4996,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
+name = "voxelis"
+version = "25.4.0"
+source = "git+https://github.com/colingilbert/voxelis.git?branch=updatedeps#818aa313d9c3a9b6b77bd58dc22e9c7511777ecb"
+dependencies = [
+ "fastnoise-lite",
+ "glam 0.33.2",
+ "parking_lot",
+ "rayon",
+ "rustc-hash 2.1.3",
+ "voxelis-memory",
+ "wide 0.7.33",
+]
+
+[[package]]
+name = "voxelis-memory"
+version = "25.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c5f721aa094c58da48cbae05f27725b215fb2c8bdd10b1d74d2111cd4a4ddada"
+
+[[package]]
 name = "walkdir"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5435,12 +5474,22 @@ dependencies = [
 
 [[package]]
 name = "wide"
+version = "0.7.33"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0ce5da8ecb62bcd8ec8b7ea19f69a51275e91299be594ea5cc6ef7819e16cd03"
+dependencies = [
+ "bytemuck",
+ "safe_arch 0.7.4",
+]
+
+[[package]]
+name = "wide"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfdfe6a32973f2d1b268b8895845a8a96cac2f0191e72c27cc929036060dbf89"
 dependencies = [
  "bytemuck",
- "safe_arch",
+ "safe_arch 1.1.0",
 ]
 
 [[package]]
