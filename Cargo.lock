@@ -360,6 +360,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_ballistic_stripped"
+version = "0.1.0"
+source = "git+https://github.com/colingilbert/bevy_ballistic.git?branch=main#b0b5221edec5cd82ecf374d7bb072c6edef77d2c"
+dependencies = [
+ "glam 0.33.2",
+ "libm",
+]
+
+[[package]]
 name = "bevy_macro_utils"
 version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2740,6 +2749,7 @@ name = "noobwerkz"
 version = "0.0.1"
 dependencies = [
  "anyhow",
+ "bevy_ballistic_stripped",
  "bitmask-enum",
  "bytemuck",
  "dodgy_2d",

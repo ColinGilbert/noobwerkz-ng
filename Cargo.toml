@@ -45,6 +45,7 @@ dogoap = "0.5.0"
 mapgraph = "0.12.0"
 wincode = "0.6.0"
 mesh-graph = "0.8.0"
+bevy_ballistic_stripped = { git = "https://github.com/colingilbert/bevy_ballistic.git", branch = "main" }
 voxelis = { git = "https://github.com/colingilbert/voxelis.git", branch = "updatedeps" }
 salva3d = { git ="https://github.com/ColinGilbert/salva", branch="master", features=["parry3d", "rapier3d", "rayon"] }
 #truck-base = { git = "https://github.com/ricosjp/truck.git", branch = "master" }
