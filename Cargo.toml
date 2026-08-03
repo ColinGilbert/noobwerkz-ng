@@ -45,7 +45,8 @@ egui-snarl = "0.11.0"
 mapgraph = "0.12.0"
 wincode = "0.5.5"
 mesh-graph = "0.8.0"
-voxelis = { git= "https://github.com/colingilbert/voxelis.git", branch = "updatedeps" }
+voxelis = { git = "https://github.com/colingilbert/voxelis.git", branch = "updatedeps" }
+salva3d = { version = "0.9.0", features=["parry3d", "rapier3d", "rayon"] }
 #truck-base = { git = "https://github.com/ricosjp/truck.git", branch = "master" }
 #truck-geotrait = { git = "https://github.com/ricosjp/truck.git", branch = "master" }
 #truck-geometry = { git = "https://github.com/ricosjp/truck.git", branch = "master" }
