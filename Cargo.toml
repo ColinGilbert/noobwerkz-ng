@@ -41,7 +41,7 @@ egui-winit = { git = "https://github.com/emilk/egui", branch="main" }
 #egui_field_editor = "0.6.0"
 kira = "0.12.2"
 dogoap = "0.5.0"
-egui-snarl = "0.11.0"
+#egui-snarl = "0.11.0"
 mapgraph = "0.12.0"
 wincode = "0.6.0"
 mesh-graph = "0.8.0"
