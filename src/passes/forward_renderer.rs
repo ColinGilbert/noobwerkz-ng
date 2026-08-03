@@ -244,7 +244,7 @@ impl ForwardRenderer {
                 &render_pipeline_layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[ModelVertex::desc(), InstanceRaw::desc()],
+                &[Some(ModelVertex::desc()), Some(InstanceRaw::desc())],
                 shader,
             )
         };
@@ -259,7 +259,7 @@ impl ForwardRenderer {
                 &skinned_render_pipeline_layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[SkinnedModelVertex::desc(), SkinnedInstanceRaw::desc()],
+                &[Some(SkinnedModelVertex::desc()), Some(SkinnedInstanceRaw::desc())],
                 shader,
             )
         };
@@ -283,7 +283,7 @@ impl ForwardRenderer {
                 &layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[ModelVertex::desc()],
+                &[Some(ModelVertex::desc())],
                 shader,
             )
         };

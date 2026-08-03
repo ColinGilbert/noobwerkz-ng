@@ -42,7 +42,6 @@ impl WindowState {
             memory_budget_thresholds: Default::default(),
             backend_options: Default::default(),
             display: None,
-
         });
 
         let surface = instance.create_surface(window.clone()).unwrap();
@@ -159,7 +158,12 @@ impl WindowState {
     }
 
     pub fn handle_mouse_button(&mut self, button: MouseButton, pressed: bool) {
-        if !self.egui_renderer.state.egui_ctx().egui_wants_pointer_input() {
+        if !self
+            .egui_renderer
+            .state
+            .egui_ctx()
+            .egui_wants_pointer_input()
+        {
             match button {
                 MouseButton::Left => self.mouse_pressed = pressed,
                 _ => {}
@@ -231,7 +235,8 @@ impl WindowState {
         let output = match self.surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(surface_texture) => surface_texture,
             wgpu::CurrentSurfaceTexture::Suboptimal(surface_texture) => {
-                self.surface.configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
+                self.surface
+                    .configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
                 surface_texture
             }
             wgpu::CurrentSurfaceTexture::Timeout
@@ -241,7 +246,8 @@ impl WindowState {
                 return Ok(());
             }
             wgpu::CurrentSurfaceTexture::Outdated => {
-                self.surface.configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
+                self.surface
+                    .configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
                 return Ok(());
             }
             wgpu::CurrentSurfaceTexture::Lost => {
@@ -296,7 +302,8 @@ impl WindowState {
 
         self.gfx_ctx.queue.submit(Some(encoder.finish()));
 
-        output.present();
+        //output.present();
+        self.gfx_ctx.queue.present(output);
 
         Ok(())
     }

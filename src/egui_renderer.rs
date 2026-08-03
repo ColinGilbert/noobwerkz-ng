@@ -3,21 +3,16 @@
 use egui::Context;
 use egui_wgpu::wgpu::{CommandEncoder, Device, Queue, StoreOp, TextureFormat, TextureView};
 use egui_wgpu::{Renderer, RendererOptions, ScreenDescriptor, wgpu};
-use egui_winit::State;
 use winit::event::WindowEvent;
 use winit::window::Window;
 
 pub struct EguiRenderer {
-    pub state: State,
+    pub state: egui_winit::State,
     pub renderer: Renderer,
     pub frame_started: bool,
 }
 
 impl EguiRenderer {
-    pub fn context(&self) -> &Context {
-        self.state.egui_ctx()
-    }
-
     pub fn new(
         device: &Device,
         output_color_format: TextureFormat,
@@ -41,6 +36,10 @@ impl EguiRenderer {
             renderer: egui_renderer,
             frame_started: false,
         }
+    }
+    
+    pub fn context(&self) -> &Context {
+        self.state.egui_ctx()
     }
 
     pub fn handle_input(&mut self, window: &Window, event: &WindowEvent) {
@@ -83,7 +82,7 @@ impl EguiRenderer {
             .tessellate(full_output.shapes, self.state.egui_ctx().pixels_per_point());
         for (id, image_delta) in &full_output.textures_delta.set {
             self.renderer
-                .update_texture(device, queue, *id, image_delta);
+                .update_texture(device, queue, *id, &image_delta[0]);
         }
         self.renderer
             .update_buffers(device, queue, encoder, &tris, &screen_descriptor);
