@@ -11,11 +11,10 @@ path = "src/lib.rs"
 ozz-animation-rs = { git = "https://github.com/colingilbert/ozz-animation-rs.git", branch = "master" }
 simple-animgraph = { git = "https://github.com/colingilbert/simple-anim-graph.git", branch = "main" }
 #smartcore = "0.4.3"
-rerecast = "0.3.2"
+rerecast = { git = "https://github.com/colingilbert/rerecast.git", branch = "main" }
 dodgy_3d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 dodgy_2d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 #sampled-dmc = "0.1.2"
-glam = { version = "0.33", features=["bytemuck", "core-simd"]}
 rapier3d = { version = "0.34", features = ["serde-serialize", "enhanced-determinism"] }
 wgpu = "30.0"
 winit = "0.30.13"
@@ -48,3 +47,4 @@ wincode = "0.6.0"
 bevy_ballistic_stripped = { git = "https://github.com/colingilbert/bevy_ballistic.git", branch = "main" }
 voxelis = { git = "https://github.com/colingilbert/voxelis.git", branch = "updated" }
 salva3d = { git ="https://github.com/ColinGilbert/salva", branch="master", features=["parry3d", "rapier3d", "rayon"] }
+glam = { version = "0.33", features=["bytemuck", "core-simd"]}
