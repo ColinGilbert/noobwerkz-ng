@@ -3859,7 +3859,7 @@ checksum = "19b30a45b0cd0bcca8037f3d0dc3421eaf95327a17cad11964fb8179b4fc4832"
 [[package]]
 name = "rerecast"
 version = "0.3.4"
-source = "git+https://github.com/colingilbert/rerecast.git?branch=main#e33c39664d48c03f11e718c18e7c5cdde0376b2c"
+source = "git+https://github.com/colingilbert/rerecast.git?branch=main#ec67379b6d8a3a7544ed00dedca5e69a3cac317e"
 dependencies = [
  "anyhow",
  "bevy_reflect 0.18.1",
