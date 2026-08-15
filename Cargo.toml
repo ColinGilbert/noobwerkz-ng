@@ -10,12 +10,10 @@ path = "src/lib.rs"
 [dependencies]
 ozz-animation-rs = { git = "https://github.com/colingilbert/ozz-animation-rs.git", branch = "master" }
 simple-animgraph = { git = "https://github.com/colingilbert/simple-anim-graph.git", branch = "main" }
-#smartcore = "0.4.3"
-rerecast = { git = "https://github.com/colingilbert/rerecast.git", branch = "main" }
 dodgy_3d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 dodgy_2d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 #sampled-dmc = "0.1.2"
-rapier3d = { version = "0.34", features = ["serde-serialize", "enhanced-determinism"] }
+rapier3d = { version = "0.35", features = ["serde-serialize", "enhanced-determinism"] }
 wgpu = "30.0"
 winit = "0.30.13"
 pollster = "1.0.1"
@@ -27,7 +25,7 @@ anyhow = "1.0.104"
 bytemuck = "1.25.2"
 bitmask-enum = "2.2.5"
 once_cell = "1.21.4"
-futures = "0.3.33"
+futures = "0.3.34"
 web-time = "1.1.0"
 rayon = "1.12.0"
 msgpacker = "0.7.1"
@@ -39,12 +37,13 @@ egui-wgpu = { git = "https://github.com/emilk/egui", branch="main" }
 egui-winit = { git = "https://github.com/emilk/egui", branch="main" }
 #egui-snarl = { git ="https://github.com/ColinGilbert/egui-snarl", branch="main" }
 #egui_field_editor = "0.6.0"
-kira = "0.12.2"
+kira = "0.12.3"
 dogoap = "0.5.0"
 mapgraph = "0.12.0"
-wincode = "0.6.0"
+wincode = "0.6.1"
 #mesh-graph = "0.8.0"
 bevy_ballistic_stripped = { git = "https://github.com/colingilbert/bevy_ballistic.git", branch = "main" }
-voxelis = { git = "https://github.com/colingilbert/voxelis.git", branch = "updated" }
-salva3d = { git ="https://github.com/ColinGilbert/salva", branch="master", features=["parry3d", "rapier3d", "rayon"] }
+#voxelis = { git = "https://github.com/colingilbert/voxelis.git", branch = "updated" }
+salva3d = {version="0.10", features=["parry3d", "rapier3d", "rayon"] }
 glam = { version = "0.33", features=["bytemuck", "core-simd"]}
+recast-rs = "0.1.0"
