@@ -32,9 +32,9 @@ msgpacker = "0.7.1"
 serde = { version = "1.0.229", features = ["serde_derive"] }
 futures-signals = "0.3.34"
 slotmap = "1.1.1"
-egui = { git = "https://github.com/emilk/egui", branch="main" }
-egui-wgpu = { git = "https://github.com/emilk/egui", branch="main" }
-egui-winit = { git = "https://github.com/emilk/egui", branch="main" }
+egui = "0.36.1" #{ git = "https://github.com/emilk/egui", branch="main" }
+egui-wgpu = "0.36.1" #{ git = "https://github.com/emilk/egui", branch="main" }
+egui-winit = "0.36.1" #{ git = "https://github.com/emilk/egui", branch="main" }
 #egui-snarl = { git ="https://github.com/ColinGilbert/egui-snarl", branch="main" }
 #egui_field_editor = "0.6.0"
 kira = "0.12.3"
@@ -47,3 +47,4 @@ bevy_ballistic_stripped = { git = "https://github.com/colingilbert/bevy_ballisti
 salva3d = {version="0.10", features=["parry3d", "rapier3d", "rayon"] }
 glam = { version = "0.33", features=["bytemuck", "core-simd"]}
 recast-rs = "0.1.0"
+splashsurf_lib = "0.14.1"
