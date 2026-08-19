@@ -29,7 +29,7 @@ impl Scene {
             cameras: Vec::<Camera>::new(),
             model_nodes: Vec::<ModelNode>::new(),
             active_camera: 0,
-            physics_context: PhysicsContext::new(gravity),
+            physics_context: PhysicsContext::new(gravity, false),
             characters_contexts: Vec::new(),
             character_types_by_name: HashMap::new(),
         }
@@ -49,7 +49,7 @@ impl Scene {
     // }
 
     pub fn step_physics(&mut self) {
-        self.physics_context.step()
+        self.physics_context.rigid_world.step()
     }
 
     pub fn update_characters(&mut self, dt: web_time::Duration, skinned_models: &Vec<SkinnedModel>, queue: &wgpu::Queue) {

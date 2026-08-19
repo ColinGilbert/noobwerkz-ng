@@ -1,57 +1,31 @@
-use rapier3d::prelude::*;
-use serde::*;
+use rapier3d::pipeline::PhysicsWorld;
+use salva3d::LiquidWorld;
 
-#[derive(Serialize, Deserialize)]
+static LIQUIDS_TIMESTEP: f32 = 1.0 / 200.0;
+static NO_LIQUIDS_TIMESTEP: f32 = 1.0 / 60.0;
 pub struct PhysicsContext {
-    pub rigid_body_set: RigidBodySet,
-    pub collider_set: ColliderSet,
-    pub gravity: rapier3d::math::Vector,
-    pub integration_parameters: IntegrationParameters,
-    #[serde(skip_serializing)]
-    #[serde(skip_deserializing)]
-    pub physics_pipeline: PhysicsPipeline,
-    pub island_manager: IslandManager,
-    pub broad_phase: DefaultBroadPhase,
-    pub narrow_phase: NarrowPhase,
-    pub impulse_joint_set: ImpulseJointSet,
-    pub multibody_joint_set: MultibodyJointSet,
-    pub ccd_solver: CCDSolver,
-    pub physics_hooks: (),
-    pub event_handler: (),
+    pub rigid_world: PhysicsWorld,
+    pub liquid_world: Option<LiquidWorld>,
+}
+
+pub struct LiquidWorldProperties {
+    pub particle_radius: f32,
+    pub smoothing_factor: f32,
+    pub boundary_force_coefficient: f32,
 }
 
 impl PhysicsContext {
-    pub fn new(gravity: &glam::Vec3) -> Self {
-        Self {
-            rigid_body_set: RigidBodySet::new(),
-            collider_set: ColliderSet::new(),
-            gravity: rapier3d::math::Vector::new(gravity[0], gravity[1], gravity[2]),
-            integration_parameters: IntegrationParameters::default(),
-            physics_pipeline: PhysicsPipeline::new(),
-            island_manager: IslandManager::new(),
-            broad_phase: DefaultBroadPhase::new(),
-            narrow_phase: NarrowPhase::new(),
-            impulse_joint_set: ImpulseJointSet::new(),
-            multibody_joint_set: MultibodyJointSet::new(),
-            ccd_solver: CCDSolver::new(),
-            physics_hooks: (),
-            event_handler: (),
+    pub fn new(gravity: &glam::Vec3, has_liquids: bool) -> Self {
+        let mut rigid_world = PhysicsWorld::new();
+        rigid_world.gravity = rapier3d::math::Vector3{ x: gravity.x, y: gravity.y, z: gravity.z };
+        if has_liquids {
+            rigid_world.integration_parameters.dt = LIQUIDS_TIMESTEP;
+        } else {
+            rigid_world.integration_parameters.dt = NO_LIQUIDS_TIMESTEP;
         }
-    }
-    pub fn step(&mut self) {
-        self.physics_pipeline.step(
-            self.gravity,
-            &self.integration_parameters,
-            &mut self.island_manager,
-            &mut self.broad_phase,
-            &mut self.narrow_phase,
-            &mut self.rigid_body_set,
-            &mut self.collider_set,
-            &mut self.impulse_joint_set,
-            &mut self.multibody_joint_set,
-            &mut self.ccd_solver,
-            &self.physics_hooks,
-            &self.event_handler,
-        );
+        Self {
+            rigid_world,
+            liquid_world: None,
+        }
     }
 }
