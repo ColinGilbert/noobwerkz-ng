@@ -5,8 +5,7 @@ use std::{collections::HashMap, rc::Rc};
 use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 
 use crate::{
-    camera::Camera, instance::Instance, model_node::ModelNode, character::Character, 
-    physics_context::PhysicsContext, skinned_model_node::SkinnedModelNode, skinned_model::SkinnedModel
+    camera::Camera, character::Character, instance::Instance, model_node::ModelNode, physics_context::{LiquidWorldProperties, PhysicsContext}, skinned_model::SkinnedModel, skinned_model_node::SkinnedModelNode
 };
 
 pub struct CharactersContext {
@@ -29,7 +28,7 @@ impl Scene {
             cameras: Vec::<Camera>::new(),
             model_nodes: Vec::<ModelNode>::new(),
             active_camera: 0,
-            physics_context: PhysicsContext::new(gravity, false),
+            physics_context: PhysicsContext::new(gravity, LiquidWorldProperties { has_liquid_world: true, particle_radius: 0.02, smoothing_factor: 2.0}),
             characters_contexts: Vec::new(),
             character_types_by_name: HashMap::new(),
         }

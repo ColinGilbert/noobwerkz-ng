@@ -13,7 +13,6 @@ simple-animgraph = { git = "https://github.com/colingilbert/simple-anim-graph.gi
 dodgy_3d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 dodgy_2d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 #sampled-dmc = "0.1.2"
-rapier3d = { version = "0.35", features = ["serde-serialize", "enhanced-determinism"] }
 wgpu = "30.0"
 winit = "0.30.13"
 pollster = "1.0.1"
@@ -44,7 +43,10 @@ wincode = "0.6.1"
 #mesh-graph = "0.8.0"
 bevy_ballistic_stripped = { git = "https://github.com/colingilbert/bevy_ballistic.git", branch = "main" }
 #voxelis = { git = "https://github.com/colingilbert/voxelis.git", branch = "updated" }
-salva3d = {version="0.10", features=["parry3d", "rapier3d", "rayon"] }
+rapier3d = { version = "0.35", features = ["serde-serialize", "enhanced-determinism"] }
+salva3d = {version="0.10", features=["parry3d", "rapier", "rayon"] }
 glam = { version = "0.33", features=["bytemuck", "core-simd"]}
 recast-rs = "0.1.0"
 splashsurf_lib = "0.14.1"
+hecs = "0.11.1"
+monstertruck = "0.4.0"
