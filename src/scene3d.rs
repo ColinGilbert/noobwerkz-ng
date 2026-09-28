@@ -13,7 +13,7 @@ pub struct CharactersContext {
     pub skinned_model_node: SkinnedModelNode,
 }
 
-pub struct Scene {
+pub struct Scene3D {
     pub cameras: Vec<Camera>,
     pub model_nodes: Vec<ModelNode>,
     pub active_camera: usize,
@@ -22,7 +22,7 @@ pub struct Scene {
     pub character_types_by_name: HashMap<String, usize>,
 }
 
-impl Scene {
+impl Scene3D {
     pub fn new(gravity: &glam::Vec3) -> Self {
         Self {
             cameras: Vec::<Camera>::new(),

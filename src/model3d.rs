@@ -9,7 +9,7 @@ pub trait Vertex {
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct ModelVertex {
+pub struct Model3DVertex {
     pub position: [f32; 3],
     pub tex_coords: [f32; 2],
     pub normal: [f32; 3],
@@ -17,7 +17,7 @@ pub struct ModelVertex {
     pub bitangent: [f32; 3],
 }
 
-impl ModelVertex {
+impl Model3DVertex {
     pub fn new() -> Self {
         Self {
             position: [0.0; 3],
@@ -29,11 +29,11 @@ impl ModelVertex {
     }
 }
 
-impl Vertex for ModelVertex {
+impl Vertex for Model3DVertex {
     fn desc() -> wgpu::VertexBufferLayout<'static> {
         use std::mem;
         wgpu::VertexBufferLayout {
-            array_stride: mem::size_of::<ModelVertex>() as wgpu::BufferAddress,
+            array_stride: mem::size_of::<Model3DVertex>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Vertex,
             attributes: &[
                 // Positions
@@ -71,7 +71,7 @@ impl Vertex for ModelVertex {
     }
 }
 
-pub struct TexturedMesh {
+pub struct TexturedMesh3D {
     pub name: String,
     pub vertex_buffer: wgpu::Buffer,
     pub index_buffer: wgpu::Buffer,
@@ -83,13 +83,13 @@ pub struct TexturedMesh {
     pub dimensions: glam::Vec3,
 }
 
-pub struct Model {
-    pub meshes: TexturedMeshes<TexturedMesh>,
+pub struct Model3D {
+    pub meshes: TexturedMeshes<TexturedMesh3D>,
     pub materials: Materials<Material>,
     pub name: String,
 }
 
-impl Model {
+impl Model3D {
     pub fn new() -> Self {
         Self {
             meshes: TexturedMeshes::new(),
@@ -102,14 +102,14 @@ pub trait DrawModel<'a> {
     #[allow(unused)]
     fn draw_mesh(
         &mut self,
-        mesh: &'a TexturedMesh,
+        mesh: &'a TexturedMesh3D,
         material: &'a Material,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_mesh_instanced(
         &mut self,
-        mesh: &'a TexturedMesh,
+        mesh: &'a TexturedMesh3D,
         material: &'a Material,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
@@ -119,13 +119,13 @@ pub trait DrawModel<'a> {
     #[allow(unused)]
     fn draw_model(
         &mut self,
-        model: &'a Model,
+        model: &'a Model3D,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_model_instanced(
         &mut self,
-        model: &'a Model,
+        model: &'a Model3D,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -133,7 +133,7 @@ pub trait DrawModel<'a> {
     #[allow(unused)]
     fn draw_model_instanced_with_material(
         &mut self,
-        model: &'a Model,
+        model: &'a Model3D,
         material: &'a Material,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
@@ -147,7 +147,7 @@ where
 {
     fn draw_mesh(
         &mut self,
-        mesh: &'b TexturedMesh,
+        mesh: &'b TexturedMesh3D,
         material: &'b Material,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
@@ -157,7 +157,7 @@ where
 
     fn draw_mesh_instanced(
         &mut self,
-        mesh: &'b TexturedMesh,
+        mesh: &'b TexturedMesh3D,
         material: &'b Material,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
@@ -173,7 +173,7 @@ where
 
     fn draw_model(
         &mut self,
-        model: &'b Model,
+        model: &'b Model3D,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
     ) {
@@ -182,7 +182,7 @@ where
 
     fn draw_model_instanced(
         &mut self,
-        model: &'b Model,
+        model: &'b Model3D,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
@@ -201,7 +201,7 @@ where
 
     fn draw_model_instanced_with_material(
         &mut self,
-        model: &'b Model,
+        model: &'b Model3D,
         material: &'b Material,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
@@ -223,13 +223,13 @@ pub trait DrawLight<'a> {
     #[allow(unused)]
     fn draw_light_mesh(
         &mut self,
-        mesh: &'a TexturedMesh,
+        mesh: &'a TexturedMesh3D,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_light_mesh_instanced(
         &mut self,
-        mesh: &'a TexturedMesh,
+        mesh: &'a TexturedMesh3D,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -237,13 +237,13 @@ pub trait DrawLight<'a> {
 
     fn draw_light_model(
         &mut self,
-        model: &'a Model,
+        model: &'a Model3D,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_light_model_instanced(
         &mut self,
-        model: &'a Model,
+        model: &'a Model3D,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -256,7 +256,7 @@ where
 {
     fn draw_light_mesh(
         &mut self,
-        mesh: &'b TexturedMesh,
+        mesh: &'b TexturedMesh3D,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
     ) {
@@ -265,7 +265,7 @@ where
 
     fn draw_light_mesh_instanced(
         &mut self,
-        mesh: &'b TexturedMesh,
+        mesh: &'b TexturedMesh3D,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
@@ -279,7 +279,7 @@ where
 
     fn draw_light_model(
         &mut self,
-        model: &'b Model,
+        model: &'b Model3D,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
     ) {
@@ -287,7 +287,7 @@ where
     }
     fn draw_light_model_instanced(
         &mut self,
-        model: &'b Model,
+        model: &'b Model3D,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
@@ -303,7 +303,7 @@ where
     }
 }
 
-pub fn calculate_tangents_and_bitangents(verts: &mut Vec<ModelVertex>, indices: &Vec<u32>) -> () {
+pub fn calculate_tangents_and_bitangents(verts: &mut Vec<Model3DVertex>, indices: &Vec<u32>) -> () {
     let mut triangles_included = vec![0; verts.len()];
 
     // Calculate tangents and bitangets. We're going to

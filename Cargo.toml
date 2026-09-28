@@ -8,7 +8,7 @@ name = "noobwerkz"
 path = "src/lib.rs"
 
 [dependencies]
-ozz-animation-rs = { git = "https://github.com/colingilbert/ozz-animation-rs.git", branch = "master" }
+ozz-animation-rs = "0.11.0" #{ git = "https://github.com/colingilbert/ozz-animation-rs.git", branch = "master" }
 simple-animgraph = { git = "https://github.com/colingilbert/simple-anim-graph.git", branch = "main" }
 dodgy_3d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 dodgy_2d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
@@ -31,12 +31,12 @@ msgpacker = "0.7.1"
 serde = { version = "1.0.229", features = ["serde_derive"] }
 futures-signals = "0.3.34"
 slotmap = "1.1.1"
-egui = "0.36.1" #{ git = "https://github.com/emilk/egui", branch="main" }
-egui-wgpu = "0.36.1" #{ git = "https://github.com/emilk/egui", branch="main" }
-egui-winit = "0.36.1" #{ git = "https://github.com/emilk/egui", branch="main" }
+egui = "0.36.2" #{ git = "https://github.com/emilk/egui", branch="main" }
+egui-wgpu = "0.36.2" #{ git = "https://github.com/emilk/egui", branch="main" }
+egui-winit = "0.36.2" #{ git = "https://github.com/emilk/egui", branch="main" }
 #egui-snarl = { git ="https://github.com/ColinGilbert/egui-snarl", branch="main" }
 #egui_field_editor = "0.6.0"
-kira = "0.12.3"
+kira = "0.12.5"
 dogoap = "0.5.0"
 mapgraph = "0.12.0"
 wincode = "0.6.1"
@@ -49,4 +49,5 @@ glam = { version = "0.33", features=["bytemuck", "core-simd"]}
 recast-rs = "0.1.0"
 splashsurf_lib = "0.14.1"
 hecs = "0.11.1"
-monstertruck = "0.4.0"
+monstertruck = "0.4.1"
+planning = "1.0.1"

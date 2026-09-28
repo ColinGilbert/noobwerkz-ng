@@ -1,6 +1,6 @@
 use crate::index_types::*;
 use crate::material::*;
-use crate::model::*;
+use crate::model3d::*;
 use std::ops::Range;
 
 #[repr(C)]
@@ -60,7 +60,7 @@ impl SkinnedModelVertex {
             bone_weights: [0.0; 4],
         }
     }
-    pub fn from_vert(model_vert: &ModelVertex) -> Self {
+    pub fn from_vert(model_vert: &Model3DVertex) -> Self {
         Self {
             position: model_vert.position,
             tex_coords: model_vert.tex_coords,

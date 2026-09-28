@@ -1,6 +1,6 @@
 use crate::index_types::*;
 use crate::material::*;
-use crate::model::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
+use crate::model3d::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
 use crate::serialized_model::*;
 use crate::skeletal_context::SkeletalContext;
 use crate::skinned_model::*;
@@ -46,7 +46,7 @@ pub fn load_skinned_model_from_serialized(
     let mut model_results = SkinnedModel::new();
     for m in model.meshes.iter_mut() {
         println!("Mesh {}", m.name);
-        let mut verts = Vec::<ModelVertex>::new();
+        let mut verts = Vec::<Model3DVertex>::new();
         let mut indices = Vec::<u32>::new();
         if m.positions.len() != m.normals.len() {
             println!("Not enough normals");
@@ -70,7 +70,7 @@ pub fn load_skinned_model_from_serialized(
 
         // let matrix = glam::Mat4::from_quat(glam::Quat::from_axis_angle(glam::Vec3{x: 1.0, y: 0.0, z: 0.0}, 90.0));
         while i < m.positions.len() {
-            let mut v = ModelVertex::new();
+            let mut v = Model3DVertex::new();
             v.position = m.positions[i];
             v.normal = m.normals[i];
             v.tex_coords = [m.uvs[i][0], 1.0 as f32 - m.uvs[i][1]];
@@ -225,10 +225,10 @@ pub fn load_model_from_serialized(
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
-) -> Option<Model> {
-    let mut model_results = Model::new();
+) -> Option<Model3D> {
+    let mut model_results = Model3D::new();
     for m in model.meshes.iter_mut() {
-        let mut verts = Vec::<ModelVertex>::new();
+        let mut verts = Vec::<Model3DVertex>::new();
         let mut indices = Vec::<u32>::new();
         if m.positions.len() != m.normals.len() {
             return Option::None;
@@ -238,7 +238,7 @@ pub fn load_model_from_serialized(
         }
         let mut i = 0;
         while i < m.positions.len() {
-            let mut v = ModelVertex::new();
+            let mut v = Model3DVertex::new();
             v.position = m.positions[i];
             v.normal = m.normals[i];
             v.tex_coords = [m.uvs[i][0], 1.0 - m.uvs[i][1]];
@@ -264,7 +264,7 @@ pub fn load_model_from_serialized(
             usage: wgpu::BufferUsages::INDEX,
         });
 
-        model_results.meshes.push(TexturedMesh {
+        model_results.meshes.push(TexturedMesh3D {
             name: m.name.clone(),
             vertex_buffer,
             index_buffer,

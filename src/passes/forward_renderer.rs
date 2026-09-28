@@ -1,10 +1,10 @@
 use crate::graphics::create_render_pipeline;
 //use crate::index_types::*;
 use crate::instance::*;
-use crate::model::*;
+use crate::model3d::*;
 use crate::model_node::*;
 use crate::passes::Pass;
-use crate::scene::CharactersContext;
+use crate::scene3d::CharactersContext;
 use crate::skinned_model::*;
 // use crate::skinned_model_node::*;
 use crate::texture::*;
@@ -27,7 +27,7 @@ impl Pass for ForwardRenderer {
         &mut self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        models: &Vec<Model>,
+        models: &Vec<Model3D>,
         skinned_models: &Vec<SkinnedModel>,
         model_nodes: &Vec<ModelNode>,
         characters_contexts: &Vec<CharactersContext>,
@@ -244,7 +244,7 @@ impl ForwardRenderer {
                 &render_pipeline_layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[Some(ModelVertex::desc()), Some(InstanceRaw::desc())],
+                &[Some(Model3DVertex::desc()), Some(InstanceRaw::desc())],
                 shader,
             )
         };
@@ -283,7 +283,7 @@ impl ForwardRenderer {
                 &layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[Some(ModelVertex::desc())],
+                &[Some(Model3DVertex::desc())],
                 shader,
             )
         };

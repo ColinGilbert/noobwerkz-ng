@@ -1,4 +1,4 @@
-use crate::model::*;
+use crate::model3d::*;
 use std::mem;
 
 pub struct Instance {
