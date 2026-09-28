@@ -1852,13 +1852,6 @@ name = "glam"
 version = "0.30.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19fc433e8437a212d1b6f1e68c7824af3aed907da60afa994e7f542d18d12aa9"
-dependencies = [
- "approx 0.5.1",
- "bytemuck",
- "libm",
- "rkyv",
- "serde_core",
-]
 
 [[package]]
 name = "glam"
@@ -1882,17 +1875,18 @@ dependencies = [
  "bytemuck",
  "libm",
  "mint",
+ "rkyv",
  "serde_core",
 ]
 
 [[package]]
 name = "glam-ext"
-version = "0.3.2"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "55bc3bce8d1476369a244cfa2857695a3ff96d58631db83253186ade322d04da"
+checksum = "49f6098938830bba86809107b50dcb0fbdb037dac6e43dbe4af4c0b9126dfaa0"
 dependencies = [
  "approx 0.5.1",
- "glam 0.30.10",
+ "glam 0.33.11",
  "libm",
  "rkyv",
 ]
@@ -3612,13 +3606,12 @@ dependencies = [
 
 [[package]]
 name = "ozz-animation-rs"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16f9fb83a8dded39c7684045951a0be9c93d0ba2e5a543990dc0b48713808cb4"
+version = "0.11.1"
+source = "git+https://github.com/colingilbert/ozz-animation-rs.git?branch=master#ea9f1d92cbe7b3d5179208335cd25088be7e0f2d"
 dependencies = [
  "bimap",
  "bytecheck",
- "glam 0.30.10",
+ "glam 0.33.11",
  "glam-ext",
  "rkyv",
  "serde",
@@ -4686,7 +4679,7 @@ checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
 [[package]]
 name = "simple-animgraph"
 version = "0.1.0"
-source = "git+https://github.com/colingilbert/simple-anim-graph.git?branch=main#649b9f859af1f294061627ff7580038e5f9a3284"
+source = "git+https://github.com/colingilbert/simple-anim-graph.git?branch=main#33934d8ac0eccbc17e2a86caaa9a155b7cbc9edd"
 dependencies = [
  "anyhow",
  "glam 0.33.11",
