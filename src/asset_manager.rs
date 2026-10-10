@@ -1,6 +1,6 @@
 // This code serves as a simplified way for asset loading.
 use crate::{
-    material::Material, model3d::*, resource::*, skeletal_context, skinned_model::*, texture::*,
+    material::Material, model3d::*, resource::*, skeletal_context, skinned_model::*, texture::*, index_types::*,
 };
 use anyhow::*;
 use kira::sound::static_sound::StaticSoundData;
@@ -18,7 +18,7 @@ pub struct AssetManager {
     pub audio_clip_names: HashMap<usize, String>,
 
     pub models: Vec<Model3D>,
-    pub skinned_models: Vec<SkinnedModel>,
+    pub skinned_models: SkinnedModels<SkinnedModel>,
     pub textures: Vec<Texture>,
     pub audio_clips: Vec<StaticSoundData>, // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
                                            // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
@@ -36,7 +36,7 @@ impl AssetManager {
             texture_names: HashMap::new(),
             audio_clip_names: HashMap::new(),
             models: Vec::<Model3D>::new(),
-            skinned_models: Vec::<SkinnedModel>::new(),
+            skinned_models: SkinnedModels::<SkinnedModel>::new(),
             textures: Vec::<Texture>::new(),
             audio_clips: Vec::<StaticSoundData>::new(),
             // skeletons: Vec::<Arc<ozz_animation_rs::Skeleton>>::new(),

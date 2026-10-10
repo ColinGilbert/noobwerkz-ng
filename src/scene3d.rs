@@ -5,11 +5,11 @@ use std::{collections::HashMap, rc::Rc};
 use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 
 use crate::{
-    camera::Camera, character::Character, instance::Instance, model_node::ModelNode, physics_context::{LiquidWorldProperties, PhysicsContext}, skinned_model::SkinnedModel, skinned_model_node::SkinnedModelNode
+    camera::Camera, index_types::*, character::Character3D, instance::Instance, model_node::ModelNode, physics_context::{LiquidWorldProperties, PhysicsContext}, skinned_model::SkinnedModel, skinned_model_node::SkinnedModelNode
 };
 
 pub struct CharactersContext {
-    pub characters: Vec<Character>,
+    pub characters: Vec<Character3D>,
     pub skinned_model_node: SkinnedModelNode,
 }
 
@@ -51,7 +51,7 @@ impl Scene3D {
         self.physics_context.rigid_world.step()
     }
 
-    pub fn update_characters(&mut self, dt: web_time::Duration, skinned_models: &Vec<SkinnedModel>, queue: &wgpu::Queue) {
+    pub fn update_characters(&mut self, dt: web_time::Duration, skinned_models: &SkinnedModels<SkinnedModel>, queue: &wgpu::Queue) {
         for characters_ctx in self.characters_contexts.iter_mut() {
             
             characters_ctx.skinned_model_node.instances.clear();
@@ -87,7 +87,7 @@ impl Scene3D {
         &mut self,
         device: &mut wgpu::Device,
         bone_matrices_bind_group_layout: &wgpu::BindGroupLayout,
-        skinned_model_idx: usize,
+        skinned_model_idx: SkinnedModelIndex,
         instances: &Vec<Instance>,
         animgraph_definition: &AnimGraphDefinition,
         skeleton: Rc<ozz_animation_rs::Skeleton>,
@@ -107,7 +107,7 @@ impl Scene3D {
         println!("ADDING CHARACTERS: Instance count: {}", instances.len());
         let characters_ctx_idx = self.characters_contexts.len() - 1;
         for instance in instances {
-            let character = Character::new(
+            let character = Character3D::new(
                 skeleton.clone(),
                 instance.position.into(),
                 instance.orientation,

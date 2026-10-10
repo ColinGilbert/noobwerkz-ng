@@ -1,7 +1,7 @@
 use msgpacker::*;
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
-pub struct SerializedMesh {
+pub struct SerializedMesh3D {
     pub name: String,
     pub translation: [f32; 3],
     pub scale: [f32; 3],
@@ -19,7 +19,7 @@ pub struct SerializedMesh {
     pub material_index: u32,
 }
 
-impl SerializedMesh {
+impl SerializedMesh3D {
     pub fn new() -> Self {
         Self {
             name: "".to_string(),
@@ -70,7 +70,7 @@ impl SerializedMaterial {
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedModel {
-    pub meshes: Vec<SerializedMesh>,
+    pub meshes: Vec<SerializedMesh3D>,
     pub materials: Vec<SerializedMaterial>,
     pub bone_names: Vec<String>,
     pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,

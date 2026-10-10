@@ -2,11 +2,7 @@ use std::ops::Range;
 
 use crate::index_types::*;
 use crate::material::*;
-
-pub trait Vertex {
-    fn desc() -> wgpu::VertexBufferLayout<'static>;
-}
-
+use crate::vertex::*;
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Model3DVertex {

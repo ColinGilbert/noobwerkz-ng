@@ -1,4 +1,5 @@
 use crate::model3d::*;
+use crate::vertex::*;
 use std::mem;
 
 pub struct Instance {

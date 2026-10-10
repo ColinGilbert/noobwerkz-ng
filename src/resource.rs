@@ -1,7 +1,7 @@
 use crate::index_types::*;
 use crate::material::*;
 use crate::model3d::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
-use crate::serialized_model::*;
+use crate::serialized_model3d::*;
 use crate::skeletal_context::SkeletalContext;
 use crate::skinned_model::*;
 use crate::texture;

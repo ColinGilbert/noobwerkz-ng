@@ -1,11 +1,12 @@
 use crate::index_types::*;
 use crate::material::*;
 use crate::model3d::*;
+use crate::vertex::*;
 use std::ops::Range;
 
 #[repr(C)]
 pub struct SkinnedModel {
-    pub meshes: SkinnedMeshes<SkinnedTexturedMesh>,
+    pub meshes: SkinnedTexturedMeshes<SkinnedTexturedMesh>,
     pub materials: Materials<Material>,
     pub name: String,
     pub inverse_bind_matrices: Vec<glam::Mat4>,
@@ -14,7 +15,7 @@ pub struct SkinnedModel {
 impl SkinnedModel {
     pub fn new() -> Self {
         Self {
-            meshes: SkinnedMeshes::new(),
+            meshes: SkinnedTexturedMeshes::new(),
             materials: Materials::new(),
             name: "".to_owned(),
             inverse_bind_matrices: Vec::new(),

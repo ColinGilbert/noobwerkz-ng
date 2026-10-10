@@ -2,7 +2,7 @@ use ozz_animation_rs::*;
 use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 use std::{collections::HashMap, rc::Rc};
 
-pub struct Character {
+pub struct Character3D {
     //pub instance_idx: usize,
     pub position: glam::Vec3,
     pub orientation: glam::Quat,
@@ -11,7 +11,7 @@ pub struct Character {
     pub anim_graph: AnimGraph,
 }
 
-impl Character {
+impl Character3D {
     pub fn new(
         skeleton: Rc<Skeleton>,
         position: glam::Vec3,
