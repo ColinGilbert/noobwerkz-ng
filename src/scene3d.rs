@@ -24,8 +24,8 @@ pub struct Scene3D {
 
 impl Scene3D {
     pub fn new(gravity: &glam::Vec3) -> Self {
-        let mut cameras = Cameras::new();
-        cameras.push(Camera::new(&glam::Vec3{x: 0.0, y:0.0, z: 0.0}, &glam::Vec3{x: 0.0, y: 0.0, z: 0.0}, &glam::Vec3::Y, 1.0, 1.0, Projection::new(600, 800, 1.0, 0.0, 100.0)));
+        let cameras = Cameras::new();
+        //cameras.push(Camera::new(&glam::Vec3{x: 0.0, y:0.0, z: 0.0}, &glam::Vec3{x: 0.0, y: 0.0, z: 0.0}, &glam::Vec3::Y, 1.0, 1.0, Projection::new(600, 800, 1.0, 0.0, 100.0)));
         Self {
             cameras,
             model_nodes: Model3DNodes::new(),
