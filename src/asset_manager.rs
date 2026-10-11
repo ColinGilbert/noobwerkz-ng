@@ -18,7 +18,7 @@ pub struct AssetManager {
     pub audio_clip_names: HashMap<AudioClipIndex, String>,
 
     pub models: Models3D<Model3D>,
-    pub skinned_models: SkinnedModels<SkinnedModel>,
+    pub skinned_models: SkinnedModels<SkinnedModel3D>,
     pub textures: Textures<Texture>,
     pub audio_clips: AudioClips<StaticSoundData>, // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
                                            // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
@@ -36,7 +36,7 @@ impl AssetManager {
             texture_names: HashMap::new(),
             audio_clip_names: HashMap::new(),
             models:Models3D::new(),
-            skinned_models: SkinnedModels::<SkinnedModel>::new(),
+            skinned_models: SkinnedModels::<SkinnedModel3D>::new(),
             textures: Textures::new(),
             audio_clips: AudioClips::new(),
             // skeletons: Vec::<Arc<ozz_animation_rs::Skeleton>>::new(),
@@ -56,7 +56,7 @@ impl AssetManager {
         let mut serialized = load_serialized_model(filepath.as_path());
         let mut path = filepath.clone();
         path.pop();
-        let model = load_model_from_serialized(
+        let model = load_3d_model_from_serialized(
             &mut serialized,
             default_material,
             &path.as_path(),
@@ -94,7 +94,7 @@ impl AssetManager {
         let mut serialized = load_serialized_model(filepath.as_path());
         let mut path = filepath.clone();
         path.pop();
-        let model = load_skinned_model_from_serialized(
+        let model = load_skinned_3d_model_from_serialized(
             &mut serialized,
             default_material,
             &path.as_path(),

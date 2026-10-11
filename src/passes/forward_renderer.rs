@@ -1,11 +1,11 @@
 use crate::graphics::create_render_pipeline;
 use crate::index_types::*;
-use crate::instance::*;
+use crate::instance3d::*;
 use crate::vertex::*;
 use crate::model3d::*;
 use crate::model3d_node::*;
 use crate::passes::Pass;
-use crate::scene3d::CharactersContext;
+use crate::scene3d::Characters3DContext;
 use crate::skinned_model::*;
 
 // use crate::skinned_model_node::*;
@@ -30,9 +30,9 @@ impl Pass for ForwardRenderer {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         models: &Models3D<Model3D>,
-        skinned_models: &SkinnedModels<SkinnedModel>,
+        skinned_models: &SkinnedModels<SkinnedModel3D>,
         model_nodes: &Model3DNodes<Model3DNode>,
-        characters_contexts: &CharactersContexts<CharactersContext>,
+        characters_contexts: &Characters3DContexts<Characters3DContext>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
     ) {
@@ -79,7 +79,7 @@ impl Pass for ForwardRenderer {
 
             for m in model_nodes.iter() {
                 let mut count = 0;
-                let mut model_instance_data = Vec::<InstanceRaw>::new();
+                let mut model_instance_data = Vec::<Instance3DRaw>::new();
                 let model = &models[m.model_idx];
                 for i in &m.instances {
                     model_instance_data.push(i.to_raw());
@@ -87,7 +87,7 @@ impl Pass for ForwardRenderer {
                 }
 
                 for mesh in model.meshes.iter() {
-                    let mut mesh_instance_data = Vec::<InstanceRaw>::new();
+                    let mut mesh_instance_data = Vec::<Instance3DRaw>::new();
 
                     let mesh_m_mat = glam::Mat4::from_scale_rotation_translation(
                         mesh.scale,
@@ -99,7 +99,7 @@ impl Pass for ForwardRenderer {
                         let mesh_n_mat = glam::Mat3::from_quat(mesh.rotation);
                         let model_m_mat = glam::Mat4::from_cols_array_2d(&instance.model);
                         let model_n_mat = glam::Mat3::from_cols_array_2d(&instance.normal);
-                        let temp = InstanceRaw {
+                        let temp = Instance3DRaw {
                             model: (model_m_mat * mesh_m_mat).to_cols_array_2d(),
                             normal: (model_n_mat * mesh_n_mat).to_cols_array_2d(),
                         };
@@ -130,7 +130,7 @@ impl Pass for ForwardRenderer {
 
             for c in characters_contexts.iter() {
                 let mut count = 0;
-                let mut model_instances = Vec::<SkinnedInstanceRaw>::new();
+                let mut model_instances = Vec::<SkinnedInstance3DRaw>::new();
                 let model = &skinned_models[c.skinned_model_node.skinned_model_idx];
 
                 for i in &c.skinned_model_node.instances {
@@ -139,7 +139,7 @@ impl Pass for ForwardRenderer {
                 }
 
                 for mesh in model.meshes.iter() {
-                    let mut mesh_instances = Vec::<SkinnedInstanceRaw>::new();
+                    let mut mesh_instances = Vec::<SkinnedInstance3DRaw>::new();
 
                     let mesh_mat = glam::Mat4::from_scale_rotation_translation(
                         mesh.scale,
@@ -151,7 +151,7 @@ impl Pass for ForwardRenderer {
                         let instance_model_mat =
                             glam::Mat4::from_cols_array_2d(&instance_raw.model);
 
-                        let temp = SkinnedInstanceRaw {
+                        let temp = SkinnedInstance3DRaw {
                             model: (instance_model_mat * mesh_mat).to_cols_array_2d(),
                         };
 
@@ -246,7 +246,7 @@ impl ForwardRenderer {
                 &render_pipeline_layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[Some(Model3DVertex::desc()), Some(InstanceRaw::desc())],
+                &[Some(Model3DVertex::desc()), Some(Instance3DRaw::desc())],
                 shader,
             )
         };
@@ -261,7 +261,7 @@ impl ForwardRenderer {
                 &skinned_render_pipeline_layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[Some(SkinnedModelVertex::desc()), Some(SkinnedInstanceRaw::desc())],
+                &[Some(SkinnedModelVertex3D::desc()), Some(SkinnedInstance3DRaw::desc())],
                 shader,
             )
         };

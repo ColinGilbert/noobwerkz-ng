@@ -34,7 +34,7 @@ pub fn load_serialized_model(filepath: &std::path::Path) -> SerializedModel {
 }
 
 // TODO: Robustify
-pub fn load_skinned_model_from_serialized(
+pub fn load_skinned_3d_model_from_serialized(
     model: &mut SerializedModel,
     default_material: &Material,
     path: &std::path::Path,
@@ -42,8 +42,8 @@ pub fn load_skinned_model_from_serialized(
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
     skeletal_context: &SkeletalContext3D,
-) -> Option<SkinnedModel> {
-    let mut model_results = SkinnedModel::new();
+) -> Option<SkinnedModel3D> {
+    let mut model_results = SkinnedModel3D::new();
     for m in model.meshes.iter_mut() {
         println!("Mesh {}", m.name);
         let mut verts = Vec::<Model3DVertex>::new();
@@ -86,10 +86,10 @@ pub fn load_skinned_model_from_serialized(
 
         calculate_tangents_and_bitangents(&mut verts, &indices);
 
-        let mut skinned_verts = Vec::<SkinnedModelVertex>::new();
+        let mut skinned_verts = Vec::<SkinnedModelVertex3D>::new();
 
         for (i, v) in verts.iter().enumerate() {
-            let mut sv = SkinnedModelVertex::from_vert(&v);
+            let mut sv = SkinnedModelVertex3D::from_vert(&v);
             let mut bi = [0; 4]; //m.bone_indices[i];
             for (ii, bone_index) in m.bone_indices[i].iter().enumerate() {
                 let bone_name = model.bone_names[*bone_index as usize].clone();
@@ -113,7 +113,7 @@ pub fn load_skinned_model_from_serialized(
             usage: wgpu::BufferUsages::INDEX,
         });
 
-        model_results.meshes.push(SkinnedTexturedMesh {
+        model_results.meshes.push(SkinnedTexturedMesh3D {
             name: m.name.clone(),
             vertex_buffer,
             index_buffer,
@@ -218,7 +218,7 @@ pub fn load_skinned_model_from_serialized(
     Some(model_results)
 }
 
-pub fn load_model_from_serialized(
+pub fn load_3d_model_from_serialized(
     model: &mut SerializedModel,
     default_material: &Material,
     filepath: &std::path::Path,

@@ -5,14 +5,14 @@ use crate::vertex::*;
 use std::ops::Range;
 
 #[repr(C)]
-pub struct SkinnedModel {
-    pub meshes: SkinnedTexturedMeshes<SkinnedTexturedMesh>,
+pub struct SkinnedModel3D {
+    pub meshes: SkinnedTexturedMeshes<SkinnedTexturedMesh3D>,
     pub materials: Materials<Material>,
     pub name: String,
     pub inverse_bind_matrices: Vec<glam::Mat4>,
 }
 
-impl SkinnedModel {
+impl SkinnedModel3D {
     pub fn new() -> Self {
         Self {
             meshes: SkinnedTexturedMeshes::new(),
@@ -24,7 +24,7 @@ impl SkinnedModel {
 }
 
 #[repr(C)]
-pub struct SkinnedTexturedMesh {
+pub struct SkinnedTexturedMesh3D {
     pub name: String,
     pub vertex_buffer: wgpu::Buffer,
     pub index_buffer: wgpu::Buffer,
@@ -39,7 +39,7 @@ pub struct SkinnedTexturedMesh {
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct SkinnedModelVertex {
+pub struct SkinnedModelVertex3D {
     pub position: [f32; 3],
     pub tex_coords: [f32; 2],
     pub normal: [f32; 3],
@@ -49,7 +49,7 @@ pub struct SkinnedModelVertex {
     pub bone_weights: [f32; 4],
 }
 
-impl SkinnedModelVertex {
+impl SkinnedModelVertex3D {
     pub fn new() -> Self {
         Self {
             position: [0.0; 3],
@@ -74,11 +74,11 @@ impl SkinnedModelVertex {
     }
 }
 
-impl Vertex for SkinnedModelVertex {
+impl Vertex for SkinnedModelVertex3D {
     fn desc() -> wgpu::VertexBufferLayout<'static> {
         use std::mem;
         wgpu::VertexBufferLayout {
-            array_stride: mem::size_of::<SkinnedModelVertex>() as wgpu::BufferAddress,
+            array_stride: mem::size_of::<SkinnedModelVertex3D>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Vertex,
             attributes: &[
                 // Positions
@@ -132,7 +132,7 @@ pub trait DrawSkinnedModel<'a> {
     #[allow(unused)]
     fn draw_skinned_mesh(
         &mut self,
-        mesh: &'a SkinnedTexturedMesh,
+        mesh: &'a SkinnedTexturedMesh3D,
         material: &'a Material,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -140,7 +140,7 @@ pub trait DrawSkinnedModel<'a> {
     );
     fn draw_skinned_mesh_instanced(
         &mut self,
-        mesh: &'a SkinnedTexturedMesh,
+        mesh: &'a SkinnedTexturedMesh3D,
         material: &'a Material,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
@@ -150,14 +150,14 @@ pub trait DrawSkinnedModel<'a> {
     #[allow(unused)]
     fn draw_skinned_model(
         &mut self,
-        model: &'a SkinnedModel,
+        model: &'a SkinnedModel3D,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
         bone_matrices_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_skinned_model_instanced(
         &mut self,
-        model: &'a SkinnedModel,
+        model: &'a SkinnedModel3D,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -166,7 +166,7 @@ pub trait DrawSkinnedModel<'a> {
     #[allow(unused)]
     fn draw_skinned_model_instanced_with_material(
         &mut self,
-        model: &'a SkinnedModel,
+        model: &'a SkinnedModel3D,
         material: &'a Material,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
@@ -181,7 +181,7 @@ where
 {
     fn draw_skinned_mesh(
         &mut self,
-        mesh: &'b SkinnedTexturedMesh,
+        mesh: &'b SkinnedTexturedMesh3D,
         material: &'b Material,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
@@ -199,7 +199,7 @@ where
 
     fn draw_skinned_mesh_instanced(
         &mut self,
-        mesh: &'b SkinnedTexturedMesh,
+        mesh: &'b SkinnedTexturedMesh3D,
         material: &'b Material,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
@@ -217,7 +217,7 @@ where
 
     fn draw_skinned_model(
         &mut self,
-        model: &'b SkinnedModel,
+        model: &'b SkinnedModel3D,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
         bone_matrices_bind_group: &'b wgpu::BindGroup,
@@ -233,7 +233,7 @@ where
 
     fn draw_skinned_model_instanced(
         &mut self,
-        model: &'b SkinnedModel,
+        model: &'b SkinnedModel3D,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
@@ -254,7 +254,7 @@ where
 
     fn draw_skinned_model_instanced_with_material(
         &mut self,
-        model: &'b SkinnedModel,
+        model: &'b SkinnedModel3D,
         material: &'b Material,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,

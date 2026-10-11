@@ -1,12 +1,12 @@
 use std::rc::Rc;
 
-use crate::{instance::Instance, index_types::*};
+use crate::{instance3d::Instance3D, index_types::*};
 // use rayon::prelude::*;
 use wgpu::{BindGroupLayout, util::*};
 
 pub struct SkinnedModelNode {
     pub skinned_model_idx: SkinnedModelIndex,
-    pub instances: Vec<Instance>,
+    pub instances: Vec<Instance3D>,
     pub num_bones: u32,
     pub bones_storage_buffer: wgpu::Buffer,
     pub num_bones_buffer: wgpu::Buffer,
@@ -19,7 +19,7 @@ impl SkinnedModelNode {
         device: &mut wgpu::Device,
         bone_matrices_bind_group_layout: &BindGroupLayout,
         skinned_model_idx: SkinnedModelIndex,
-        instances_arg: &Vec<Instance>,
+        instances_arg: &Vec<Instance3D>,
         skeleton: Rc<ozz_animation_rs::Skeleton>,
     ) -> Self {
         // let mut playbacks = Vec::new();
@@ -30,7 +30,7 @@ impl SkinnedModelNode {
         let mut bone_matrices = Vec::<glam::Mat4>::new();
         let mut instances = Vec::new();
         for instance in instances_arg {
-            let i = Instance{ position: instance.position, orientation: instance.orientation, scale: instance.scale};
+            let i = Instance3D{ position: instance.position, orientation: instance.orientation, scale: instance.scale};
             instances.push(i);
         }
         let num_bones_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {

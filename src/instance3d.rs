@@ -2,23 +2,23 @@ use crate::model3d::*;
 use crate::vertex::*;
 use std::mem;
 
-pub struct Instance {
+pub struct Instance3D {
     pub position: glam::Vec3A,
     pub orientation: glam::Quat,
     pub scale: glam::Vec3A,
 }
 
-impl Instance {
-    pub fn to_raw(&self) -> InstanceRaw {
-        InstanceRaw {
+impl Instance3D {
+    pub fn to_raw(&self) -> Instance3DRaw {
+        Instance3DRaw {
             model: glam::Mat4::from_scale_rotation_translation(self.scale.into(), self.orientation, self.position.into())
             .to_cols_array_2d(),
             normal: glam::Mat3::from_quat(self.orientation).to_cols_array_2d(),
         }
     }
 
-    pub fn to_skinned_raw(&self) -> SkinnedInstanceRaw {
-        SkinnedInstanceRaw {
+    pub fn to_skinned_raw(&self) -> SkinnedInstance3DRaw {
+        SkinnedInstance3DRaw {
             model: glam::Mat4::from_scale_rotation_translation(self.scale.into(), self.orientation, self.position.into())
             .to_cols_array_2d(),
             //normal: glam::Mat3::from_quat(self.orientation).to_cols_array_2d(),
@@ -29,7 +29,7 @@ impl Instance {
 #[repr(C)]
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 #[allow(dead_code)]
-pub struct InstanceRaw {
+pub struct Instance3DRaw {
     pub model: [[f32; 4]; 4],
     pub normal: [[f32; 3]; 3],
 }
@@ -37,15 +37,15 @@ pub struct InstanceRaw {
 #[repr(C)]
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 #[allow(dead_code)]
-pub struct SkinnedInstanceRaw {
+pub struct SkinnedInstance3DRaw {
     pub model: [[f32; 4]; 4],
     //pub normal: [[f32; 3]; 3],
 }
 
-impl Vertex for InstanceRaw {
+impl Vertex for Instance3DRaw {
     fn desc() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
-            array_stride: mem::size_of::<InstanceRaw>() as wgpu::BufferAddress,
+            array_stride: mem::size_of::<Instance3DRaw>() as wgpu::BufferAddress,
             // We need to switch from using a step mode of Vertex to Instance
             // This means that our shaders will only change to use the next
             // instance when the shader starts processing a new instance
@@ -94,10 +94,10 @@ impl Vertex for InstanceRaw {
     }
 }
 
-impl Vertex for SkinnedInstanceRaw {
+impl Vertex for SkinnedInstance3DRaw {
     fn desc() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
-            array_stride: mem::size_of::<SkinnedInstanceRaw>() as wgpu::BufferAddress,
+            array_stride: mem::size_of::<SkinnedInstance3DRaw>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Instance,
             attributes: &[
                 // Model matrix

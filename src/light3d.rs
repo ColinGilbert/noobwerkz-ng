@@ -1,14 +1,14 @@
 use wgpu::util::DeviceExt;
 
-pub struct LightContext {
-    pub light_uniforms: Vec<LightUniform>,
+pub struct Light3DContext {
+    pub light_uniforms: Vec<Light3DUniform>,
     pub light_buffer: wgpu::Buffer,
     pub light_bind_group_layout: wgpu::BindGroupLayout,
     pub light_bind_group: wgpu::BindGroup,
 }
 
-impl LightContext {
-    pub fn new(device: &wgpu::Device, light_uniforms: Vec<LightUniform>) -> Self {
+impl Light3DContext {
+    pub fn new(device: &wgpu::Device, light_uniforms: Vec<Light3DUniform>) -> Self {
         let light_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Light VB"),
             contents: bytemuck::cast_slice(&light_uniforms),
@@ -51,7 +51,7 @@ impl LightContext {
 #[repr(C)]
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 
-pub struct LightUniform {
+pub struct Light3DUniform {
     pub position: [f32; 3],
     // Due to uniforms requiring 16 byte (4 float) spacing, we need to use a padding field here
     pub _padding: u32,
@@ -59,7 +59,7 @@ pub struct LightUniform {
     pub _padding2: u32,
 }
 
-impl LightUniform {
+impl Light3DUniform {
     pub fn new(position: glam::Vec3, color: glam::Vec3) -> Self {
         Self {
             position: position.into(),

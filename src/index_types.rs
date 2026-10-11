@@ -25,8 +25,8 @@ safe_index::new! {
 }
 
 safe_index::new! {
-  CharactersContextIndex,
-  map: CharactersContexts
+  Characters3DContextIndex,
+  map: Characters3DContexts
 }
 
 safe_index::new! {

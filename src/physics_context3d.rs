@@ -8,20 +8,20 @@ const NO_LIQUIDS_HZ: u32 = 60;
 const LIQUIDS_TIMESTEP: f32 = 1.0 / 240.0;
 const NO_LIQUIDS_TIMESTEP: f32 = 1.0 / 60.0;
 
-pub struct PhysicsContext {
+pub struct Physics3DContext {
     pub rigid_world: PhysicsWorld,
     pub fluids_pipeline: Option<FluidsPipeline>,
 }
 
-pub struct LiquidWorldProperties {
+pub struct LiquidWorld3DProperties {
     pub has_liquid_world: bool,
     pub particle_radius: f32,
     pub smoothing_factor: f32,
     // pub boundary_force_coefficient: f32,
 }
 
-impl PhysicsContext {
-    pub fn new(gravity: &glam::Vec3, liquid_world_properties: LiquidWorldProperties) -> Self {
+impl Physics3DContext {
+    pub fn new(gravity: &glam::Vec3, liquid_world_properties: LiquidWorld3DProperties) -> Self {
         let mut rigid_world = PhysicsWorld::new();
         rigid_world.gravity = rapier3d::math::Vector3{ x: gravity.x, y: gravity.y, z: gravity.z };
         let mut fluids_pipeline: Option<FluidsPipeline> = None;

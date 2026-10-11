@@ -2,7 +2,7 @@ use crate::callbacks::*;
 use crate::camera3d::*;
 use crate::egui_renderer::EguiRenderer;
 use crate::graphics::*;
-use crate::light::*;
+use crate::light3d::*;
 use crate::passes::{Pass, forward_renderer::*};
 use crate::texture::*;
 use crate::user_context::*;
@@ -21,7 +21,7 @@ pub struct WindowState {
     pub window: Arc<Window>,
     pub surface: wgpu::Surface<'static>,
     pub gfx_ctx: GraphicsContext,
-    pub light_ctx: LightContext,
+    pub light_ctx: Light3DContext,
     pub cam_ctx: CameraContext,
     pub user_ctx: UserContext,
     pub forward_renderer: ForwardRenderer,
@@ -46,7 +46,7 @@ impl WindowState {
 
         let surface = instance.create_surface(window.clone()).unwrap();
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
-        let mut lights = Vec::<LightUniform>::new();
+        let mut lights = Vec::<Light3DUniform>::new();
         let mut user_ctx = UserContext::new(); // { models: :, skinned_models: (), scenes: (), active_scene: () }
 
         if let Some(cb) = *USER_SETUP_CALLBACK.lock().unwrap() {
@@ -58,7 +58,7 @@ impl WindowState {
         let c = &s.cameras[s.active_camera];
 
         let cam_ctx = CameraContext::new(&gfx_ctx.device, &c);
-        let light_ctx = LightContext::new(&gfx_ctx.device, lights);
+        let light_ctx = Light3DContext::new(&gfx_ctx.device, lights);
 
         let forward_renderer = ForwardRenderer::new(
             &gfx_ctx.device,

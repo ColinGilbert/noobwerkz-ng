@@ -5,10 +5,10 @@ use std::{collections::HashMap, rc::Rc};
 use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 
 use crate::{
-    camera3d::*, character3d::Character3D, index_types::*, instance::Instance, model3d_node::Model3DNode, physics_context::{LiquidWorldProperties, PhysicsContext}, skinned_model::SkinnedModel, skinned_model_node::SkinnedModelNode
+    camera3d::*, character3d::Character3D, index_types::*, instance3d::Instance3D, model3d_node::Model3DNode, physics_context3d::*, skinned_model::SkinnedModel3D, skinned_model_node::SkinnedModelNode
 };
 
-pub struct CharactersContext {
+pub struct Characters3DContext {
     pub characters: Characters3D<Character3D>,
     pub skinned_model_node: SkinnedModelNode,
 }
@@ -17,9 +17,9 @@ pub struct Scene3D {
     pub cameras: Cameras3D<Camera3D>,
     pub model_nodes: Model3DNodes<Model3DNode>,
     pub active_camera: Camera3DIndex,
-    pub physics_context: PhysicsContext,
-    pub characters_contexts: CharactersContexts<CharactersContext>,
-    pub character_types_by_name: HashMap<String, CharactersContextIndex>,
+    pub physics_context: Physics3DContext,
+    pub characters_contexts: Characters3DContexts<Characters3DContext>,
+    pub character_types_by_name: HashMap<String, Characters3DContextIndex>,
 }
 
 impl Scene3D {
@@ -30,8 +30,8 @@ impl Scene3D {
             cameras,
             model_nodes: Model3DNodes::new(),
             active_camera: Camera3DIndex::new(0),
-            physics_context: PhysicsContext::new(gravity, LiquidWorldProperties { has_liquid_world: false, particle_radius: 0.02, smoothing_factor: 2.0}),
-            characters_contexts: CharactersContexts::new(),
+            physics_context: Physics3DContext::new(gravity, LiquidWorld3DProperties { has_liquid_world: false, particle_radius: 0.02, smoothing_factor: 2.0}),
+            characters_contexts: Characters3DContexts::new(),
             character_types_by_name: HashMap::new(),
         }
     }
@@ -53,7 +53,7 @@ impl Scene3D {
         self.physics_context.rigid_world.step()
     }
 
-    pub fn update_characters(&mut self, dt: web_time::Duration, skinned_models: &SkinnedModels<SkinnedModel>, queue: &wgpu::Queue) {
+    pub fn update_characters(&mut self, dt: web_time::Duration, skinned_models: &SkinnedModels<SkinnedModel3D>, queue: &wgpu::Queue) {
         for characters_ctx in self.characters_contexts.iter_mut() {
             
             characters_ctx.skinned_model_node.instances.clear();
@@ -65,7 +65,7 @@ impl Scene3D {
                     Ok(_) => {}
                     Err(err) => {println!("Could not evaluate character's anim graph: {}", err)}
                 }
-                let instance = Instance {
+                let instance = Instance3D {
                     position: c.position.into(),
                     orientation: c.orientation,
                     scale: glam::Vec3A::splat(1.0),
@@ -90,13 +90,13 @@ impl Scene3D {
         device: &mut wgpu::Device,
         bone_matrices_bind_group_layout: &wgpu::BindGroupLayout,
         skinned_model_idx: SkinnedModelIndex,
-        instances: &Vec<Instance>,
+        instances: &Vec<Instance3D>,
         animgraph_definition: &AnimGraphDefinition,
         skeleton: Rc<ozz_animation_rs::Skeleton>,
         animations_by_name: &HashMap<String, Rc<ozz_animation_rs::Animation>>,
         name: String,
-    ) -> Option<CharactersContextIndex> {
-        self.characters_contexts.push(CharactersContext {
+    ) -> Option<Characters3DContextIndex> {
+        self.characters_contexts.push(Characters3DContext {
             characters: Characters3D::new(),
             skinned_model_node: SkinnedModelNode::new(
                 device,
@@ -107,7 +107,7 @@ impl Scene3D {
             ),
         });
         println!("ADDING CHARACTERS: Instance count: {}", instances.len());
-        let characters_ctx_idx = CharactersContextIndex::new(self.characters_contexts.len() - 1);
+        let characters_ctx_idx = Characters3DContextIndex::new(self.characters_contexts.len() - 1);
         for instance in instances {
             let character = Character3D::new(
                 skeleton.clone(),
@@ -134,7 +134,7 @@ impl Scene3D {
 
     pub fn change_anim_graphs(
         &mut self,
-        character_type_idx: CharactersContextIndex,
+        character_type_idx: Characters3DContextIndex,
         definition: &AnimGraphDefinition,
         skeleton: Rc<ozz_animation_rs::Skeleton>,
         animations_by_name: &HashMap<String, Rc<ozz_animation_rs::Animation>>,
