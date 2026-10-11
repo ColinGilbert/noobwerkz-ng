@@ -13,7 +13,7 @@ use crate::texture::*;
 // use crate::character::Character;
 use wgpu::util::DeviceExt;
 
-pub struct ForwardRenderer {
+pub struct ForwardRenderer3D {
     pub render_pipeline_layout: wgpu::PipelineLayout,
     pub skinned_render_pipeline_layout: wgpu::PipelineLayout,
     pub light_bind_group: wgpu::BindGroup,
@@ -24,7 +24,7 @@ pub struct ForwardRenderer {
     pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
 }
 
-impl Pass for ForwardRenderer {
+impl Pass for ForwardRenderer3D {
     fn draw(
         &mut self,
         device: &wgpu::Device,
@@ -183,7 +183,7 @@ impl Pass for ForwardRenderer {
     }
 }
 
-impl ForwardRenderer {
+impl ForwardRenderer3D {
     pub fn new(
         device: &wgpu::Device,
         light_buffer: &wgpu::Buffer,
@@ -238,7 +238,7 @@ impl ForwardRenderer {
         let render_pipeline = {
             let shader = wgpu::ShaderModuleDescriptor {
                 label: Some("Normal Shader"),
-                source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
+                source: wgpu::ShaderSource::Wgsl(include_str!("forward_shader3d.wgsl").into()),
             };
 
             create_render_pipeline(
@@ -254,7 +254,7 @@ impl ForwardRenderer {
         let skinned_render_pipeline = {
             let shader = wgpu::ShaderModuleDescriptor {
                 label: Some("Skinned Shader"),
-                source: wgpu::ShaderSource::Wgsl(include_str!("skinned.wgsl").into()),
+                source: wgpu::ShaderSource::Wgsl(include_str!("forward_skinned3d.wgsl").into()),
             };
             create_render_pipeline(
                 &device,
@@ -277,7 +277,7 @@ impl ForwardRenderer {
             });
             let shader = wgpu::ShaderModuleDescriptor {
                 label: Some("Light Shader"),
-                source: wgpu::ShaderSource::Wgsl(include_str!("light.wgsl").into()),
+                source: wgpu::ShaderSource::Wgsl(include_str!("forward_light3d.wgsl").into()),
             };
 
             create_render_pipeline(

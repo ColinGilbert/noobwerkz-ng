@@ -3,7 +3,7 @@ use crate::camera3d::*;
 use crate::egui_renderer::EguiRenderer;
 use crate::graphics::*;
 use crate::light3d::*;
-use crate::passes::{Pass, forward_renderer::*};
+use crate::passes::{Pass, forward_renderer3d::*};
 use crate::texture::*;
 use crate::user_context::*;
 use egui_wgpu::ScreenDescriptor;
@@ -24,7 +24,7 @@ pub struct WindowState {
     pub light_ctx: Light3DContext,
     pub cam_ctx: CameraContext,
     pub user_ctx: UserContext,
-    pub forward_renderer: ForwardRenderer,
+    pub forward_renderer: ForwardRenderer3D,
     pub egui_renderer: EguiRenderer,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
@@ -60,7 +60,7 @@ impl WindowState {
         let cam_ctx = CameraContext::new(&gfx_ctx.device, &c);
         let light_ctx = Light3DContext::new(&gfx_ctx.device, lights);
 
-        let forward_renderer = ForwardRenderer::new(
+        let forward_renderer = ForwardRenderer3D::new(
             &gfx_ctx.device,
             &light_ctx.light_buffer,
             &cam_ctx.buffer,
