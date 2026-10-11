@@ -3,7 +3,7 @@ use crate::index_types::*;
 use crate::instance::*;
 use crate::vertex::*;
 use crate::model3d::*;
-use crate::model_node::*;
+use crate::model3d_node::*;
 use crate::passes::Pass;
 use crate::scene3d::CharactersContext;
 use crate::skinned_model::*;
@@ -29,10 +29,10 @@ impl Pass for ForwardRenderer {
         &mut self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        models: &Vec<Model3D>,
+        models: &Models3D<Model3D>,
         skinned_models: &SkinnedModels<SkinnedModel>,
-        model_nodes: &Vec<ModelNode>,
-        characters_contexts: &Vec<CharactersContext>,
+        model_nodes: &Model3DNodes<Model3DNode>,
+        characters_contexts: &CharactersContexts<CharactersContext>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
     ) {

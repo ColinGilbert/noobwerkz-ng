@@ -18,3 +18,33 @@ safe_index::new! {
   SkinnedModelIndex,
   map: SkinnedModels
 }
+
+safe_index::new! {
+  Model3DNodeIndex,
+  map: Model3DNodes,
+}
+
+safe_index::new! {
+  CharactersContextIndex,
+  map: CharactersContexts
+}
+
+safe_index::new! {
+  Model3DIndex,
+  map: Models3D
+}
+
+safe_index::new! {
+  CameraIndex,
+  map: Cameras
+}
+
+safe_index::new! {
+  TextureIndex,
+  map: Textures
+}
+
+safe_index::new! {
+  AudioClipIndex,
+  map: AudioClips
+}

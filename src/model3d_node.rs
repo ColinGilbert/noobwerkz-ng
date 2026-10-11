@@ -1,13 +1,13 @@
-use crate::instance::Instance;
+use crate::{index_types::Model3DIndex, instance::Instance};
 
-pub struct ModelNode {
-    pub model_idx: usize,
+pub struct Model3DNode {
+    pub model_idx: Model3DIndex,
     pub instances: Vec<Instance>,
     // pub visible: Vec<bool>,
 }
 
-impl ModelNode {
-    pub fn new(model_idx: usize, instances: Vec<Instance>) -> Self {
+impl Model3DNode {
+    pub fn new(model_idx: Model3DIndex, instances: Vec<Instance>) -> Self {
         // let len = instances.len();
         Self {
             model_idx,

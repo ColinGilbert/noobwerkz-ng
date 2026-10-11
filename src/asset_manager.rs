@@ -7,20 +7,20 @@ use kira::sound::static_sound::StaticSoundData;
 use std::{collections::*, path::*, result::Result::*};
 
 pub struct AssetManager {
-    pub models_by_name: HashMap<String, usize>,
+    pub models_by_name: HashMap<String, Model3DIndex>,
     pub skinned_models_by_name: HashMap<String, SkinnedModelIndex>,
-    pub textures_by_name: HashMap<String, usize>,
-    pub audio_clips_by_name: HashMap<String, usize>,
+    pub textures_by_name: HashMap<String, TextureIndex>,
+    pub audio_clips_by_name: HashMap<String, AudioClipIndex>,
 
-    pub model_names: HashMap<usize, String>,
+    pub model_names: HashMap<Model3DIndex, String>,
     pub skinned_model_names: HashMap<SkinnedModelIndex, String>,
-    pub texture_names: HashMap<usize, String>,
-    pub audio_clip_names: HashMap<usize, String>,
+    pub texture_names: HashMap<TextureIndex, String>,
+    pub audio_clip_names: HashMap<AudioClipIndex, String>,
 
-    pub models: Vec<Model3D>,
+    pub models: Models3D<Model3D>,
     pub skinned_models: SkinnedModels<SkinnedModel>,
-    pub textures: Vec<Texture>,
-    pub audio_clips: Vec<StaticSoundData>, // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
+    pub textures: Textures<Texture>,
+    pub audio_clips: AudioClips<StaticSoundData>, // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
                                            // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
 }
 
@@ -35,10 +35,10 @@ impl AssetManager {
             skinned_model_names: HashMap::new(),
             texture_names: HashMap::new(),
             audio_clip_names: HashMap::new(),
-            models: Vec::<Model3D>::new(),
+            models:Models3D::new(),
             skinned_models: SkinnedModels::<SkinnedModel>::new(),
-            textures: Vec::<Texture>::new(),
-            audio_clips: Vec::<StaticSoundData>::new(),
+            textures: Textures::new(),
+            audio_clips: AudioClips::new(),
             // skeletons: Vec::<Arc<ozz_animation_rs::Skeleton>>::new(),
             // animations: Vec::<Arc<ozz_animation_rs::Animation>>::new(),
         }
@@ -52,7 +52,7 @@ impl AssetManager {
         queue: &mut wgpu::Queue,
         default_material: &Material,
         texture_layout: &wgpu::BindGroupLayout,
-    ) -> anyhow::Result<usize> {
+    ) -> anyhow::Result<Model3DIndex> {
         let mut serialized = load_serialized_model(filepath.as_path());
         let mut path = filepath.clone();
         path.pop();
@@ -67,7 +67,7 @@ impl AssetManager {
         match model {
             Some(val) => {
                 self.models.push(val);
-                let idx = self.models.len() - 1;
+                let idx = Model3DIndex::new(self.models.len() - 1);
                 self.model_names.insert(idx, name.to_owned());
                 self.models_by_name.insert(name.to_owned(), idx);
                 return anyhow::Result::Ok(idx);
@@ -150,12 +150,12 @@ impl AssetManager {
         &mut self,
         filepath: &Path,
         name: &str,
-    ) -> anyhow::Result<usize> {
+    ) -> anyhow::Result<AudioClipIndex> {
         let audio_bytes = StaticSoundData::from_file(filepath);
         match audio_bytes {
             anyhow::Result::Ok(val) => {
                 self.audio_clips.push(val);
-                let idx = self.audio_clips.len() - 1;
+                let idx = AudioClipIndex::new(self.audio_clips.len() - 1);
                 self.audio_clip_names.insert(idx, name.to_owned());
                 self.audio_clips_by_name.insert(name.to_owned(), idx);
                 return anyhow::Result::Ok(idx);

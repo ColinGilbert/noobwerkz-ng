@@ -7,7 +7,7 @@ pub mod model3d;
 pub mod resource;
 pub mod instance;
 pub mod passes;
-pub mod model_node;
+pub mod model3d_node;
 pub mod skinned_model_node;
 pub mod vertex;
 pub mod scene2d;

@@ -5,7 +5,7 @@ use std::{collections::HashMap, rc::Rc};
 use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 
 use crate::{
-    camera::Camera, index_types::*, character::Character3D, instance::Instance, model_node::ModelNode, physics_context::{LiquidWorldProperties, PhysicsContext}, skinned_model::SkinnedModel, skinned_model_node::SkinnedModelNode
+    camera::Camera, index_types::*, character::Character3D, instance::Instance, model3d_node::Model3DNode, physics_context::{LiquidWorldProperties, PhysicsContext}, skinned_model::SkinnedModel, skinned_model_node::SkinnedModelNode
 };
 
 pub struct CharactersContext {
@@ -14,22 +14,22 @@ pub struct CharactersContext {
 }
 
 pub struct Scene3D {
-    pub cameras: Vec<Camera>,
-    pub model_nodes: Vec<ModelNode>,
-    pub active_camera: usize,
+    pub cameras: Cameras<Camera>,
+    pub model_nodes: Model3DNodes<Model3DNode>,
+    pub active_camera: CameraIndex,
     pub physics_context: PhysicsContext,
-    pub characters_contexts: Vec<CharactersContext>,
-    pub character_types_by_name: HashMap<String, usize>,
+    pub characters_contexts: CharactersContexts<CharactersContext>,
+    pub character_types_by_name: HashMap<String, CharactersContextIndex>,
 }
 
 impl Scene3D {
     pub fn new(gravity: &glam::Vec3) -> Self {
         Self {
-            cameras: Vec::<Camera>::new(),
-            model_nodes: Vec::<ModelNode>::new(),
-            active_camera: 0,
+            cameras: Cameras::new(),
+            model_nodes: Model3DNodes::new(),
+            active_camera: CameraIndex::new(0),
             physics_context: PhysicsContext::new(gravity, LiquidWorldProperties { has_liquid_world: true, particle_radius: 0.02, smoothing_factor: 2.0}),
-            characters_contexts: Vec::new(),
+            characters_contexts: CharactersContexts::new(),
             character_types_by_name: HashMap::new(),
         }
     }
@@ -93,7 +93,7 @@ impl Scene3D {
         skeleton: Rc<ozz_animation_rs::Skeleton>,
         animations_by_name: &HashMap<String, Rc<ozz_animation_rs::Animation>>,
         name: String,
-    ) -> Option<usize> {
+    ) -> Option<CharactersContextIndex> {
         self.characters_contexts.push(CharactersContext {
             characters: Vec::new(),
             skinned_model_node: SkinnedModelNode::new(
@@ -105,7 +105,7 @@ impl Scene3D {
             ),
         });
         println!("ADDING CHARACTERS: Instance count: {}", instances.len());
-        let characters_ctx_idx = self.characters_contexts.len() - 1;
+        let characters_ctx_idx = CharactersContextIndex::new(self.characters_contexts.len() - 1);
         for instance in instances {
             let character = Character3D::new(
                 skeleton.clone(),
@@ -132,7 +132,7 @@ impl Scene3D {
 
     pub fn change_anim_graphs(
         &mut self,
-        character_type_idx: usize,
+        character_type_idx: CharactersContextIndex,
         definition: &AnimGraphDefinition,
         skeleton: Rc<ozz_animation_rs::Skeleton>,
         animations_by_name: &HashMap<String, Rc<ozz_animation_rs::Animation>>,
