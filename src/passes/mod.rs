@@ -6,5 +6,5 @@ use crate::index_types::*;
 pub mod forward_renderer;
 
 pub trait Pass {
-    fn draw(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, models: &Models3D<Model3D>, skinned_models: &SkinnedModels<SkinnedModel>, nodes: &Model3DNodes<Model3DNode>, skinned_model_nodes: &CharactersContexts<CharactersContext>, depth_texture_view: &wgpu::TextureView, view: &wgpu::TextureView );
+    fn draw(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, models: &Models3D<Model3D>, skinned_models: &SkinnedModels<SkinnedModel>, nodes: &Model3DNodes<Model3DNode>, characters_contexts: &CharactersContexts<CharactersContext>, depth_texture_view: &wgpu::TextureView, view: &wgpu::TextureView );
 }

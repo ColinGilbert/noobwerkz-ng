@@ -16,8 +16,7 @@ impl UserContext {
     pub fn new() -> Self {
         let asset_mgr = AssetManager::new();
         let skeletals = SkeletalContexts::new();
-        let mut scenes = Scenes3D::new();
-        //scenes.push(Scene3D::new(&glam::Vec3::new(0.0, -9.86, 0.0)));
+        let scenes = Scenes3D::new();
         let audio_mgr_res =  AudioManager::<DefaultBackend>::new(AudioManagerSettings::default());
         let mut audio_mgr: Option<AudioManager> = None;
 
