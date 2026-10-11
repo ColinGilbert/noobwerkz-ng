@@ -48,3 +48,13 @@ safe_index::new! {
   AudioClipIndex,
   map: AudioClips
 }
+
+safe_index::new! {
+  Scene3DIndex,
+  map: Scenes3D
+}
+
+safe_index::new! {
+  SkeletalContextIndex,
+  map: SkeletalContexts
+}

@@ -28,7 +28,7 @@ impl Scene3D {
             cameras: Cameras::new(),
             model_nodes: Model3DNodes::new(),
             active_camera: CameraIndex::new(0),
-            physics_context: PhysicsContext::new(gravity, LiquidWorldProperties { has_liquid_world: true, particle_radius: 0.02, smoothing_factor: 2.0}),
+            physics_context: PhysicsContext::new(gravity, LiquidWorldProperties { has_liquid_world: false, particle_radius: 0.02, smoothing_factor: 2.0}),
             characters_contexts: CharactersContexts::new(),
             character_types_by_name: HashMap::new(),
         }
