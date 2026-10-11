@@ -58,3 +58,8 @@ safe_index::new! {
   SkeletalContextIndex,
   map: SkeletalContexts
 }
+
+safe_index::new! {
+  InstanceIndex,
+  map: Instances
+}
