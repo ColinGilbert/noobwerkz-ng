@@ -5,13 +5,13 @@ use std::io::Cursor;
 use std::rc::*;
 use std::path::*;
 
-pub struct SkeletalContext {
+pub struct SkeletalContext3D {
     pub skeleton: Rc<ozz_animation_rs::Skeleton>,
     pub animations: Vec<Rc<ozz_animation_rs::Animation>>,
     pub animations_idx_by_name: HashMap<String, usize>,
 }
 
-impl SkeletalContext {
+impl SkeletalContext3D {
     pub fn new(
         filepath: &Vec<&str>,
         skeleton_filename: &str,

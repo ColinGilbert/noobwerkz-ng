@@ -1,5 +1,5 @@
 use crate::callbacks::*;
-use crate::camera::*;
+use crate::camera3d::*;
 use crate::egui_renderer::EguiRenderer;
 use crate::graphics::*;
 use crate::light::*;

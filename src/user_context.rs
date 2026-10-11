@@ -1,11 +1,11 @@
-use crate::{asset_manager::*, scene3d::*, skeletal_context::SkeletalContext, index_types::*};
+use crate::{asset_manager::*, scene3d::*, skeletal_context3d::SkeletalContext3D, index_types::*};
 use kira::{
 	AudioManager, AudioManagerSettings, DefaultBackend,
 };
 
 pub struct UserContext {
     pub asset_mgr: AssetManager,
-    pub skeletals: SkeletalContexts<SkeletalContext>,
+    pub skeletals: SkeletalContexts<SkeletalContext3D>,
     pub scenes: Scenes3D<Scene3D>,
     pub audio_mgr: Option<AudioManager>,
     pub active_scene: Scene3DIndex,

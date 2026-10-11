@@ -9,7 +9,7 @@ pub fn degrees_to_radians(degrees: f32) -> f32 {
     degrees * PI / 180.0
 }
 
-pub struct Camera {
+pub struct Camera3D {
     pub up: glam::Vec3,
     pub eye: glam::Vec3,
     pub eye_delta: glam::Vec3,
@@ -23,17 +23,17 @@ pub struct Camera {
     pub moving: bool,
     pub speed: f32,
     pub heading_speed: f32,
-    pub projection: Projection,
+    pub projection: Projection3D,
 }
 
-impl Camera {
+impl Camera3D {
     pub fn new(
         starting_eye_pos: &glam::Vec3,
         look_at: &glam::Vec3,
         world_up: &glam::Vec3,
         speed: f32,
         heading_speed: f32,
-        projection: Projection,
+        projection: Projection3D,
     ) -> Self {
         Self {
             up: *world_up,
@@ -153,7 +153,7 @@ impl Camera {
     }
 }
 
-pub struct Projection {
+pub struct Projection3D {
     pub aspect_ratio: f32,
     pub fovy_rad: f32,
     pub znear: f32,
@@ -166,7 +166,7 @@ pub struct Projection {
 //     glam::Vec4::new(0.0, 0.0, 0.5, 1.0),
 // );
 
-impl Projection {
+impl Projection3D {
     pub fn new(height: u32, width: u32, fovy_rad: f32, znear: f32, zfar: f32) -> Self {
         Self {
             aspect_ratio: width as f32 / height as f32,
@@ -205,7 +205,7 @@ impl CameraUniform {
         }
     }
 
-    pub fn update_view_proj(&mut self, camera: &Camera, projection: &Projection) {
+    pub fn update_view_proj(&mut self, camera: &Camera3D, projection: &Projection3D) {
         self.view_position = [camera.eye.x, camera.eye.y, camera.eye.z, 1.0];
         self.view_projection = (projection.calc_matrix() * camera.view_matrix()).to_cols_array_2d();
     }
@@ -219,7 +219,7 @@ pub struct CameraContext {
 }
 
 impl CameraContext {
-    pub fn new(device: &wgpu::Device, cam: &Camera) -> Self {
+    pub fn new(device: &wgpu::Device, cam: &Camera3D) -> Self {
         let mut uniform = CameraUniform::new();
 
         uniform.update_view_proj(cam, &cam.projection);

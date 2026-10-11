@@ -35,8 +35,8 @@ safe_index::new! {
 }
 
 safe_index::new! {
-  CameraIndex,
-  map: Cameras
+  Camera3DIndex,
+  map: Cameras3D
 }
 
 safe_index::new! {
@@ -52,6 +52,11 @@ safe_index::new! {
 safe_index::new! {
   Scene3DIndex,
   map: Scenes3D
+}
+
+safe_index::new! {
+  Character3DIndex,
+  map: Characters3D
 }
 
 safe_index::new! {

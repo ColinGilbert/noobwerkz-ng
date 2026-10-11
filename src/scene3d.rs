@@ -5,18 +5,18 @@ use std::{collections::HashMap, rc::Rc};
 use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 
 use crate::{
-    camera::{Camera, Projection}, character::Character3D, index_types::*, instance::Instance, model3d_node::Model3DNode, physics_context::{LiquidWorldProperties, PhysicsContext}, skinned_model::SkinnedModel, skinned_model_node::SkinnedModelNode
+    camera3d::*, character3d::Character3D, index_types::*, instance::Instance, model3d_node::Model3DNode, physics_context::{LiquidWorldProperties, PhysicsContext}, skinned_model::SkinnedModel, skinned_model_node::SkinnedModelNode
 };
 
 pub struct CharactersContext {
-    pub characters: Vec<Character3D>,
+    pub characters: Characters3D<Character3D>,
     pub skinned_model_node: SkinnedModelNode,
 }
 
 pub struct Scene3D {
-    pub cameras: Cameras<Camera>,
+    pub cameras: Cameras3D<Camera3D>,
     pub model_nodes: Model3DNodes<Model3DNode>,
-    pub active_camera: CameraIndex,
+    pub active_camera: Camera3DIndex,
     pub physics_context: PhysicsContext,
     pub characters_contexts: CharactersContexts<CharactersContext>,
     pub character_types_by_name: HashMap<String, CharactersContextIndex>,
@@ -24,12 +24,12 @@ pub struct Scene3D {
 
 impl Scene3D {
     pub fn new(gravity: &glam::Vec3) -> Self {
-        let cameras = Cameras::new();
+        let cameras = Cameras3D::new();
         //cameras.push(Camera::new(&glam::Vec3{x: 0.0, y:0.0, z: 0.0}, &glam::Vec3{x: 0.0, y: 0.0, z: 0.0}, &glam::Vec3::Y, 1.0, 1.0, Projection::new(600, 800, 1.0, 0.0, 100.0)));
         Self {
             cameras,
             model_nodes: Model3DNodes::new(),
-            active_camera: CameraIndex::new(0),
+            active_camera: Camera3DIndex::new(0),
             physics_context: PhysicsContext::new(gravity, LiquidWorldProperties { has_liquid_world: false, particle_radius: 0.02, smoothing_factor: 2.0}),
             characters_contexts: CharactersContexts::new(),
             character_types_by_name: HashMap::new(),
@@ -97,7 +97,7 @@ impl Scene3D {
         name: String,
     ) -> Option<CharactersContextIndex> {
         self.characters_contexts.push(CharactersContext {
-            characters: Vec::new(),
+            characters: Characters3D::new(),
             skinned_model_node: SkinnedModelNode::new(
                 device,
                 bone_matrices_bind_group_layout,
