@@ -89,7 +89,7 @@ impl AssetManager {
         queue: &mut wgpu::Queue,
         default_material: &Material,
         texture_layout: &wgpu::BindGroupLayout,
-        skeletal_context: &SkeletalContext3D,
+        skeletal_context: &Skeletal3DContext,
     ) -> anyhow::Result<SkinnedModel3DIndex> {
         let mut serialized = load_serialized_model(filepath.as_path());
         let mut path = filepath.clone();

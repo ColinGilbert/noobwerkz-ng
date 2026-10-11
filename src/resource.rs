@@ -2,7 +2,7 @@ use crate::index_types::*;
 use crate::material::*;
 use crate::model3d::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
 use crate::serialized_model3d::*;
-use crate::skeletal3d_context::SkeletalContext3D;
+use crate::skeletal3d_context::Skeletal3DContext;
 use crate::skinned_model3d::*;
 use crate::texture;
 use crate::texture::Texture;
@@ -41,7 +41,7 @@ pub fn load_skinned_3d_model_from_serialized(
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
-    skeletal_context: &SkeletalContext3D,
+    skeletal_context: &Skeletal3DContext,
 ) -> Option<SkinnedModel3D> {
     let mut model_results = SkinnedModel3D::new();
     for m in model.meshes.iter_mut() {
