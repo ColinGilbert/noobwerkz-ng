@@ -4,8 +4,8 @@ use crate::{instance3d::Instance3D, index_types::*};
 // use rayon::prelude::*;
 use wgpu::{BindGroupLayout, util::*};
 
-pub struct SkinnedModelNode {
-    pub skinned_model_idx: SkinnedModelIndex,
+pub struct SkinnedModel3DNode {
+    pub skinned_model_idx: SkinnedModel3DIndex,
     pub instances: Vec<Instance3D>,
     pub num_bones: u32,
     pub bones_storage_buffer: wgpu::Buffer,
@@ -14,11 +14,11 @@ pub struct SkinnedModelNode {
     pub bone_matrices: Vec<glam::Mat4>,
 }
 
-impl SkinnedModelNode {
+impl SkinnedModel3DNode {
     pub fn new(
         device: &mut wgpu::Device,
         bone_matrices_bind_group_layout: &BindGroupLayout,
-        skinned_model_idx: SkinnedModelIndex,
+        skinned_model_idx: SkinnedModel3DIndex,
         instances_arg: &Vec<Instance3D>,
         skeleton: Rc<ozz_animation_rs::Skeleton>,
     ) -> Self {

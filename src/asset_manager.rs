@@ -1,6 +1,6 @@
 // This code serves as a simplified way for asset loading.
 use crate::{
-    material::Material, model3d::*, resource::*, skeletal_context3d::*, skinned_model::*, texture::*, index_types::*,
+    material::Material, model3d::*, resource::*, skeletal3d_context::*, skinned_model3d::*, texture::*, index_types::*,
 };
 use anyhow::*;
 use kira::sound::static_sound::StaticSoundData;
@@ -8,17 +8,17 @@ use std::{collections::*, path::*, result::Result::*};
 
 pub struct AssetManager {
     pub models_by_name: HashMap<String, Model3DIndex>,
-    pub skinned_models_by_name: HashMap<String, SkinnedModelIndex>,
+    pub skinned_models_by_name: HashMap<String, SkinnedModel3DIndex>,
     pub textures_by_name: HashMap<String, TextureIndex>,
     pub audio_clips_by_name: HashMap<String, AudioClipIndex>,
 
     pub model_names: HashMap<Model3DIndex, String>,
-    pub skinned_model_names: HashMap<SkinnedModelIndex, String>,
+    pub skinned_model_names: HashMap<SkinnedModel3DIndex, String>,
     pub texture_names: HashMap<TextureIndex, String>,
     pub audio_clip_names: HashMap<AudioClipIndex, String>,
 
     pub models: Models3D<Model3D>,
-    pub skinned_models: SkinnedModels<SkinnedModel3D>,
+    pub skinned_models: SkinnedModels3D<SkinnedModel3D>,
     pub textures: Textures<Texture>,
     pub audio_clips: AudioClips<StaticSoundData>, // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
                                            // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
@@ -36,7 +36,7 @@ impl AssetManager {
             texture_names: HashMap::new(),
             audio_clip_names: HashMap::new(),
             models:Models3D::new(),
-            skinned_models: SkinnedModels::<SkinnedModel3D>::new(),
+            skinned_models: SkinnedModels3D::<SkinnedModel3D>::new(),
             textures: Textures::new(),
             audio_clips: AudioClips::new(),
             // skeletons: Vec::<Arc<ozz_animation_rs::Skeleton>>::new(),
@@ -90,7 +90,7 @@ impl AssetManager {
         default_material: &Material,
         texture_layout: &wgpu::BindGroupLayout,
         skeletal_context: &SkeletalContext3D,
-    ) -> anyhow::Result<SkinnedModelIndex> {
+    ) -> anyhow::Result<SkinnedModel3DIndex> {
         let mut serialized = load_serialized_model(filepath.as_path());
         let mut path = filepath.clone();
         path.pop();
@@ -106,7 +106,7 @@ impl AssetManager {
         match model {
             Some(val) => {
                 self.skinned_models.push(val);
-                let idx = SkinnedModelIndex::new(self.skinned_models.len() - 1);
+                let idx = SkinnedModel3DIndex::new(self.skinned_models.len() - 1);
                 self.skinned_model_names.insert(idx, name.to_owned());
                 self.skinned_models_by_name.insert(name.to_owned(), idx);
                 return anyhow::Result::Ok(idx);

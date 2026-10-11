@@ -6,7 +6,7 @@ use std::ops::Range;
 
 #[repr(C)]
 pub struct SkinnedModel3D {
-    pub meshes: SkinnedTexturedMeshes<SkinnedTexturedMesh3D>,
+    pub meshes: SkinnedTexturedMeshes3D<SkinnedTexturedMesh3D>,
     pub materials: Materials<Material>,
     pub name: String,
     pub inverse_bind_matrices: Vec<glam::Mat4>,
@@ -15,7 +15,7 @@ pub struct SkinnedModel3D {
 impl SkinnedModel3D {
     pub fn new() -> Self {
         Self {
-            meshes: SkinnedTexturedMeshes::new(),
+            meshes: SkinnedTexturedMeshes3D::new(),
             materials: Materials::new(),
             name: "".to_owned(),
             inverse_bind_matrices: Vec::new(),

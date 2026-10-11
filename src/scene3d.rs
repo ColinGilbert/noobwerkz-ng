@@ -5,12 +5,12 @@ use std::{collections::HashMap, rc::Rc};
 use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 
 use crate::{
-    camera3d::*, character3d::Character3D, index_types::*, instance3d::Instance3D, model3d_node::Model3DNode, physics_context3d::*, skinned_model::SkinnedModel3D, skinned_model_node::SkinnedModelNode
+    camera3d::*, character3d::Character3D, index_types::*, instance3d::Instance3D, model3d_node::Model3DNode, physics_context3d::*, skinned_model3d::SkinnedModel3D, skinned_model3d_node::SkinnedModel3DNode
 };
 
 pub struct Characters3DContext {
     pub characters: Characters3D<Character3D>,
-    pub skinned_model_node: SkinnedModelNode,
+    pub skinned_model_node: SkinnedModel3DNode,
 }
 
 pub struct Scene3D {
@@ -53,7 +53,7 @@ impl Scene3D {
         self.physics_context.rigid_world.step()
     }
 
-    pub fn update_characters(&mut self, dt: web_time::Duration, skinned_models: &SkinnedModels<SkinnedModel3D>, queue: &wgpu::Queue) {
+    pub fn update_characters(&mut self, dt: web_time::Duration, skinned_models: &SkinnedModels3D<SkinnedModel3D>, queue: &wgpu::Queue) {
         for characters_ctx in self.characters_contexts.iter_mut() {
             
             characters_ctx.skinned_model_node.instances.clear();
@@ -89,7 +89,7 @@ impl Scene3D {
         &mut self,
         device: &mut wgpu::Device,
         bone_matrices_bind_group_layout: &wgpu::BindGroupLayout,
-        skinned_model_idx: SkinnedModelIndex,
+        skinned_model_idx: SkinnedModel3DIndex,
         instances: &Vec<Instance3D>,
         animgraph_definition: &AnimGraphDefinition,
         skeleton: Rc<ozz_animation_rs::Skeleton>,
@@ -98,7 +98,7 @@ impl Scene3D {
     ) -> Option<Characters3DContextIndex> {
         self.characters_contexts.push(Characters3DContext {
             characters: Characters3D::new(),
-            skinned_model_node: SkinnedModelNode::new(
+            skinned_model_node: SkinnedModel3DNode::new(
                 device,
                 bone_matrices_bind_group_layout,
                 skinned_model_idx,

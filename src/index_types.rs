@@ -5,8 +5,8 @@ safe_index::new! {
 }
 
 safe_index::new! {
-    SkinnedTexturedMeshIndex,
-    map: SkinnedTexturedMeshes
+    SkinnedTexturedMesh3DIndex,
+    map: SkinnedTexturedMeshes3D
 }
 
 safe_index::new! {
@@ -15,8 +15,8 @@ safe_index::new! {
 }
 
 safe_index::new! {
-  SkinnedModelIndex,
-  map: SkinnedModels
+  SkinnedModel3DIndex,
+  map: SkinnedModels3D
 }
 
 safe_index::new! {
@@ -60,8 +60,8 @@ safe_index::new! {
 }
 
 safe_index::new! {
-  SkeletalContextIndex,
-  map: SkeletalContexts
+  Skeletal3DContextIndex,
+  map: Skeletal3DContexts
 }
 
 safe_index::new! {

@@ -6,7 +6,7 @@ use crate::model3d::*;
 use crate::model3d_node::*;
 use crate::passes::Pass;
 use crate::scene3d::Characters3DContext;
-use crate::skinned_model::*;
+use crate::skinned_model3d::*;
 
 // use crate::skinned_model_node::*;
 use crate::texture::*;
@@ -30,7 +30,7 @@ impl Pass for ForwardRenderer {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         models: &Models3D<Model3D>,
-        skinned_models: &SkinnedModels<SkinnedModel3D>,
+        skinned_models: &SkinnedModels3D<SkinnedModel3D>,
         model_nodes: &Model3DNodes<Model3DNode>,
         characters_contexts: &Characters3DContexts<Characters3DContext>,
         depth_texture_view: &wgpu::TextureView,
