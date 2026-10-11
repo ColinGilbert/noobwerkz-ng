@@ -8,12 +8,12 @@ use std::{collections::*, path::*, result::Result::*};
 
 pub struct AssetManager {
     pub models_by_name: HashMap<String, usize>,
-    pub skinned_models_by_name: HashMap<String, usize>,
+    pub skinned_models_by_name: HashMap<String, SkinnedModelIndex>,
     pub textures_by_name: HashMap<String, usize>,
     pub audio_clips_by_name: HashMap<String, usize>,
 
     pub model_names: HashMap<usize, String>,
-    pub skinned_model_names: HashMap<usize, String>,
+    pub skinned_model_names: HashMap<SkinnedModelIndex, String>,
     pub texture_names: HashMap<usize, String>,
     pub audio_clip_names: HashMap<usize, String>,
 
@@ -90,7 +90,7 @@ impl AssetManager {
         default_material: &Material,
         texture_layout: &wgpu::BindGroupLayout,
         skeletal_context: &skeletal_context::SkeletalContext,
-    ) -> anyhow::Result<usize> {
+    ) -> anyhow::Result<SkinnedModelIndex> {
         let mut serialized = load_serialized_model(filepath.as_path());
         let mut path = filepath.clone();
         path.pop();
@@ -106,7 +106,7 @@ impl AssetManager {
         match model {
             Some(val) => {
                 self.skinned_models.push(val);
-                let idx = self.skinned_models.len() - 1;
+                let idx = SkinnedModelIndex::new(self.skinned_models.len() - 1);
                 self.skinned_model_names.insert(idx, name.to_owned());
                 self.skinned_models_by_name.insert(name.to_owned(), idx);
                 return anyhow::Result::Ok(idx);
