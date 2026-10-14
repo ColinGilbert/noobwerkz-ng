@@ -1,0 +1,19 @@
+[package]
+name = "shared"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+hecs = "0.11.1"
+rapier3d = { version = "0.35", features = ["serde-serialize", "enhanced-determinism"] }
+glam = { version = "0.33", features=["bytemuck", "core-simd"]}
+safe_index = "0.10.0"
+dodgy_3d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
+dodgy_2d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
+libm = "0.2.16"
+env_logger = "0.11.11"
+bevy_ballistic_stripped = { git = "https://github.com/colingilbert/bevy_ballistic.git", branch = "main" }
+web-time = "1.1.0"
+planning = "1.0.1"
+netcode-rs = "1.4.0"
+recast-rs = "0.1.0"

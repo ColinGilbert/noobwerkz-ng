@@ -1,0 +1,71 @@
+use wgpu::util::DeviceExt;
+
+pub struct Light3DContext {
+    pub light_uniforms: Vec<Light3DUniform>,
+    pub light_buffer: wgpu::Buffer,
+    pub light_bind_group_layout: wgpu::BindGroupLayout,
+    pub light_bind_group: wgpu::BindGroup,
+}
+
+impl Light3DContext {
+    pub fn new(device: &wgpu::Device, light_uniforms: Vec<Light3DUniform>) -> Self {
+        let light_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Light VB"),
+            contents: bytemuck::cast_slice(&light_uniforms),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+
+        let light_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::VERTEX | wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                }],
+                label: None,
+            });
+
+        let light_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &light_bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: light_buffer.as_entire_binding(),
+            }],
+            label: None,
+        });
+
+        Self {
+            light_uniforms,
+            light_buffer,
+            light_bind_group_layout,
+            light_bind_group,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+
+pub struct Light3DUniform {
+    pub position: [f32; 3],
+    // Due to uniforms requiring 16 byte (4 float) spacing, we need to use a padding field here
+    pub _padding: u32,
+    pub color: [f32; 3],
+    pub _padding2: u32,
+}
+
+impl Light3DUniform {
+    pub fn new(position: glam::Vec3, color: glam::Vec3) -> Self {
+        Self {
+            position: position.into(),
+            _padding: 0,
+            color: color.into(),
+            _padding2: 0,
+        }
+    }
+}

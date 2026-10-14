@@ -1,0 +1,143 @@
+use crate::vertex::*;
+use std::mem;
+
+pub struct Instance3D {
+    pub position: glam::Vec3A,
+    pub orientation: glam::Quat,
+    pub scale: glam::Vec3A,
+}
+
+impl Instance3D {
+    pub fn to_raw(&self) -> Instance3DRaw {
+        Instance3DRaw {
+            model: glam::Mat4::from_scale_rotation_translation(self.scale.into(), self.orientation, self.position.into())
+            .to_cols_array_2d(),
+            normal: glam::Mat3::from_quat(self.orientation).to_cols_array_2d(),
+        }
+    }
+
+    pub fn to_skinned_raw(&self) -> SkinnedInstance3DRaw {
+        SkinnedInstance3DRaw {
+            model: glam::Mat4::from_scale_rotation_translation(self.scale.into(), self.orientation, self.position.into())
+            .to_cols_array_2d(),
+            //normal: glam::Mat3::from_quat(self.orientation).to_cols_array_2d(),
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+#[allow(dead_code)]
+pub struct Instance3DRaw {
+    pub model: [[f32; 4]; 4],
+    pub normal: [[f32; 3]; 3],
+}
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+#[allow(dead_code)]
+pub struct SkinnedInstance3DRaw {
+    pub model: [[f32; 4]; 4],
+    //pub normal: [[f32; 3]; 3],
+}
+
+impl Vertex for Instance3DRaw {
+    fn desc() -> wgpu::VertexBufferLayout<'static> {
+        wgpu::VertexBufferLayout {
+            array_stride: mem::size_of::<Instance3DRaw>() as wgpu::BufferAddress,
+            // We need to switch from using a step mode of Vertex to Instance
+            // This means that our shaders will only change to use the next
+            // instance when the shader starts processing a new instance
+            step_mode: wgpu::VertexStepMode::Instance,
+            attributes: &[
+                // Model matrix
+                wgpu::VertexAttribute {
+                    offset: 0,
+                    // Our vertex shader uses slots 0-4. We start at 5.
+                    shader_location: 5,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
+                    shader_location: 6,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 8]>() as wgpu::BufferAddress,
+                    shader_location: 7,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 12]>() as wgpu::BufferAddress,
+                    shader_location: 8,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+                // Normal matrix
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 16]>() as wgpu::BufferAddress,
+                    shader_location: 9,
+                    format: wgpu::VertexFormat::Float32x3,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 19]>() as wgpu::BufferAddress,
+                    shader_location: 10,
+                    format: wgpu::VertexFormat::Float32x3,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 22]>() as wgpu::BufferAddress,
+                    shader_location: 11,
+                    format: wgpu::VertexFormat::Float32x3,
+                },
+            ],
+        }
+    }
+}
+
+impl Vertex for SkinnedInstance3DRaw {
+    fn desc() -> wgpu::VertexBufferLayout<'static> {
+        wgpu::VertexBufferLayout {
+            array_stride: mem::size_of::<SkinnedInstance3DRaw>() as wgpu::BufferAddress,
+            step_mode: wgpu::VertexStepMode::Instance,
+            attributes: &[
+                // Model matrix
+                wgpu::VertexAttribute {
+                    offset: 0,
+                    // Our skinned vertex shader uses slots 0-6. We start at 7.
+                    shader_location: 7,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
+                    shader_location: 8,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 8]>() as wgpu::BufferAddress,
+                    shader_location: 9,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 12]>() as wgpu::BufferAddress,
+                    shader_location: 10,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+                // // Normal matrix
+                // wgpu::VertexAttribute {
+                //     offset: mem::size_of::<[f32; 16]>() as wgpu::BufferAddress,
+                //     shader_location: 11,
+                //     format: wgpu::VertexFormat::Float32x3,
+                // },
+                // wgpu::VertexAttribute {
+                //     offset: mem::size_of::<[f32; 19]>() as wgpu::BufferAddress,
+                //     shader_location: 12,
+                //     format: wgpu::VertexFormat::Float32x3,
+                // },
+                // wgpu::VertexAttribute {
+                //     offset: mem::size_of::<[f32; 22]>() as wgpu::BufferAddress,
+                //     shader_location: 13,
+                //     format: wgpu::VertexFormat::Float32x3,
+                // },
+            ],
+        }
+    }
+}
