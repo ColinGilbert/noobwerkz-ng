@@ -1,10 +1,10 @@
 [package]
-name = "client"
+name = "noobwerkz-client"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-shared = { path = "../shared" }
+noobwerkz-shared = { path = "../shared" }
 ozz-animation-rs = { git = "https://github.com/colingilbert/ozz-animation-rs.git", branch = "master" }
 simple-animgraph = { git = "https://github.com/colingilbert/simple-anim-graph.git", branch = "main" }
 glam = { version = "0.33", features=["bytemuck", "core-simd"]}

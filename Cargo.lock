@@ -722,39 +722,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "client"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bitmask-enum",
- "bytemuck",
- "egui",
- "egui-wgpu",
- "egui-winit",
- "env_logger",
- "futures",
- "futures-signals",
- "glam 0.33.12",
- "image",
- "kira",
- "libm",
- "monstertruck",
- "msgpacker",
- "once_cell",
- "ozz-animation-rs",
- "pollster",
- "rayon",
- "safe_index",
- "serde",
- "shared",
- "simple-animgraph",
- "web-time",
- "wgpu",
- "wincode",
- "winit",
-]
-
-[[package]]
 name = "client-example"
 version = "0.1.0"
 
@@ -2871,6 +2838,62 @@ name = "noobwerkz"
 version = "0.0.2"
 
 [[package]]
+name = "noobwerkz-client"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bitmask-enum",
+ "bytemuck",
+ "egui",
+ "egui-wgpu",
+ "egui-winit",
+ "env_logger",
+ "futures",
+ "futures-signals",
+ "glam 0.33.12",
+ "image",
+ "kira",
+ "libm",
+ "monstertruck",
+ "msgpacker",
+ "noobwerkz-shared",
+ "once_cell",
+ "ozz-animation-rs",
+ "pollster",
+ "rayon",
+ "safe_index",
+ "serde",
+ "simple-animgraph",
+ "web-time",
+ "wgpu",
+ "wincode",
+ "winit",
+]
+
+[[package]]
+name = "noobwerkz-server"
+version = "0.1.0"
+
+[[package]]
+name = "noobwerkz-shared"
+version = "0.1.0"
+dependencies = [
+ "bevy_ballistic_stripped",
+ "dodgy_2d",
+ "dodgy_3d",
+ "env_logger",
+ "glam 0.33.12",
+ "hecs",
+ "libm",
+ "netcode-rs",
+ "planning",
+ "rapier3d",
+ "recast-rs",
+ "safe_index",
+ "web-time",
+]
+
+[[package]]
 name = "noop_proc_macro"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4339,29 +4362,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.9",
-]
-
-[[package]]
-name = "server"
-version = "0.1.0"
-
-[[package]]
-name = "shared"
-version = "0.1.0"
-dependencies = [
- "bevy_ballistic_stripped",
- "dodgy_2d",
- "dodgy_3d",
- "env_logger",
- "glam 0.33.12",
- "hecs",
- "libm",
- "netcode-rs",
- "planning",
- "rapier3d",
- "recast-rs",
- "safe_index",
- "web-time",
 ]
 
 [[package]]

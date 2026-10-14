@@ -6,7 +6,7 @@ pub mod texture;
 pub mod model3d;
 pub mod resource;
 pub mod instance3d;
-pub mod passes;
+pub mod rendering;
 pub mod model3d_node;
 pub mod skinned_model3d_node;
 pub mod vertex;

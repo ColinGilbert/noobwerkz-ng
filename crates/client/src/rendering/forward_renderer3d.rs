@@ -4,7 +4,7 @@ use crate::instance3d::*;
 use crate::vertex::*;
 use crate::model3d::*;
 use crate::model3d_node::*;
-use crate::passes::Pass;
+use crate::rendering::Pass;
 use crate::scene3d::Characters3DContext;
 use crate::skinned_model3d::*;
 

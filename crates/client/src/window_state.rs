@@ -3,7 +3,7 @@ use crate::camera3d::*;
 use crate::egui_renderer::EguiRenderer;
 use crate::graphics::*;
 use crate::light3d::*;
-use crate::passes::{Pass, forward_renderer3d::*};
+use crate::rendering::{Pass, forward_renderer3d::*};
 use crate::texture::*;
 use crate::user_context::*;
 use egui_wgpu::ScreenDescriptor;
