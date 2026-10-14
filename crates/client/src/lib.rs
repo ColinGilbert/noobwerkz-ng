@@ -30,3 +30,4 @@ pub use egui;
 pub use futures;
 pub use web_time;
 pub use simple_animgraph;
+pub use noobwerkz_shared;
