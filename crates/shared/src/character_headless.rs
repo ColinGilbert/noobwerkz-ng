@@ -1,1 +1,0 @@
-// This file stores all the info for a headless character (ie: one that doesn't have any rendering info attached)

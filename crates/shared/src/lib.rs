@@ -1,5 +1,8 @@
-pub mod physics_context_3d;
-pub mod scene_headless;
-pub mod character_headless;
-
-pub use glam;
+pub mod index_types;
+pub mod physics3d_context;
+pub mod character3d_common;
+pub mod player3d_common;
+pub mod npc3d_common;
+pub mod client_to_server_commands;
+pub mod server_to_client_commands;
+pub mod item3d_common;

@@ -5,7 +5,7 @@ use crate::graphics::*;
 use crate::light3d::*;
 use crate::rendering::{Pass, forward_renderer3d::*};
 use crate::texture::*;
-use crate::user_context::*;
+use crate::client_user_context::*;
 use egui_wgpu::ScreenDescriptor;
 
 use std::f64;
@@ -23,7 +23,7 @@ pub struct WindowState {
     pub gfx_ctx: GraphicsContext,
     pub light_ctx: Light3DContext,
     pub cam_ctx: CameraContext,
-    pub user_ctx: UserContext,
+    pub user_ctx: ClientUserContext,
     pub forward_renderer: ForwardRenderer3D,
     pub egui_renderer: EguiRenderer,
     #[allow(dead_code)]
@@ -47,7 +47,7 @@ impl WindowState {
         let surface = instance.create_surface(window.clone()).unwrap();
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
         let mut lights = Vec::<Light3DUniform>::new();
-        let mut user_ctx = UserContext::new(); // { models: :, skinned_models: (), scenes: (), active_scene: () }
+        let mut user_ctx = ClientUserContext::new(); // { models: :, skinned_models: (), scenes: (), active_scene: () }
 
         if let Some(cb) = *USER_SETUP_CALLBACK.lock().unwrap() {
             cb(&mut gfx_ctx, &mut user_ctx, &mut lights);

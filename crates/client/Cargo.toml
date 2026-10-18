@@ -5,19 +5,18 @@ edition = "2024"
 
 [dependencies]
 noobwerkz-shared = { path = "../shared" }
+glam = { workspace = true }
+safe_index = { workspace = true }
+web-time = { workspace = true }
 ozz-animation-rs = { git = "https://github.com/colingilbert/ozz-animation-rs.git", branch = "master" }
 simple-animgraph = { git = "https://github.com/colingilbert/simple-anim-graph.git", branch = "main" }
-glam = { version = "0.33", features=["bytemuck", "core-simd"]}
 egui = "0.36.2"
 egui-wgpu = "0.36.2"
 egui-winit = "0.36.2"
-safe_index = "0.10.0"
-libm = "0.2.16"
 wgpu = "30.0"
 winit = "0.30.13"
 pollster = "1.0.1"
 env_logger = "0.11.11"
-web-time = "1.1.0"
 kira = "0.12.5"
 msgpacker = "0.7.1"
 monstertruck = "0.4.1"

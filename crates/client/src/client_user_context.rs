@@ -3,16 +3,16 @@ use kira::{
 	AudioManager, AudioManagerSettings, DefaultBackend,
 };
 
-pub struct UserContext {
+pub struct ClientUserContext {
     pub asset_mgr: AssetManager,
     pub skeletals: Skeletal3DContexts<Skeletal3DContext>,
     pub scenes: Scenes3D<Scene3D>,
-    pub audio_mgr: Option<AudioManager>,
     pub active_scene: Scene3DIndex,
-    pub time_elapsed: u128,
+    pub audio_mgr: Option<AudioManager>,
+    pub time_elapsed: u128, // TODO: Replace with web_time::Duration??
 }
 
-impl UserContext {
+impl ClientUserContext {
     pub fn new() -> Self {
         let asset_mgr = AssetManager::new();
         let skeletals = Skeletal3DContexts::new();
@@ -29,8 +29,8 @@ impl UserContext {
             asset_mgr,
             skeletals,
             scenes,
-            audio_mgr,
             active_scene: Scene3DIndex::new(0),
+            audio_mgr,
             time_elapsed: 0,
         }
     }

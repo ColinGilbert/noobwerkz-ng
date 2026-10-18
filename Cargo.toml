@@ -1,15 +1,12 @@
 [workspace]
-members = ["crates/shared", "crates/client", "crates/server", "crates/client-example"]
+members = ["crates/shared", "crates/client", "crates/server"]
 resolver = "3"
 
-[package]
-name = "noobwerkz"
-version = "0.1.0"
-edition = "2024"
-
-[lib]
-
-
-
-
-
+[workspace.dependencies]
+glam = { version = "0.33", features=["bytemuck", "core-simd"]}
+safe_index = "0.10.0"
+netcode-rs = "1.4.0"
+web-time = "1.1.0"
+flax = "0.7.1"
+bevy_ballistic_stripped = { git = "https://github.com/colingilbert/bevy_ballistic.git", branch = "main" }
+once_cell = "1.21.4"

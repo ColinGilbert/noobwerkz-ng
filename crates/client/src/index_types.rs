@@ -1,4 +1,3 @@
-
 safe_index::new! {
   TexturedMeshIndex,
   map: TexturedMeshes
