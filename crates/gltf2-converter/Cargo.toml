@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 noobwerkz-shared = { path = "../shared" }
-noobwerkz-skeletal-animation = {path = "../skeletal-animation" }
+noobwerkz-skeletal-animation = { path = "../skeletal-animation" }
 anyhow = { workspace = true }
 glam = { workspace = true }
 msgpacker = { workspace = true }

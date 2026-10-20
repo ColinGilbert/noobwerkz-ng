@@ -2998,6 +2998,7 @@ name = "noobwerkz-skeletal-animation"
 version = "0.1.0"
 dependencies = [
  "glam 0.33.12",
+ "noobwerkz-shared",
  "safe_index",
  "web-time",
 ]

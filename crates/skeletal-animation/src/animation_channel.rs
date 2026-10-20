@@ -1,15 +1,14 @@
 use crate::keyframe::Keyframe;
+use noobwerkz_shared::serialized_model3d::*;
 
 // Consists of several keyframes
 #[derive(Clone)]
-
-pub struct Animation {
+pub struct AnimationChannel {
     pub translation_keys: Vec<glam::Vec3>,
     pub rotation_keys: Vec<glam::Quat>,
     pub scale_keys: Vec<glam::Vec3>,
-    pub timepoints: Vec<f32>,
-    pub duration: f32,
-    pub num_tracks: usize,
+    pub times: Vec<f32>,
+    pub looping: bool,
 }
 
 pub struct AnimationSeekResults {
@@ -20,24 +19,41 @@ pub struct AnimationSeekResults {
     pub time_elapsed: f32,
 }
 
-impl Animation {
-    pub fn new() -> Self {
-        Self {
-            translation_keys: Vec::new(),
-            rotation_keys: Vec::new(),
-            scale_keys: Vec::new(),
-            timepoints: Vec::new(),
-            duration: 0.0,
-            num_tracks: 1, // TODO: Change to be more flexible
+impl AnimationChannel {
+    pub fn from_serialized(serialized: &SerializedModel3D) -> Vec<Self> {
+        let mut results: Vec<Self> = Vec::new();
+
+        for serialized_channel in &serialized.animations_by_channel {
+            let mut translation_keys = Vec::new();
+            for t in &serialized_channel.translations {
+                translation_keys.push(glam::Vec3::from_array(*t));
+            }
+            let mut rotation_keys = Vec::new();
+            for r in &serialized_channel.rotations {
+                rotation_keys.push(glam::Quat::from_array(*r));
+            }
+            let mut scale_keys = Vec::new();
+            for s in &serialized_channel.scales {
+                scale_keys.push(glam::Vec3::from_array(*s));
+            }
+
+            let channel = Self {
+                translation_keys,
+                rotation_keys,
+                scale_keys,
+                times: serialized_channel.times.clone(),
+                looping: false,
+            };
+            results.push(channel);
         }
+        results
     }
 
     pub fn add_keyframe(&mut self, keyframe: Keyframe) {
         self.translation_keys.push(keyframe.translation);
         self.rotation_keys.push(keyframe.rotation);
         self.scale_keys.push(keyframe.scale);
-        self.timepoints.push(keyframe.time);
-        self.duration += keyframe.time;
+        self.times.push(keyframe.time);
     }
 
     //  Returns the index of the first of two animations
@@ -57,11 +73,11 @@ impl Animation {
             };
             return results;
         }
-        while i < self.timepoints.len() {
+        while i < self.times.len() {
             let i2 = i + 1;
-            if i2 < self.timepoints.len() {
-                let t = self.timepoints[i];
-                let t2 = self.timepoints[i2];
+            if i2 < self.times.len() {
+                let t = self.times[i];
+                let t2 = self.times[i2];
                 if time >= t && time <= t2 {
                     let results: AnimationSeekResults = AnimationSeekResults {
                         beginning: false,
@@ -72,7 +88,7 @@ impl Animation {
                     };
                     return results;
                 }
-            } else if i == self.timepoints.len() - 1 {
+            } else if i == self.times.len() - 1 {
                 let results: AnimationSeekResults = AnimationSeekResults {
                     beginning: false,
                     finished: true,
@@ -88,8 +104,8 @@ impl Animation {
         AnimationSeekResults {
             beginning: false,
             finished: true,
-            first: self.timepoints.len() - 1,
-            second: self.timepoints.len() - 1,
+            first: self.times.len() - 1,
+            second: self.times.len() - 1,
             time_elapsed: 0.0,
         }
     }

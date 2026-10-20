@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+noobwerkz-shared = { path = "../shared" }
 glam = { workspace = true }
 safe_index = { workspace = true }
 web-time = { workspace = true }

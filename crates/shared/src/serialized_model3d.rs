@@ -14,6 +14,8 @@ pub struct SerializedAnimationKeyframes {
     pub scales: Vec<[f32; 3]>,
     pub translations: Vec<[f32; 3]>,
     pub rotations: Vec<[f32; 4]>,
+    pub times: Vec<f32>,
+
 }
 
 impl SerializedAnimationKeyframes {
@@ -22,6 +24,7 @@ impl SerializedAnimationKeyframes {
             scales: Vec::new(),
             translations: Vec::new(),
             rotations: Vec::new(),
+            times: Vec::new(),
         }
     }
 }
@@ -96,7 +99,7 @@ impl SerializedMaterial {
 
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
-pub struct SerializedModel {
+pub struct SerializedModel3D {
     pub meshes: Vec<SerializedMesh3D>,
     pub materials: Vec<SerializedMaterial>,
     pub bones: Vec<SerializedBone3D>,
@@ -106,7 +109,7 @@ pub struct SerializedModel {
     //pub inverse_transform: [[f32; 4]; 4],
 }
 
-impl SerializedModel {
+impl SerializedModel3D {
     pub fn new() -> Self {
         Self {
             meshes: Vec::new(),

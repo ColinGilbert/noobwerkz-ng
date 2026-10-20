@@ -1,18 +1,18 @@
 use crate::{
-    MAX_BONES, animation::Animation, bone::*, operation_result::OperationResults,
+    MAX_BONES, animation_channel::AnimationChannel, bone::*, operation_result::OperationResults,
     skeleton::Skeleton,
 };
 use std::sync::Arc;
 
 pub struct PlaybackContext {
     pub skeleton: Arc<Skeleton>,
-    pub animation: Arc<Animation>,
+    pub animation: Arc<AnimationChannel>,
     pub timepoint_index: usize,
     pub finished: bool,
 }
 
 impl PlaybackContext {
-    pub fn new(skeleton: Arc<Skeleton>, animation: Arc<Animation>) -> Self {
+    pub fn new(skeleton: Arc<Skeleton>, animation: Arc<AnimationChannel>) -> Self {
         Self {
             skeleton: skeleton.clone(),
             animation: animation.clone(),

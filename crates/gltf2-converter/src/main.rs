@@ -1,7 +1,6 @@
 use msgpacker::*;
 use noobwerkz_shared::serialized_model3d::*;
-use noobwerkz_skeletal_animation::{animation::*, skeleton::*};
-use std::{any, fs::*, io::*};
+use std::{fs::*, io::*};
 
 fn traverse_node_recursive(
     node: &gltf::Node,
@@ -228,11 +227,13 @@ fn run(path: &str) {
     let mut serialized_animations_by_channel = Vec::<SerializedAnimationKeyframes>::new();
     for anim in anims {
         for channel in anim.channels() {
+            let mut serialized_channel_keyframes = SerializedAnimationKeyframes::new();
+            let mut times = Vec::new();
             let reader = channel.reader(|buffer| Some(&buffers[buffer.index()]));
-            let keyframe_timestamps = if let Some(inputs) = reader.read_inputs() {
+            let _keyframe_times = if let Some(inputs) = reader.read_inputs() {
                 match inputs {
-                    gltf::accessor::Iter::Standard(times) => {
-                        let times: Vec<f32> = times.collect();
+                    gltf::accessor::Iter::Standard(serialized_times) => {
+                        times = serialized_times.collect();
                         println!("Time: {}", times.len());
                     }
                     gltf::accessor::Iter::Sparse(_) => {
@@ -241,7 +242,7 @@ fn run(path: &str) {
                 }
             };
 
-            let mut serialized_channel_keyframes = SerializedAnimationKeyframes::new();
+            serialized_channel_keyframes.times = times;
 
             if let Some(outputs) = reader.read_outputs() {
                 match outputs {
@@ -249,7 +250,7 @@ fn run(path: &str) {
                         translation.for_each(|tr| {
                             // println!("Translation:");
                             // dbg!(tr);
-                           serialized_channel_keyframes.translations.push(tr);
+                            serialized_channel_keyframes.translations.push(tr);
                         });
                     }
                     gltf::animation::util::ReadOutputs::Rotations(rotation) => {
@@ -268,11 +269,23 @@ fn run(path: &str) {
             };
 
             println!(
-                "Anim {}, channel {}, keyframes translation length: {}", anim_num, channel_num,
+                "Anim {}, channel {}, keyframes translation length: {}",
+                anim_num,
+                channel_num,
                 serialized_channel_keyframes.translations.len()
             );
-            println!("Anim {}, channel {}, keyframes rotation length: {}", anim_num, channel_num, serialized_channel_keyframes.rotations.len());
-            println!("Anim {}, channel {}, keyframes scales length: {}", anim_num, channel_num, serialized_channel_keyframes.scales.len());
+            println!(
+                "Anim {}, channel {}, keyframes rotation length: {}",
+                anim_num,
+                channel_num,
+                serialized_channel_keyframes.rotations.len()
+            );
+            println!(
+                "Anim {}, channel {}, keyframes scales length: {}",
+                anim_num,
+                channel_num,
+                serialized_channel_keyframes.scales.len()
+            );
 
             serialized_animations_by_channel.push(serialized_channel_keyframes);
 
@@ -281,14 +294,14 @@ fn run(path: &str) {
         anim_num += 1;
     }
 
-    let mut serialized_model = SerializedModel::new();
+    let mut serialized_model = SerializedModel3D::new();
     serialized_model.meshes = serialized_meshes;
     serialized_model.materials = serialized_materials;
     serialized_model.bones = joints;
     serialized_model.bone_names = joint_names;
     serialized_model.inverse_bind_matrices = inverse_bind_matrices;
     serialized_model.animations_by_channel = serialized_animations_by_channel;
-    
+
     let mut buf = Vec::new();
     let _n = serialized_model.pack(&mut buf);
     let mut file = File::create("model.bin").unwrap();
