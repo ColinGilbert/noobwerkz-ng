@@ -1,4 +1,31 @@
 use msgpacker::*;
+
+#[repr(C)]
+#[derive(Clone, Debug, PartialEq, MsgPacker)]
+pub struct SerializedBone3D {
+    pub scale: [f32; 3],
+    pub translation: [f32; 3],
+    pub rotation: [f32; 4],
+}
+
+#[repr(C)]
+#[derive(Clone, Debug, PartialEq, MsgPacker)]
+pub struct SerializedAnimationKeyframes {
+    pub scales: Vec<[f32; 3]>,
+    pub translations: Vec<[f32; 3]>,
+    pub rotations: Vec<[f32; 4]>,
+}
+
+impl SerializedAnimationKeyframes {
+    pub fn new() -> Self {
+        Self {
+            scales: Vec::new(),
+            translations: Vec::new(),
+            rotations: Vec::new(),
+        }
+    }
+}
+
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedMesh3D {
@@ -72,8 +99,10 @@ impl SerializedMaterial {
 pub struct SerializedModel {
     pub meshes: Vec<SerializedMesh3D>,
     pub materials: Vec<SerializedMaterial>,
+    pub bones: Vec<SerializedBone3D>,
     pub bone_names: Vec<String>,
     pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
+    pub animations_by_channel: Vec<SerializedAnimationKeyframes>,
     //pub inverse_transform: [[f32; 4]; 4],
 }
 
@@ -82,8 +111,10 @@ impl SerializedModel {
         Self {
             meshes: Vec::new(),
             materials: Vec::new(),
+            bones: Vec::new(),
             bone_names: Vec::new(),
             inverse_bind_matrices: Vec::new(),
+            animations_by_channel: Vec::new(),
         }
     }
 

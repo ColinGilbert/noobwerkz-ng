@@ -2,7 +2,7 @@
 
 use std::{collections::HashMap, rc::Rc};
 
-use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
+// use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 use noobwerkz_shared::physics3d_context::*;
 
 use crate::{
@@ -93,8 +93,8 @@ impl Scene3D {
         skinned_model_idx: SkinnedModel3DIndex,
         instances: &Vec<Instance3D>,
         animgraph_definition: &AnimGraphDefinition,
-        skeleton: Rc<ozz_animation_rs::Skeleton>,
-        animations_by_name: &HashMap<String, Rc<ozz_animation_rs::Animation>>,
+        // skeleton: Rc<ozz_animation_rs::Skeleton>,
+        // animations_by_name: &HashMap<String, Rc<ozz_animation_rs::Animation>>,
         name: String,
     ) -> Option<Characters3DContextIndex> {
         self.characters_contexts.push(Characters3DContext {

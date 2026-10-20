@@ -1,8 +1,7 @@
 use msgpacker::*;
-use std::{fs::*, io::*};
-// use std::boxed::Box;
-// use std::error::Error as StdError;
-use noobwerkz_client::serialized_model3d::*;
+use noobwerkz_shared::serialized_model3d::*;
+use noobwerkz_skeletal_animation::{animation::*, skeleton::*};
+use std::{any, fs::*, io::*};
 
 fn traverse_node_recursive(
     node: &gltf::Node,
@@ -17,7 +16,7 @@ fn traverse_node_recursive(
     if mesh.is_some() {
         println!("Node {} has mesh", node.name().unwrap_or_default());
         let prims = mesh.unwrap().primitives();
-        let mut serialized_mesh = noobwerkz_client::serialized_model3d::SerializedMesh3D::new();
+        let mut serialized_mesh = SerializedMesh3D::new();
         let mut min_extents = [0.0 as f32; 3];
         let mut max_extents = [0.0 as f32; 3];
         for p in prims {
@@ -189,7 +188,7 @@ fn run(path: &str) {
         }
         serialized_materials.push(serialized_material);
     }
-
+    let mut joints = Vec::<SerializedBone3D>::new();
     let mut joint_names = Vec::<String>::new();
     let mut inverse_bind_matrices = Vec::new();
     for skin in document.skins() {
@@ -211,15 +210,85 @@ fn run(path: &str) {
                 println!("  Joint (Bone) has no name");
                 joint_names.push(joint_node.index().to_string());
             }
+            let xform = glam::Mat4::from_cols_array_2d(&joint_node.transform().matrix())
+                .to_scale_rotation_translation();
+            let serialized_bone = SerializedBone3D {
+                scale: xform.0.to_array(),
+                rotation: xform.1.to_array(),
+                translation: xform.2.to_array(),
+            };
+            joints.push(serialized_bone);
         }
     }
 
-    let mut serialized_model = noobwerkz_client::serialized_model3d::SerializedModel::new();
+    // Here we add the animations extracting code
+    let anims = document.animations();
+    let mut anim_num = 0usize;
+    let mut channel_num = 0usize;
+    let mut serialized_animations_by_channel = Vec::<SerializedAnimationKeyframes>::new();
+    for anim in anims {
+        for channel in anim.channels() {
+            let reader = channel.reader(|buffer| Some(&buffers[buffer.index()]));
+            let keyframe_timestamps = if let Some(inputs) = reader.read_inputs() {
+                match inputs {
+                    gltf::accessor::Iter::Standard(times) => {
+                        let times: Vec<f32> = times.collect();
+                        println!("Time: {}", times.len());
+                    }
+                    gltf::accessor::Iter::Sparse(_) => {
+                        println!("Sparse keyframes not supported :(");
+                    }
+                }
+            };
+
+            let mut serialized_channel_keyframes = SerializedAnimationKeyframes::new();
+
+            if let Some(outputs) = reader.read_outputs() {
+                match outputs {
+                    gltf::animation::util::ReadOutputs::Translations(translation) => {
+                        translation.for_each(|tr| {
+                            // println!("Translation:");
+                            // dbg!(tr);
+                           serialized_channel_keyframes.translations.push(tr);
+                        });
+                    }
+                    gltf::animation::util::ReadOutputs::Rotations(rotation) => {
+                        rotation.into_f32().for_each(|rot| {
+                            serialized_channel_keyframes.rotations.push(rot);
+                        });
+                    }
+                    gltf::animation::util::ReadOutputs::Scales(scale) => {
+                        scale.for_each(|s| {
+                            serialized_channel_keyframes.scales.push(s);
+                        });
+                    }
+                    _ => (),
+                    // gltf::animation::util::ReadOutputs::MorphTargetWeights(_) => {},
+                }
+            };
+
+            println!(
+                "Anim {}, channel {}, keyframes translation length: {}", anim_num, channel_num,
+                serialized_channel_keyframes.translations.len()
+            );
+            println!("Anim {}, channel {}, keyframes rotation length: {}", anim_num, channel_num, serialized_channel_keyframes.rotations.len());
+            println!("Anim {}, channel {}, keyframes scales length: {}", anim_num, channel_num, serialized_channel_keyframes.scales.len());
+
+            serialized_animations_by_channel.push(serialized_channel_keyframes);
+
+            channel_num += 1;
+        }
+        anim_num += 1;
+    }
+
+    let mut serialized_model = SerializedModel::new();
     serialized_model.meshes = serialized_meshes;
     serialized_model.materials = serialized_materials;
+    serialized_model.bones = joints;
     serialized_model.bone_names = joint_names;
     serialized_model.inverse_bind_matrices = inverse_bind_matrices;
-
+    serialized_model.animations_by_channel = serialized_animations_by_channel;
+    
     let mut buf = Vec::new();
     let _n = serialized_model.pack(&mut buf);
     let mut file = File::create("model.bin").unwrap();

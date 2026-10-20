@@ -3,7 +3,7 @@ members = ["crates/shared", "crates/client", "crates/server", "crates/skeletal-a
 resolver = "3"
 
 [workspace.dependencies]
-glam = { version = "0.33", features=["bytemuck", "core-simd"]}
+glam = { version = "0.33.12", features=["bytemuck"]}
 rapier3d = { version = "0.35", features = ["serde-serialize", "enhanced-determinism"] }
 web-time = "1.1.0"
 safe_index = "0.10.0"

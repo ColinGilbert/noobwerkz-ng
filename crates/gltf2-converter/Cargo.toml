@@ -4,8 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-noobwerkz-client = { path = "../client" }
+noobwerkz-shared = { path = "../shared" }
+noobwerkz-skeletal-animation = {path = "../skeletal-animation" }
 anyhow = { workspace = true }
 glam = { workspace = true }
-gltf = "1.4.1"
 msgpacker = { workspace = true }
+gltf = {version = "1.4.1", features = ["utils"] }

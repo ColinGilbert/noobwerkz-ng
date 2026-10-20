@@ -6,3 +6,4 @@ pub mod npc3d_common;
 pub mod client_to_server_commands;
 pub mod server_to_client_commands;
 pub mod item3d_common;
+pub mod serialized_model3d;

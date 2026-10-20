@@ -1,7 +1,6 @@
 use crate::index_types::*;
 use crate::material::*;
 use crate::model3d::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
-use crate::serialized_model3d::*;
 use crate::skeletal3d_context::Skeletal3DContext;
 use crate::skinned_model3d::*;
 use crate::texture;
@@ -9,6 +8,7 @@ use crate::texture::Texture;
 use msgpacker::*;
 use std::path::*;
 use wgpu::util::DeviceExt;
+use noobwerkz_shared::serialized_model3d::*;
 
 pub fn load_serialized_model(filepath: &std::path::Path) -> SerializedModel {
     let mut path = PathBuf::new();
