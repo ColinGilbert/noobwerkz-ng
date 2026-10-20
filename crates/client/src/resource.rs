@@ -18,19 +18,19 @@ pub fn load_serialized_model(filepath: &std::path::Path) -> SerializedModel {
     println!("Full path {:?}", path.as_path());
     let data = std::fs::read(path.as_path()).unwrap();
     let deserialized = SerializedModel::unpack(&data).unwrap();
-    println!("Dimensions {:?}", deserialized.1.meshes[0].dimensions);
-    println!("Scale {:?}", deserialized.1.meshes[0].scale);
-    println!("Translation {:?}", deserialized.1.meshes[0].translation);
-    println!("Rotation {:?}", deserialized.1.meshes[0].rotation);
+    println!("Dimensions {:?}", deserialized.meshes[0].dimensions);
+    println!("Scale {:?}", deserialized.meshes[0].scale);
+    println!("Translation {:?}", deserialized.meshes[0].translation);
+    println!("Rotation {:?}", deserialized.meshes[0].rotation);
     println!(
         "Diffuse texture {}",
-        deserialized.1.materials[0].diffuse_texture_path
+        deserialized.materials[0].diffuse_texture_path
     );
     println!(
         "Normals texture {}",
-        deserialized.1.materials[0].normals_texture_path
+        deserialized.materials[0].normals_texture_path
     );
-    deserialized.1
+    deserialized
 }
 
 // TODO: Robustify

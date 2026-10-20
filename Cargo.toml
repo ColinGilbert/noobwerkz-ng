@@ -11,6 +11,6 @@ netcode-rs = "1.4.0"
 zero_ecs = "0.3.4"
 bevy_ballistic_stripped = { git = "https://github.com/colingilbert/bevy_ballistic.git", branch = "main" }
 once_cell = "1.21.4"
-msgpacker = "0.4.8"
+msgpacker = "0.7.2"
 rayon = "1.12.0"
 anyhow = "1.0.104"

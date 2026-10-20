@@ -2820,19 +2820,22 @@ dependencies = [
 
 [[package]]
 name = "msgpacker"
-version = "0.4.8"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "134a72ec3a6d034e9c767344ce8aebde228eef4e1343fff3ea209993f12920b3"
+checksum = "c5c0ac43666318ea49105bbc10246a9609d9a5a20b6c2d2f934b32d19e685bf5"
 dependencies = [
+ "bytes",
  "msgpacker-derive",
+ "serde",
 ]
 
 [[package]]
 name = "msgpacker-derive"
-version = "0.3.2"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c334ab77a6d4f29c5c2e41149c0f03af4082923aa364aa0c9876232f33f9853f"
+checksum = "5aa6c602164791e82913716444fefa7d6bb8902a788ead4d1e20d688cd2642a0"
 dependencies = [
+ "proc-macro2",
  "quote",
  "syn 2.0.119",
 ]
