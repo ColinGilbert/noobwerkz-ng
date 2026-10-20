@@ -2,7 +2,7 @@ use crate::index_types::*;
 
 pub struct ItemCommon {
     pub uid: Item3DUIDIndex,
-    pub item_type: Item3DTypeUIDIndex,
+    pub item_type_uid: Item3DTypeUIDIndex,
     pub health: f32,
     pub status: ItemStatus,
 }

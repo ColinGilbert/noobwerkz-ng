@@ -334,12 +334,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
 
 [[package]]
-name = "atomic_refcell"
-version = "0.1.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21e4227379beff4205943696e6c3e0cd809bacdf3f0edd6e3dd153e2269571a4"
-
-[[package]]
 name = "audio_thread_priority"
 version = "0.35.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -388,7 +382,7 @@ dependencies = [
  "anyhow",
  "arrayvec",
  "log",
- "nom 8.0.0",
+ "nom",
  "num-rational",
  "v_frame",
 ]
@@ -765,6 +759,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "const-random"
+version = "0.1.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "87e00182fe74b066627d63b85fd550ac2998d4b0bd86bfed477a0ae4c7c71359"
+dependencies = [
+ "const-random-macro",
+]
+
+[[package]]
+name = "const-random-macro"
+version = "0.1.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f9d839f2a20b0aee515dc581a6172f2321f96cab76c1a38a4c584a194955390e"
+dependencies = [
+ "getrandom 0.2.17",
+ "once_cell",
+ "tiny-keccak",
+]
+
+[[package]]
+name = "convert_case"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "baaaa0ecca5b51987b9423ccdc971514dd8b0bb7b4060b983d3664dad3f1f89f"
+dependencies = [
+ "unicode-segmentation",
+]
+
+[[package]]
 name = "convert_case"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1004,6 +1027,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "derive-syn-parse"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d65d7ce8132b7c0e54497a4d9a55a1c2a0912a0d786cf894472ba818fba45762"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
 name = "derive_more"
 version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1018,7 +1052,7 @@ version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "799a97264921d8623a957f6c3b9011f3b5492f557bbb7a5a19b7fa6d06ba8dcb"
 dependencies = [
- "convert_case",
+ "convert_case 0.10.0",
  "proc-macro2",
  "quote",
  "rustc_version",
@@ -1075,24 +1109,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4b8a88685455ed29a21542a33abd9cb6510b6b129abadabdcef0f4c55bc8f61"
 dependencies = [
  "litrs",
-]
-
-[[package]]
-name = "dodgy_2d"
-version = "0.5.5"
-source = "git+https://github.com/colingilbert/dodgy.git?branch=main#170002afc0afdd73fc565f0a90c04e8b2bc2d6bd"
-dependencies = [
- "glam 0.33.12",
- "rand 0.10.3",
-]
-
-[[package]]
-name = "dodgy_3d"
-version = "0.5.2"
-source = "git+https://github.com/colingilbert/dodgy.git?branch=main#170002afc0afdd73fc565f0a90c04e8b2bc2d6bd"
-dependencies = [
- "glam 0.33.12",
- "rand 0.10.3",
 ]
 
 [[package]]
@@ -1361,6 +1377,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "extend"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "311a6d2f1f9d60bff73d2c78a0af97ed27f79672f15c238192a5bbb64db56d00"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
 name = "extended"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1414,32 +1441,6 @@ dependencies = [
  "crc32fast",
  "miniz_oxide 0.9.1",
  "zlib-rs",
-]
-
-[[package]]
-name = "flax"
-version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "969d03701ee2143c566cd480b3122ff635af85508992c80aca76e3d6b5e43913"
-dependencies = [
- "anyhow",
- "atomic_refcell",
- "bitflags 2.13.2",
- "flume",
- "itertools 0.12.1",
- "once_cell",
- "rayon",
- "smallvec",
- "tynm",
-]
-
-[[package]]
-name = "flume"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da0e4dd2a88388a1f4ccc7c9ce104604dab68d9f408dc34cd45823d5a9069095"
-dependencies = [
- "spin",
 ]
 
 [[package]]
@@ -1901,6 +1902,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "header-parsing"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "648c7304bdedea53138308b293d5fcc88be72facb8f171a16258a7ff732a5fe9"
+
+[[package]]
 name = "heapless"
 version = "0.7.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2087,6 +2094,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "inner-space"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c2dff135fecfa6c472ef6892d45e0eed32445d1ef0142af9885804f82e9fc84e"
+dependencies = [
+ "scalars",
+ "vector-space",
+]
+
+[[package]]
 name = "inout"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2103,6 +2120,12 @@ checksum = "276ec31bcb4a9ee45f58bec6f9ec700ae4cf4f4f8f2fa7e06cb406bd5ffdd770"
 dependencies = [
  "num-traits",
 ]
+
+[[package]]
+name = "intehan_util_dump"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b00a7be6dd8e42683b97f24d73a7b7ba43d94c81cd5b0c21433be611c521c8f"
 
 [[package]]
 name = "interpolate_name"
@@ -2495,6 +2518,54 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dae608c151f68243f2b000364e1f7b186d9c29845f7d2d85bd31b9ad77ad552b"
 
 [[package]]
+name = "macro_magic"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0625ea4e11e9b0f45e650aa92a94e83719433992dcafd5f130c6435d2ea67107"
+dependencies = [
+ "macro_magic_core",
+ "macro_magic_macros",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "macro_magic_core"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "10a0d941b46232df6f549002d493fc30b720b617b5d7bfb58febda386c2c5abe"
+dependencies = [
+ "const-random",
+ "derive-syn-parse",
+ "macro_magic_core_macros",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "macro_magic_core_macros"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "31e7b9b365f39f573850b21c1e241234e29426ee8b0d6ee13637f714fad7390f"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "macro_magic_macros"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54256681b01f4e5b038a619b24896f8c76d61995075909226d4e6bcf60bad525"
+dependencies = [
+ "macro_magic_core",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
 name = "matext4cgmath"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2539,12 +2610,6 @@ checksum = "d1219ed1b7f229ee7104d281dd01d6802fe28bb6e95d292942c4daacdeb798c0"
 dependencies = [
  "libc",
 ]
-
-[[package]]
-name = "minimal-lexical"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 
 [[package]]
 name = "miniz_oxide"
@@ -2902,16 +2967,6 @@ checksum = "2bf50223579dc7cdcfb3bfcacf7069ff68243f8c363f62ffa99cf000a6b9c451"
 
 [[package]]
 name = "nom"
-version = "7.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
-dependencies = [
- "memchr",
- "minimal-lexical",
-]
-
-[[package]]
-name = "nom"
 version = "8.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df9761775871bdef83bee530e60050f7e54b1105350d6884eb0fb4f46c2f9405"
@@ -2941,38 +2996,53 @@ dependencies = [
  "once_cell",
  "ozz-animation-rs",
  "pollster",
+ "rapier3d",
  "rayon",
  "safe_index",
  "serde",
  "simple-animgraph",
+ "simple-particles",
  "web-time",
  "wgpu",
  "wincode",
  "winit",
+ "zero_ecs",
 ]
 
 [[package]]
 name = "noobwerkz-server"
 version = "0.1.0"
 dependencies = [
- "flax",
  "landmark",
  "netcode-rs",
  "noobwerkz-shared",
  "once_cell",
+ "rapier3d",
  "safe_index",
  "waymark",
  "waymark-crowd",
  "waymark-dynamic",
  "waymark-tilecache",
+ "zero_ecs",
 ]
 
 [[package]]
 name = "noobwerkz-shared"
 version = "0.1.0"
 dependencies = [
- "dodgy_2d",
- "dodgy_3d",
+ "env_logger",
+ "glam 0.33.12",
+ "libm",
+ "planning",
+ "rapier3d",
+ "safe_index",
+ "web-time",
+]
+
+[[package]]
+name = "noobwerkz-skeletal-animation"
+version = "0.1.0"
+dependencies = [
  "env_logger",
  "glam 0.33.12",
  "libm",
@@ -4359,6 +4429,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "scalars"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "82ff7fdc3ffda90527442f54f16b45854291fe1e62a4d4363c85264337ace6a9"
+dependencies = [
+ "libm",
+]
+
+[[package]]
 name = "scoped-tls"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4514,6 +4593,27 @@ dependencies = [
  "petgraph",
  "safe_index",
  "web-time",
+]
+
+[[package]]
+name = "simple-particles"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "98a9423d204d5afdfff9122cbb30871c5d105b7401ad69ddad661ab591e0d26d"
+dependencies = [
+ "header-parsing",
+ "simple-vectors",
+]
+
+[[package]]
+name = "simple-vectors"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8dbd4887691cd845f86f2dc3baf6c5f08f40a15fa043057d1e741114f762d5b1"
+dependencies = [
+ "inner-space",
+ "scalars",
+ "vector-basis",
 ]
 
 [[package]]
@@ -4914,6 +5014,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "tiny-keccak"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c9d3793400a45f954c52e73d068316d76b6f4e36977e3fcebb13a2721e80237"
+dependencies = [
+ "crunchy",
+]
+
+[[package]]
 name = "tiny-skia"
 version = "0.11.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5032,15 +5141,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "86a801b3cea342a06d468c8710662aa29e5e05e4f5c0d62f00bbb7f2ad7941c2"
 
 [[package]]
-name = "tynm"
-version = "0.1.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd30d05e69d1478e13fe3e7a853409cfec82cebc2cf9b8d613b3c6b0081781ed"
-dependencies = [
- "nom 7.1.3",
-]
-
-[[package]]
 name = "type-map"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5139,6 +5239,25 @@ dependencies = [
  "aligned-vec",
  "num-traits",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "vector-basis"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aac4cdc3cef2a32f13c0bb9a0b476f0030aa0e83c9a6f3e8d5b9969372aa6ff7"
+dependencies = [
+ "scalars",
+ "vector-space",
+]
+
+[[package]]
+name = "vector-space"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cef3e9fe6ca4e3807d260ce966d098900c682e13058282f9b7607a6b2b779d1e"
+dependencies = [
+ "scalars",
 ]
 
 [[package]]
@@ -6083,6 +6202,34 @@ dependencies = [
  "quote",
  "syn 3.0.9",
  "synstructure",
+]
+
+[[package]]
+name = "zero_ecs"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e01cc7333aee3b3b9d4bca6b387aafade5ea84014bd2f08fe9a93a66aefdcb95"
+dependencies = [
+ "derive_more",
+ "extend",
+ "itertools 0.12.1",
+ "macro_magic",
+ "rayon",
+ "zero_ecs_macros",
+]
+
+[[package]]
+name = "zero_ecs_macros"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d6e7e9bd71617ecf13eac3580199c01ef713e6c7a325255f97c17abd9496ae73"
+dependencies = [
+ "convert_case 0.8.0",
+ "intehan_util_dump",
+ "macro_magic",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
 ]
 
 [[package]]

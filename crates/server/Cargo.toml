@@ -6,9 +6,10 @@ edition = "2024"
 [dependencies]
 noobwerkz-shared = { path = "../shared" }
 netcode-rs = { workspace = true }
-flax = { workspace = true }
+zero_ecs = { workspace = true }
 safe_index = {workspace = true }
 once_cell = {workspace = true }
+rapier3d = { workspace = true }
 landmark = "0.1"
 waymark = "0.1"
 waymark-crowd = "0.1"
