@@ -23,7 +23,7 @@ impl AnimationChannel {
     pub fn from_serialized(serialized: &SerializedModel3D) -> Vec<Self> {
         let mut results: Vec<Self> = Vec::new();
 
-        for serialized_channel in &serialized.animations_by_channel {
+        for serialized_channel in &serialized.animations_channels {
             let mut translation_keys = Vec::new();
             for t in &serialized_channel.translations {
                 translation_keys.push(glam::Vec3::from_array(*t));
@@ -49,12 +49,12 @@ impl AnimationChannel {
         results
     }
 
-    pub fn add_keyframe(&mut self, keyframe: Keyframe) {
-        self.translation_keys.push(keyframe.translation);
-        self.rotation_keys.push(keyframe.rotation);
-        self.scale_keys.push(keyframe.scale);
-        self.times.push(keyframe.time);
-    }
+    // pub fn add_keyframe(&mut self, keyframe: Keyframe) {
+    //     self.translation_keys.push(keyframe.translation);
+    //     self.rotation_keys.push(keyframe.rotation);
+    //     self.scale_keys.push(keyframe.scale);
+    //     self.times.push(keyframe.time);
+    // }
 
     //  Returns the index of the first of two animations
     pub fn seek(&self, time: f32, start: Option<usize>) -> AnimationSeekResults {

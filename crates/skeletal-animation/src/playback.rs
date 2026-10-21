@@ -38,6 +38,7 @@ impl PlaybackContext {
     }
 
     pub fn reset(&mut self) {
-
+        self.timepoint_index = 0;
+        self.finished = false;
     }
 }

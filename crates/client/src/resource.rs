@@ -10,14 +10,14 @@ use std::path::*;
 use wgpu::util::DeviceExt;
 use noobwerkz_shared::serialized_model3d::*;
 
-pub fn load_serialized_model(filepath: &std::path::Path) -> SerializedModel {
+pub fn load_serialized_model(filepath: &std::path::Path) -> SerializedModel3D {
     let mut path = PathBuf::new();
     for p in filepath {
         path.push(p);
     }
     println!("Full path {:?}", path.as_path());
     let data = std::fs::read(path.as_path()).unwrap();
-    let deserialized = SerializedModel::unpack(&data).unwrap();
+    let deserialized = SerializedModel3D::unpack(&data).unwrap();
     println!("Dimensions {:?}", deserialized.meshes[0].dimensions);
     println!("Scale {:?}", deserialized.meshes[0].scale);
     println!("Translation {:?}", deserialized.meshes[0].translation);
@@ -35,7 +35,7 @@ pub fn load_serialized_model(filepath: &std::path::Path) -> SerializedModel {
 
 // TODO: Robustify
 pub fn load_skinned_3d_model_from_serialized(
-    model: &mut SerializedModel,
+    model: &mut SerializedModel3D,
     default_material: &Material,
     path: &std::path::Path,
     device: &mut wgpu::Device,
@@ -219,7 +219,7 @@ pub fn load_skinned_3d_model_from_serialized(
 }
 
 pub fn load_3d_model_from_serialized(
-    model: &mut SerializedModel,
+    model: &mut SerializedModel3D,
     default_material: &Material,
     filepath: &std::path::Path,
     device: &mut wgpu::Device,

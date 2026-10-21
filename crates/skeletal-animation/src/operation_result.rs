@@ -1,4 +1,4 @@
-use crate::{MAX_BONES, bone::Bone};
+use crate::{MAX_BONES};
 
 pub struct OperationResults {
     pub translations: [glam::Vec3; MAX_BONES],

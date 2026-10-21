@@ -1,8 +1,11 @@
 use msgpacker::*;
 
+pub const INVALID_BONE: usize = usize::MAX;
+
 #[repr(C)]
-#[derive(Clone, Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Copy, Debug, PartialEq, MsgPacker)]
 pub struct SerializedBone3D {
+    pub parent: usize,
     pub scale: [f32; 3],
     pub translation: [f32; 3],
     pub rotation: [f32; 4],
@@ -105,7 +108,7 @@ pub struct SerializedModel3D {
     pub bones: Vec<SerializedBone3D>,
     pub bone_names: Vec<String>,
     pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
-    pub animations_by_channel: Vec<SerializedAnimationKeyframes>,
+    pub animations_channels: Vec<SerializedAnimationKeyframes>,
     //pub inverse_transform: [[f32; 4]; 4],
 }
 
@@ -117,7 +120,7 @@ impl SerializedModel3D {
             bones: Vec::new(),
             bone_names: Vec::new(),
             inverse_bind_matrices: Vec::new(),
-            animations_by_channel: Vec::new(),
+            animations_channels: Vec::new(),
         }
     }
 

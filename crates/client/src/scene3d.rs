@@ -104,14 +104,14 @@ impl Scene3D {
                 bone_matrices_bind_group_layout,
                 skinned_model_idx,
                 instances,
-                skeleton.clone(),
+                // skeleton.clone(),
             ),
         });
         println!("ADDING CHARACTERS: Instance count: {}", instances.len());
         let characters_ctx_idx = Characters3DContextIndex::new(self.characters_contexts.len() - 1);
         for instance in instances {
             let character = Character3DRenderable::new(
-                skeleton.clone(),
+                // skeleton.clone(),
                 instance.position.into(),
                 instance.orientation,
                 animgraph_definition,
