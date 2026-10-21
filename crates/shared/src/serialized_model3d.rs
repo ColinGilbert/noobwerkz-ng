@@ -3,7 +3,7 @@ use msgpacker::*;
 pub const INVALID_BONE: usize = usize::MAX;
 
 #[repr(C)]
-#[derive(Clone, Copy, Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedBone3D {
     pub parent: usize,
     pub scale: [f32; 3],
@@ -14,6 +14,7 @@ pub struct SerializedBone3D {
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedAnimationKeyframes {
+    pub bone: usize,
     pub scales: Vec<[f32; 3]>,
     pub translations: Vec<[f32; 3]>,
     pub rotations: Vec<[f32; 4]>,
@@ -24,6 +25,7 @@ pub struct SerializedAnimationKeyframes {
 impl SerializedAnimationKeyframes {
     pub fn new() -> Self {
         Self {
+            bone: INVALID_BONE,
             scales: Vec::new(),
             translations: Vec::new(),
             rotations: Vec::new(),

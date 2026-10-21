@@ -250,7 +250,7 @@ fn run(path: &str) {
         }
         println!("Num bones {}", num_bones);
         for j in joints_temp.iter() {
-            let mut temp_joint = *j;
+            let mut temp_joint = j.clone();
             if raw_joint_nodes_indices_to_serialized_indices.contains_key(&j.parent) {
                 temp_joint.parent = raw_joint_nodes_indices_to_serialized_indices[&j.parent];
             } else {
@@ -260,7 +260,7 @@ fn run(path: &str) {
         }
 
         println!("Serialized joints: ");
-        for (i,j) in joints.iter().enumerate() {
+        for (i, j) in joints.iter().enumerate() {
             println!("    {}: {:?}", i, j);
         }
     }
@@ -275,9 +275,14 @@ fn run(path: &str) {
         for channel in anim.channels() {
             let s = channel.sampler();
             println!("Sampler interpolation: {:?}", s.interpolation());
-            let target_index = raw_joint_nodes_indices_to_serialized_indices[&channel.target().node().index()];
+            let target_index =
+                raw_joint_nodes_indices_to_serialized_indices[&channel.target().node().index()];
+
             println!("Target index {}", target_index);
             let mut serialized_channels_keyframes = SerializedAnimationKeyframes::new();
+
+            serialized_channels_keyframes.bone = target_index;
+
             let mut times = Vec::new();
             let reader = channel.reader(|buffer| Some(&buffers[buffer.index()]));
             let _keyframe_times = if let Some(inputs) = reader.read_inputs() {
@@ -318,6 +323,11 @@ fn run(path: &str) {
                     // gltf::animation::util::ReadOutputs::MorphTargetWeights(_) => {},
                 }
             };
+
+            println!(
+                "Anim {}, channel {}, bone {}, name {}",
+                anim_num, channel_num, serialized_channels_keyframes.bone, joint_names[serialized_channels_keyframes.bone]
+            );
 
             println!(
                 "Anim {}, channel {}, keyframe translations: {}",

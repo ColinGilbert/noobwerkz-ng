@@ -6,9 +6,10 @@ use std::sync::Arc;
 
 pub struct PlaybackContext {
     pub skeleton: Arc<Skeleton>,
-    pub animation: Arc<AnimationChannel>,
+    pub animation: Vec<AnimationChannel>,
     pub timepoint_index: usize,
     pub finished: bool,
+    pub looping: bool,
 }
 
 impl PlaybackContext {
@@ -18,20 +19,23 @@ impl PlaybackContext {
             animation: animation.clone(),
             timepoint_index: 0,
             finished: false,
+            looping: true,
         }
     }
 
     pub fn set_time(&mut self, time: f32) {
-        let results = self.animation.seek(time, None);
-        self.timepoint_index = results.first;
-        self.finished = results.finished;
+        let results = self.animation.seek(time);
+        self.timepoint_index = results.index;
+        if !self.looping {
+            self.finished = results.end;
+        }
     }
 
     pub fn playback(&mut self, duration: f32) -> OperationResults {
         let mut results = OperationResults::new();
         // Here we do the actual playback
         // Check to see if we're at the end of the animation's keyframes. If so, simply set the output to be the last keyframe.
-        
+
         // Now, we blend between the two
 
         results

@@ -1,9 +1,9 @@
-use crate::keyframe::Keyframe;
 use noobwerkz_shared::serialized_model3d::*;
 
 // Consists of several keyframes
 #[derive(Clone)]
 pub struct AnimationChannel {
+    pub bone: usize,
     pub translation_keys: Vec<glam::Vec3>,
     pub rotation_keys: Vec<glam::Quat>,
     pub scale_keys: Vec<glam::Vec3>,
@@ -11,12 +11,11 @@ pub struct AnimationChannel {
     pub looping: bool,
 }
 
-pub struct AnimationSeekResults {
-    pub beginning: bool,
-    pub finished: bool,
-    pub first: usize,
-    pub second: usize,
-    pub time_elapsed: f32,
+pub struct SeekResults {
+    pub end: bool,
+    pub begin: bool,
+    pub interpolation_needed: bool,
+    pub index: usize,
 }
 
 impl AnimationChannel {
@@ -24,6 +23,7 @@ impl AnimationChannel {
         let mut results: Vec<Self> = Vec::new();
 
         for serialized_channel in &serialized.animations_channels {
+            let bone = serialized_channel.bone;
             let mut translation_keys = Vec::new();
             for t in &serialized_channel.translations {
                 translation_keys.push(glam::Vec3::from_array(*t));
@@ -38,6 +38,7 @@ impl AnimationChannel {
             }
 
             let channel = Self {
+                bone,
                 translation_keys,
                 rotation_keys,
                 scale_keys,
@@ -49,64 +50,39 @@ impl AnimationChannel {
         results
     }
 
-    // pub fn add_keyframe(&mut self, keyframe: Keyframe) {
-    //     self.translation_keys.push(keyframe.translation);
-    //     self.rotation_keys.push(keyframe.rotation);
-    //     self.scale_keys.push(keyframe.scale);
-    //     self.times.push(keyframe.time);
-    // }
-
     //  Returns the index of the first of two animations
-    pub fn seek(&self, time: f32, start: Option<usize>) -> AnimationSeekResults {
-        let mut i;
-        match start {
-            Some(val) => i = val,
-            None => i = 0,
-        };
+    pub fn seek(&self, time: f32) -> SeekResults {
         if time == 0.0 {
-            let results = AnimationSeekResults {
-                beginning: true,
-                finished: false,
-                first: 0,
-                second: 1,
-                time_elapsed: 0.0,
+            return SeekResults {
+                begin: true,
+                end: false,
+                interpolation_needed: false,
+                index: 0,
             };
-            return results;
         }
-        while i < self.times.len() {
-            let i2 = i + 1;
-            if i2 < self.times.len() {
-                let t = self.times[i];
-                let t2 = self.times[i2];
-                if time >= t && time <= t2 {
-                    let results: AnimationSeekResults = AnimationSeekResults {
-                        beginning: false,
-                        finished: false,
-                        first: i,
-                        second: i2,
-                        time_elapsed: time - t,
-                    };
-                    return results;
+        let mut seek_results: SeekResults;
+        let findings = self.times.binary_search_by(|t| t.total_cmp(&time));
+        match findings {
+            // We found the number
+            Ok(val) => {
+                if val == self.times.len() - 1 {
+                    seek_results = SeekResults {
+                        end: true,
+                        begin: false,
+                        interpolation_needed: false,
+                        index: val,
+                    }
                 }
-            } else if i == self.times.len() - 1 {
-                let results: AnimationSeekResults = AnimationSeekResults {
-                    beginning: false,
-                    finished: true,
-                    first: i,
-                    second: i,
-                    time_elapsed: 0.0,
-                };
-                return results;
+                else {
+                    seek_results = SeekResults { end:  false, begin: false, interpolation_needed: true, index: val };
+                }
             }
-            i += 1;
-        }
+            // We didn't find the specific number
+            Err(val) => {
+                seek_results = SeekResults { end: false, begin: false, interpolation_needed: true, index: val };
+            }
+    }
 
-        AnimationSeekResults {
-            beginning: false,
-            finished: true,
-            first: self.times.len() - 1,
-            second: self.times.len() - 1,
-            time_elapsed: 0.0,
-        }
+        seek_results
     }
 }

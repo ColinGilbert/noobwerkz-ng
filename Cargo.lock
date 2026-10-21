@@ -2960,7 +2960,6 @@ dependencies = [
  "gltf",
  "msgpacker",
  "noobwerkz-shared",
- "noobwerkz-skeletal-animation",
 ]
 
 [[package]]
