@@ -275,13 +275,10 @@ fn run(path: &str) {
         for channel in anim.channels() {
             let s = channel.sampler();
             println!("Sampler interpolation: {:?}", s.interpolation());
-            let target_index =
+            let target_bone_index =
                 raw_joint_nodes_indices_to_serialized_indices[&channel.target().node().index()];
 
-            println!("Target index {}", target_index);
-            let mut serialized_channels_keyframes = SerializedAnimationKeyframes::new();
-
-            serialized_channels_keyframes.bone = target_index;
+            println!("Target index {}", target_bone_index);
 
             let mut times = Vec::new();
             let reader = channel.reader(|buffer| Some(&buffers[buffer.index()]));
@@ -297,55 +294,60 @@ fn run(path: &str) {
                     }
                 }
             };
-
-            serialized_channels_keyframes.times = times;
-
+            let mut serialized_channels_keyframes: SerializedAnimationKeyframes = SerializedAnimationKeyframes { bone: target_bone_index, data: SerializedKeyframeTypes::Invalid, times };
             if let Some(outputs) = reader.read_outputs() {
                 match outputs {
                     gltf::animation::util::ReadOutputs::Translations(translation) => {
+                        let mut translations = Vec::new();
                         translation.for_each(|tr| {
                             // println!("Translation:");
                             // dbg!(tr);
-                            serialized_channels_keyframes.translations.push(tr);
+                            translations.push(tr);
                         });
+                        serialized_channels_keyframes.data = SerializedKeyframeTypes::Translations(translations.clone());
+                        println!(
+                            "Anim {}, channel {}, keyframe translations: {}",
+                            anim_num,
+                            channel_num,
+                            translations.len()
+                        );
                     }
                     gltf::animation::util::ReadOutputs::Rotations(rotation) => {
+                        let mut rotations = Vec::new();
                         rotation.into_f32().for_each(|rot| {
-                            serialized_channels_keyframes.rotations.push(rot);
+                            rotations.push(rot);
                         });
+                        serialized_channels_keyframes.data =SerializedKeyframeTypes::Rotations(rotations.clone());
+                        println!(
+                            "Anim {}, channel {}, keyframe rotations: {}",
+                            anim_num,
+                            channel_num,
+                            rotations.len()
+                        );
                     }
                     gltf::animation::util::ReadOutputs::Scales(scale) => {
+                        let mut scales = Vec::new();
                         scale.for_each(|s| {
-                            serialized_channels_keyframes.scales.push(s);
+                            scales.push(s);
                         });
+                        serialized_channels_keyframes.data = SerializedKeyframeTypes::Scales(scales.clone());
+                        println!(
+                            "Anim {}, channel {}, keyframe scales: {}",
+                            anim_num,
+                            channel_num,
+                            scales.len()
+                        );
                     }
-                    _ => (),
-                    // gltf::animation::util::ReadOutputs::MorphTargetWeights(_) => {},
+                    _ => { } // gltf::animation::util::ReadOutputs::MorphTargetWeights(_) => {},
                 }
             };
 
             println!(
                 "Anim {}, channel {}, bone {}, name {}",
-                anim_num, channel_num, serialized_channels_keyframes.bone, joint_names[serialized_channels_keyframes.bone]
-            );
-
-            println!(
-                "Anim {}, channel {}, keyframe translations: {}",
                 anim_num,
                 channel_num,
-                serialized_channels_keyframes.translations.len()
-            );
-            println!(
-                "Anim {}, channel {}, keyframe rotations: {}",
-                anim_num,
-                channel_num,
-                serialized_channels_keyframes.rotations.len()
-            );
-            println!(
-                "Anim {}, channel {}, keyframe scales: {}",
-                anim_num,
-                channel_num,
-                serialized_channels_keyframes.scales.len()
+                serialized_channels_keyframes.bone,
+                joint_names[serialized_channels_keyframes.bone]
             );
 
             serialized_animations_channels.push(serialized_channels_keyframes);

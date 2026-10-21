@@ -1,20 +1,29 @@
 use noobwerkz_shared::serialized_model3d::*;
 
+
+#[derive(clone)
+pub enum KeyframeKeys {
+    Translation(Vec<glam::Vec3>),
+    Rotation(Vec<glam::Quat>),
+    Scale(Vec<glam::Vec3>)
+}
+
 // Consists of several keyframes
 #[derive(Clone)]
 pub struct AnimationChannel {
-    pub bone: usize,
-    pub translation_keys: Vec<glam::Vec3>,
-    pub rotation_keys: Vec<glam::Quat>,
-    pub scale_keys: Vec<glam::Vec3>,
+    pub bone_index: usize,
+    pub keys: KeyframeKeys,
     pub times: Vec<f32>,
     pub looping: bool,
+    pub seek_results: SeekResults,
 }
 
+#[derive(Clone)]
 pub struct SeekResults {
     pub end: bool,
     pub begin: bool,
     pub interpolation_needed: bool,
+    pub t: f32,
     pub index: usize,
 }
 
@@ -23,7 +32,7 @@ impl AnimationChannel {
         let mut results: Vec<Self> = Vec::new();
 
         for serialized_channel in &serialized.animations_channels {
-            let bone = serialized_channel.bone;
+            let bone_index = serialized_channel.bone;
             let mut translation_keys = Vec::new();
             for t in &serialized_channel.translations {
                 translation_keys.push(glam::Vec3::from_array(*t));
@@ -38,12 +47,13 @@ impl AnimationChannel {
             }
 
             let channel = Self {
-                bone,
+                bone_index,
                 translation_keys,
                 rotation_keys,
                 scale_keys,
                 times: serialized_channel.times.clone(),
                 looping: false,
+                seek_results: SeekResults { end: false, begin: true, interpolation_needed: false, t: 0.0, index: 0 }
             };
             results.push(channel);
         }
@@ -51,38 +61,39 @@ impl AnimationChannel {
     }
 
     //  Returns the index of the first of two animations
-    pub fn seek(&self, time: f32) -> SeekResults {
+    pub fn seek(&mut self, time: f32) {
         if time == 0.0 {
-            return SeekResults {
+            self.seek_results = SeekResults {
                 begin: true,
                 end: false,
                 interpolation_needed: false,
+                t: 0.0,
                 index: 0,
             };
         }
-        let mut seek_results: SeekResults;
         let findings = self.times.binary_search_by(|t| t.total_cmp(&time));
         match findings {
             // We found the number
             Ok(val) => {
                 if val == self.times.len() - 1 {
-                    seek_results = SeekResults {
+                    self.seek_results = SeekResults {
                         end: true,
                         begin: false,
                         interpolation_needed: false,
+                        t: 0.0,
                         index: val,
                     }
                 }
                 else {
-                    seek_results = SeekResults { end:  false, begin: false, interpolation_needed: true, index: val };
+                   self. seek_results = SeekResults { end:  false, begin: false, interpolation_needed: false, t: 0.0, index: val };
                 }
             }
             // We didn't find the specific number
             Err(val) => {
-                seek_results = SeekResults { end: false, begin: false, interpolation_needed: true, index: val };
+                let t = 1.0 - (self.times[val] - time) / self.times[val];
+                self.seek_results = SeekResults { end: false, begin: false, interpolation_needed: true, t, index: val };
             }
     }
 
-        seek_results
     }
 }
