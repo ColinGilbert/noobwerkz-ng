@@ -463,7 +463,7 @@ pub async fn load_texture(
 }
 
 pub async fn load_binary(filepath: &Path) -> anyhow::Result<Vec<u8>> {
-    let data = { ImageReader::open(filepath)? }.with_guessed_format()?.decode()?;
+    let data = { ImageReader::open(filepath)? }.with_guessed_format()?.decode()?.into_bytes();
 
     Ok(data)
 }
