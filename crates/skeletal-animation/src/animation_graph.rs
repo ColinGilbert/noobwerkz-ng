@@ -12,6 +12,7 @@ use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::sync::Arc;
 
+
 safe_index::new!(
     AnimationIndex,
     map: Animations,

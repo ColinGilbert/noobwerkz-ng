@@ -1,6 +1,6 @@
-use crate::{skeleton::*, bone::*};
+use crate::{bone::*};
 
-use std::sync::Arc;
+use std::{collections::HashMap};
 
 use msgpacker::*;
 
@@ -125,6 +125,7 @@ pub struct SerializedModel3D {
     pub bone_names: Vec<String>,
     pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
     pub animations: Vec<SerializedAnimation3D>,
+    pub animations_by_name: HashMap<String, usize>
     //pub inverse_transform: [[f32; 4]; 4],
 }
 
@@ -137,6 +138,7 @@ impl SerializedModel3D {
             bone_names: Vec::new(),
             inverse_bind_matrices: Vec::new(),
             animations: Vec::new(),
+            animations_by_name: HashMap::new(),
         }
     }
 

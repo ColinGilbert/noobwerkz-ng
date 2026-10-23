@@ -270,7 +270,20 @@ fn run(path: &str) {
     let mut serialized_animations = Vec::<SerializedAnimation3D>::new();
     let mut anim_num = 0usize;
     println!("Num anims: {}", anims.len());
+    let mut anim_name_counter = 0;
+    let mut animation_index = 0usize;
+    let mut animations_by_name = HashMap::new();
     for anim in anims {
+        let anim_name: String;
+        match anim.name() {
+            Some(val) => {anim_name = val.to_owned()}
+            None => {
+                anim_name = anim_name_counter.to_string();
+                anim_name_counter += 1;
+            }
+        }
+        animations_by_name.insert(anim_name, animation_index);
+        animation_index += 1;
         let mut channel_num = 0usize;
         let mut serialized_animations_channels = Vec::new();
         for channel in anim.channels() {
@@ -364,6 +377,7 @@ fn run(path: &str) {
     serialized_model.bone_names = joint_names;
     serialized_model.inverse_bind_matrices = inverse_bind_matrices;
     serialized_model.animations = serialized_animations;
+    serialized_model.animations_by_name = animations_by_name;
 
     let mut buf = Vec::new();
     let _n = serialized_model.pack(&mut buf);

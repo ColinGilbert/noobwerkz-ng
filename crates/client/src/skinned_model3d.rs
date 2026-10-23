@@ -1,4 +1,5 @@
 use noobwerkz_skeletal_animation::animation::Animation;
+use noobwerkz_skeletal_animation::animation_graph::AnimationIndex;
 use noobwerkz_skeletal_animation::animation_graph::Animations;
 use noobwerkz_shared::{skeleton::*};
 use crate::index_types::*;
@@ -16,7 +17,8 @@ pub struct SkinnedModel3D {
     pub name: String,
     pub inverse_bind_matrices: Vec<glam::Mat4>,
     pub skeleton: Arc<Skeleton>,
-    pub animations_idx_by_name: HashMap<String, usize>,
+    pub animations_idx_by_name: HashMap<String, AnimationIndex>,
+    pub animation_names: HashMap<AnimationIndex, String>,
     pub animations: Animations<Animation>,
 }
 
@@ -29,6 +31,7 @@ impl SkinnedModel3D {
             inverse_bind_matrices: Vec::new(),
             skeleton: Arc::new(Skeleton::new()),
             animations_idx_by_name: HashMap::new(),
+            animation_names: HashMap::new(),
             animations: Animations::new(),
         }
     }

@@ -5,10 +5,12 @@ use crate::skinned_model3d::*;
 use crate::texture;
 use crate::texture::Texture;
 use msgpacker::*;
+use noobwerkz_shared::item3d_common::ItemStatus::InWorld;
 use noobwerkz_shared::serialized_model3d::*;
 use noobwerkz_shared::skeleton::Skeleton;
 use noobwerkz_skeletal_animation::animation::Animation;
 use noobwerkz_skeletal_animation::animation_channel::AnimationChannel;
+use noobwerkz_skeletal_animation::animation_graph::AnimationIndex;
 use std::path::*;
 use wgpu::util::DeviceExt;
 
@@ -239,6 +241,11 @@ pub fn load_skinned_3d_model_from_serialized(
         let animation = Animation::new(anim_channels.clone());
 
         model_results.animations.push(animation.clone());
+    }
+
+    for (n, i) in &model.animations_by_name {
+        model_results.animation_names.insert(AnimationIndex::new(*i), n.clone());
+        model_results.animations_idx_by_name.insert(n.clone(), AnimationIndex::new(*i));
     }
 
     Some(model_results)
