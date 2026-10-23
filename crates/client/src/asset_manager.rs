@@ -53,10 +53,10 @@ impl AssetManager {
         default_material: &Material,
         texture_layout: &wgpu::BindGroupLayout,
     ) -> anyhow::Result<Model3DIndex> {
-        let mut serialized_opt = load_serialized_model(filepath.as_path());
+        let serialized_opt = load_serialized_model(filepath.as_path());
 
         match serialized_opt {
-            Some(serialized) => {
+            Some(mut serialized) => {
                 let mut path = filepath.clone();
                 path.pop();
                 let model = load_3d_model_from_serialized(
@@ -96,31 +96,38 @@ impl AssetManager {
         default_material: &Material,
         texture_layout: &wgpu::BindGroupLayout,
     ) -> anyhow::Result<SkinnedModel3DIndex> {
-        let mut serialized = load_serialized_model(filepath.as_path());
-        let mut path = filepath.clone();
-        path.pop();
-        let model = load_skinned_3d_model_from_serialized(
-            &mut serialized,
-            default_material,
-            &path.as_path(),
-            device,
-            queue,
-            texture_layout,
-        );
-        match model {
-            Some(val) => {
-                self.skinned_models.push(val);
-                let idx = SkinnedModel3DIndex::new(self.skinned_models.len() - 1);
-                self.skinned_model_names.insert(idx, name.to_owned());
-                self.skinned_models_by_name.insert(name.to_owned(), idx);
-                return anyhow::Result::Ok(idx);
+        let serialized_opt = load_serialized_model(filepath.as_path());
+        match serialized_opt {
+            Some(mut serialized) => {
+                let mut path = filepath.clone();
+                path.pop();
+                let model = load_skinned_3d_model_from_serialized(
+                    &mut serialized,
+                    default_material,
+                    &path.as_path(),
+                    device,
+                    queue,
+                    texture_layout,
+                );
+                match model {
+                    Some(val) => {
+                        self.skinned_models.push(val);
+                        let idx = SkinnedModel3DIndex::new(self.skinned_models.len() - 1);
+                        self.skinned_model_names.insert(idx, name.to_owned());
+                        self.skinned_models_by_name.insert(name.to_owned(), idx);
+                        return anyhow::Result::Ok(idx);
+                    }
+                    None => {
+                        return anyhow::Result::Err(anyhow!(format!(
+                            "Skinned model {} refused to load properly",
+                            name
+                        )));
+                    }
+                }
             }
-            None => {
-                return anyhow::Result::Err(anyhow!(format!(
-                    "Could not load skinned model {} from file",
-                    name
-                )));
-            }
+            None => Err(anyhow!(
+                "AssetManager: Could not load serialized 3D skinned model"
+            )),
         }
     }
 
