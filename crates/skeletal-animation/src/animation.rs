@@ -50,7 +50,7 @@ impl Animation {
         for c in self.channels.iter_mut() {
             // Check to see if we're at the end of the animation's keyframe with looping off. If so, simply set results to be the last keyframe.
             if c.seek_results.end && !self.looping {
-                println!("Playback at the end without looping");
+                // println!("Playback at the end without looping");
                 match &c.data {
                     KeyframeKeys::Translation(val) => {
                         results.translations[c.bone_index] = val[val.len() - 1];
@@ -65,7 +65,7 @@ impl Animation {
             }
             // If looping and at the end, go back to beginning
             else if c.seek_results.end && self.looping {
-                println!("Playback at the end with looping");
+                // println!("Playback at the end with looping");
                 match &c.data {
                     KeyframeKeys::Translation(val) => {
                         results.translations[c.bone_index] = val[0];
@@ -80,7 +80,7 @@ impl Animation {
             }
             // If at the first keyframe use the first keyframe
             else if c.seek_results.begin {
-                println!("Playback at the first keyframe");
+                // println!("Playback at the first keyframe");
                 match &c.data {
                     KeyframeKeys::Translation(val) => {
                         results.translations[c.bone_index] = val[0];
@@ -112,7 +112,7 @@ impl Animation {
                         );
                     }
                     KeyframeKeys::Scale(val) => {
-                        results.translations[c.bone_index] = glam::Vec3::lerp(
+                        results.scales[c.bone_index] = glam::Vec3::lerp(
                             val[c.seek_results.index],
                             val[c.seek_results.index + 1],
                             c.seek_results.t_between_frames,
