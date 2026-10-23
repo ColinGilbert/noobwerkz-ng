@@ -89,6 +89,7 @@ pub struct AnimationGraph {
     node_names: HashMap<String, NodeIndex>,
     output_locals: LocalToLocalResults,
     pub output_model: LocalToModelResults,
+    duration: web_time::Duration,
 }
 
 impl AnimationGraph {
@@ -194,18 +195,20 @@ impl AnimationGraph {
             node_names,
             output_locals: LocalToLocalResults::new(),
             output_model: LocalToModelResults::new(),
+            duration: web_time::Duration::new(0,0),
         })
         // Err(anyhow!("Method unimplemented"))
     }
 
     pub fn evaluate(&mut self, dt: web_time::Duration) -> Result<(), anyhow::Error> {
+        self.duration += dt;
         // Handle the transition case
         if self.on_a_transition {
             match self.current_edge_idx {
                 Some(edge_idx) => {
                     let transition_idx = self.graph.edge_weight(edge_idx).unwrap();
                     // Calculate the time taken and check whether or not the transition is finished.
-                    self.transitions[*transition_idx].seek += dt;
+                    self.transitions[*transition_idx].seek += self.duration;
                     let finished: bool;
                     if self.transitions[*transition_idx].seek
                         >= self.transitions[*transition_idx].duration
@@ -237,7 +240,7 @@ impl AnimationGraph {
                         let mut from_results = LocalToLocalResults::new(); // TODO: Init inside match clause
                         match from {
                             GenericNode::Sampler(val) => {
-                                self.animations[self.samplers[*val].index].seek(dt.as_secs_f32());
+                                self.animations[self.samplers[*val].index].seek(self.duration.as_secs_f32());
                                 from_results =
                                     self.animations[self.samplers[*val].index].playback();
                             }
@@ -250,7 +253,7 @@ impl AnimationGraph {
                         let mut to_results = LocalToLocalResults::new(); // TODO: Init inside match clause
                         match to {
                             GenericNode::Sampler(val) => {
-                                self.animations[self.samplers[*val].index].seek(dt.as_secs_f32());
+                                self.animations[self.samplers[*val].index].seek(self.duration.as_secs_f32());
                                 to_results = self.animations[self.samplers[*val].index].playback();
                             }
                             GenericNode::BlendTreeOneDim(val) => {
@@ -314,7 +317,7 @@ impl AnimationGraph {
                     match node {
                         GenericNode::Sampler(val) => {
                             println!("DT: {:?}", dt);
-                            self.animations[self.samplers[*val].index].seek(dt.as_secs_f32());
+                            self.animations[self.samplers[*val].index].seek(self.duration.as_secs_f32());
                             self.output_locals =
                                 self.animations[self.samplers[*val].index].playback();
                         }
@@ -333,6 +336,7 @@ impl AnimationGraph {
         // Now we check whether or not we are in need of transitioning through the path list
         // let mut first_time_on_transition = false;
         // let mut first_time_on_node = false;
+
 
         Ok(())
     }
