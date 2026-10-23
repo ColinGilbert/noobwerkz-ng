@@ -9,8 +9,8 @@ pub fn local_to_model(skeleton: Arc<Skeleton>, locals: &LocalToLocalResults) -> 
     for (i, parent) in skeleton.parents.iter().enumerate() {
         if *parent != INVALID_BONE {
             let local_matrix = glam::Mat4::from_scale_rotation_translation(locals.scales[i], locals.rotations[i], locals.translations[i]);
-            let parent_matrix = glam::Mat4::from_scale_rotation_translation(locals.scales[*parent], locals.rotations[*parent], locals.translations[*parent]);
-            results.model_matrices[i] = results.model_matrices[*parent] * parent_matrix * local_matrix;
+            // let parent_matrix = glam::Mat4::from_scale_rotation_translation(locals.scales[*parent], locals.rotations[*parent], locals.translations[*parent]);
+            results.model_matrices[i] = results.model_matrices[*parent] * local_matrix;
         }
         else {
             results.model_matrices[i] = glam::Mat4::from_scale_rotation_translation(locals.scales[i], locals.rotations[i], locals.translations[i]);

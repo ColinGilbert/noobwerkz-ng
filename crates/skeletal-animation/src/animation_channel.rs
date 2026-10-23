@@ -96,6 +96,7 @@ impl AnimationChannel {
 
     //  Returns the index of the first of two animations
     pub fn seek(&mut self, time: f32) {
+        println!("Time {}", time);
         if time == 0.0 {
             self.seek_results = SeekResults {
                 begin: true,
