@@ -63,7 +63,9 @@ fn traverse_node_recursive(
                     }
                     if let Some(uvs) = reader.read_tex_coords(0) {
                         for u in uvs.into_f32() {
-                            serialized_mesh.uvs.push(u);
+                            let mut uv = u;
+                            uv[1] = uv[1]*-1.0;
+                            serialized_mesh.uvs.push(uv);
                         }
                     }
                     if let Some(bone_indices) = reader.read_joints(0) {
@@ -218,8 +220,6 @@ fn run(path: &str) {
                     joint_parents.insert(f.index(), joint_node.index());
                 });
 
-                println!("");
-
                 joint_names.push(joint_node.name().unwrap().to_owned());
             } else {
                 println!("  Joint ({}) has no name", joint_node.index().to_string());
@@ -369,6 +369,17 @@ fn run(path: &str) {
         serialized_animations.push(SerializedAnimation3D{ channels: serialized_animations_channels });
         anim_num += 1;
     }
+
+/*
+    pub meshes: Vec<SerializedMesh3D>,
+    pub materials: Vec<SerializedMaterial>,
+    pub bones: Vec<SerializedBone3D>,
+    pub bone_names: Vec<String>,
+    pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
+    pub animations: Vec<SerializedAnimation3D>,
+    pub animations_by_name: HashMap<String, usize>
+
+*/
 
     let mut serialized_model = SerializedModel3D::new();
     serialized_model.meshes = serialized_meshes;
