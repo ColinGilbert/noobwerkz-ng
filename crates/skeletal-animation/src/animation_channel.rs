@@ -1,13 +1,21 @@
 // Each channel covers a single transform (either translation, rotation, or scale) for a single bone.
 // This is because each bone may have a different set of keyframes.
 
-use crate::seek_results::*;
 use noobwerkz_shared::serialized_model3d::*;
 #[derive(Clone)]
 pub enum KeyframeKeys {
     Translation(Vec<glam::Vec3>),
     Rotation(Vec<glam::Quat>),
     Scale(Vec<glam::Vec3>),
+}
+
+#[derive(Clone)]
+pub struct SeekResults {
+    pub end: bool,
+    pub begin: bool,
+    pub interpolation_needed: bool,
+    pub t_between_frames: f32,
+    pub index: usize,
 }
 
 // Consists of several keyframes

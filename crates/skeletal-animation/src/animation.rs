@@ -97,6 +97,11 @@ impl Animation {
             }
             // For all other cases, we blend between two sequential keyframes
             else {
+
+                if c.seek_results.index == results.translations.len() {
+                    c.seek_results.index -= 1;
+                }
+
                 // println!("Playback blending two frames");
                 match &c.data {
                     KeyframeKeys::Translation(val) => {

@@ -1,5 +1,3 @@
-use crate::{MAX_BONES};
-
 pub struct LocalToLocalResults {
     pub translations: Vec<glam::Vec3>,
     pub rotations: Vec<glam::Quat>,
