@@ -326,7 +326,7 @@ impl AnimationGraph {
             }
         }
 
-        println!("{:?}, {:?}. {:?}", &self.output_locals.translations, &self.output_locals.rotations, &self.output_locals.scales );
+       // println!("{:?}, {:?}. {:?}", &self.output_locals.translations, &self.output_locals.rotations, &self.output_locals.scales );
         self.output_model = local_to_model(self.skeleton.clone(), &self.output_locals);
 
         // Now we check whether or not we are in need of transitioning through the path list

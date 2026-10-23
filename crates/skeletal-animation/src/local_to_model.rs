@@ -6,11 +6,11 @@ use std::sync::Arc;
 pub fn local_to_model(skeleton: Arc<Skeleton>, locals: &LocalToLocalResults) -> LocalToModelResults {
     let mut results = LocalToModelResults::new();
     results.model_matrices.resize(skeleton.num_bones, glam::Mat4::IDENTITY);
-    for (i,parent) in skeleton.parents.iter().enumerate() {
+    for (i, parent) in skeleton.parents.iter().enumerate() {
         if *parent != INVALID_BONE {
             let local_matrix = glam::Mat4::from_scale_rotation_translation(locals.scales[i], locals.rotations[i], locals.translations[i]);
             let parent_matrix = glam::Mat4::from_scale_rotation_translation(locals.scales[*parent], locals.rotations[*parent], locals.translations[*parent]);
-            results.model_matrices[i] =local_matrix * parent_matrix;
+            results.model_matrices[i] = results.model_matrices[*parent] * local_matrix;
         }
         else {
             results.model_matrices[i] = glam::Mat4::from_scale_rotation_translation(locals.scales[i], locals.rotations[i], locals.translations[i]);
