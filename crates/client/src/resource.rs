@@ -218,6 +218,7 @@ pub fn load_skinned_3d_model_from_serialized(
 
     for bone_idx in 0..model.bone_names.len() {
         let bone_name = &model.bone_names[bone_idx].clone();
+        println!("Searching for new position for {}", bone_name);
         let bone_newpos = model_results.skeleton.bone_names_to_idx[bone_name];
         inverse_bind_poses[bone_newpos] = model.inverse_bind_matrices[bone_idx];
         bone_names_reshuffled[bone_newpos] = bone_name.to_string();
