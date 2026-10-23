@@ -1,6 +1,6 @@
 // This code serves as a simplified way for asset loading.
 use crate::{
-    material::Material, model3d::*, resource::*, skinned_model3d::*, texture::*, index_types::*,
+    index_types::*, material::Material, model3d::*, resource::*, skinned_model3d::*, texture::*,
 };
 use anyhow::*;
 use kira::sound::static_sound::StaticSoundData;
@@ -21,7 +21,7 @@ pub struct AssetManager {
     pub skinned_models: SkinnedModels3D<SkinnedModel3D>,
     pub textures: Textures<Texture>,
     pub audio_clips: AudioClips<StaticSoundData>, // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
-                                           // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
+                                                  // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
 }
 
 impl AssetManager {
@@ -35,7 +35,7 @@ impl AssetManager {
             skinned_model_names: HashMap::new(),
             texture_names: HashMap::new(),
             audio_clip_names: HashMap::new(),
-            models:Models3D::new(),
+            models: Models3D::new(),
             skinned_models: SkinnedModels3D::<SkinnedModel3D>::new(),
             textures: Textures::new(),
             audio_clips: AudioClips::new(),
@@ -53,31 +53,37 @@ impl AssetManager {
         default_material: &Material,
         texture_layout: &wgpu::BindGroupLayout,
     ) -> anyhow::Result<Model3DIndex> {
-        let mut serialized = load_serialized_model(filepath.as_path());
-        let mut path = filepath.clone();
-        path.pop();
-        let model = load_3d_model_from_serialized(
-            &mut serialized,
-            default_material,
-            &path.as_path(),
-            device,
-            queue,
-            texture_layout,
-        );
-        match model {
-            Some(val) => {
-                self.models.push(val);
-                let idx = Model3DIndex::new(self.models.len() - 1);
-                self.model_names.insert(idx, name.to_owned());
-                self.models_by_name.insert(name.to_owned(), idx);
-                return anyhow::Result::Ok(idx);
+        let mut serialized_opt = load_serialized_model(filepath.as_path());
+
+        match serialized_opt {
+            Some(serialized) => {
+                let mut path = filepath.clone();
+                path.pop();
+                let model = load_3d_model_from_serialized(
+                    &mut serialized,
+                    default_material,
+                    &path.as_path(),
+                    device,
+                    queue,
+                    texture_layout,
+                );
+                match model {
+                    Some(val) => {
+                        self.models.push(val);
+                        let idx = Model3DIndex::new(self.models.len() - 1);
+                        self.model_names.insert(idx, name.to_owned());
+                        self.models_by_name.insert(name.to_owned(), idx);
+                        return anyhow::Result::Ok(idx);
+                    }
+                    None => {
+                        return anyhow::Result::Err(anyhow!(format!(
+                            "Could not load model {} from file",
+                            name
+                        )));
+                    }
+                }
             }
-            None => {
-                return anyhow::Result::Err(anyhow!(format!(
-                    "Could not load model {} from file",
-                    name
-                )));
-            }
+            None => Err(anyhow!("AssetManager: Could not load serialized 3D model")),
         }
     }
 
