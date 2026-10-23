@@ -28,10 +28,10 @@ impl Animation {
     }
 
     pub fn seek(&mut self, time: f32) {
-        let time = time % self.length;
+        let new_time = time % self.length;
         // let mut temp_finished = true;
         for c in self.channels.iter_mut() {
-            c.seek(time);
+            c.seek(new_time);
         }
     }
 
@@ -96,7 +96,7 @@ impl Animation {
             }
             // For all other cases, we blend between two sequential keyframes
             else {
-                println!("Playback blending two frames");
+                // println!("Playback blending two frames");
                 match &c.data {
                     KeyframeKeys::Translation(val) => {
                         results.translations[c.bone_index] = glam::Vec3::lerp(
