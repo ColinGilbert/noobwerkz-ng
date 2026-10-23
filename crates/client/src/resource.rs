@@ -14,27 +14,37 @@ use noobwerkz_skeletal_animation::animation_graph::AnimationIndex;
 use std::path::*;
 use wgpu::util::DeviceExt;
 
-pub fn load_serialized_model(filepath: &std::path::Path) -> SerializedModel3D {
+pub fn load_serialized_model(filepath: &std::path::Path) -> Option<SerializedModel3D> {
     let mut path = PathBuf::new();
     for p in filepath {
         path.push(p);
     }
     println!("Full path {:?}", path.as_path());
     let data = std::fs::read(path.as_path()).unwrap();
-    let deserialized = SerializedModel3D::unpack(&data).unwrap();
-    println!("Dimensions {:?}", deserialized.meshes[0].dimensions);
-    println!("Scale {:?}", deserialized.meshes[0].scale);
-    println!("Translation {:?}", deserialized.meshes[0].translation);
-    println!("Rotation {:?}", deserialized.meshes[0].rotation);
-    println!(
-        "Diffuse texture {}",
-        deserialized.materials[0].diffuse_texture_path
-    );
-    println!(
-        "Normals texture {}",
-        deserialized.materials[0].normals_texture_path
-    );
-    deserialized
+    let deserialized_results = SerializedModel3D::unpack(&data);
+
+    match deserialized_results {
+        Ok(deserialized) => {
+            println!("Dimensions {:?}", deserialized.meshes[0].dimensions);
+            println!("Scale {:?}", deserialized.meshes[0].scale);
+            println!("Translation {:?}", deserialized.meshes[0].translation);
+            println!("Rotation {:?}", deserialized.meshes[0].rotation);
+            println!(
+                "Diffuse texture {}",
+                deserialized.materials[0].diffuse_texture_path
+            );
+            println!(
+                "Normals texture {}",
+                deserialized.materials[0].normals_texture_path
+            );
+
+            Some(deserialized)
+        }
+        Err(err) => {
+            println!("Error loading 3D model: {}", err);
+            None
+        }
+    }
 }
 
 // TODO: Robustify
@@ -244,8 +254,12 @@ pub fn load_skinned_3d_model_from_serialized(
     }
 
     for (n, i) in &model.animations_by_name {
-        model_results.animation_names.insert(AnimationIndex::new(*i), n.clone());
-        model_results.animations_idx_by_name.insert(n.clone(), AnimationIndex::new(*i));
+        model_results
+            .animation_names
+            .insert(AnimationIndex::new(*i), n.clone());
+        model_results
+            .animations_idx_by_name
+            .insert(n.clone(), AnimationIndex::new(*i));
     }
 
     Some(model_results)
