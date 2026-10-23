@@ -4,10 +4,10 @@ use std::collections::HashMap;
 use crate::{bone::*};
 
 pub struct Skeleton {
-    pub bones: [Bone; MAX_BONES],    // These store local transforms
-    pub parents: [usize; MAX_BONES], // These store the parent bone indices.
-    pub valid: [bool; MAX_BONES],
-    pub inverse_bind_matrices: [glam::Mat4; MAX_BONES],
+    pub bones: Vec<Bone>,    // These store local transforms
+    pub parents: Vec<usize>, // These store the parent bone indices.
+    pub valid: Vec<bool>,
+    pub inverse_bind_matrices: Vec<glam::Mat4>,
     pub num_bones: usize,
     pub bone_names_to_idx: HashMap<String, usize>,
     pub bone_idx_to_names: HashMap<usize, String>,
@@ -16,10 +16,10 @@ pub struct Skeleton {
 impl Skeleton {
     pub fn new() -> Self {
         Self {
-            bones: [Bone::new(); MAX_BONES],
-            parents: [INVALID_BONE; MAX_BONES], // These store the parent bone indices.
-            valid: [false; MAX_BONES],
-            inverse_bind_matrices: [glam::Mat4::IDENTITY; MAX_BONES],
+            bones: Vec::new(),
+            parents: Vec::new(), // These store the parent bone indices.
+            valid: Vec::new(),
+            inverse_bind_matrices: Vec::new(),
             num_bones: 0,
             bone_names_to_idx: HashMap::new(),
             bone_idx_to_names: HashMap::new(),

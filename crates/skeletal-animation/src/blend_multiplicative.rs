@@ -1,7 +1,7 @@
 use crate::{MAX_BONES, operation_result::LocalToLocalResults};
 use std::iter::zip;
 
-pub fn blend_multiplicative(first: &LocalToLocalResults, second : &LocalToLocalResults, weight: f32, mask: &[bool; MAX_BONES]) -> LocalToLocalResults {
+pub fn blend_multiplicative(first: &LocalToLocalResults, second : &LocalToLocalResults, weight: f32, mask: &Vec<bool>) -> LocalToLocalResults {
     let mut results = LocalToLocalResults::new();
     for (i, vals) in zip(first.translations, second.translations).enumerate() {
         if mask[i] {

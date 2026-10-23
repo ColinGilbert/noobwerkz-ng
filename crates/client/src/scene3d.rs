@@ -78,7 +78,7 @@ impl Scene3D {
                 let output = &c.anim_graph.output_model;
                 
                 for (i, o) in output.model_matrices.iter().enumerate() {
-                    characters_ctx.skinned_model_node.bone_matrices.push(o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx].inverse_bind_matrices[i]);
+                    characters_ctx.skinned_model_node.bone_matrices.push(o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx].skeleton.inverse_bind_matrices[i]);
                 }
             }
             
