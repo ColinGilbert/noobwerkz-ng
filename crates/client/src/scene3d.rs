@@ -1,9 +1,10 @@
 // This is where our game world resides.
 
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, sync::Arc};
 
 // use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 use noobwerkz_shared::physics3d_context::*;
+use noobwerkz_skeletal_animation::{animation::Animation, animation_graph::{AnimationGraph, AnimationIndex, Animations}, animation_graph_definition::AnimationGraphDefinition, skeleton::Skeleton};
 
 use crate::{
     camera3d::*, character3d_renderable::Character3DRenderable, index_types::*, instance3d::Instance3D, model3d_node::Model3DNode, skinned_model3d::SkinnedModel3D, skinned_model3d_node::SkinnedModel3DNode
@@ -74,9 +75,9 @@ impl Scene3D {
                 
                 characters_ctx.skinned_model_node.instances.push(instance);
                 
-                let output = c.anim_graph.get_skeletal_matrices();
+                let output = &c.anim_graph.output_model;
                 
-                for (i, o) in output.borrow().iter().enumerate() {
+                for (i, o) in output.model_matrices.iter().enumerate() {
                     characters_ctx.skinned_model_node.bone_matrices.push(o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx].inverse_bind_matrices[i]);
                 }
             }
@@ -92,9 +93,10 @@ impl Scene3D {
         bone_matrices_bind_group_layout: &wgpu::BindGroupLayout,
         skinned_model_idx: SkinnedModel3DIndex,
         instances: &Vec<Instance3D>,
-        animgraph_definition: &AnimGraphDefinition,
-        // skeleton: Rc<ozz_animation_rs::Skeleton>,
-        // animations_by_name: &HashMap<String, Rc<ozz_animation_rs::Animation>>,
+        animgraph_definition: &AnimationGraphDefinition,
+        animations: Animations<Animation>,
+        skeleton: Arc<Skeleton>,
+        animations_by_name: &HashMap<String, AnimationIndex>,
         name: String,
     ) -> Option<Characters3DContextIndex> {
         self.characters_contexts.push(Characters3DContext {
@@ -104,17 +106,18 @@ impl Scene3D {
                 bone_matrices_bind_group_layout,
                 skinned_model_idx,
                 instances,
-                // skeleton.clone(),
+                skeleton.clone(),
             ),
         });
         println!("ADDING CHARACTERS: Instance count: {}", instances.len());
         let characters_ctx_idx = Characters3DContextIndex::new(self.characters_contexts.len() - 1);
         for instance in instances {
             let character = Character3DRenderable::new(
-                // skeleton.clone(),
+                skeleton.clone(),
                 instance.position.into(),
                 instance.orientation,
                 animgraph_definition,
+                animations.clone(),
                 animations_by_name,
             );
             match character {
@@ -136,13 +139,14 @@ impl Scene3D {
     pub fn change_anim_graphs(
         &mut self,
         character_type_idx: Characters3DContextIndex,
-        definition: &AnimGraphDefinition,
-        skeleton: Rc<ozz_animation_rs::Skeleton>,
-        animations_by_name: &HashMap<String, Rc<ozz_animation_rs::Animation>>,
+        definition: &AnimationGraphDefinition,
+        skeleton: Arc<Skeleton>,
+        animations: Animations<Animation>,
+        animations_by_name: &HashMap<String, AnimationIndex>,
     ) -> bool {
         for c in self.characters_contexts[character_type_idx].characters.iter_mut() {
             let updated_anim_graph =
-                AnimGraph::new(skeleton.clone(), definition, animations_by_name);
+                AnimationGraph::new(skeleton.clone(), animations.clone(), definition, animations_by_name);
             match updated_anim_graph {
                 Ok(val) => c.anim_graph = val,
                 Err(err) => {

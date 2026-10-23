@@ -8,3 +8,5 @@ noobwerkz-shared = { path = "../shared" }
 glam = { workspace = true }
 safe_index = { workspace = true }
 web-time = { workspace = true }
+anyhow = { workspace = true }
+petgraph = { workspace = true }

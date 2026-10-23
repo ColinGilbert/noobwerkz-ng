@@ -1,6 +1,6 @@
 // This code serves as a simplified way for asset loading.
 use crate::{
-    material::Material, model3d::*, resource::*, skeletal3d_context::*, skinned_model3d::*, texture::*, index_types::*,
+    material::Material, model3d::*, resource::*, skeletal_animation3d_context::*, skinned_model3d::*, texture::*, index_types::*,
 };
 use anyhow::*;
 use kira::sound::static_sound::StaticSoundData;
@@ -89,7 +89,7 @@ impl AssetManager {
         queue: &mut wgpu::Queue,
         default_material: &Material,
         texture_layout: &wgpu::BindGroupLayout,
-        skeletal_context: &Skeletal3DContext,
+        skeletal_context: &SkeletalAnimation3DContext,
     ) -> anyhow::Result<SkinnedModel3DIndex> {
         let mut serialized = load_serialized_model(filepath.as_path());
         let mut path = filepath.clone();

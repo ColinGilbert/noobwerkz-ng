@@ -1,9 +1,16 @@
 use msgpacker::*;
 
 pub const INVALID_BONE: usize = usize::MAX;
+
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
-pub enum SerializedKeyframeTypes {
+pub struct SerializedAnimation3D {
+    pub keyframes: Vec<SerializedAnimation3DKeyframes>,
+}
+
+#[repr(C)]
+#[derive(Clone, Debug, PartialEq, MsgPacker)]
+pub enum SerializedAnimation3DKeyframeTypes {
     Translations(Vec<[f32;3]>),
     Rotations(Vec<[f32;4]>),
     Scales(Vec<[f32;3]>),
@@ -21,15 +28,15 @@ pub struct SerializedBone3D {
 
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
-pub struct SerializedAnimationKeyframes {
+pub struct SerializedAnimation3DKeyframes {
     pub bone: usize,
-    pub data: SerializedKeyframeTypes,
+    pub data: SerializedAnimation3DKeyframeTypes,
     pub times: Vec<f32>,
 
 }
 
-impl SerializedAnimationKeyframes {
-    pub fn new(data: SerializedKeyframeTypes) -> Self {
+impl SerializedAnimation3DKeyframes {
+    pub fn new(data: SerializedAnimation3DKeyframeTypes) -> Self {
         Self {
             bone: INVALID_BONE,
             data,
@@ -114,7 +121,7 @@ pub struct SerializedModel3D {
     pub bones: Vec<SerializedBone3D>,
     pub bone_names: Vec<String>,
     pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
-    pub animations_channels: Vec<SerializedAnimationKeyframes>,
+    pub animations: Vec<SerializedAnimation3D>,
     //pub inverse_transform: [[f32; 4]; 4],
 }
 
@@ -126,7 +133,7 @@ impl SerializedModel3D {
             bones: Vec::new(),
             bone_names: Vec::new(),
             inverse_bind_matrices: Vec::new(),
-            animations_channels: Vec::new(),
+            animations: Vec::new(),
         }
     }
 

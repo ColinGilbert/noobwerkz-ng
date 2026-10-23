@@ -1,7 +1,6 @@
-use std::rc::Rc;
-
+use std::sync::Arc;
+use noobwerkz_skeletal_animation::skeleton::*;
 use crate::{instance3d::Instance3D, index_types::*};
-// use rayon::prelude::*;
 use wgpu::{BindGroupLayout, util::*};
 
 pub struct SkinnedModel3DNode {
@@ -12,6 +11,7 @@ pub struct SkinnedModel3DNode {
     pub num_bones_buffer: wgpu::Buffer,
     pub bind_group: wgpu::BindGroup,
     pub bone_matrices: Vec<glam::Mat4>,
+    pub skeleton: Arc<Skeleton>,
 }
 
 impl SkinnedModel3DNode {
@@ -20,11 +20,11 @@ impl SkinnedModel3DNode {
         bone_matrices_bind_group_layout: &BindGroupLayout,
         skinned_model_idx: SkinnedModel3DIndex,
         instances_arg: &Vec<Instance3D>,
-        skeleton: Rc<ozz_animation_rs::Skeleton>,
+        skeleton: Arc<Skeleton>,
     ) -> Self {
         // let mut playbacks = Vec::new();
         let skeleton = skeleton.clone();
-        let num_bones = skeleton.num_joints() as u32;
+        let num_bones = skeleton.num_bones as u32;
         // let animation = skeletal_context.animations[0].clone();
         // let len = instances.len();
         let mut bone_matrices = Vec::<glam::Mat4>::new();
@@ -83,7 +83,8 @@ impl SkinnedModel3DNode {
             bones_storage_buffer,
             num_bones_buffer,
             bind_group,
-            bone_matrices
+            bone_matrices,
+            skeleton,
         }
     }
 

@@ -1,7 +1,7 @@
 use crate::index_types::*;
 use crate::material::*;
-use crate::model3d::*; //{Material, MaterialIndex, Model, ModelVertex, TexturedMesh};
-use crate::skeletal3d_context::Skeletal3DContext;
+use crate::model3d::*;
+use crate::skeletal_animation3d_context::*;
 use crate::skinned_model3d::*;
 use crate::texture;
 use crate::texture::Texture;
@@ -41,7 +41,7 @@ pub fn load_skinned_3d_model_from_serialized(
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
-    skeletal_context: &Skeletal3DContext,
+    skeletal_context: &SkeletalAnimation3DContext,
 ) -> Option<SkinnedModel3D> {
     let mut model_results = SkinnedModel3D::new();
     for m in model.meshes.iter_mut() {
@@ -93,7 +93,7 @@ pub fn load_skinned_3d_model_from_serialized(
             let mut bi = [0; 4]; //m.bone_indices[i];
             for (ii, bone_index) in m.bone_indices[i].iter().enumerate() {
                 let bone_name = model.bone_names[*bone_index as usize].clone();
-                let new_index = skeletal_context.skeleton.joint_by_name(&bone_name).unwrap();
+                let new_index = skeletal_context.skeleton.bone_names_to_idx[&bone_name];
                 bi[ii] = new_index as u32;
             }
             sv.bone_indices = bi;
@@ -194,20 +194,20 @@ pub fn load_skinned_3d_model_from_serialized(
     }
 
     let mut inverse_bind_poses = Vec::<[[f32; 4]; 4]>::new();
-    inverse_bind_poses.resize(skeletal_context.skeleton.num_joints(), [[0.0; 4]; 4]);
+    inverse_bind_poses.resize(skeletal_context.skeleton.num_bones, [[0.0; 4]; 4]);
 
     let mut bone_names_reshuffled = Vec::<String>::new();
-    bone_names_reshuffled.resize(skeletal_context.skeleton.num_joints(), "".to_owned());
+    bone_names_reshuffled.resize(skeletal_context.skeleton.num_bones, "".to_owned());
 
     for bone_idx in 0..model.bone_names.len() {
         let bone_name = &model.bone_names[bone_idx].clone();
-        let bone_newpos = skeletal_context.skeleton.joint_by_name(&bone_name).unwrap() as usize;
+        let bone_newpos = skeletal_context.skeleton.bone_names_to_idx[bone_name];
         inverse_bind_poses[bone_newpos] = model.inverse_bind_matrices[bone_idx];
         bone_names_reshuffled[bone_newpos] = bone_name.to_string();
     }
 
-    // println!("Bones              {:?}", model.bone_names);
-    // !("Bones (reshuffled) {:?}", bone_names_reshuffled);
+    println!("Bones              {:?}", model.bone_names);
+    println!("Bones (reshuffled) {:?}", bone_names_reshuffled);
 
     for ibp in inverse_bind_poses {
         model_results

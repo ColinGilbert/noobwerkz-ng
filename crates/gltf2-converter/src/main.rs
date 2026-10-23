@@ -267,11 +267,12 @@ fn run(path: &str) {
 
     // Here we add the animations extracting code
     let anims = document.animations();
+    let mut serialized_animations = Vec::<SerializedAnimation3D>::new();
     let mut anim_num = 0usize;
-    let mut serialized_animations_channels = Vec::<SerializedAnimationKeyframes>::new();
     println!("Num anims: {}", anims.len());
     for anim in anims {
         let mut channel_num = 0usize;
+        let mut serialized_animations_channels = Vec::new();
         for channel in anim.channels() {
             let s = channel.sampler();
             println!("Sampler interpolation: {:?}", s.interpolation());
@@ -294,7 +295,7 @@ fn run(path: &str) {
                     }
                 }
             };
-            let mut serialized_channels_keyframes: SerializedAnimationKeyframes = SerializedAnimationKeyframes { bone: target_bone_index, data: SerializedKeyframeTypes::Invalid, times };
+            let mut serialized_channels_keyframes: SerializedAnimation3DKeyframes = SerializedAnimation3DKeyframes { bone: target_bone_index, data: SerializedAnimation3DKeyframeTypes::Invalid, times };
             if let Some(outputs) = reader.read_outputs() {
                 match outputs {
                     gltf::animation::util::ReadOutputs::Translations(translation) => {
@@ -304,7 +305,7 @@ fn run(path: &str) {
                             // dbg!(tr);
                             translations.push(tr);
                         });
-                        serialized_channels_keyframes.data = SerializedKeyframeTypes::Translations(translations.clone());
+                        serialized_channels_keyframes.data = SerializedAnimation3DKeyframeTypes::Translations(translations.clone());
                         println!(
                             "Anim {}, channel {}, keyframe translations: {}",
                             anim_num,
@@ -317,7 +318,7 @@ fn run(path: &str) {
                         rotation.into_f32().for_each(|rot| {
                             rotations.push(rot);
                         });
-                        serialized_channels_keyframes.data =SerializedKeyframeTypes::Rotations(rotations.clone());
+                        serialized_channels_keyframes.data =SerializedAnimation3DKeyframeTypes::Rotations(rotations.clone());
                         println!(
                             "Anim {}, channel {}, keyframe rotations: {}",
                             anim_num,
@@ -330,7 +331,7 @@ fn run(path: &str) {
                         scale.for_each(|s| {
                             scales.push(s);
                         });
-                        serialized_channels_keyframes.data = SerializedKeyframeTypes::Scales(scales.clone());
+                        serialized_channels_keyframes.data = SerializedAnimation3DKeyframeTypes::Scales(scales.clone());
                         println!(
                             "Anim {}, channel {}, keyframe scales: {}",
                             anim_num,
@@ -340,20 +341,19 @@ fn run(path: &str) {
                     }
                     _ => { } // gltf::animation::util::ReadOutputs::MorphTargetWeights(_) => {},
                 }
-            };
-
+            };   
+            
+            serialized_animations_channels.push(serialized_channels_keyframes.clone());
             println!(
-                "Anim {}, channel {}, bone {}, name {}",
+                "Anim {}, channel {}, bone {}, bone name {}",
                 anim_num,
                 channel_num,
-                serialized_channels_keyframes.bone,
-                joint_names[serialized_channels_keyframes.bone]
+                serialized_channels_keyframes.clone().bone,
+                joint_names[serialized_channels_keyframes.clone().bone]
             );
-
-            serialized_animations_channels.push(serialized_channels_keyframes);
-
             channel_num += 1;
         }
+        serialized_animations.push(SerializedAnimation3D{ keyframes: serialized_animations_channels });
         anim_num += 1;
     }
 
@@ -363,7 +363,7 @@ fn run(path: &str) {
     serialized_model.bones = joints;
     serialized_model.bone_names = joint_names;
     serialized_model.inverse_bind_matrices = inverse_bind_matrices;
-    serialized_model.animations_channels = serialized_animations_channels;
+    serialized_model.animations = serialized_animations;
 
     let mut buf = Vec::new();
     let _n = serialized_model.pack(&mut buf);
