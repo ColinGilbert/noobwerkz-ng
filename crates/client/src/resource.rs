@@ -253,6 +253,7 @@ pub fn load_skinned_3d_model_from_serialized(
         skeleton.parents.push(b.parent);
     }
 
+    skeleton.num_bones = model.bones.len();
 
     for (i, b) in model.bone_names.iter().enumerate() {
         skeleton.bone_names_to_idx.insert(b.clone(), i);
