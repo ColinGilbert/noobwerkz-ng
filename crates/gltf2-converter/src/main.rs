@@ -1,3 +1,4 @@
+use image::{RgbImage, RgbaImage};
 use msgpacker::*;
 use noobwerkz_shared::{bone::*, serialized_model3d::*};
 use std::{collections::HashMap, fs::*, io::*};
@@ -119,6 +120,85 @@ fn traverse_node_recursive(
         traverse_node_recursive(&child, trans, meshes, buffers);
     }
 }
+/*
+    A8,
+    /// Pixel is 1-bit luminance
+    L1,
+    /// Pixel is 1-bit luminance with an alpha channel
+    La1,
+    /// Pixel contains 1-bit R, G and B channels
+    Rgb1,
+    /// Pixel is 1-bit RGB with an alpha channel
+    Rgba1,
+    /// Pixel is 2-bit luminance
+    L2,
+    /// Pixel is 2-bit luminance with an alpha channel
+    La2,
+    /// Pixel contains 2-bit R, G and B channels
+    Rgb2,
+    /// Pixel is 2-bit RGB with an alpha channel
+    Rgba2,
+    /// Pixel is 4-bit luminance
+    L4,
+    /// Pixel is 4-bit luminance with an alpha channel
+    La4,
+    /// Pixel contains 4-bit R, G and B channels
+    Rgb4,
+    /// Pixel is 4-bit RGB with an alpha channel
+    Rgba4,
+    /// Pixel contains 5-bit R, G and B channels packed into 2 bytes
+    Rgb5x1,
+    /// Pixel is 8-bit luminance
+    L8,
+    /// Pixel is 8-bit luminance with an alpha channel
+    La8,
+    /// Pixel contains 8-bit R, G and B channels
+    Rgb8,
+    /// Pixel is 8-bit RGB with an alpha channel
+    Rgba8,
+    /// Pixel is 16-bit luminance
+    L16,
+    /// Pixel is 16-bit luminance with an alpha channel
+    La16,
+    /// Pixel contains 16-bit R, G and B channels
+    Rgb16,
+    /// Pixel is 16-bit RGB with an alpha channel
+    Rgba16,
+    /// Pixel contains 8-bit B, G and R channels
+    Bgr8,
+    /// Pixel is 8-bit BGR with an alpha channel
+    Bgra8,
+
+    // TODO f16 types?
+    /// Pixel is 32-bit float RGB
+    Rgb32F,
+    /// Pixel is 32-bit float RGBA
+    Rgba32F,
+
+    /// Pixel is 8-bit CMYK
+    Cmyk8,
+    /// Pixel is 16-bit CMYK
+    Cmyk16,
+
+    /// Pixel is of unknown color type with the specified bits per pixel. This can apply to pixels
+    /// which are associated with an external palette. In that case, the pixel value is an index
+    /// into the palette.
+    Unknown(u8),
+*/
+fn convert_image_format(input: gltf::image::Format) -> Option<image::ExtendedColorType> {
+    match input {
+        gltf::image::Format::R8 => None,
+        gltf::image::Format::R8G8 => None,
+        gltf::image::Format::R8G8B8 => Some(image::ExtendedColorType::Rgb8),
+        gltf::image::Format::R8G8B8A8 => Some(image::ExtendedColorType::Rgba8),
+        gltf::image::Format::R16 => None,
+        gltf::image::Format::R16G16 => None,
+        gltf::image::Format::R16G16B16 => Some(image::ExtendedColorType::Rgb16),
+        gltf::image::Format::R16G16B16A16 => Some(image::ExtendedColorType::Rgba16),
+        gltf::image::Format::R32G32B32FLOAT => Some(image::ExtendedColorType::Rgb32F),
+        gltf::image::Format::R32G32B32A32FLOAT => Some(image::ExtendedColorType::Rgba32F),
+    }
+}
 
 fn run(path: &str) {
     //let file = fs::File::open(path);
@@ -153,16 +233,35 @@ fn run(path: &str) {
                 gltf::image::Source::View { view, mime_type } => {
                     println!("Embedded diffuse texture MIME type: {}", mime_type);
                     // TODO: Find out if correct
-                    let image_data = &images[img.index()].pixels;
-                    let mime_extension = mime_type.split("/").last();
-                    match mime_extension {
-                        Some(val) => {
-                            let uri = "diffuse_texture.".to_owned() + val;
-                            let mut texture_export_file = std::fs::File::create(&uri).unwrap();
-                            let _ = texture_export_file.write_all(image_data);
-                            serialized_material.diffuse_texture_path = uri;
+                    let image_data = &images[img.index()];
+                    let f = image_data.format;
+
+                    match f {
+                        gltf::image::Format::R8G8B8 => {
+                            let buf: RgbImage = image::ImageBuffer::from_raw(
+                                image_data.width,
+                                image_data.height,
+                                image_data.pixels.clone(),
+                            )
+                            .unwrap();
+                            buf.save("diffuse_texture.png");
+                            serialized_material.diffuse_texture_path =
+                                "diffuse_texture.png".to_owned();
                         }
-                        None => {}
+                        gltf::image::Format::R8G8B8A8 => {
+                            let buf: RgbaImage = image::ImageBuffer::from_raw(
+                                image_data.width,
+                                image_data.height,
+                                image_data.pixels.clone(),
+                            )
+                            .unwrap();
+                            buf.save("diffuse_texture.png");
+                            serialized_material.diffuse_texture_path =
+                                "diffuse_texture.png".to_owned();
+                        }
+                        _ => {
+                            println!("Invalid diffuse texture format")
+                        }
                     }
                 }
                 gltf::image::Source::Uri { uri, mime_type } => {
@@ -184,17 +283,7 @@ fn run(path: &str) {
                     println!("Embedded normal texture MIME type: {}", mime_type);
                     // TODO: Find out if correct
                     let image_data = &images[view.index()].pixels;
-                    let image_format = &images[view.index()].format;
-                    let mime_extension = mime_type.split("/").last();
-                    match mime_extension {
-                        Some(val) => {
-                            let uri = "normals_texture.".to_owned() + val;
-                            let mut texture_export_file = std::fs::File::create(&uri).unwrap();
-                            let  _ = texture_export_file.write_all(image_data);
-                            serialized_material.normals_texture_path = uri;
-                        }
-                        None => {}
-                    }
+                    // let image_format = &images[view.index()].format;
                 }
                 gltf::image::Source::Uri { uri, mime_type } => {
                     println!(

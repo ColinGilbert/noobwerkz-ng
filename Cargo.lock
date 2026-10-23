@@ -2979,6 +2979,7 @@ dependencies = [
  "anyhow",
  "glam 0.33.12",
  "gltf",
+ "image",
  "msgpacker",
  "noobwerkz-shared",
 ]

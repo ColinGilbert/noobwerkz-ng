@@ -8,4 +8,5 @@ noobwerkz-shared = { path = "../shared" }
 anyhow = { workspace = true }
 glam = { workspace = true }
 msgpacker = { workspace = true }
+image = { workspace = true }
 gltf = {version = "1.4.1", features = ["utils"] }
