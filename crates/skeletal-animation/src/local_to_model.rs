@@ -12,7 +12,7 @@ pub fn local_to_model(skeleton: Arc<Skeleton>, locals: &LocalToLocalResults) -> 
             results.model_matrices[i] = parent_matrix * local_matrix;
         }
         else {
-            results.model_matrices[i] = glam::Mat4::from_scale_rotation_translation(locals.scales[i], locals.rotations[*parent], locals.translations[i]);
+            results.model_matrices[i] = glam::Mat4::from_scale_rotation_translation(locals.scales[i], locals.rotations[i], locals.translations[i]);
         }
     }
     results
