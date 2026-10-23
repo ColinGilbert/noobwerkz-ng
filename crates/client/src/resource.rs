@@ -16,6 +16,7 @@ use wgpu::wgc::command::ComputePassErrorInner::BindGroupIndexOutOfRange;
 use std::path::*;
 use std::sync::Arc;
 use wgpu::util::DeviceExt;
+use image::*;
 
 pub fn load_serialized_model(filepath: &std::path::Path) -> Option<SerializedModel3D> {
     let mut path = PathBuf::new();
@@ -308,6 +309,8 @@ pub fn load_skinned_3d_model_from_serialized(
 
     println!("Animation names {:?},", model_results.animation_names);
 
+
+
     model_results.skeleton = Arc::new(skeleton);
 
     Some(model_results)
@@ -460,7 +463,7 @@ pub async fn load_texture(
 }
 
 pub async fn load_binary(filepath: &Path) -> anyhow::Result<Vec<u8>> {
-    let data = { std::fs::read(filepath)? };
+    let data = { ImageReader::open(filepath)? }.with_guessed_format()?.decode()?;
 
     Ok(data)
 }

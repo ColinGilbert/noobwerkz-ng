@@ -1,5 +1,5 @@
 use msgpacker::*;
-use noobwerkz_shared::{serialized_model3d::*, bone::*};
+use noobwerkz_shared::{bone::*, serialized_model3d::*};
 use std::{collections::HashMap, fs::*, io::*};
 
 fn traverse_node_recursive(
@@ -63,9 +63,7 @@ fn traverse_node_recursive(
                     }
                     if let Some(uvs) = reader.read_tex_coords(0) {
                         for u in uvs.into_f32() {
-                            let mut uv = u;
-                            uv[1] = uv[1]*-1.0;
-                            serialized_mesh.uvs.push(uv);
+                            serialized_mesh.uvs.push(u);
                         }
                     }
                     if let Some(bone_indices) = reader.read_joints(0) {
@@ -155,7 +153,17 @@ fn run(path: &str) {
                 gltf::image::Source::View { view, mime_type } => {
                     println!("Embedded diffuse texture MIME type: {}", mime_type);
                     // TODO: Find out if correct
-                    let _image_data = &images[img.index()].pixels;
+                    let image_data = &images[img.index()].pixels;
+                    let mime_extension = mime_type.split("/").last();
+                    match mime_extension {
+                        Some(val) => {
+                            let uri = "diffuse_texture.".to_owned() + val;
+                            let mut texture_export_file = std::fs::File::create(&uri).unwrap();
+                            let _ = texture_export_file.write_all(image_data);
+                            serialized_material.diffuse_texture_path = uri;
+                        }
+                        None => {}
+                    }
                 }
                 gltf::image::Source::Uri { uri, mime_type } => {
                     println!(
@@ -175,7 +183,18 @@ fn run(path: &str) {
                 gltf::image::Source::View { view, mime_type } => {
                     println!("Embedded normal texture MIME type: {}", mime_type);
                     // TODO: Find out if correct
-                    let _image_data = &images[view.index()].pixels;
+                    let image_data = &images[view.index()].pixels;
+                    let image_format = &images[view.index()].format;
+                    let mime_extension = mime_type.split("/").last();
+                    match mime_extension {
+                        Some(val) => {
+                            let uri = "normals_texture.".to_owned() + val;
+                            let mut texture_export_file = std::fs::File::create(&uri).unwrap();
+                            let  _ = texture_export_file.write_all(image_data);
+                            serialized_material.normals_texture_path = uri;
+                        }
+                        None => {}
+                    }
                 }
                 gltf::image::Source::Uri { uri, mime_type } => {
                     println!(
@@ -276,7 +295,7 @@ fn run(path: &str) {
     for anim in anims {
         let anim_name: String;
         match anim.name() {
-            Some(val) => {anim_name = val.to_owned()}
+            Some(val) => anim_name = val.to_owned(),
             None => {
                 anim_name = anim_name_counter.to_string();
                 anim_name_counter += 1;
@@ -308,7 +327,12 @@ fn run(path: &str) {
                     }
                 }
             };
-            let mut serialized_channels_keyframes: SerializedAnimation3DChannel = SerializedAnimation3DChannel { bone: target_bone_index, data: SerializedAnimation3DKeyframeTypes::Invalid, times };
+            let mut serialized_channels_keyframes: SerializedAnimation3DChannel =
+                SerializedAnimation3DChannel {
+                    bone: target_bone_index,
+                    data: SerializedAnimation3DKeyframeTypes::Invalid,
+                    times,
+                };
             if let Some(outputs) = reader.read_outputs() {
                 match outputs {
                     gltf::animation::util::ReadOutputs::Translations(translation) => {
@@ -318,7 +342,8 @@ fn run(path: &str) {
                             // dbg!(tr);
                             translations.push(tr);
                         });
-                        serialized_channels_keyframes.data = SerializedAnimation3DKeyframeTypes::Translations(translations.clone());
+                        serialized_channels_keyframes.data =
+                            SerializedAnimation3DKeyframeTypes::Translations(translations.clone());
                         println!(
                             "Anim {}, channel {}, keyframe translations: {}",
                             anim_num,
@@ -331,7 +356,8 @@ fn run(path: &str) {
                         rotation.into_f32().for_each(|rot| {
                             rotations.push(rot);
                         });
-                        serialized_channels_keyframes.data =SerializedAnimation3DKeyframeTypes::Rotations(rotations.clone());
+                        serialized_channels_keyframes.data =
+                            SerializedAnimation3DKeyframeTypes::Rotations(rotations.clone());
                         println!(
                             "Anim {}, channel {}, keyframe rotations: {}",
                             anim_num,
@@ -344,7 +370,8 @@ fn run(path: &str) {
                         scale.for_each(|s| {
                             scales.push(s);
                         });
-                        serialized_channels_keyframes.data = SerializedAnimation3DKeyframeTypes::Scales(scales.clone());
+                        serialized_channels_keyframes.data =
+                            SerializedAnimation3DKeyframeTypes::Scales(scales.clone());
                         println!(
                             "Anim {}, channel {}, keyframe scales: {}",
                             anim_num,
@@ -352,10 +379,10 @@ fn run(path: &str) {
                             scales.len()
                         );
                     }
-                    _ => { } // gltf::animation::util::ReadOutputs::MorphTargetWeights(_) => {},
+                    _ => {} // gltf::animation::util::ReadOutputs::MorphTargetWeights(_) => {},
                 }
-            };   
-            
+            };
+
             serialized_animations_channels.push(serialized_channels_keyframes.clone());
             println!(
                 "Anim {}, channel {}, bone {}, bone name {}",
@@ -366,20 +393,22 @@ fn run(path: &str) {
             );
             channel_num += 1;
         }
-        serialized_animations.push(SerializedAnimation3D{ channels: serialized_animations_channels });
+        serialized_animations.push(SerializedAnimation3D {
+            channels: serialized_animations_channels,
+        });
         anim_num += 1;
     }
 
-/*
-    pub meshes: Vec<SerializedMesh3D>,
-    pub materials: Vec<SerializedMaterial>,
-    pub bones: Vec<SerializedBone3D>,
-    pub bone_names: Vec<String>,
-    pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
-    pub animations: Vec<SerializedAnimation3D>,
-    pub animations_by_name: HashMap<String, usize>
+    /*
+        pub meshes: Vec<SerializedMesh3D>,
+        pub materials: Vec<SerializedMaterial>,
+        pub bones: Vec<SerializedBone3D>,
+        pub bone_names: Vec<String>,
+        pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
+        pub animations: Vec<SerializedAnimation3D>,
+        pub animations_by_name: HashMap<String, usize>
 
-*/
+    */
 
     let mut serialized_model = SerializedModel3D::new();
     serialized_model.meshes = serialized_meshes;
