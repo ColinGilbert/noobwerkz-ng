@@ -129,7 +129,7 @@ impl AnimationChannel {
             }
             // We didn't find the specific number
             Err(val) => {
-                let t_between_frames = 1.0 - (self.times[val] - time) / self.times[val];
+                let t_between_frames = (time - self.times[val - 1]) / (self.times[val] - self.times[val - 1]);
                 self.seek_results = SeekResults {
                     end: false,
                     begin: false,
