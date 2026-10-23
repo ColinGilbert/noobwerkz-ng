@@ -77,7 +77,7 @@ impl SerializedMesh3D {
             max_extents: [0.0; 3],
             min_extents: [0.0; 3],
             dimensions: [0.0; 3],
-            rotation: [0.0, 0.0, 0.0, 1.0],
+            rotation: [0.0, 1.0, 0.0, 0.0],
             positions: Vec::new(),
             normals: Vec::new(),
             uvs: Vec::new(),
@@ -126,7 +126,6 @@ pub struct SerializedModel3D {
     pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
     pub animations: Vec<SerializedAnimation3D>,
     pub animations_by_name: HashMap<String, usize>
-    //pub inverse_transform: [[f32; 4]; 4],
 }
 
 impl SerializedModel3D {
