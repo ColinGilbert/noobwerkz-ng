@@ -1,5 +1,4 @@
 // TODO: Stub out
-use noobwerkz_shared::{skeleton::*};
 use crate::animation::*;
 use crate::animation_graph_definition::*;
 use crate::blend_multiplicative::blend_multiplicative;
@@ -7,11 +6,11 @@ use crate::local_to_model::local_to_model;
 use crate::operation_result::LocalToLocalResults;
 use crate::operation_result::LocalToModelResults;
 use anyhow::anyhow;
+use noobwerkz_shared::skeleton::*;
 use petgraph::graph::{EdgeIndex, Graph, NodeIndex};
 use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::sync::Arc;
-
 
 safe_index::new!(
     AnimationIndex,
@@ -40,10 +39,7 @@ pub struct Transition {
 }
 
 impl Transition {
-    pub fn new(
-        duration: web_time::Duration,
-    ) -> Transition {
-
+    pub fn new(duration: web_time::Duration) -> Transition {
         Transition {
             duration,
             seek: web_time::Duration::from_nanos(0),
@@ -57,7 +53,6 @@ impl Transition {
         self.started = false;
     }
 }
-
 
 pub enum GenericNode {
     Sampler(SamplerNodeIndex),
@@ -158,7 +153,7 @@ impl AnimationGraph {
                     if !node_definitions_to_node_mappings.contains_key(&endpoint_indices.1) {
                         return Err(anyhow!("Couldn't find \"to\" node from edge"));
                     }
- 
+
                     let edge_def = animgraph_definition.graph.edge_weight(edge_index);
                     let duration: web_time::Duration;
                     match edge_def {
@@ -279,6 +274,38 @@ impl AnimationGraph {
                 }
                 None => return Err(anyhow! {"Invalid current transition during evaluation."}),
             }
+
+            let last_transition_idx = self
+                .graph
+                .edge_weight(self.current_edge_idx.unwrap())
+                .unwrap();
+            let last_transition = &self.transitions[*last_transition_idx];
+
+            if last_transition.seek >= last_transition.duration {
+                self.transitions[*last_transition_idx].reset();
+                match self.path.front() {
+                    Some(val) => {
+                        self.current_edge_idx = Some(*val);
+                        self.current_node_idx = None;
+                        self.path.pop_front();
+                        // first_time_on_transition = true;
+                    }
+                    None => {
+                        // The path is empty. We now set the current node/edge as the "to" node of the current edge
+                        let t = self
+                            .graph
+                            .edge_endpoints(self.current_edge_idx.unwrap())
+                            .unwrap()
+                            .1;
+                        if t != self.target {
+                            return Err(anyhow! {"Path ended on a non-target node"});
+                        }
+                        self.current_node_idx = Some(t);
+                        self.current_edge_idx = None;
+                        // first_time_on_node = true;
+                    }
+                }
+            }
         } else {
             // If we are on a node. Far simpler to evaluate
             match self.current_node_idx {
@@ -304,34 +331,6 @@ impl AnimationGraph {
         // Now we check whether or not we are in need of transitioning through the path list
         // let mut first_time_on_transition = false;
         // let mut first_time_on_node = false;
-
-        let last_transition_idx = self.graph.edge_weight(self.current_edge_idx.unwrap()).unwrap();
-        let last_transition = &self.transitions[*last_transition_idx];
-        if self.on_a_transition && last_transition.seek >= last_transition.duration {
-            self.transitions[*last_transition_idx].reset();
-            match self.path.front() {
-                Some(val) => {
-                    self.current_edge_idx = Some(*val);
-                    self.current_node_idx = None;
-                    self.path.pop_front();
-                    // first_time_on_transition = true;
-                }
-                None => {
-                    // The path is empty. We now set the current node/edge as the "to" node of the current edge
-                    let t = self
-                        .graph
-                        .edge_endpoints(self.current_edge_idx.unwrap())
-                        .unwrap()
-                        .1;
-                    if t != self.target {
-                        return Err(anyhow! {"Path ended on a non-target node"});
-                    }
-                    self.current_node_idx = Some(t);
-                    self.current_edge_idx = None;
-                    // first_time_on_node = true;
-                }
-            }
-        }
 
         Ok(())
     }
@@ -361,5 +360,4 @@ impl AnimationGraph {
         self.current_edge_idx = None;
         self.path.clear();
     }
-
 }
