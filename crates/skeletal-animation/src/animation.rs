@@ -28,6 +28,7 @@ impl Animation {
     }
 
     pub fn seek(&mut self, time: f32) {
+        let time = time % self.length;
         // let mut temp_finished = true;
         for c in self.channels.iter_mut() {
             c.seek(time);
