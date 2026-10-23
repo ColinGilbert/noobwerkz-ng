@@ -7,11 +7,12 @@ pub struct Animation {
     pub length: f32,
     pub seek: f32,
     pub channels: Vec<AnimationChannel>,
-    pub looping: bool
+    pub looping: bool,
+    pub num_bones: usize,
 }
 
 impl Animation {
-    pub fn new(anim_channels: Vec<AnimationChannel>) -> Self {
+    pub fn new(anim_channels: Vec<AnimationChannel>, num_bones: usize) -> Self {
         let mut latest_time: f32 = 0.0;
         for c in &anim_channels {
             let last_time = c.times[c.times.len() -1];
@@ -21,7 +22,8 @@ impl Animation {
             length: latest_time,
             seek: 0.0,
             channels: anim_channels,
-            looping: false
+            looping: false,
+            num_bones
         }
     }
 
@@ -34,8 +36,10 @@ impl Animation {
 
     pub fn playback(&mut self) -> LocalToLocalResults {
         let mut results = LocalToLocalResults::new();
+        results.translations.resize(self.num_bones, glam::Vec3::ZERO);
+        results.rotations.resize(self.num_bones, glam::Quat::IDENTITY);
+        results.scales.resize(self.num_bones, glam::Vec3::splat(1.0));
         // Here we do the actual playback
-
         // For each animation channel:
         for c in self.channels.iter_mut() {
             // Check to see if we're at the end of the animation's keyframe with looping off. If so, simply set results to be the last keyframe.
