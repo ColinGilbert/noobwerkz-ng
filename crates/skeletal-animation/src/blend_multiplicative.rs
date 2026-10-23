@@ -1,11 +1,7 @@
-use crate::{MAX_BONES, operation_result::LocalToLocalResults, bone::Bone, skeleton::Skeleton };
+use crate::{MAX_BONES, operation_result::LocalToLocalResults};
 use std::iter::zip;
-// // Stubbed out
-pub fn blend_multiplicative(first: &LocalToLocalResults, second : &LocalToLocalResults, weight: f32, mask: &[bool; MAX_BONES]) -> LocalToLocalResults {
-    // LocalToLocalResults{
-    //     bones: [Bone{ position: glam::Vec3::ZERO, orientation: glam::Quat::IDENTITY, scale: glam::Vec3::splat(1.0)}; MAX_BONES]
-    // }
 
+pub fn blend_multiplicative(first: &LocalToLocalResults, second : &LocalToLocalResults, weight: f32, mask: &[bool; MAX_BONES]) -> LocalToLocalResults {
     let mut results = LocalToLocalResults::new();
     for (i, vals) in zip(first.translations, second.translations).enumerate() {
         if mask[i] {

@@ -17,7 +17,6 @@ pub mod callbacks;
 pub mod material;
 pub mod skinned_model3d;
 pub mod index_types;
-pub mod skeletal_animation3d_context;
 pub mod mesh3d_shapes;
 pub mod character3d_renderable;
 pub mod asset_manager;

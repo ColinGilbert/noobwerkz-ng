@@ -1,8 +1,13 @@
+use noobwerkz_skeletal_animation::animation::Animation;
+use noobwerkz_skeletal_animation::animation_graph::Animations;
+use noobwerkz_shared::{skeleton::*};
 use crate::index_types::*;
 use crate::material::*;
 use crate::model3d::*;
 use crate::vertex::*;
+use std::collections::HashMap;
 use std::ops::Range;
+use std::sync::Arc;
 
 #[repr(C)]
 pub struct SkinnedModel3D {
@@ -10,6 +15,9 @@ pub struct SkinnedModel3D {
     pub materials: Materials<Material>,
     pub name: String,
     pub inverse_bind_matrices: Vec<glam::Mat4>,
+    pub skeleton: Arc<Skeleton>,
+    pub animations_idx_by_name: HashMap<String, usize>,
+    pub animations: Animations<Animation>,
 }
 
 impl SkinnedModel3D {
@@ -19,6 +27,9 @@ impl SkinnedModel3D {
             materials: Materials::new(),
             name: "".to_owned(),
             inverse_bind_matrices: Vec::new(),
+            skeleton: Arc::new(Skeleton::new()),
+            animations_idx_by_name: HashMap::new(),
+            animations: Animations::new(),
         }
     }
 }

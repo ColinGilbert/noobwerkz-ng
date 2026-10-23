@@ -1,3 +1,6 @@
+pub const MAX_BONES: usize = 64;
+pub const INVALID_BONE: usize = usize::MAX;
+
 #[derive(Clone, Copy)]
 pub struct Bone {
     pub position: glam::Vec3,

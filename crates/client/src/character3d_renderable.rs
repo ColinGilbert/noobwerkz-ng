@@ -1,8 +1,8 @@
 // use ozz_animation_rs::*;
 // use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 use std::{collections::HashMap, sync::Arc};
-use noobwerkz_shared::{character3d_common::*};
-use noobwerkz_skeletal_animation::{animation::Animation, animation_graph::{AnimationGraph, AnimationIndex, Animations}, animation_graph_definition::AnimationGraphDefinition, skeleton::Skeleton};
+use noobwerkz_shared::{character3d_common::*, skeleton::*};
+use noobwerkz_skeletal_animation::{animation::Animation, animation_graph::{AnimationGraph, AnimationIndex, Animations}, animation_graph_definition::AnimationGraphDefinition};
 
 
 pub struct Character3DRenderable {

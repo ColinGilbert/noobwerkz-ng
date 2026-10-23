@@ -1,14 +1,16 @@
 use crate::index_types::*;
 use crate::material::*;
 use crate::model3d::*;
-use crate::skeletal_animation3d_context::*;
 use crate::skinned_model3d::*;
 use crate::texture;
 use crate::texture::Texture;
 use msgpacker::*;
+use noobwerkz_shared::serialized_model3d::*;
+use noobwerkz_shared::skeleton::Skeleton;
+use noobwerkz_skeletal_animation::animation::Animation;
+use noobwerkz_skeletal_animation::animation_channel::AnimationChannel;
 use std::path::*;
 use wgpu::util::DeviceExt;
-use noobwerkz_shared::serialized_model3d::*;
 
 pub fn load_serialized_model(filepath: &std::path::Path) -> SerializedModel3D {
     let mut path = PathBuf::new();
@@ -41,7 +43,6 @@ pub fn load_skinned_3d_model_from_serialized(
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
-    skeletal_context: &SkeletalAnimation3DContext,
 ) -> Option<SkinnedModel3D> {
     let mut model_results = SkinnedModel3D::new();
     for m in model.meshes.iter_mut() {
@@ -88,15 +89,19 @@ pub fn load_skinned_3d_model_from_serialized(
 
         let mut skinned_verts = Vec::<SkinnedModelVertex3D>::new();
 
+        let skeleton = Skeleton::new();
+
         for (i, v) in verts.iter().enumerate() {
             let mut sv = SkinnedModelVertex3D::from_vert(&v);
-            let mut bi = [0; 4]; //m.bone_indices[i];
-            for (ii, bone_index) in m.bone_indices[i].iter().enumerate() {
-                let bone_name = model.bone_names[*bone_index as usize].clone();
-                let new_index = skeletal_context.skeleton.bone_names_to_idx[&bone_name];
-                bi[ii] = new_index as u32;
-            }
-            sv.bone_indices = bi;
+            // let mut bi = [0; 4]; //m.bone_indices[i];
+            // for (ii, bone_index) in m.bone_indices[i].iter().enumerate() {
+            //     let bone_name = model.bone_names[*bone_index as usize].clone();
+            //     let new_index = model.bones[*bone_index as usize].
+            //     // .bone_names_to_idx[&bone_name];
+            //     bi[ii] = new_index as u32;
+            // }
+            // sv.bone_indices = bi;
+            sv.bone_indices = m.bone_indices[i];
             sv.bone_weights = m.bone_weights[i];
             skinned_verts.push(sv);
         }
@@ -194,14 +199,14 @@ pub fn load_skinned_3d_model_from_serialized(
     }
 
     let mut inverse_bind_poses = Vec::<[[f32; 4]; 4]>::new();
-    inverse_bind_poses.resize(skeletal_context.skeleton.num_bones, [[0.0; 4]; 4]);
+    inverse_bind_poses.resize(model.bones.len() - 1, [[0.0; 4]; 4]);
 
     let mut bone_names_reshuffled = Vec::<String>::new();
-    bone_names_reshuffled.resize(skeletal_context.skeleton.num_bones, "".to_owned());
+    bone_names_reshuffled.resize(model.bones.len() - 1, "".to_owned());
 
     for bone_idx in 0..model.bone_names.len() {
         let bone_name = &model.bone_names[bone_idx].clone();
-        let bone_newpos = skeletal_context.skeleton.bone_names_to_idx[bone_name];
+        let bone_newpos = model_results.skeleton.bone_names_to_idx[bone_name];
         inverse_bind_poses[bone_newpos] = model.inverse_bind_matrices[bone_idx];
         bone_names_reshuffled[bone_newpos] = bone_name.to_string();
     }
@@ -213,6 +218,27 @@ pub fn load_skinned_3d_model_from_serialized(
         model_results
             .inverse_bind_matrices
             .push(glam::Mat4::from_cols_array_2d(&ibp));
+    }
+
+    let mut anim_channels = Vec::new();
+
+    for a in model.animations.clone() {
+        for s in &a.channels {
+            let channel = AnimationChannel::from_serialized(&s);
+            match channel {
+                Some(val) => {
+                    anim_channels.push(val);
+                }
+                None => {
+                    println!("Invalid animation channel detected.");
+                    return None;
+                }
+            }
+        }
+
+        let animation = Animation::new(anim_channels.clone());
+
+        model_results.animations.push(animation.clone());
     }
 
     Some(model_results)

@@ -3,8 +3,8 @@
 use std::{collections::HashMap, sync::Arc};
 
 // use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
-use noobwerkz_shared::physics3d_context::*;
-use noobwerkz_skeletal_animation::{animation::Animation, animation_graph::{AnimationGraph, AnimationIndex, Animations}, animation_graph_definition::AnimationGraphDefinition, skeleton::Skeleton};
+use noobwerkz_shared::{skeleton::*, physics3d_context::*};
+use noobwerkz_skeletal_animation::{animation::Animation, animation_graph::{AnimationGraph, AnimationIndex, Animations}, animation_graph_definition::AnimationGraphDefinition};
 
 use crate::{
     camera3d::*, character3d_renderable::Character3DRenderable, index_types::*, instance3d::Instance3D, model3d_node::Model3DNode, skinned_model3d::SkinnedModel3D, skinned_model3d_node::SkinnedModel3DNode

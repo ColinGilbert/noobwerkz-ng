@@ -1,5 +1,5 @@
 use msgpacker::*;
-use noobwerkz_shared::serialized_model3d::*;
+use noobwerkz_shared::{serialized_model3d::*, bone::*};
 use std::{collections::HashMap, fs::*, io::*};
 
 fn traverse_node_recursive(
@@ -295,7 +295,7 @@ fn run(path: &str) {
                     }
                 }
             };
-            let mut serialized_channels_keyframes: SerializedAnimation3DKeyframes = SerializedAnimation3DKeyframes { bone: target_bone_index, data: SerializedAnimation3DKeyframeTypes::Invalid, times };
+            let mut serialized_channels_keyframes: SerializedAnimation3DChannel = SerializedAnimation3DChannel { bone: target_bone_index, data: SerializedAnimation3DKeyframeTypes::Invalid, times };
             if let Some(outputs) = reader.read_outputs() {
                 match outputs {
                     gltf::animation::util::ReadOutputs::Translations(translation) => {
@@ -353,7 +353,7 @@ fn run(path: &str) {
             );
             channel_num += 1;
         }
-        serialized_animations.push(SerializedAnimation3D{ keyframes: serialized_animations_channels });
+        serialized_animations.push(SerializedAnimation3D{ channels: serialized_animations_channels });
         anim_num += 1;
     }
 

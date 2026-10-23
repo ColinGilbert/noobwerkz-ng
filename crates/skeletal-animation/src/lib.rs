@@ -1,7 +1,5 @@
 pub const MAX_BONES: usize = 64;
 
-pub mod skeleton;
-pub mod bone;
 pub mod animation_channel;
 pub mod animation;
 pub mod animation_graph;

@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use noobwerkz_skeletal_animation::skeleton::*;
+use noobwerkz_shared::skeleton::*;
 use crate::{instance3d::Instance3D, index_types::*};
 use wgpu::{BindGroupLayout, util::*};
 

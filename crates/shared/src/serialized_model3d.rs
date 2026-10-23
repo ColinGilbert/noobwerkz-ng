@@ -1,11 +1,14 @@
+use crate::{skeleton::*, bone::*};
+
+use std::sync::Arc;
+
 use msgpacker::*;
 
-pub const INVALID_BONE: usize = usize::MAX;
 
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedAnimation3D {
-    pub keyframes: Vec<SerializedAnimation3DKeyframes>,
+    pub channels: Vec<SerializedAnimation3DChannel>,
 }
 
 #[repr(C)]
@@ -28,14 +31,14 @@ pub struct SerializedBone3D {
 
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
-pub struct SerializedAnimation3DKeyframes {
+pub struct SerializedAnimation3DChannel{
     pub bone: usize,
     pub data: SerializedAnimation3DKeyframeTypes,
     pub times: Vec<f32>,
 
 }
 
-impl SerializedAnimation3DKeyframes {
+impl SerializedAnimation3DChannel {
     pub fn new(data: SerializedAnimation3DKeyframeTypes) -> Self {
         Self {
             bone: INVALID_BONE,
