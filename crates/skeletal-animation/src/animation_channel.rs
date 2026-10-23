@@ -105,6 +105,7 @@ impl AnimationChannel {
                 index: 0,
             };
         }
+
         let findings = self.times.binary_search_by(|t| t.total_cmp(&time));
         match findings {
             // We found the number
@@ -129,7 +130,7 @@ impl AnimationChannel {
             }
             // We didn't find the specific number
             Err(val) => {
-                let t_between_frames = (time - self.times[val - 1]) / (self.times[val] - self.times[val - 1]);
+                let t_between_frames = (time - self.times[val]) / (self.times[val]);
                 self.seek_results = SeekResults {
                     end: false,
                     begin: false,
