@@ -18,6 +18,7 @@ impl Animation {
             let last_time = c.times[c.times.len() - 1];
             latest_time = latest_time.max(last_time);
         }
+        println!("Latest anim time: {}", latest_time);
         Self {
             length: latest_time,
             seek: 0.0,

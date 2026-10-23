@@ -316,7 +316,7 @@ impl AnimationGraph {
                     let node = self.graph.node_weight(val).unwrap();
                     match node {
                         GenericNode::Sampler(val) => {
-                            println!("DT: {:?}", dt);
+                            // println!("DT: {:?}", dt);
                             self.animations[self.samplers[*val].index].seek(self.duration.as_secs_f32());
                             self.output_locals =
                                 self.animations[self.samplers[*val].index].playback();
