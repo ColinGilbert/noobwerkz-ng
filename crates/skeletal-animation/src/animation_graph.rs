@@ -307,6 +307,7 @@ impl AnimationGraph {
                 }
             }
         } else {
+            println!("On a node in animgraph");
             // If we are on a node. Far simpler to evaluate
             match self.current_node_idx {
                 Some(val) => {
