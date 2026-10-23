@@ -305,6 +305,7 @@ pub fn load_skinned_3d_model_from_serialized(
             .insert(n.clone(), AnimationIndex::new(*i));
     }
 
+    println!("Animation names {:?},", model_results.animation_names);
 
     model_results.skeleton = Arc::new(skeleton);
 
