@@ -97,31 +97,33 @@ impl Animation {
             }
             // For all other cases, we blend between two sequential keyframes
             else {
-
-                if c.seek_results.index == results.translations.len() -1 {
-                    c.seek_results.index -= 1;
+                let index: usize;
+                if c.seek_results.index == results.translations.len() - 1 {
+                    index = c.seek_results.index - 1;
+                } else {
+                    index = c.seek_results.index;
                 }
 
                 // println!("Playback blending two frames");
                 match &c.data {
                     KeyframeKeys::Translation(val) => {
                         results.translations[c.bone_index] = glam::Vec3::lerp(
-                            val[c.seek_results.index],
-                            val[c.seek_results.index + 1],
+                            val[index],
+                            val[index + 1],
                             c.seek_results.t_between_frames,
                         );
                     }
                     KeyframeKeys::Rotation(val) => {
                         results.rotations[c.bone_index] = glam::Quat::slerp(
-                            val[c.seek_results.index],
-                            val[c.seek_results.index + 1],
+                            val[index],
+                            val[index + 1],
                             c.seek_results.t_between_frames,
                         );
                     }
                     KeyframeKeys::Scale(val) => {
                         results.scales[c.bone_index] = glam::Vec3::lerp(
-                            val[c.seek_results.index],
-                            val[c.seek_results.index + 1],
+                            val[index],
+                            val[index + 1],
                             c.seek_results.t_between_frames,
                         );
                     }
