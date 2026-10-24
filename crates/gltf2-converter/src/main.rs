@@ -246,44 +246,10 @@ fn run(path: &str) {
 
                     let file_name = format!("texture_diffuse.{}", ext);
                     let mut file = std::fs::File::create(file_name.clone()).unwrap();
-                    file.write_all(raw_bytes);
+                    file.write_all(raw_bytes).unwrap();
                     println!("Saved diffuse texture to {}", file_name.clone());
                     serialized_material.diffuse_texture_path = file_name.clone();
-                    // TODO: Find out if correct
-                    // let image_data = &images[img.index()];
-                    // let f = image_data.format;
-
-                    // match f {
-                    //     gltf::image::Format::R8G8B8 => {
-                    //     //     let buf: RgbImage = image::ImageBuffer::from_raw(
-                    //     //         image_data.width,
-                    //     //         image_data.height,
-                    //     //         image_data.pixels.clone(),
-                    //     //     )
-                    //     //     .unwrap();
-                    //     //     buf.save_with_format("diffuse_texture.jpeg", image::ImageFormat::Jpeg);
-                    //     //     serialized_material.diffuse_texture_path =
-                    //     //         "diffuse_texture.jpeg".to_owned();
-                    //     let mut file = std::fs::File::create("diffuse_texture.raw").unwrap();
-                    //     file.write_all(&image_data.pixels);
-                    //         serialized_material.diffuse_texture_path =
-                    //             "diffuse_texture.raw".to_owned();
-                    //     }
-                    //     gltf::image::Format::R8G8B8A8 => {
-                    //         let buf: RgbaImage = image::ImageBuffer::from_raw(
-                    //             image_data.width,
-                    //             image_data.height,
-                    //             image_data.pixels.clone(),
-                    //         )
-                    //         .unwrap();
-                    //         buf.save_with_format("diffuse_texture.png", image::ImageFormat::Png);
-                    //         serialized_material.diffuse_texture_path =
-                    //             "diffuse_texture.png".to_owned();
-                    //     }
-                    //     _ => {
-                    //         println!("Invalid diffuse texture format")
-                    //     }
-                    // }
+  
                 }
                 gltf::image::Source::Uri { uri, mime_type } => {
                     println!(
@@ -301,10 +267,24 @@ fn run(path: &str) {
             let image = temp.source();
             match image.source() {
                 gltf::image::Source::View { view, mime_type } => {
-                    println!("Embedded normal texture MIME type: {}", mime_type);
-                    // TODO: Find out if correct
-                    let image_data = &images[view.index()].pixels;
-                    // let image_format = &images[view.index()].format;
+                    println!("Embedded diffuse texture MIME type: {}", mime_type);
+
+                    let parent_buffer = view.buffer();
+                    let buffer_data = &buffers[parent_buffer.index()].0;
+                    let start = view.offset();
+                    let end = start + view.length();
+                    let raw_bytes = &buffer_data[start..end];
+                    let ext = match mime_type {
+                        "image/png" => "png",
+                        "image/jpeg" => "jpg",
+                        _ => ".bin",
+                    };
+
+                    let file_name = format!("texture_normal.{}", ext);
+                    let mut file = std::fs::File::create(file_name.clone()).unwrap();
+                    file.write_all(raw_bytes).unwrap();
+                    println!("Saved normal texture to {}", file_name.clone());
+                    serialized_material.normals_texture_path = file_name.clone();
                 }
                 gltf::image::Source::Uri { uri, mime_type } => {
                     println!(
