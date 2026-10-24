@@ -244,9 +244,9 @@ fn run(path: &str) {
                                 image_data.pixels.clone(),
                             )
                             .unwrap();
-                            buf.save_with_format("diffuse_texture.png", image::ImageFormat::Png);
+                            buf.save_with_format("diffuse_texture.jpg", image::ImageFormat::Jpeg);
                             serialized_material.diffuse_texture_path =
-                                "diffuse_texture.png".to_owned();
+                                "diffuse_texture.jpg".to_owned();
                         }
                         gltf::image::Format::R8G8B8A8 => {
                             let buf: RgbaImage = image::ImageBuffer::from_raw(
