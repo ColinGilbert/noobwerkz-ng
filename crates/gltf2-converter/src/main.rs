@@ -244,7 +244,7 @@ fn run(path: &str) {
                                 image_data.pixels.clone(),
                             )
                             .unwrap();
-                            buf.save("diffuse_texture.png");
+                            buf.save_with_format("diffuse_texture.png", image::ImageFormat::Png);
                             serialized_material.diffuse_texture_path =
                                 "diffuse_texture.png".to_owned();
                         }
@@ -255,7 +255,7 @@ fn run(path: &str) {
                                 image_data.pixels.clone(),
                             )
                             .unwrap();
-                            buf.save("diffuse_texture.png");
+                            buf.save_with_format("diffuse_texture.png", image::ImageFormat::Png);
                             serialized_material.diffuse_texture_path =
                                 "diffuse_texture.png".to_owned();
                         }
