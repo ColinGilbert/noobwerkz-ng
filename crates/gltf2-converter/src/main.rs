@@ -238,15 +238,19 @@ fn run(path: &str) {
 
                     match f {
                         gltf::image::Format::R8G8B8 => {
-                            let buf: RgbImage = image::ImageBuffer::from_raw(
-                                image_data.width,
-                                image_data.height,
-                                image_data.pixels.clone(),
-                            )
-                            .unwrap();
-                            buf.save_with_format("diffuse_texture.jpg", image::ImageFormat::Jpeg);
+                        //     let buf: RgbImage = image::ImageBuffer::from_raw(
+                        //         image_data.width,
+                        //         image_data.height,
+                        //         image_data.pixels.clone(),
+                        //     )
+                        //     .unwrap();
+                        //     buf.save_with_format("diffuse_texture.jpeg", image::ImageFormat::Jpeg);
+                        //     serialized_material.diffuse_texture_path =
+                        //         "diffuse_texture.jpeg".to_owned();
+                        let mut file = std::fs::File::open("diffuse_texture.raw").unwrap();
+                        file.write_all(&image_data.pixels);
                             serialized_material.diffuse_texture_path =
-                                "diffuse_texture.jpg".to_owned();
+                                "diffuse_texture.raw".to_owned();
                         }
                         gltf::image::Format::R8G8B8A8 => {
                             let buf: RgbaImage = image::ImageBuffer::from_raw(

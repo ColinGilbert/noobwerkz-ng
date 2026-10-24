@@ -464,8 +464,8 @@ pub async fn load_texture(
 
 pub async fn load_binary(filepath: &Path) -> anyhow::Result<Vec<u8>> {
     let data = { std::fs::read(filepath)? };
-    let image_data = image::ImageReader::new(std::io::Cursor::new(data)).with_guessed_format().expect("Cursor to not fail");
-    let bytes = image_data.decode().unwrap().into_bytes();
+   // let image_data = image::ImageReader::new(std::io::Cursor::new(data)).with_guessed_format().expect("Cursor to not fail");
+   // let bytes = image_data.decode().unwrap().into_bytes();
 
-    Ok(bytes)
+    Ok(data)
 }
