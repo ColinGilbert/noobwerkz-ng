@@ -140,7 +140,6 @@ fn run(path: &str) {
 
             let img = texture.source();
             match img.source() {
-                #[allow(unused)]
                 gltf::image::Source::View { view, mime_type } => {
                     println!("Embedded diffuse texture MIME type: {}", mime_type);
 

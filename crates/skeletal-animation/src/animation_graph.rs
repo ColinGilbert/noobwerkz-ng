@@ -244,7 +244,7 @@ impl AnimationGraph {
                                 from_results =
                                     self.animations[self.samplers[*val].index].playback();
                             }
-                            GenericNode::BlendTreeOneDim(val) => {
+                            GenericNode::BlendTreeOneDim(_) => {
                                 // self.blend_trees_one_dim[*val].update(dt);
                                 // TODO
                             }
@@ -256,7 +256,7 @@ impl AnimationGraph {
                                 self.animations[self.samplers[*val].index].seek(self.duration.as_secs_f32());
                                 to_results = self.animations[self.samplers[*val].index].playback();
                             }
-                            GenericNode::BlendTreeOneDim(val) => {
+                            GenericNode::BlendTreeOneDim(_) => {
                                 // self.blend_trees_one_dim[*val].update(dt);
                                 // TODO
                             }
@@ -321,7 +321,7 @@ impl AnimationGraph {
                             self.output_locals =
                                 self.animations[self.samplers[*val].index].playback();
                         }
-                        GenericNode::BlendTreeOneDim(val) => {
+                        GenericNode::BlendTreeOneDim(_) => {
                             // TODO
                         }
                     }
