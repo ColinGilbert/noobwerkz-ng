@@ -247,7 +247,7 @@ fn run(path: &str) {
                         //     buf.save_with_format("diffuse_texture.jpeg", image::ImageFormat::Jpeg);
                         //     serialized_material.diffuse_texture_path =
                         //         "diffuse_texture.jpeg".to_owned();
-                        let mut file = std::fs::File::open("diffuse_texture.raw").unwrap();
+                        let mut file = std::fs::File::create("diffuse_texture.raw").unwrap();
                         file.write_all(&image_data.pixels);
                             serialized_material.diffuse_texture_path =
                                 "diffuse_texture.raw".to_owned();
