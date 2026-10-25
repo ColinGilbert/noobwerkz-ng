@@ -23,9 +23,8 @@ pub mod asset_manager;
 pub mod egui_renderer;
 pub mod particle_system3d;
 
-pub use bytemuck;
-pub use egui;
-pub use futures;
-pub use web_time;
-// pub use simple_animgraph;
+pub use bytemuck as bytemuck;
+pub use egui as egui;
+pub use futures as futures;
+pub use web_time as web_time;
 pub use glam as glam;

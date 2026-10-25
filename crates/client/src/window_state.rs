@@ -1,11 +1,12 @@
 use crate::callbacks::*;
 use crate::camera3d::*;
+use crate::client_user_context::*;
 use crate::egui_renderer::EguiRenderer;
 use crate::graphics::*;
 use crate::light3d::*;
+use crate::rendering::particle_renderer3d::ParticleRenderer;
 use crate::rendering::{Pass, forward_renderer3d::*};
 use crate::texture::*;
-use crate::client_user_context::*;
 use egui_wgpu::ScreenDescriptor;
 
 use std::f64;
@@ -25,6 +26,7 @@ pub struct WindowState {
     pub cam_ctx: CameraContext,
     pub user_ctx: ClientUserContext,
     pub forward_renderer: ForwardRenderer3D,
+    pub particle_renderer: ParticleRenderer,
     pub egui_renderer: EguiRenderer,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
@@ -71,6 +73,19 @@ impl WindowState {
             &gfx_ctx.config,
         );
 
+        let caps = surface.get_capabilities(&gfx_ctx.adapter);
+
+        let format = caps
+            .formats
+            .iter()
+            .copied()
+            .find(wgpu::TextureFormat::is_srgb)
+            .or_else(|| caps.formats.first().copied())
+            .ok_or_else(|| "the surface offers no texture format".to_string()).unwrap();
+
+        let particle_renderer =
+            ParticleRenderer::new(&gfx_ctx.device, &gfx_ctx.queue, format, None);
+
         let egui_renderer =
             EguiRenderer::new(&gfx_ctx.device, gfx_ctx.surface_format, &window.clone());
 
@@ -94,6 +109,7 @@ impl WindowState {
             user_ctx,
             cam_ctx,
             forward_renderer,
+            particle_renderer,
             egui_renderer,
             is_surface_configured: false,
             mouse_pressed: false,

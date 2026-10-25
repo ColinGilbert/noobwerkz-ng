@@ -31,7 +31,6 @@ futures = "0.3.34"
 serde = { version = "1.0.229", features = ["serde_derive"] }
 futures-signals = "0.3.34"
 wincode = "0.6.3"
-simple-particles = "0.4"
 
 [features]
 bytemuck = []

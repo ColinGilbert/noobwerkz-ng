@@ -9,3 +9,4 @@ pub mod item3d_common;
 pub mod serialized_model3d;
 pub mod skeleton;
 pub mod bone;
+pub mod prng;

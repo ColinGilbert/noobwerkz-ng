@@ -1889,12 +1889,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "header-parsing"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "648c7304bdedea53138308b293d5fcc88be72facb8f171a16258a7ff732a5fe9"
-
-[[package]]
 name = "heapless"
 version = "0.7.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2085,16 +2079,6 @@ name = "inflections"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a257582fdcde896fd96463bf2d40eefea0580021c0712a0e2b028b60b47a837a"
-
-[[package]]
-name = "inner-space"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2dff135fecfa6c472ef6892d45e0eed32445d1ef0142af9885804f82e9fc84e"
-dependencies = [
- "scalars",
- "vector-space",
-]
 
 [[package]]
 name = "inout"
@@ -2964,7 +2948,6 @@ dependencies = [
  "rayon",
  "safe_index",
  "serde",
- "simple-particles",
  "web-time",
  "wgpu",
  "wincode",
@@ -4296,15 +4279,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "scalars"
-version = "0.3.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82ff7fdc3ffda90527442f54f16b45854291fe1e62a4d4363c85264337ace6a9"
-dependencies = [
- "libm",
-]
-
-[[package]]
 name = "scoped-tls"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4448,27 +4422,6 @@ name = "simdutf8"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
-
-[[package]]
-name = "simple-particles"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98a9423d204d5afdfff9122cbb30871c5d105b7401ad69ddad661ab591e0d26d"
-dependencies = [
- "header-parsing",
- "simple-vectors",
-]
-
-[[package]]
-name = "simple-vectors"
-version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8dbd4887691cd845f86f2dc3baf6c5f08f40a15fa043057d1e741114f762d5b1"
-dependencies = [
- "inner-space",
- "scalars",
- "vector-basis",
-]
 
 [[package]]
 name = "skrifa"
@@ -5093,25 +5046,6 @@ dependencies = [
  "aligned-vec",
  "num-traits",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "vector-basis"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aac4cdc3cef2a32f13c0bb9a0b476f0030aa0e83c9a6f3e8d5b9969372aa6ff7"
-dependencies = [
- "scalars",
- "vector-space",
-]
-
-[[package]]
-name = "vector-space"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cef3e9fe6ca4e3807d260ce966d098900c682e13058282f9b7607a6b2b779d1e"
-dependencies = [
- "scalars",
 ]
 
 [[package]]
