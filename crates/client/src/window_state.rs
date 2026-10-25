@@ -292,9 +292,21 @@ impl WindowState {
             &view,
         );
 
+        let draws = self.user_ctx.scenes[self.user_ctx.active_scene]
+            .particle_system
+            .collect();
+        self.particle_renderer
+            .prepare(&self.gfx_ctx.device, &self.gfx_ctx.queue, &draws);
+        let active_camera = self.user_ctx.scenes[self.user_ctx.active_scene].active_camera;
+        let view_mat =
+            self.user_ctx.scenes[self.user_ctx.active_scene].cameras[active_camera].view_matrix();
+        let proj_mat = self.user_ctx.scenes[self.user_ctx.active_scene].cameras[active_camera]
+            .projection
+            .calc_matrix();
+        let view_proj = view_mat * proj_mat;
 
-        let draws = self.user_ctx.scenes[self.user_ctx.active_scene].particle_system.collect();
-        self.particle_renderer.prepare(&self.gfx_ctx.device, &self.gfx_ctx.queue, &draws);
+        self.particle_renderer
+            .set_camera(&self.gfx_ctx.queue, view_proj.to_cols_array_2d());
 
         let mut encoder = self
             .gfx_ctx
