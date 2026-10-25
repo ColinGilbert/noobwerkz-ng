@@ -81,7 +81,8 @@ impl WindowState {
             .copied()
             .find(wgpu::TextureFormat::is_srgb)
             .or_else(|| caps.formats.first().copied())
-            .ok_or_else(|| "the surface offers no texture format".to_string()).unwrap();
+            .ok_or_else(|| "the surface offers no texture format".to_string())
+            .unwrap();
 
         let particle_renderer =
             ParticleRenderer::new(&gfx_ctx.device, &gfx_ctx.queue, format, None);
@@ -290,6 +291,34 @@ impl WindowState {
             &self.gfx_ctx.depth_texture.view,
             &view,
         );
+
+
+        let draws = self.user_ctx.scenes[self.user_ctx.active_scene].particle_system.collect();
+        self.particle_renderer.prepare(&self.gfx_ctx.device, &self.gfx_ctx.queue, &draws);
+
+        let mut encoder = self
+            .gfx_ctx
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor::default());
+        {
+            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("particle_editor_preview_pass"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &view,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Load,
+                        store: wgpu::StoreOp::Store,
+                    },
+                    depth_slice: None,
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
+                multiview_mask: None,
+            });
+            self.particle_renderer.draw(&mut render_pass);
+        }
 
         let screen_descriptor = ScreenDescriptor {
             size_in_pixels: [self.gfx_ctx.config.width, self.gfx_ctx.config.height],

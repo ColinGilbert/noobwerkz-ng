@@ -1,4 +1,4 @@
-use crate::{asset_manager::*, scene3d::*, index_types::*};
+use crate::{asset_manager::*, scene3d::*, index_types::*, particle_system3d::*};
 use kira::{
 	AudioManager, AudioManagerSettings, DefaultBackend,
 };
