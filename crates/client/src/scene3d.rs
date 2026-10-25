@@ -7,7 +7,7 @@ use noobwerkz_shared::{skeleton::*, physics3d_context::*};
 use noobwerkz_skeletal_animation::{animation::Animation, animation_graph::{AnimationGraph, AnimationIndex, Animations}, animation_graph_definition::AnimationGraphDefinition};
 
 use crate::{
-    camera3d::*, character3d_renderable::Character3DRenderable, index_types::*, instance3d::Instance3D, model3d_node::Model3DNode, particle_system3d::ParticleSystem, skinned_model3d::SkinnedModel3D, skinned_model3d_node::SkinnedModel3DNode
+    camera3d::*, character3d_renderable::Character3DRenderable, index_types::*, instance3d::Instance3D, model3d_node::Model3DNode, skinned_model3d::SkinnedModel3D, skinned_model3d_node::SkinnedModel3DNode
 };
 
 pub struct Characters3DContext {
@@ -22,7 +22,6 @@ pub struct Scene3D {
     pub physics_context: Physics3DContext,
     pub characters_contexts: Characters3DContexts<Characters3DContext>,
     pub character_types_by_name: HashMap<String, Characters3DContextIndex>,
-    pub particle_system: ParticleSystem,
 
 }
 
@@ -37,7 +36,6 @@ impl Scene3D {
             physics_context: Physics3DContext::new(gravity),
             characters_contexts: Characters3DContexts::new(),
             character_types_by_name: HashMap::new(),
-            particle_system: ParticleSystem::new(),
         }
     }
 

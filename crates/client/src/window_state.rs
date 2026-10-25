@@ -4,7 +4,6 @@ use crate::client_user_context::*;
 use crate::egui_renderer::EguiRenderer;
 use crate::graphics::*;
 use crate::light3d::*;
-use crate::rendering::particle_renderer3d::ParticleRenderer;
 use crate::rendering::{Pass, forward_renderer3d::*};
 use crate::texture::*;
 use egui_wgpu::ScreenDescriptor;
@@ -27,7 +26,6 @@ pub struct WindowState {
     pub cam_ctx: CameraContext,
     pub user_ctx: ClientUserContext,
     pub forward_renderer: ForwardRenderer3D,
-    pub particle_renderer: ParticleRenderer,
     pub egui_renderer: EguiRenderer,
     #[allow(dead_code)]
     pub is_surface_configured: bool,
@@ -74,20 +72,7 @@ impl WindowState {
             &gfx_ctx.config,
         );
 
-        let caps = surface.get_capabilities(&gfx_ctx.adapter);
-
-        let format = caps
-            .formats
-            .iter()
-            .copied()
-            .find(wgpu::TextureFormat::is_srgb)
-            .or_else(|| caps.formats.first().copied())
-            .ok_or_else(|| "the surface offers no texture format".to_string())
-            .unwrap();
-
-        let particle_renderer =
-            ParticleRenderer::new(&gfx_ctx.device, &gfx_ctx.queue, format, None);
-
+  
         let egui_renderer =
             EguiRenderer::new(&gfx_ctx.device, gfx_ctx.surface_format, &window.clone());
 
@@ -111,7 +96,6 @@ impl WindowState {
             user_ctx,
             cam_ctx,
             forward_renderer,
-            particle_renderer,
             egui_renderer,
             is_surface_configured: false,
             mouse_pressed: false,
@@ -292,48 +276,6 @@ impl WindowState {
             &self.gfx_ctx.depth_texture.view,
             &view,
         );
-
-        let draws = self.user_ctx.scenes[self.user_ctx.active_scene]
-            .particle_system
-            .collect();
-
-        self.particle_renderer
-            .prepare(&self.gfx_ctx.device, &self.gfx_ctx.queue, &draws);
-
-        let active_camera = self.user_ctx.scenes[self.user_ctx.active_scene].active_camera;
-        let view_mat =
-            self.user_ctx.scenes[self.user_ctx.active_scene].cameras[active_camera].view_matrix();
-        let proj_mat = self.user_ctx.scenes[self.user_ctx.active_scene].cameras[active_camera]
-            .projection
-            .calc_matrix();
-        let view_proj = view_mat * proj_mat;
-
-        self.particle_renderer
-            .set_camera(&self.gfx_ctx.queue, view_proj.to_cols_array_2d());
-
-        let mut encoder = self
-            .gfx_ctx
-            .device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor::default());
-
-        let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("particle_editor_preview_pass"),
-            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: &view,
-                resolve_target: None,
-                ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(Color::TRANSPARENT),
-                    store: wgpu::StoreOp::Store,
-                },
-                depth_slice: None,
-            })],
-            depth_stencil_attachment: None,
-            timestamp_writes: None,
-            occlusion_query_set: None,
-            multiview_mask: None,
-        });
-
-        self.particle_renderer.draw(&mut render_pass);
 
         let screen_descriptor = ScreenDescriptor {
             size_in_pixels: [self.gfx_ctx.config.width, self.gfx_ctx.config.height],
