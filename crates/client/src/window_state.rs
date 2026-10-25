@@ -8,6 +8,7 @@ use crate::rendering::particle_renderer3d::ParticleRenderer;
 use crate::rendering::{Pass, forward_renderer3d::*};
 use crate::texture::*;
 use egui_wgpu::ScreenDescriptor;
+use wgpu::Color;
 
 use std::f64;
 use std::sync::*;
@@ -321,7 +322,7 @@ impl WindowState {
                 view: &view,
                 resolve_target: None,
                 ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Load,
+                    load: wgpu::LoadOp::Clear(Color::TRANSPARENT),
                     store: wgpu::StoreOp::Store,
                 },
                 depth_slice: None,
@@ -331,6 +332,7 @@ impl WindowState {
             occlusion_query_set: None,
             multiview_mask: None,
         });
+
         self.particle_renderer.draw(&mut render_pass);
 
         let screen_descriptor = ScreenDescriptor {
