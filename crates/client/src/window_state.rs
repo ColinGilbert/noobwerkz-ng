@@ -118,10 +118,9 @@ impl WindowState {
             self.gfx_ctx.config.width = width;
             self.gfx_ctx.config.height = height;
 
-            drop(self.surface.get_current_texture());
-
             self.surface
                 .configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
+            
             self.gfx_ctx.depth_texture = Texture::create_depth_texture(
                 &self.gfx_ctx.device,
                 &self.gfx_ctx.config,
