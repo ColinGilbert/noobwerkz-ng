@@ -4,7 +4,6 @@ use crate::texture::*;
 pub struct GraphicsContext {
     pub device: wgpu::Device,
     pub queue: wgpu::Queue,
-    pub adapter: wgpu::Adapter,
     pub config: wgpu::SurfaceConfiguration,
     pub surface_format: wgpu::TextureFormat,
     pub depth_texture: Texture,
@@ -162,7 +161,6 @@ impl GraphicsContext {
         Self {
             device,
             config,
-            adapter,
             queue,
             surface_format,
             depth_texture,

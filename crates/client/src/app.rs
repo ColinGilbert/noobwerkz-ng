@@ -121,9 +121,9 @@ impl ApplicationHandler<WindowState> for App {
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),
             WindowEvent::Resized(size) => {
-                if size.width > 0 && size.height > 0 {
+
                     state.resize(size.width, size.height)
-                }
+
             }
             WindowEvent::RedrawRequested => {
                 let dt = self.last_time.elapsed();
