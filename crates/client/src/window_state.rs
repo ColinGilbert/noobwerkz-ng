@@ -120,7 +120,7 @@ impl WindowState {
 
             self.surface
                 .configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
-            
+
             self.gfx_ctx.depth_texture = Texture::create_depth_texture(
                 &self.gfx_ctx.device,
                 &self.gfx_ctx.config,
@@ -237,9 +237,10 @@ impl WindowState {
         let output = match self.surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(surface_texture) => surface_texture,
             wgpu::CurrentSurfaceTexture::Suboptimal(surface_texture) => {
-                self.surface
-                    .configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
-                surface_texture
+                // self.surface
+                //     .configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
+                // surface_texture
+                return Ok(());
             }
             wgpu::CurrentSurfaceTexture::Timeout
             | wgpu::CurrentSurfaceTexture::Occluded
