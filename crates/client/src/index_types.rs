@@ -67,3 +67,13 @@ safe_index::new! {
   InstanceIndex,
   map: Instances
 }
+
+safe_index::new! {
+  ParticleSystemIndex,
+  map: ParticleSystems
+}
+
+safe_index::new! {
+  ParticleIndex,
+  map: Particles
+}

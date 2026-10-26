@@ -7,7 +7,6 @@ use crate::light3d::*;
 use crate::rendering::{Pass, forward_renderer3d::*};
 use crate::texture::*;
 use egui_wgpu::ScreenDescriptor;
-use wgpu::Color;
 
 use std::f64;
 use std::sync::*;
