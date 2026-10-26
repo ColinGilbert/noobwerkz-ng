@@ -71,7 +71,6 @@ impl WindowState {
             &gfx_ctx.config,
         );
 
-  
         let egui_renderer =
             EguiRenderer::new(&gfx_ctx.device, gfx_ctx.surface_format, &window.clone());
 
@@ -118,6 +117,9 @@ impl WindowState {
             self.is_surface_configured = true;
             self.gfx_ctx.config.width = width;
             self.gfx_ctx.config.height = height;
+
+            drop(self.surface.get_current_texture());
+
             self.surface
                 .configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
             self.gfx_ctx.depth_texture = Texture::create_depth_texture(
@@ -303,7 +305,7 @@ impl WindowState {
 
         self.gfx_ctx.queue.submit(Some(encoder.finish()));
 
-        //output.present();
+        // output.present();
         self.gfx_ctx.queue.present(output);
 
         Ok(())
