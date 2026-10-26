@@ -71,7 +71,7 @@ impl EguiRenderer {
 
         self.ppp(screen_descriptor.pixels_per_point);
 
-        let full_output = self.state.egui_ctx().end_pass();
+        let mut full_output = self.state.egui_ctx().end_pass();
 
         self.state
             .handle_platform_output(window, full_output.platform_output);
@@ -84,6 +84,7 @@ impl EguiRenderer {
             self.renderer
                 .update_texture(device, queue, *id, &image_delta[0]);
         }
+        full_output.textures_delta.clear();
         self.renderer
             .update_buffers(device, queue, encoder, &tris, &screen_descriptor);
         let rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
