@@ -188,11 +188,10 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
-
             //for effect in particle_effects {
-                // if self..is_empty() {
-                //     return;
-                // }
+            // if self..is_empty() {
+            //     return;
+            // }
                 let Some(fallback) = particles_ctx.textures.get("") else {
                     println!("Could not get fallback texture. Aborting particle effect draw...");
                     return;
@@ -201,10 +200,13 @@ impl Pass for ForwardRenderer3D {
                 //render_pass.set_bind_group(2, particles_ctx.depth_bind_group, &[]);
                 render_pass.set_vertex_buffer(0, particles_ctx.instance_buffer.slice(..));
                 for batch in &particles_ctx.batches {
-                    let texture = particles_ctx.textures.get(&batch.texture).unwrap_or(fallback);
+                    let texture = particles_ctx
+                        .textures
+                        .get(&batch.texture)
+                        .unwrap_or(fallback);
                     let pipeline = if batch.additive {
                         &self.cpu_particles_render_pipeline_additive
-                                        } else {
+                    } else {
                         &self.cpu_particles_render_pipeline_alpha
                     };
                     render_pass.set_pipeline(pipeline);
@@ -212,6 +214,7 @@ impl Pass for ForwardRenderer3D {
                     render_pass.draw(0..6, batch.start..batch.start + batch.count);
                 }
             }
+
         //}
 
         queue.submit([encoder.finish()]);
@@ -393,7 +396,6 @@ impl ForwardRenderer3D {
                 ADDITIVE_BLEND,
             )
         };
-
 
         Self {
             render_pipeline_layout,

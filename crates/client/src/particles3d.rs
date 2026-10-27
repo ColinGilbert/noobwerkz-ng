@@ -104,8 +104,8 @@ impl Particle3DContext {
         let circle = create_soft_circle_texture();
         let results = self.register_texture(device, queue, "", &circle, texture_layout);
         println!("Register fallback circle texture success? {} ", results);
-        let results = self.register_texture(device, queue, "circle", &circle, texture_layout);
-        println!("Register explicit circle texture success? {} ", results);
+        // let results = self.register_texture(device, queue, "circle", &circle, texture_layout);
+        // println!("Register explicit circle texture success? {} ", results);
     }
 
     pub fn prepare(&mut self, draws: &[EffectDraw]) {
