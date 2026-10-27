@@ -108,7 +108,7 @@ impl Particle3DContext {
         // println!("Register explicit circle texture success? {} ", results);
     }
 
-    pub fn prepare(&mut self, device: &wpgu::Device, queue: &wpgu::Queue, draws: &[EffectDraw]) {
+    pub fn prepare(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, draws: &[EffectDraw]) {
         self.instances.clear();
         self.batches.clear();
         for draw in draws {
