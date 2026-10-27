@@ -153,6 +153,7 @@ impl GraphicsContext {
                 "default-diffuse",
                 false,
                 &texture_bind_group_layout,
+                None
             )
             .unwrap();
             let normal_texture = Texture::from_bytes(
@@ -162,7 +163,7 @@ impl GraphicsContext {
                 "default-normal",
                 true,
                 &texture_bind_group_layout,
-            )
+                None)
             .unwrap();
             ModelMaterial::new(
                 &device,

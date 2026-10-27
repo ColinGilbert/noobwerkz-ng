@@ -420,7 +420,8 @@ pub async fn load_texture(
         &data,
         filepath.to_str().expect("Filepath must exist"),
         is_normal_map,
-        texture_bind_group_layout
+        texture_bind_group_layout,
+        None
     )
 }
 

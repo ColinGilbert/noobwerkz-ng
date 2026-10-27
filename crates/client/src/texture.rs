@@ -4,6 +4,12 @@ use anyhow::*;
 use image::GenericImageView;
 use wgpu::BindGroupLayout;
 
+pub struct RawTextureBytes {
+    pub width: u32,
+    pub height: u32,
+    pub bytes: Vec<u8>,
+}
+
 #[derive(Clone)]
 pub struct Texture {
     pub texture: wgpu::Texture,
@@ -104,17 +110,31 @@ impl Texture {
         label: &str,
         is_normal_map: bool,
         texture_bind_group_layout: &BindGroupLayout,
+        raw_bytes: Option<RawTextureBytes>,
     ) -> Result<Self> {
         //println!("Loading {} from memory", label);
-        let img = image::load_from_memory(bytes)?;
-        Self::from_image(
-            device,
-            queue,
-            &img,
-            Some(label),
-            is_normal_map,
-            texture_bind_group_layout,
-        )
+        if raw_bytes.is_none() {
+            let img = image::load_from_memory(bytes)?;
+            Self::from_image(
+                device,
+                queue,
+                &img,
+                Some(label),
+                is_normal_map,
+                texture_bind_group_layout,
+            )
+        } else {
+            let raw_bytes = raw_bytes.unwrap();
+                let img = image::ImageBuffer::<image::Rgba<u8>, std::vec::Vec<u8>>::from_raw(raw_bytes.width, raw_bytes.height, raw_bytes.bytes);
+           Self::from_image(
+                device,
+                queue,
+                &img.unwrap().into(),
+                Some(label),
+                is_normal_map,
+                texture_bind_group_layout,
+            )
+        }
     }
 
     pub fn from_image(
