@@ -205,9 +205,12 @@ impl Pass for ForwardRenderer3D {
                         .get(&batch.texture)
                         .unwrap_or(fallback);
                     let pipeline = if batch.additive {
+                        println!("Rendering additive");
                         &self.cpu_particles_render_pipeline_additive
                     } else {
+                        println!("Rendering alpha");
                         &self.cpu_particles_render_pipeline_alpha
+
                     };
                     render_pass.set_pipeline(pipeline);
                     render_pass.set_bind_group(1, texture.bind_group.as_ref().unwrap(), &[]);
