@@ -10,7 +10,6 @@ use crate::vertex::*;
 
 // use crate::skinned_model_node::*;
 use crate::texture::*;
-use simple_particles::render::ParticleRenderer;
 // use crate::character::Character;
 use wgpu::util::DeviceExt;
 
@@ -22,7 +21,10 @@ pub struct ForwardRenderer3D {
     pub render_pipeline: wgpu::RenderPipeline,
     pub skinned_render_pipeline: wgpu::RenderPipeline,
     pub light_render_pipeline: wgpu::RenderPipeline,
-    pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
+    pub cpu_particles_render_pipeline: wgpu::RenderPipeline,
+
+    //pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
+    
 }
 
 impl Pass for ForwardRenderer3D {
@@ -36,7 +38,6 @@ impl Pass for ForwardRenderer3D {
         characters_contexts: &Characters3DContexts<Characters3DContext>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
-        particle_renderer: &ParticleRenderer,
     ) {
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Render Encoder"),
@@ -130,7 +131,7 @@ impl Pass for ForwardRenderer3D {
             }
 
 
-            particle_renderer.draw(&mut render_pass);
+          //  particle_renderer.draw(&mut render_pass);
 
 
             render_pass.set_pipeline(&self.skinned_render_pipeline);
@@ -300,6 +301,30 @@ impl ForwardRenderer3D {
             )
         };
 
+        let cpu_particles_render_pipeline = {
+            let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("CPU Particles Pipeline Layout"),
+                bind_group_layouts: &[
+                    Some(camera_bind_group_layout),
+                    Some(light_bind_group_layout),
+                ],
+                immediate_size: 0,
+            });
+            let shader = wgpu::ShaderModuleDescriptor {
+                label: Some("CPU Particles Shader"),
+                source: wgpu::ShaderSource::Wgsl(include_str!("cpu_particles3d.wgsl").into()),
+            };
+
+            create_render_pipeline(
+                &device,
+                &layout,
+                config.format,
+                Some(Texture::DEPTH_FORMAT),
+                &[Some(Model3DVertex::desc())],
+                shader,
+            )
+        };
+
         Self {
             render_pipeline_layout,
             skinned_render_pipeline_layout,
@@ -308,7 +333,8 @@ impl ForwardRenderer3D {
             render_pipeline,
             skinned_render_pipeline,
             light_render_pipeline,
-            bone_matrices_bind_group_layout: bone_matrices_bind_group_layout.clone(),
+            cpu_particles_render_pipeline,
+           // bone_matrices_bind_group_layout: bone_matrices_bind_group_layout.clone(),
         }
     }
 }

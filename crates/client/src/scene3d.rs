@@ -10,7 +10,7 @@ use noobwerkz_skeletal_animation::{
     animation_graph_definition::AnimationGraphDefinition,
 };
 
-use simple_particles::{ParticleSystem, render::ParticleRenderer};
+use simple_particles::{ParticleSystem};
 
 use crate::{
     camera3d::*, character3d_renderable::Character3DRenderable, index_types::*, instance3d::Instance3D, model3d_node::Model3DNode, skinned_model3d::SkinnedModel3D, skinned_model3d_node::SkinnedModel3DNode,

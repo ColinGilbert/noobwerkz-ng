@@ -4488,10 +4488,8 @@ name = "simple-particles"
 version = "0.4.0"
 source = "git+https://www.github.com/ColinGilbert/simple-particles-mirror.git#c92b22ffd9d59392322c0ec7900da01b86a7b43e"
 dependencies = [
- "bytemuck",
  "header-parsing",
  "simple-vectors",
- "wgpu",
 ]
 
 [[package]]

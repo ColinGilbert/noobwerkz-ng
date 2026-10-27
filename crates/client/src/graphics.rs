@@ -1,5 +1,3 @@
-use simple_particles::render::ParticleRenderer;
-
 use crate::material::*;
 use crate::texture::*;
 
@@ -12,7 +10,6 @@ pub struct GraphicsContext {
     pub texture_bind_group_layout_3d: wgpu::BindGroupLayout,
     pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
     pub debug_material: Material,
-    pub particle_renderer: ParticleRenderer,
 }
 
 impl GraphicsContext {
@@ -160,7 +157,6 @@ impl GraphicsContext {
                 &texture_bind_group_layout_3d,
             )
         };
-        let particle_renderer= ParticleRenderer::new(&device, &queue, surface_format, Some(Texture::DEPTH_FORMAT));
 
         Self {
             device,
@@ -171,7 +167,6 @@ impl GraphicsContext {
             texture_bind_group_layout_3d,
             bone_matrices_bind_group_layout,
             debug_material,
-            particle_renderer,
         }
     }
 

@@ -31,7 +31,7 @@ futures = "0.3.34"
 serde = { version = "1.0.229", features = ["serde_derive"] }
 futures-signals = "0.3.34"
 wincode = "0.6.3"
-simple-particles = { git = "https://www.github.com/ColinGilbert/simple-particles-mirror.git", features = ["render"] }
+simple-particles = { git = "https://www.github.com/ColinGilbert/simple-particles-mirror.git" }
 
 [features]
 bytemuck = []
