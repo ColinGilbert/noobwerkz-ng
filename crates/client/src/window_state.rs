@@ -271,10 +271,10 @@ impl WindowState {
         let u = &mut self.user_ctx;
 
         let s = &u.scenes[u.active_scene];
-        println!("Scene {} active", u.active_scene);
+        //println!("Scene {} active", u.active_scene);
         let particle_effects = s.particle_system.collect();
 
-        println!("Particle system empty?: {}", s.particle_system.is_empty());
+        //println!("Particle system empty?: {}", s.particle_system.is_empty());
         // let view_proj = s.cameras[s.active_camera].view_matrix() * s.cameras[s.active_camera].projection.calc_matrix();
         self.gfx_ctx.particles_ctx.prepare(&self.gfx_ctx.device, &self.gfx_ctx.queue, &particle_effects);
 
