@@ -3,10 +3,6 @@
 struct Camera {
     view_pos: vec4<f32>,
     view_proj: mat4x4<f32>,
-    near: f32,
-    far: f32,
-    fade_distance: f32,
-    soft_enabled: f32,
 }
 @group(0) @binding(0)
 var<uniform> camera: Camera;
@@ -18,6 +14,10 @@ struct Light {
 @group(1) @binding(0)
 var<uniform> light: Light;
 
+@group(2) @binding(0)
+var particle_texture: texture_2d<f32>;
+@group(2) @binding(1)
+var particle_sampler: sampler;
 
 struct Instance {
     @location(0) position: vec3<f32>,
@@ -90,14 +90,9 @@ fn vs_main(
 
 // Fragment shader
 
-@group(2) @binding(0)
-var particle_texture: texture_2d<f32>;
-@group(2) @binding(1)
-var particle_sampler: sampler;
-
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
-    let texel = textureSample(particle_texture, particle_sampler, in.uv);
+        let texel = textureSample(particle_texture, particle_sampler, in.uv);
     var color = texel * in.color;
     return color;
 }
