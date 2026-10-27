@@ -196,7 +196,7 @@ impl Pass for ForwardRenderer3D {
                     println!("Could not get fallback texture. Aborting particle effect draw...");
                     return;
                 };
-                //render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
+                // render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
                 //render_pass.set_bind_group(2, particles_ctx.depth_bind_group, &[]);
                 render_pass.set_vertex_buffer(0, particles_ctx.instance_buffer.slice(..));
                 for batch in &particles_ctx.batches {

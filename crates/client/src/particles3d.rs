@@ -108,7 +108,7 @@ impl Particle3DContext {
         // println!("Register explicit circle texture success? {} ", results);
     }
 
-    pub fn prepare(&mut self, draws: &[EffectDraw]) {
+    pub fn prepare(&mut self, device: &wpgu::Device, queue: &wpgu::Queue, draws: &[EffectDraw]) {
         self.instances.clear();
         self.batches.clear();
         for draw in draws {
@@ -134,6 +134,25 @@ impl Particle3DContext {
                 });
             }
         }
+
+
+        if self.instances.is_empty() {
+            return;
+        }
+        let data: &[u8] = bytemuck::cast_slice(&self.instances);
+        let required = data.len() as u64;
+        if required > self.instance_capacity {
+            let new_capacity = required.next_power_of_two();
+            self.instance_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+                label: Some("particle_instance_buffer"),
+                size: new_capacity,
+                usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+                mapped_at_creation: false,
+            });
+            self.instance_capacity = new_capacity;
+        }
+        queue.write_buffer(&self.instance_buffer, 0, data);
+
     }
 
     pub fn register_texture(
