@@ -201,6 +201,7 @@ const ADDITIVE_BLEND: wgpu::BlendState = wgpu::BlendState {
         operation: wgpu::BlendOperation::Add,
     },
 };
+
 impl ForwardRenderer3D {
     pub fn new(
         device: &wgpu::Device,
@@ -322,9 +323,10 @@ impl ForwardRenderer3D {
                 immediate_size: 0,
             });
             let shader = wgpu::ShaderModuleDescriptor {
-                label: Some("CPU Particles Shader"),
+                label: Some("CPU Particles Shader alpha"),
                 source: wgpu::ShaderSource::Wgsl(include_str!("cpu_particles3d.wgsl").into()),
             };
+
             create_particles_render_pipeline(
                 &device,
                 &layout,
@@ -347,9 +349,10 @@ impl ForwardRenderer3D {
                 immediate_size: 0,
             });
             let shader = wgpu::ShaderModuleDescriptor {
-                label: Some("CPU Particles Shader"),
+                label: Some("CPU Particles Shader additive"),
                 source: wgpu::ShaderSource::Wgsl(include_str!("cpu_particles3d.wgsl").into()),
             };
+
             create_particles_render_pipeline(
                 &device,
                 &layout,
