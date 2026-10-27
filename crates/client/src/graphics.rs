@@ -160,7 +160,7 @@ impl GraphicsContext {
                 &texture_bind_group_layout_3d,
             )
         };
-        let particle_renderer= ParticleRenderer::new(&device, &queue, surface_format, None);
+        let particle_renderer= ParticleRenderer::new(&device, &queue, surface_format, Some(Texture::DEPTH_FORMAT));
 
         Self {
             device,
@@ -174,6 +174,10 @@ impl GraphicsContext {
             particle_renderer,
         }
     }
+
+
+
+
 }
 
 pub fn create_render_pipeline(

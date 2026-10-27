@@ -268,6 +268,7 @@ impl WindowState {
         let s = &u.scenes[u.active_scene];
         let particle_draws = s.particle_system.collect();
         let view_proj = s.cameras[s.active_camera].view_matrix() * s.cameras[s.active_camera].projection.calc_matrix();
+        
         self.gfx_ctx.particle_renderer.set_camera(&self.gfx_ctx.queue, view_proj.to_cols_array_2d());
         self.gfx_ctx.particle_renderer.prepare(&self.gfx_ctx.device, &self.gfx_ctx.queue, &particle_draws);
 
