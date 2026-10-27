@@ -45,12 +45,13 @@ impl WindowState {
             display: None,
         });
 
+        println!("INITIATING WINDOW STATE");
         let surface = instance.create_surface(window.clone()).unwrap();
         let mut gfx_ctx = GraphicsContext::new(&window, &surface, &instance).await;
         gfx_ctx.particles_ctx.init(&gfx_ctx.device, &gfx_ctx.queue, &gfx_ctx.texture_bind_group_layout);
 
         let mut lights = Vec::<Light3DUniform>::new();
-        let mut user_ctx = ClientUserContext::new(); // { models: :, skinned_models: (), scenes: (), active_scene: () }
+        let mut user_ctx = ClientUserContext::new();
 
         if let Some(cb) = *USER_SETUP_CALLBACK.lock().unwrap() {
             cb(&mut gfx_ctx, &mut user_ctx, &mut lights);
