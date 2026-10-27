@@ -37,29 +37,35 @@ impl Vertex for Particle3DVertex {
                     shader_location: 0,
                     format: wgpu::VertexFormat::Float32x3,
                 },
-                // UV
+                // Size
                 wgpu::VertexAttribute {
                     offset: mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
                     shader_location: 1,
-                    format: wgpu::VertexFormat::Float32x2,
+                    format: wgpu::VertexFormat::Float32,
                 },
-                // Normals
+                // Color
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 5]>() as wgpu::BufferAddress,
+                    offset: mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
                     shader_location: 2,
-                    format: wgpu::VertexFormat::Float32x3,
+                    format: wgpu::VertexFormat::Float32x4,
                 },
-                // Tangent
+                //Rotation
                 wgpu::VertexAttribute {
                     offset: mem::size_of::<[f32; 8]>() as wgpu::BufferAddress,
                     shader_location: 3,
-                    format: wgpu::VertexFormat::Float32x3,
+                    format: wgpu::VertexFormat::Float32,
                 },
-                // Bitangent
+                // Life
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 11]>() as wgpu::BufferAddress,
+                    offset: mem::size_of::<[f32; 9]>() as wgpu::BufferAddress,
                     shader_location: 4,
-                    format: wgpu::VertexFormat::Float32x3,
+                    format: wgpu::VertexFormat::Float32,
+                },
+                // UV
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 13]>() as wgpu::BufferAddress,
+                    shader_location: 5,
+                    format: wgpu::VertexFormat::Float32x2,
                 },
             ],
         }

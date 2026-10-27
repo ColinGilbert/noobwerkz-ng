@@ -25,7 +25,7 @@ struct Instance {
     @location(2) color: vec4<f32>,
     @location(3) rotation: f32,
     @location(4) life: f32,
-    @location(5) sheet: vec2<f32>,
+    @location(5) uv: vec2<f32>,
 }
 
 struct VertexOutput {
@@ -69,8 +69,8 @@ fn vs_main(
         + right * rotated.x * instance.size
         + up * rotated.y * instance.size;
 
-    let columns = max(instance.sheet.x, 1.0);
-    let rows = max(instance.sheet.y, 1.0);
+    let columns = max(instance.uv.x, 1.0);
+    let rows = max(instance.uv.y, 1.0);
     let frame_count = columns * rows;
     let frame = floor(min(instance.life, 0.999) * frame_count);
     let column = frame - floor(frame / columns) * columns;
