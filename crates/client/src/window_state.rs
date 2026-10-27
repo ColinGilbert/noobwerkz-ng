@@ -64,11 +64,13 @@ impl WindowState {
             &gfx_ctx.device,
             &light_ctx.light_buffer,
             &cam_ctx.buffer,
+            gfx_ctx.particles_ctx.instance_buffer.clone(),
             &gfx_ctx.texture_bind_group_layout,
             &cam_ctx.bind_group_layout,
             &light_ctx.light_bind_group_layout,
             &gfx_ctx.bone_matrices_bind_group_layout,
             &gfx_ctx.config,
+            
         );
 
         let egui_renderer =
@@ -266,7 +268,7 @@ impl WindowState {
         let u = &mut self.user_ctx;
 
         let s = &u.scenes[u.active_scene];
-        let particle_draws = s.particle_system.collect();
+        let particle_effects = s.particle_system.collect();
         // let view_proj = s.cameras[s.active_camera].view_matrix() * s.cameras[s.active_camera].projection.calc_matrix();
 
 
@@ -278,7 +280,10 @@ impl WindowState {
             &u.asset_mgr.skinned_models,
             &s.model_nodes,
             &s.characters_contexts,
+            &self.gfx_ctx.particles_ctx,
+            &particle_effects,
             &self.gfx_ctx.depth_texture.view,
+            
             &view,
         );
 

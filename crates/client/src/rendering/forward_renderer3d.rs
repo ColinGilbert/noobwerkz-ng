@@ -3,6 +3,7 @@ use crate::index_types::*;
 use crate::instance3d::*;
 use crate::model3d::*;
 use crate::model3d_node::*;
+use crate::particles3d::Particle3DContext;
 use crate::particles3d::Particle3DVertex;
 use crate::rendering::Pass;
 use crate::scene3d::Characters3DContext;
@@ -11,6 +12,7 @@ use crate::vertex::*;
 
 // use crate::skinned_model_node::*;
 use crate::texture::*;
+use simple_particles::EffectDraw;
 // use crate::character::Character;
 use wgpu::util::DeviceExt;
 
@@ -36,6 +38,8 @@ impl Pass for ForwardRenderer3D {
         skinned_models: &SkinnedModels3D<SkinnedModel3D>,
         model_nodes: &Model3DNodes<Model3DNode>,
         characters_contexts: &Characters3DContexts<Characters3DContext>,
+        particles_ctx: &Particle3DContext,
+        particle_effects: &Vec<EffectDraw>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
     ) {
@@ -183,6 +187,32 @@ impl Pass for ForwardRenderer3D {
                     );
                 }
             }
+
+            // render_pass.set_pipeline(&self.cpu_particles_render_pipeline_additive);
+
+            for effect in particle_effects {
+                // if self..is_empty() {
+                //     return;
+                // }
+                let Some(fallback) = particles_ctx.textures.get("") else {
+                    println!("Could not get fallback texture. Aborting particle effect draw...");
+                    return;
+                };
+                //render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
+                //render_pass.set_bind_group(2, particles_ctx.depth_bind_group, &[]);
+                render_pass.set_vertex_buffer(0, particles_ctx.instance_buffer.slice(..));
+                for batch in &particles_ctx.batches {
+                    let texture = particles_ctx.textures.get(&batch.texture).unwrap_or(fallback);
+                    let pipeline = if batch.additive {
+                        &self.cpu_particles_render_pipeline_additive
+                                        } else {
+                        &self.cpu_particles_render_pipeline_alpha
+                    };
+                    render_pass.set_pipeline(pipeline);
+                    render_pass.set_bind_group(1, texture.bind_group.as_ref().unwrap(), &[]);
+                    render_pass.draw(0..6, batch.start..batch.start + batch.count);
+                }
+            }
         }
 
         queue.submit([encoder.finish()]);
@@ -207,6 +237,7 @@ impl ForwardRenderer3D {
         device: &wgpu::Device,
         light_buffer: &wgpu::Buffer,
         camera_buffer: &wgpu::Buffer,
+        particles_instance_buffer: wgpu::Buffer,
         texture_bind_group_layout: &wgpu::BindGroupLayout,
         camera_bind_group_layout: &wgpu::BindGroupLayout,
         light_bind_group_layout: &wgpu::BindGroupLayout,
@@ -363,6 +394,7 @@ impl ForwardRenderer3D {
                 ADDITIVE_BLEND,
             )
         };
+
 
         Self {
             render_pipeline_layout,

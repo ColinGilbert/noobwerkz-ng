@@ -158,7 +158,7 @@ pub fn load_skinned_3d_model_from_serialized(
             }
             full_path.push(&m.diffuse_texture_path);
             let diffuse_texture_result =
-                futures::executor::block_on(load_texture(&full_path, false, device, queue));
+                futures::executor::block_on(load_texture(&full_path, false, device, queue, texture_layout));
             match diffuse_texture_result {
                 Ok(value) => {
                     diffuse_texture = value;
@@ -183,7 +183,7 @@ pub fn load_skinned_3d_model_from_serialized(
             }
             full_path.push(&m.normals_texture_path);
             let normal_texture_result =
-                futures::executor::block_on(load_texture(&full_path, true, device, queue));
+                futures::executor::block_on(load_texture(&full_path, true, device, queue, texture_layout));
             match normal_texture_result {
                 Ok(value) => {
                     normal_texture = value;
@@ -350,7 +350,7 @@ pub fn load_3d_model_from_serialized(
             path.push(&m.diffuse_texture_path);
             let diffuse_path = path.as_path();
             let diffuse_texture_result =
-                futures::executor::block_on(load_texture(&diffuse_path, false, device, queue));
+                futures::executor::block_on(load_texture(&diffuse_path, false, device, queue, texture_layout));
             match diffuse_texture_result {
                 Ok(value) => {
                     diffuse_texture = value;
@@ -377,7 +377,7 @@ pub fn load_3d_model_from_serialized(
             path.push(&m.normals_texture_path);
             println!("Normal texture path {:?}", path);
             let normal_texture_result =
-                futures::executor::block_on(load_texture(path.as_path(), true, device, queue));
+                futures::executor::block_on(load_texture(path.as_path(), true, device, queue, texture_layout));
             match normal_texture_result {
                 Ok(value) => {
                     normal_texture = value;
@@ -411,6 +411,7 @@ pub async fn load_texture(
     is_normal_map: bool,
     device: &wgpu::Device,
     queue: &wgpu::Queue,
+    texture_bind_group_layout: &wgpu::BindGroupLayout
 ) -> anyhow::Result<texture::Texture> {
     let data = load_binary(filepath).await?;
     texture::Texture::from_bytes(
@@ -419,6 +420,7 @@ pub async fn load_texture(
         &data,
         filepath.to_str().expect("Filepath must exist"),
         is_normal_map,
+        texture_bind_group_layout
     )
 }
 

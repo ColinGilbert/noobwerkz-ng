@@ -1,4 +1,5 @@
 use crate::model_material::*;
+use crate::particles3d::Particle3DContext;
 use crate::texture::*;
 
 pub struct GraphicsContext {
@@ -10,6 +11,7 @@ pub struct GraphicsContext {
     pub texture_bind_group_layout: wgpu::BindGroupLayout,
     pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
     pub debug_material: ModelMaterial,
+    pub particles_ctx: Particle3DContext,
 }
 
 impl GraphicsContext {
@@ -144,11 +146,24 @@ impl GraphicsContext {
             let diffuse_bytes = include_bytes!("default-diffuse.png");
             let normal_bytes = include_bytes!("default-normal.png");
 
-            let diffuse_texture =
-                Texture::from_bytes(&device, &queue, diffuse_bytes, "default-diffuse", false)
-                    .unwrap();
-            let normal_texture =
-                Texture::from_bytes(&device, &queue, normal_bytes, "default-normal", true).unwrap();
+            let diffuse_texture = Texture::from_bytes(
+                &device,
+                &queue,
+                diffuse_bytes,
+                "default-diffuse",
+                false,
+                &texture_bind_group_layout,
+            )
+            .unwrap();
+            let normal_texture = Texture::from_bytes(
+                &device,
+                &queue,
+                normal_bytes,
+                "default-normal",
+                true,
+                &texture_bind_group_layout,
+            )
+            .unwrap();
             ModelMaterial::new(
                 &device,
                 "alt-material",
@@ -157,6 +172,15 @@ impl GraphicsContext {
                 &texture_bind_group_layout,
             )
         };
+
+        let particles_instance_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Particles instance buffer"),
+            size: 1000,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+
+        let particles_ctx = Particle3DContext::new(particles_instance_buffer, 1000);
 
         Self {
             device,
@@ -167,11 +191,10 @@ impl GraphicsContext {
             texture_bind_group_layout,
             bone_matrices_bind_group_layout,
             debug_material,
+            particles_ctx,
         }
     }
-
 }
-
 pub fn create_indexed_mesh_render_pipeline(
     device: &wgpu::Device,
     layout: &wgpu::PipelineLayout,
@@ -234,8 +257,6 @@ pub fn create_indexed_mesh_render_pipeline(
     })
 }
 
-
-
 pub fn create_particles_render_pipeline(
     device: &wgpu::Device,
     layout: &wgpu::PipelineLayout,
@@ -247,7 +268,7 @@ pub fn create_particles_render_pipeline(
 ) -> wgpu::RenderPipeline {
     let shader = device.create_shader_module(shader);
 
-   device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: Some(&format!("{:?}", shader)),
         layout: Some(layout),
         vertex: wgpu::VertexState {

@@ -2,12 +2,14 @@
 
 use anyhow::*;
 use image::GenericImageView;
+use wgpu::BindGroupLayout;
 
 #[derive(Clone)]
 pub struct Texture {
     pub texture: wgpu::Texture,
     pub view: wgpu::TextureView,
     pub sampler: wgpu::Sampler,
+    pub bind_group: Option<wgpu::BindGroup>,
 }
 
 impl Texture {
@@ -48,10 +50,12 @@ impl Texture {
             ..Default::default()
         });
 
-        Self {
+
+       Self {
             texture,
             view,
             sampler,
+            bind_group: None,
         }
     }
 
@@ -90,6 +94,7 @@ impl Texture {
             texture,
             view,
             sampler,
+            bind_group: None
         }
     }
 
@@ -99,10 +104,11 @@ impl Texture {
         bytes: &[u8],
         label: &str,
         is_normal_map: bool,
+        texture_bind_group_layout: &BindGroupLayout
     ) -> Result<Self> {
         //println!("Loading {} from memory", label);
         let img = image::load_from_memory(bytes)?;
-        Self::from_image(device, queue, &img, Some(label), is_normal_map)
+        Self::from_image(device, queue, &img, Some(label), is_normal_map, texture_bind_group_layout)
     }
 
     pub fn from_image(
@@ -111,6 +117,7 @@ impl Texture {
         img: &image::DynamicImage,
         label: Option<&str>,
         is_normal_map: bool,
+        texture_bind_group_layout: &BindGroupLayout,
     ) -> Result<Self> {
         // println!("Obtaining imge dimensions");
         let dimensions = img.dimensions();
@@ -167,10 +174,26 @@ impl Texture {
             ..Default::default()
         });
 
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &texture_bind_group_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&sampler),
+                },
+            ],
+            label: Some("Texture bind group"),
+        });
+
         Ok(Self {
             texture,
             view,
             sampler,
+            bind_group: Some(bind_group),
         })
     }
 }
