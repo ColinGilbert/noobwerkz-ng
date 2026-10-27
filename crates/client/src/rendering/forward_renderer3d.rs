@@ -129,6 +129,10 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
+
+            particle_renderer.draw(&mut render_pass);
+
+
             render_pass.set_pipeline(&self.skinned_render_pipeline);
 
             for c in characters_contexts.iter() {
@@ -180,7 +184,6 @@ impl Pass for ForwardRenderer3D {
                     );
                 }
             }
-            particle_renderer.draw(&mut render_pass);
         }
 
         queue.submit([encoder.finish()]);
