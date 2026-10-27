@@ -2,6 +2,10 @@
 struct Camera {
     view_pos: vec4<f32>,
     view_proj: mat4x4<f32>,
+    near: f32,
+    far: f32,
+    fade_distance: f32,
+    soft_enabled: f32,
 }
 @group(1) @binding(0)
 var<uniform> camera: Camera;
