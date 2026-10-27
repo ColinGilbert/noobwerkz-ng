@@ -132,6 +132,7 @@ impl WindowState {
                 "depth_texture",
             );
         }
+        println!("Done resizing");
     }
 
     pub fn handle_key(&mut self, event_loop: &ActiveEventLoop, key: KeyCode, pressed: bool) {
