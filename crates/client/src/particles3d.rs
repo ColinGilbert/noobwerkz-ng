@@ -95,6 +95,18 @@ impl Particle3DContext {
         }
     }
 
+    pub fn init(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        texture_layout: &wgpu::BindGroupLayout,
+    ) {
+        let circle = create_soft_circle_texture();
+       self.register_texture(device, queue, "", &circle, texture_layout);
+       self.register_texture(device, queue, "circle", &circle, texture_layout);
+
+    }
+
     pub fn prepare(&mut self, draws: &[EffectDraw]) {
         self.instances.clear();
         self.batches.clear();
@@ -148,3 +160,40 @@ pub struct ParticlesBatch {
     pub start: u32,
     pub count: u32,
 }
+
+fn create_soft_circle_texture() -> Vec<u8> {
+    let size = 64_u32;
+    let center = size as f32 / 2.0;
+    let mut pixels = vec![0u8; (size * size * 4) as usize];
+    for (index, pixel) in pixels.as_chunks_mut::<4>().0.iter_mut().enumerate() {
+        let dx = (index as u32 % size) as f32 + 0.5 - center;
+        let dy = (index as u32 / size) as f32 + 0.5 - center;
+        let distance = dx.hypot(dy) / center;
+        let alpha = (1.0 - distance).clamp(0.0, 1.0);
+        pixel.copy_from_slice(&[255, 255, 255, (alpha * alpha * 255.0) as u8]);
+    }
+
+    pixels
+}
+// Texture::from_bytes(device, queue,pixels, "Soft circle texture fallback for particles", false, texture_bind_group_layout)
+
+// device.create_texture_with_data(
+//     queue,
+//     &wgpu::TextureDescriptor {
+//         label: Some("particle_circle_texture"),
+//         size: wgpu::Extent3d {
+//             width: size,
+//             height: size,
+//             depth_or_array_layers: 1,
+//         },
+//         mip_level_count: 1,
+//         sample_count: 1,
+//         dimension: wgpu::TextureDimension::D2,
+//         format: wgpu::TextureFormat::Rgba8UnormSrgb,
+//         usage: wgpu::TextureUsages::TEXTURE_BINDING,
+//         view_formats: &[],
+//     },
+//     wgpu::util::TextureDataOrder::LayerMajor,
+//     &pixels,
+//     )
+// }
