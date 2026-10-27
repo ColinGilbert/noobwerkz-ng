@@ -270,7 +270,7 @@ impl WindowState {
         let s = &u.scenes[u.active_scene];
         let particle_effects = s.particle_system.collect();
         // let view_proj = s.cameras[s.active_camera].view_matrix() * s.cameras[s.active_camera].projection.calc_matrix();
-
+        self.gfx_ctx.particles_ctx.prepare(&particle_effects);
 
 
         self.forward_renderer.draw(

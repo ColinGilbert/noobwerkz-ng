@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 
+use simple_particles::{BlendMode, EffectDraw};
+
 use crate::{texture::Texture, vertex::Vertex};
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct Particle3DVertex {
+pub struct Particle3DInstance {
     pub position: [f32; 3],
     pub size: f32,
     pub color: [f32; 4],
@@ -13,7 +15,7 @@ pub struct Particle3DVertex {
     pub uv: [f32; 2],
 }
 
-impl Particle3DVertex {
+impl Particle3DInstance {
     pub fn new() -> Self {
         Self {
             position: [0.0; 3],
@@ -26,11 +28,11 @@ impl Particle3DVertex {
     }
 }
 
-impl Vertex for Particle3DVertex {
+impl Vertex for Particle3DInstance {
     fn desc() -> wgpu::VertexBufferLayout<'static> {
         use std::mem;
         wgpu::VertexBufferLayout {
-            array_stride: mem::size_of::<Particle3DVertex>() as wgpu::BufferAddress,
+            array_stride: mem::size_of::<Particle3DInstance>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Vertex,
             attributes: &[
                 // Positions
@@ -76,6 +78,7 @@ impl Vertex for Particle3DVertex {
 
 pub struct Particle3DContext {
     pub textures: HashMap<String, Texture>,
+    pub instances: Vec<Particle3DInstance>,
     pub instance_buffer: wgpu::Buffer,
     pub instance_capacity: u64,
     pub batches: Vec<ParticlesBatch>,
@@ -85,9 +88,38 @@ impl Particle3DContext {
     pub fn new(instance_buffer: wgpu::Buffer, instance_capacity: u64) -> Self {
         Self {
             textures: HashMap::new(),
+            instances: Vec::new(),
             instance_buffer,
             instance_capacity,
             batches: Vec::new(),
+        }
+    }
+
+    pub fn prepare(&mut self, draws: &[EffectDraw]) {
+        self.instances.clear();
+        self.batches.clear();
+        for draw in draws {
+            let start = self.instances.len() as u32;
+            let sheet = [draw.sheet[0].max(1) as f32, draw.sheet[1].max(1) as f32];
+            for particle in &draw.instances {
+                self.instances.push(Particle3DInstance {
+                    position: particle.position,
+                    size: particle.size,
+                    color: particle.color,
+                    rotation: particle.rotation,
+                    life: particle.life,
+                    uv: sheet,
+                });
+            }
+            let count = self.instances.len() as u32 - start;
+            if count > 0 {
+                self.batches.push(ParticlesBatch {
+                    additive: matches!(draw.blend, BlendMode::Additive),
+                    texture: draw.texture.clone(),
+                    start,
+                    count,
+                });
+            }
         }
     }
 

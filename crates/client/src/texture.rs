@@ -191,6 +191,7 @@ impl Texture {
                     binding: 1,
                     resource: wgpu::BindingResource::Sampler(&sampler),
                 },
+                // To match normal mapped texture binding layout. Horrible hack.
                 wgpu::BindGroupEntry {
                     binding: 2,
                     resource: wgpu::BindingResource::TextureView(&view),

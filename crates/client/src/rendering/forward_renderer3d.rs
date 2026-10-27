@@ -4,7 +4,7 @@ use crate::instance3d::*;
 use crate::model3d::*;
 use crate::model3d_node::*;
 use crate::particles3d::Particle3DContext;
-use crate::particles3d::Particle3DVertex;
+use crate::particles3d::Particle3DInstance;
 use crate::rendering::Pass;
 use crate::scene3d::Characters3DContext;
 use crate::skinned_model3d::*;
@@ -188,9 +188,8 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
-            // render_pass.set_pipeline(&self.cpu_particles_render_pipeline_additive);
 
-            for effect in particle_effects {
+            //for effect in particle_effects {
                 // if self..is_empty() {
                 //     return;
                 // }
@@ -213,7 +212,7 @@ impl Pass for ForwardRenderer3D {
                     render_pass.draw(0..6, batch.start..batch.start + batch.count);
                 }
             }
-        }
+        //}
 
         queue.submit([encoder.finish()]);
     }
@@ -363,7 +362,7 @@ impl ForwardRenderer3D {
                 &layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[Some(Particle3DVertex::desc())],
+                &[Some(Particle3DInstance::desc())],
                 shader,
                 wgpu::BlendState::ALPHA_BLENDING,
             )
@@ -389,7 +388,7 @@ impl ForwardRenderer3D {
                 &layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[Some(Particle3DVertex::desc())],
+                &[Some(Particle3DInstance::desc())],
                 shader,
                 ADDITIVE_BLEND,
             )
