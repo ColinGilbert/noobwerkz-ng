@@ -77,10 +77,8 @@ impl Pass for ForwardRenderer3D {
             //     &self.camera_bind_group,
             //     &self.light_bind_group,
             // );
-            particle_renderer.draw(&mut render_pass);
 
             render_pass.set_pipeline(&self.render_pipeline);
-
 
             for m in model_nodes.iter() {
                 let mut count = 0;
@@ -182,6 +180,7 @@ impl Pass for ForwardRenderer3D {
                     );
                 }
             }
+            particle_renderer.draw(&mut render_pass);
         }
 
         queue.submit([encoder.finish()]);
