@@ -1,6 +1,9 @@
-use std::collections::{HashMap, VecDeque};
+use std::{
+    collections::{HashMap, VecDeque},
+    mem,
+};
 
-use crate::{index_types::ParticleSystemIndex, texture::Texture};
+use crate::{index_types::ParticleSystemIndex, texture::Texture, vertex::Vertex};
 
 pub struct Particle3D {
     pub position: glam::Vec3,
@@ -11,6 +14,18 @@ pub struct Particle3D {
     pub angular_acceleration: f32,
     pub life_left: web_time::Duration,
     pub alive: bool,
+}
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+#[allow(dead_code)]
+pub struct Particle3DRaw {
+    pub position: [f32; 3],
+    pub size: f32,
+    pub color: [f32; 4],
+    pub rotation: f32,
+    pub life: f32,
+    pub sheet: [f32; 2],
 }
 
 impl Particle3D {
@@ -33,6 +48,55 @@ impl Particle3D {
         self.rotation += self.angular_acceleration;
         self.acceleration = glam::Vec3::ZERO;
         self.angular_acceleration = 0.0;
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BlendMode {
+    Additive,
+    Alpha,
+}
+
+pub struct EffectDraw {
+    pub texture: String,
+    pub sheet: [u32; 2],
+    pub blend: BlendMode,
+    pub instances: Vec<Particle3DRaw>,
+}
+
+impl Vertex for Particle3DRaw {
+    fn desc() -> wgpu::VertexBufferLayout<'static> {
+        wgpu::VertexBufferLayout {
+            array_stride: mem::size_of::<Particle3DRaw>() as wgpu::BufferAddress,
+            // We need to switch from using a step mode of Vertex to Instance
+            // This means that our shaders will only change to use the next
+            // instance when the shader starts processing a new instance
+            step_mode: wgpu::VertexStepMode::Instance,
+            attributes: &[
+                // Model matrix
+                wgpu::VertexAttribute {
+                    offset: 0,
+                    // Our vertex shader uses slots 0-4. We start at 5.
+                    shader_location: 5,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
+                    shader_location: 6,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 8]>() as wgpu::BufferAddress,
+                    shader_location: 7,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+                wgpu::VertexAttribute {
+                    offset: mem::size_of::<[f32; 12]>() as wgpu::BufferAddress,
+                    shader_location: 8,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+            ],
+        }
     }
 }
 

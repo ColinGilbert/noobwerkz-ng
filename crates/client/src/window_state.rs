@@ -236,7 +236,7 @@ impl WindowState {
 
         let output = match self.surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(surface_texture) => surface_texture,
-            wgpu::CurrentSurfaceTexture::Suboptimal(surface_texture) => {
+            wgpu::CurrentSurfaceTexture::Suboptimal(_) => {
                 // self.surface
                 //     .configure(&self.gfx_ctx.device, &self.gfx_ctx.config);
                 // surface_texture
@@ -266,6 +266,10 @@ impl WindowState {
         let u = &mut self.user_ctx;
 
         let s = &u.scenes[u.active_scene];
+        let particle_draws = s.particle_system.collect();
+        let view_proj = s.cameras[s.active_camera].view_matrix() * s.cameras[s.active_camera].projection.calc_matrix();
+        self.gfx_ctx.particle_renderer.set_camera(&self.gfx_ctx.queue, view_proj.to_cols_array_2d());
+        self.gfx_ctx.particle_renderer.prepare(&self.gfx_ctx.device, &self.gfx_ctx.queue, &particle_draws);
 
         self.forward_renderer.draw(
             &self.gfx_ctx.device,
@@ -276,6 +280,7 @@ impl WindowState {
             &s.characters_contexts,
             &self.gfx_ctx.depth_texture.view,
             &view,
+            &self.gfx_ctx.particle_renderer
         );
 
         let screen_descriptor = ScreenDescriptor {

@@ -10,6 +10,7 @@ use crate::skinned_model3d::*;
 
 // use crate::skinned_model_node::*;
 use crate::texture::*;
+use simple_particles::render::ParticleRenderer;
 // use crate::character::Character;
 use wgpu::util::DeviceExt;
 
@@ -35,6 +36,7 @@ impl Pass for ForwardRenderer3D {
         characters_contexts: &Characters3DContexts<Characters3DContext>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
+        particle_renderer: &ParticleRenderer
     ) {
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Render Encoder"),
@@ -177,6 +179,8 @@ impl Pass for ForwardRenderer3D {
                     );
                 }
             }
+            
+            particle_renderer.draw(&mut render_pass);
         }
 
         queue.submit([encoder.finish()]);

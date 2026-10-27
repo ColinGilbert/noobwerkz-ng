@@ -21,7 +21,6 @@ pub mod mesh3d_shapes;
 pub mod character3d_renderable;
 pub mod asset_manager;
 pub mod egui_renderer;
-pub mod particles3d;
 
 
 pub use bytemuck as bytemuck;

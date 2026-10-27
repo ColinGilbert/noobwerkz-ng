@@ -15,9 +15,9 @@ msgpacker = { workspace = true }
 rayon = { workspace = true }
 image = { version = "0.25.10", features = ["default-formats"] }
 bytemuck = {version = "1.25.2", default-features = false}
-egui = "0.36.2"
-egui-wgpu = "0.36.2"
-egui-winit = "0.36.2"
+egui = "0.37.0"
+egui-wgpu = "0.37.0"
+egui-winit = "0.37.0"
 wgpu = "30.0"
 winit = "0.30.13"
 pollster = "1.0.1"
@@ -31,6 +31,7 @@ futures = "0.3.34"
 serde = { version = "1.0.229", features = ["serde_derive"] }
 futures-signals = "0.3.34"
 wincode = "0.6.3"
+simple-particles = { git = "https://www.github.com/ColinGilbert/simple-particles-mirror.git", features = ["render"] }
 
 [features]
 bytemuck = []

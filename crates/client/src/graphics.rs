@@ -1,3 +1,5 @@
+use simple_particles::render::ParticleRenderer;
+
 use crate::material::*;
 use crate::texture::*;
 
@@ -10,6 +12,7 @@ pub struct GraphicsContext {
     pub texture_bind_group_layout_3d: wgpu::BindGroupLayout,
     pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
     pub debug_material: Material,
+    pub particle_renderer: ParticleRenderer,
 }
 
 impl GraphicsContext {
@@ -133,7 +136,7 @@ impl GraphicsContext {
             alpha_mode: wgpu::CompositeAlphaMode::Auto,
             view_formats: vec![],
             desired_maximum_frame_latency: 2,
-            color_space: wgpu::SurfaceColorSpace::Auto
+            color_space: wgpu::SurfaceColorSpace::Auto,
         };
 
         //surface.configure(&device, &config);
@@ -157,6 +160,7 @@ impl GraphicsContext {
                 &texture_bind_group_layout_3d,
             )
         };
+        let particle_renderer= ParticleRenderer::new(&device, &queue, surface_format, None);
 
         Self {
             device,
@@ -167,6 +171,7 @@ impl GraphicsContext {
             texture_bind_group_layout_3d,
             bone_matrices_bind_group_layout,
             debug_material,
+            particle_renderer,
         }
     }
 }
