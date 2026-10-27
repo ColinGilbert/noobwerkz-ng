@@ -28,3 +28,4 @@ pub use egui as egui;
 pub use futures as futures;
 pub use web_time as web_time;
 pub use glam as glam;
+pub use simple_particles as simple_particles;
