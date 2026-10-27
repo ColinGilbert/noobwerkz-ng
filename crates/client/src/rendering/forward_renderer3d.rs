@@ -1,12 +1,12 @@
 use crate::graphics::create_render_pipeline;
 use crate::index_types::*;
 use crate::instance3d::*;
-use crate::vertex::*;
 use crate::model3d::*;
 use crate::model3d_node::*;
 use crate::rendering::Pass;
 use crate::scene3d::Characters3DContext;
 use crate::skinned_model3d::*;
+use crate::vertex::*;
 
 // use crate::skinned_model_node::*;
 use crate::texture::*;
@@ -36,7 +36,7 @@ impl Pass for ForwardRenderer3D {
         characters_contexts: &Characters3DContexts<Characters3DContext>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
-        particle_renderer: &ParticleRenderer
+        particle_renderer: &ParticleRenderer,
     ) {
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Render Encoder"),
@@ -68,7 +68,7 @@ impl Pass for ForwardRenderer3D {
                 }),
                 occlusion_query_set: None,
                 timestamp_writes: None,
-                multiview_mask: None
+                multiview_mask: None,
             });
 
             // render_pass.set_pipeline(&self.light_render_pipeline);
@@ -77,7 +77,10 @@ impl Pass for ForwardRenderer3D {
             //     &self.camera_bind_group,
             //     &self.light_bind_group,
             // );
+
             render_pass.set_pipeline(&self.render_pipeline);
+
+            particle_renderer.draw(&mut render_pass);
 
             for m in model_nodes.iter() {
                 let mut count = 0;
@@ -179,8 +182,6 @@ impl Pass for ForwardRenderer3D {
                     );
                 }
             }
-            
-            particle_renderer.draw(&mut render_pass);
         }
 
         queue.submit([encoder.finish()]);
@@ -265,7 +266,10 @@ impl ForwardRenderer3D {
                 &skinned_render_pipeline_layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
-                &[Some(SkinnedModelVertex3D::desc()), Some(SkinnedInstance3DRaw::desc())],
+                &[
+                    Some(SkinnedModelVertex3D::desc()),
+                    Some(SkinnedInstance3DRaw::desc()),
+                ],
                 shader,
             )
         };
