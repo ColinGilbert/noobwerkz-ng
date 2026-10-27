@@ -1,6 +1,6 @@
 // This is where our game world resides.
 
-use std::{collections::HashMap, sync::Arc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc, sync::Arc};
 
 // use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 use noobwerkz_shared::{physics3d_context::*, skeleton::*};
@@ -28,7 +28,7 @@ pub struct Scene3D {
     pub physics_context: Physics3DContext,
     pub characters_contexts: Characters3DContexts<Characters3DContext>,
     pub character_types_by_name: HashMap<String, Characters3DContextIndex>,
-    pub particle_system: ParticleSystem,
+    pub particle_system: Rc<RefCell<ParticleSystem>>,
 }
 
 impl Scene3D {
@@ -42,7 +42,7 @@ impl Scene3D {
             physics_context: Physics3DContext::new(gravity),
             characters_contexts: Characters3DContexts::new(),
             character_types_by_name: HashMap::new(),
-            particle_system: ParticleSystem::new(),
+            particle_system: Rc::new(RefCell::new(ParticleSystem::new())),
         }
     }
 
@@ -64,8 +64,8 @@ impl Scene3D {
     }
 
     pub fn update_particles(&mut self, dt: web_time::Duration) {
-        self.particle_system.update(dt.as_secs_f32());
-        println!("Particle system empty? {}", self.particle_system.is_empty());
+        self.particle_system.borrow_mut().update(dt.as_secs_f32());
+        println!("Particle system empty? {}", self.particle_system.borrow().is_empty());
     }
 
 
