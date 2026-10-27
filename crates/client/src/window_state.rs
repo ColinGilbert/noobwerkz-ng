@@ -271,7 +271,6 @@ impl WindowState {
         let u = &mut self.user_ctx;
 
         let s = &u.scenes[u.active_scene];
-        s.particle_system.prepare();
         let particle_effects = s.particle_system.collect();
 
         println!("Particle system empty?: {}", s.particle_system.is_empty());
