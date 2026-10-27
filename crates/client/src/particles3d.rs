@@ -63,7 +63,7 @@ impl Vertex for Particle3DVertex {
                 },
                 // UV
                 wgpu::VertexAttribute {
-                    offset: mem::size_of::<[f32; 13]>() as wgpu::BufferAddress,
+                    offset: mem::size_of::<[f32; 10]>() as wgpu::BufferAddress,
                     shader_location: 5,
                     format: wgpu::VertexFormat::Float32x2,
                 },
