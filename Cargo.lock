@@ -4467,7 +4467,7 @@ checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
 [[package]]
 name = "simple-particles"
 version = "0.4.0"
-source = "git+https://www.github.com/ColinGilbert/simple-particles-mirror.git#77c925198d8a579b502eb45a6bdcae0efd891c1e"
+source = "git+https://www.github.com/ColinGilbert/simple-particles-mirror.git#a3008f8e43968a905febaf03b8bedaec5ea6d3a8"
 dependencies = [
  "header-parsing",
  "simple-vectors",
