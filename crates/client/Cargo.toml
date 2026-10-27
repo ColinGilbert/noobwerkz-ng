@@ -15,7 +15,7 @@ msgpacker = { workspace = true }
 rayon = { workspace = true }
 image = { version = "0.25.10", features = ["default-formats"] }
 bytemuck = {version = "1.25.2", default-features = false}
-egui = "0.37.0"
+egui = {version= "0.37.0", features=["default_fonts"]}
 egui-wgpu = "0.37.0"
 egui-winit = "0.37.0"
 wgpu = "30.0"
