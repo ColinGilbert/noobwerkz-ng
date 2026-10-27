@@ -151,8 +151,11 @@ impl Particle3DContext {
             self.textures.insert(name.to_owned(), texture.unwrap());
             return true;
         }
+        else {
+            println!("Error registering texture: {:?}", texture.err());
         return false;
     }
+}
 }
 
 pub struct ParticlesBatch {
