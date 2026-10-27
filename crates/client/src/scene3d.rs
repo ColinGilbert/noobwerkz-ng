@@ -65,6 +65,7 @@ impl Scene3D {
 
     pub fn update_particles(&mut self, dt: web_time::Duration) {
         self.particle_system.update(dt.as_secs_f32());
+        println!("Particle system empty? {}", self.particle_system.is_empty());
     }
 
 
