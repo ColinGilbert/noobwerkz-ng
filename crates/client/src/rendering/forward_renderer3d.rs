@@ -316,9 +316,9 @@ impl ForwardRenderer3D {
             let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("CPU Particles Pipeline Layout Alpha"),
                 bind_group_layouts: &[
-                    Some(texture_bind_group_layout),
                     Some(camera_bind_group_layout),
                     Some(light_bind_group_layout),
+                    Some(texture_bind_group_layout),
                 ],
                 immediate_size: 0,
             });
