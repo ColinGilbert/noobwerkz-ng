@@ -14,11 +14,6 @@ struct Light {
 @group(1) @binding(0)
 var<uniform> light: Light;
 
-@group(2) @binding(0)
-var particle_texture: texture_2d<f32>;
-@group(2) @binding(1)
-var particle_sampler: sampler;
-
 struct Instance {
     @location(0) position: vec3<f32>,
     @location(1) size: f32,
@@ -87,6 +82,12 @@ fn vs_main(
     output.color = instance.color;
     return output;
 }
+
+
+@group(2) @binding(0)
+var particle_texture: texture_2d<f32>;
+@group(2) @binding(1)
+var particle_sampler: sampler;
 
 // Fragment shader
 
