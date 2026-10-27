@@ -1,14 +1,14 @@
 use crate::texture;
 #[repr(C)]
 #[derive(Clone)]
-pub struct Material {
+pub struct ModelMaterial {
     pub name: String,
     pub diffuse_texture: texture::Texture,
     pub normal_texture: texture::Texture,
     pub bind_group: wgpu::BindGroup,
 }
 
-impl Material {
+impl ModelMaterial {
     pub fn new(
         device: &wgpu::Device,
         name: &str,

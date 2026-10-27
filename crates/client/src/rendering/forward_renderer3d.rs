@@ -3,6 +3,7 @@ use crate::index_types::*;
 use crate::instance3d::*;
 use crate::model3d::*;
 use crate::model3d_node::*;
+use crate::particles3d::Particle3DVertex;
 use crate::rendering::Pass;
 use crate::scene3d::Characters3DContext;
 use crate::skinned_model3d::*;
@@ -301,29 +302,33 @@ impl ForwardRenderer3D {
             )
         };
 
-        // let cpu_particles_render_pipeline = {
-        //     let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-        //         label: Some("CPU Particles Pipeline Layout"),
-        //         bind_group_layouts: &[
-        //             Some(camera_bind_group_layout),
-        //             Some(light_bind_group_layout),
-        //         ],
-        //         immediate_size: 0,
-        //     });
-        //     let shader = wgpu::ShaderModuleDescriptor {
-        //         label: Some("CPU Particles Shader"),
-        //         source: wgpu::ShaderSource::Wgsl(include_str!("cpu_particles3d.wgsl").into()),
-        //     };
+        let cpu_particles_render_pipeline = {
+            let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("CPU Particles Pipeline Layout"),
+                bind_group_layouts: &[
+                    Some(camera_bind_group_layout),
+                    Some(light_bind_group_layout),
+                ],
+                immediate_size: 0,
+            });
+            let shader = wgpu::ShaderModuleDescriptor {
+                label: Some("CPU Particles Shader"),
+                source: wgpu::ShaderSource::Wgsl(include_str!("cpu_particles3d.wgsl").into()),
+            };
 
-        //     create_indexed_mesh_render_pipeline(
-        //         &device,
-        //         &layout,
-        //         config.format,
-        //         Some(Texture::DEPTH_FORMAT),
-        //         &[Some(Model3DVertex::desc())],
-        //         shader,
-        //     )
-        // };
+            create_indexed_mesh_render_pipeline(
+                &device,
+                &layout,
+                config.format,
+                Some(Texture::DEPTH_FORMAT),
+                &[Some(Particle3DVertex::desc())],
+                shader,
+            )
+        };
+
+
+
+
 
         Self {
             render_pipeline_layout,

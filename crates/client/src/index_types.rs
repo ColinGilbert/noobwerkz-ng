@@ -9,8 +9,8 @@ safe_index::new! {
 }
 
 safe_index::new! {
-  MaterialIndex,
-  map: Materials
+  ModelMaterialIndex,
+  map: ModelMaterials
 }
 
 safe_index::new! {

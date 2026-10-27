@@ -14,13 +14,14 @@ pub mod scene3d;
 pub mod light3d;
 pub mod client_user_context;
 pub mod callbacks;
-pub mod material;
+pub mod model_material;
 pub mod skinned_model3d;
 pub mod index_types;
 pub mod mesh3d_shapes;
 pub mod character3d_renderable;
 pub mod asset_manager;
 pub mod egui_renderer;
+pub mod particles3d;
 
 
 pub use bytemuck as bytemuck;

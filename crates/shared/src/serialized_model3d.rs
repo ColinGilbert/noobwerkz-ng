@@ -92,7 +92,7 @@ impl SerializedMesh3D {
 
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
-pub struct SerializedMaterial {
+pub struct SerializedModelMaterial {
     pub name: String,
     pub base_colour: [f32; 4],
     pub metallic: f32,
@@ -102,7 +102,7 @@ pub struct SerializedMaterial {
     pub specular_texture_path: String,
 }
 
-impl SerializedMaterial {
+impl SerializedModelMaterial {
     pub fn new() -> Self {
         Self {
             name: "".to_owned(),
@@ -120,7 +120,7 @@ impl SerializedMaterial {
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedModel3D {
     pub meshes: Vec<SerializedMesh3D>,
-    pub materials: Vec<SerializedMaterial>,
+    pub materials: Vec<SerializedModelMaterial>,
     pub bones: Vec<SerializedBone3D>,
     pub bone_names: Vec<String>,
     pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,

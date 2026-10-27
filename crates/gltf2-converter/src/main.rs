@@ -123,14 +123,14 @@ fn run(path: &str) {
     println!("Scene name: {}", scene_name);
     let roots = scene.nodes();
     let mut serialized_meshes = Vec::<SerializedMesh3D>::new();
-    let mut serialized_materials = Vec::<SerializedMaterial>::new();
+    let mut serialized_materials = Vec::<SerializedModelMaterial>::new();
 
     for r in roots {
         traverse_node_recursive(&r, glam::Mat4::IDENTITY, &mut serialized_meshes, &buffers);
     }
     for mat in document.materials() {
-        let mut serialized_material = SerializedMaterial::new();
-        println!("Material name: {} ", mat.name().unwrap_or_default());
+        let mut serialized_material = SerializedModelMaterial::new();
+        println!("ModelMaterial name: {} ", mat.name().unwrap_or_default());
 
         if let Some(pbr) = mat.pbr_metallic_roughness().base_color_texture() {
             let texture = document

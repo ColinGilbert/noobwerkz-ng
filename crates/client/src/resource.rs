@@ -1,5 +1,5 @@
 use crate::index_types::*;
-use crate::material::*;
+use crate::model_material::*;
 use crate::model3d::*;
 use crate::skinned_model3d::*;
 use crate::texture;
@@ -51,7 +51,7 @@ pub fn load_serialized_model(filepath: &std::path::Path) -> Option<SerializedMod
 // TODO: Robustify
 pub fn load_skinned_3d_model_from_serialized(
     model: &mut SerializedModel3D,
-    default_material: &Material,
+    default_material: &ModelMaterial,
     path: &std::path::Path,
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
@@ -136,7 +136,7 @@ pub fn load_skinned_3d_model_from_serialized(
             vertex_buffer,
             index_buffer,
             num_elements: indices.len() as u32,
-            material: MaterialIndex::new(m.material_index as usize),
+            material: ModelMaterialIndex::new(m.material_index as usize),
             translation: glam::Vec3::from_array(m.translation),
             rotation: glam::Quat::from_array(m.rotation),
             scale: glam::Vec3::from_array(m.scale),
@@ -200,7 +200,7 @@ pub fn load_skinned_3d_model_from_serialized(
             normal_texture = default_material.normal_texture.clone();
         }
 
-        let material = Material::new(
+        let material = ModelMaterial::new(
             device,
             &name,
             diffuse_texture,
@@ -278,7 +278,7 @@ pub fn load_skinned_3d_model_from_serialized(
 
 pub fn load_3d_model_from_serialized(
     model: &mut SerializedModel3D,
-    default_material: &Material,
+    default_material: &ModelMaterial,
     filepath: &std::path::Path,
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
@@ -327,7 +327,7 @@ pub fn load_3d_model_from_serialized(
             vertex_buffer,
             index_buffer,
             num_elements: indices.len() as u32,
-            material: MaterialIndex::new(m.material_index as usize),
+            material: ModelMaterialIndex::new(m.material_index as usize),
             translation: glam::Vec3::from_array(m.translation),
             rotation: glam::Quat::from_array(m.rotation),
             scale: glam::Vec3::from_array(m.scale),
@@ -393,7 +393,7 @@ pub fn load_3d_model_from_serialized(
         } else {
             normal_texture = default_material.normal_texture.clone();
         }
-        let material = Material::new(
+        let material = ModelMaterial::new(
             device,
             name,
             diffuse_texture,

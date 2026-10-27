@@ -1,4 +1,4 @@
-use crate::material::*;
+use crate::model_material::*;
 use crate::texture::*;
 
 pub struct GraphicsContext {
@@ -9,7 +9,7 @@ pub struct GraphicsContext {
     pub depth_texture: Texture,
     pub texture_bind_group_layout: wgpu::BindGroupLayout,
     pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
-    pub debug_material: Material,
+    pub debug_material: ModelMaterial,
 }
 
 impl GraphicsContext {
@@ -149,7 +149,7 @@ impl GraphicsContext {
                     .unwrap();
             let normal_texture =
                 Texture::from_bytes(&device, &queue, normal_bytes, "default-normal", true).unwrap();
-            Material::new(
+            ModelMaterial::new(
                 &device,
                 "alt-material",
                 diffuse_texture,

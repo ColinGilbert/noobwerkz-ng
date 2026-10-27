@@ -1,7 +1,7 @@
 use std::ops::Range;
 
 use crate::index_types::*;
-use crate::material::*;
+use crate::model_material::*;
 use crate::vertex::*;
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
@@ -72,7 +72,7 @@ pub struct TexturedMesh3D {
     pub vertex_buffer: wgpu::Buffer,
     pub index_buffer: wgpu::Buffer,
     pub num_elements: u32,
-    pub material: MaterialIndex,
+    pub material: ModelMaterialIndex,
     pub translation: glam::Vec3,
     pub rotation: glam::Quat,
     pub scale: glam::Vec3,
@@ -81,7 +81,7 @@ pub struct TexturedMesh3D {
 
 pub struct Model3D {
     pub meshes: TexturedMeshes<TexturedMesh3D>,
-    pub materials: Materials<Material>,
+    pub materials: ModelMaterials<ModelMaterial>,
     pub name: String,
 }
 
@@ -89,7 +89,7 @@ impl Model3D {
     pub fn new() -> Self {
         Self {
             meshes: TexturedMeshes::new(),
-            materials: Materials::new(),
+            materials: ModelMaterials::new(),
             name: "".to_owned(),
         }
     }
@@ -99,14 +99,14 @@ pub trait DrawModel<'a> {
     fn draw_mesh(
         &mut self,
         mesh: &'a TexturedMesh3D,
-        material: &'a Material,
+        material: &'a ModelMaterial,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
     );
     fn draw_mesh_instanced(
         &mut self,
         mesh: &'a TexturedMesh3D,
-        material: &'a Material,
+        material: &'a ModelMaterial,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -130,7 +130,7 @@ pub trait DrawModel<'a> {
     fn draw_model_instanced_with_material(
         &mut self,
         model: &'a Model3D,
-        material: &'a Material,
+        material: &'a ModelMaterial,
         instances: Range<u32>,
         camera_bind_group: &'a wgpu::BindGroup,
         light_bind_group: &'a wgpu::BindGroup,
@@ -144,7 +144,7 @@ where
     fn draw_mesh(
         &mut self,
         mesh: &'b TexturedMesh3D,
-        material: &'b Material,
+        material: &'b ModelMaterial,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
     ) {
@@ -154,7 +154,7 @@ where
     fn draw_mesh_instanced(
         &mut self,
         mesh: &'b TexturedMesh3D,
-        material: &'b Material,
+        material: &'b ModelMaterial,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
@@ -198,7 +198,7 @@ where
     fn draw_model_instanced_with_material(
         &mut self,
         model: &'b Model3D,
-        material: &'b Material,
+        material: &'b ModelMaterial,
         instances: Range<u32>,
         camera_bind_group: &'b wgpu::BindGroup,
         light_bind_group: &'b wgpu::BindGroup,
