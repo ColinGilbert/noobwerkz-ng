@@ -50,8 +50,7 @@ impl Texture {
             ..Default::default()
         });
 
-
-       Self {
+        Self {
             texture,
             view,
             sampler,
@@ -94,7 +93,7 @@ impl Texture {
             texture,
             view,
             sampler,
-            bind_group: None
+            bind_group: None,
         }
     }
 
@@ -104,11 +103,18 @@ impl Texture {
         bytes: &[u8],
         label: &str,
         is_normal_map: bool,
-        texture_bind_group_layout: &BindGroupLayout
+        texture_bind_group_layout: &BindGroupLayout,
     ) -> Result<Self> {
         //println!("Loading {} from memory", label);
         let img = image::load_from_memory(bytes)?;
-        Self::from_image(device, queue, &img, Some(label), is_normal_map, texture_bind_group_layout)
+        Self::from_image(
+            device,
+            queue,
+            &img,
+            Some(label),
+            is_normal_map,
+            texture_bind_group_layout,
+        )
     }
 
     pub fn from_image(
@@ -177,6 +183,14 @@ impl Texture {
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: &texture_bind_group_layout,
             entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&sampler),
+                },
                 wgpu::BindGroupEntry {
                     binding: 0,
                     resource: wgpu::BindingResource::TextureView(&view),
