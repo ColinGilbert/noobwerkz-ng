@@ -136,7 +136,7 @@ impl GraphicsContext {
             color_space: wgpu::SurfaceColorSpace::Auto,
         };
 
-        //surface.configure(&device, &config);
+        surface.configure(&device, &config);
 
         let depth_texture = Texture::create_depth_texture(&device, &config, "depth_texture");
 
@@ -175,7 +175,7 @@ impl GraphicsContext {
 
 }
 
-pub fn create_render_pipeline(
+pub fn create_indexed_mesh_render_pipeline(
     device: &wgpu::Device,
     layout: &wgpu::PipelineLayout,
     color_format: wgpu::TextureFormat,

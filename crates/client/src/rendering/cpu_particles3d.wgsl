@@ -18,10 +18,6 @@ struct Light {
 @group(1) @binding(0)
 var<uniform> light: Light;
 
-@group(2) @binding(0)
-var particle_texture: texture_2d<f32>;
-@group(2) @binding(1)
-var particle_sampler: sampler;
 
 struct Instance {
     @location(0) position: vec3<f32>,
@@ -93,6 +89,11 @@ fn vs_main(
 }
 
 // Fragment shader
+
+@group(2) @binding(0)
+var particle_texture: texture_2d<f32>;
+@group(2) @binding(1)
+var particle_sampler: sampler;
 
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {

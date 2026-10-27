@@ -1,4 +1,4 @@
-use crate::graphics::create_render_pipeline;
+use crate::graphics::create_indexed_mesh_render_pipeline;
 use crate::index_types::*;
 use crate::instance3d::*;
 use crate::model3d::*;
@@ -21,7 +21,7 @@ pub struct ForwardRenderer3D {
     pub render_pipeline: wgpu::RenderPipeline,
     pub skinned_render_pipeline: wgpu::RenderPipeline,
     pub light_render_pipeline: wgpu::RenderPipeline,
-    // pub cpu_particles_render_pipeline: wgpu::RenderPipeline,
+    pub cpu_particles_render_pipeline: wgpu::RenderPipeline,
 
     //pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
     
@@ -249,7 +249,7 @@ impl ForwardRenderer3D {
                 source: wgpu::ShaderSource::Wgsl(include_str!("forward_shader3d.wgsl").into()),
             };
 
-            create_render_pipeline(
+            create_indexed_mesh_render_pipeline(
                 &device,
                 &render_pipeline_layout,
                 config.format,
@@ -264,7 +264,7 @@ impl ForwardRenderer3D {
                 label: Some("Skinned Shader"),
                 source: wgpu::ShaderSource::Wgsl(include_str!("forward_skinned3d.wgsl").into()),
             };
-            create_render_pipeline(
+            create_indexed_mesh_render_pipeline(
                 &device,
                 &skinned_render_pipeline_layout,
                 config.format,
@@ -291,7 +291,7 @@ impl ForwardRenderer3D {
                 source: wgpu::ShaderSource::Wgsl(include_str!("forward_light3d.wgsl").into()),
             };
 
-            create_render_pipeline(
+            create_indexed_mesh_render_pipeline(
                 &device,
                 &layout,
                 config.format,
@@ -301,29 +301,29 @@ impl ForwardRenderer3D {
             )
         };
 
-        // let cpu_particles_render_pipeline = {
-        //     let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-        //         label: Some("CPU Particles Pipeline Layout"),
-        //         bind_group_layouts: &[
-        //             Some(camera_bind_group_layout),
-        //             Some(light_bind_group_layout),
-        //         ],
-        //         immediate_size: 0,
-        //     });
-        //     let shader = wgpu::ShaderModuleDescriptor {
-        //         label: Some("CPU Particles Shader"),
-        //         source: wgpu::ShaderSource::Wgsl(include_str!("cpu_particles3d.wgsl").into()),
-        //     };
+        let cpu_particles_render_pipeline = {
+            let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("CPU Particles Pipeline Layout"),
+                bind_group_layouts: &[
+                    Some(camera_bind_group_layout),
+                    Some(light_bind_group_layout),
+                ],
+                immediate_size: 0,
+            });
+            let shader = wgpu::ShaderModuleDescriptor {
+                label: Some("CPU Particles Shader"),
+                source: wgpu::ShaderSource::Wgsl(include_str!("cpu_particles3d.wgsl").into()),
+            };
 
-        //     create_render_pipeline(
-        //         &device,
-        //         &layout,
-        //         config.format,
-        //         Some(Texture::DEPTH_FORMAT),
-        //         &[Some(Model3DVertex::desc())],
-        //         shader,
-        //     )
-        // };
+            create_indexed_mesh_render_pipeline(
+                &device,
+                &layout,
+                config.format,
+                Some(Texture::DEPTH_FORMAT),
+                &[Some(Model3DVertex::desc())],
+                shader,
+            )
+        };
 
         Self {
             render_pipeline_layout,
@@ -333,7 +333,7 @@ impl ForwardRenderer3D {
             render_pipeline,
             skinned_render_pipeline,
             light_render_pipeline,
-            // cpu_particles_render_pipeline,
+            cpu_particles_render_pipeline,
            // bone_matrices_bind_group_layout: bone_matrices_bind_group_layout.clone(),
         }
     }
