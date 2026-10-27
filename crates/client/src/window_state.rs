@@ -64,7 +64,7 @@ impl WindowState {
             &gfx_ctx.device,
             &light_ctx.light_buffer,
             &cam_ctx.buffer,
-            &gfx_ctx.texture_bind_group_layout_3d,
+            &gfx_ctx.texture_bind_group_layout,
             &cam_ctx.bind_group_layout,
             &light_ctx.light_bind_group_layout,
             &gfx_ctx.bone_matrices_bind_group_layout,
