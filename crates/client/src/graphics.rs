@@ -170,9 +170,6 @@ impl GraphicsContext {
         }
     }
 
-
-
-
 }
 
 pub fn create_indexed_mesh_render_pipeline(
