@@ -1,4 +1,4 @@
-use crate::graphics::create_indexed_mesh_render_pipeline;
+use crate::graphics::*;
 use crate::index_types::*;
 use crate::instance3d::*;
 use crate::model3d::*;
@@ -22,10 +22,9 @@ pub struct ForwardRenderer3D {
     pub render_pipeline: wgpu::RenderPipeline,
     pub skinned_render_pipeline: wgpu::RenderPipeline,
     pub light_render_pipeline: wgpu::RenderPipeline,
-    // pub cpu_particles_render_pipeline: wgpu::RenderPipeline,
-
+    pub cpu_particles_render_pipeline_alpha: wgpu::RenderPipeline,
+    pub cpu_particles_render_pipeline_additive: wgpu::RenderPipeline,
     //pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
-    
 }
 
 impl Pass for ForwardRenderer3D {
@@ -131,9 +130,7 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
-
-          //  particle_renderer.draw(&mut render_pass);
-
+            //  particle_renderer.draw(&mut render_pass);
 
             render_pass.set_pipeline(&self.skinned_render_pipeline);
 
@@ -192,6 +189,18 @@ impl Pass for ForwardRenderer3D {
     }
 }
 
+const ADDITIVE_BLEND: wgpu::BlendState = wgpu::BlendState {
+    color: wgpu::BlendComponent {
+        src_factor: wgpu::BlendFactor::SrcAlpha,
+        dst_factor: wgpu::BlendFactor::One,
+        operation: wgpu::BlendOperation::Add,
+    },
+    alpha: wgpu::BlendComponent {
+        src_factor: wgpu::BlendFactor::One,
+        dst_factor: wgpu::BlendFactor::One,
+        operation: wgpu::BlendOperation::Add,
+    },
+};
 impl ForwardRenderer3D {
     pub fn new(
         device: &wgpu::Device,
@@ -302,9 +311,9 @@ impl ForwardRenderer3D {
             )
         };
 
-        let cpu_particles_render_pipeline = {
+        let cpu_particles_render_pipeline_alpha = {
             let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                label: Some("CPU Particles Pipeline Layout"),
+                label: Some("CPU Particles Pipeline Layout Alpha"),
                 bind_group_layouts: &[
                     Some(camera_bind_group_layout),
                     Some(light_bind_group_layout),
@@ -315,20 +324,40 @@ impl ForwardRenderer3D {
                 label: Some("CPU Particles Shader"),
                 source: wgpu::ShaderSource::Wgsl(include_str!("cpu_particles3d.wgsl").into()),
             };
-
-            create_indexed_mesh_render_pipeline(
+            create_particles_render_pipeline(
                 &device,
                 &layout,
                 config.format,
                 Some(Texture::DEPTH_FORMAT),
                 &[Some(Particle3DVertex::desc())],
                 shader,
+                wgpu::BlendState::ALPHA_BLENDING,
             )
         };
 
-
-
-
+        let cpu_particles_render_pipeline_additive = {
+            let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("CPU Particles Pipeline Layout Additive"),
+                bind_group_layouts: &[
+                    Some(camera_bind_group_layout),
+                    Some(light_bind_group_layout),
+                ],
+                immediate_size: 0,
+            });
+            let shader = wgpu::ShaderModuleDescriptor {
+                label: Some("CPU Particles Shader"),
+                source: wgpu::ShaderSource::Wgsl(include_str!("cpu_particles3d.wgsl").into()),
+            };
+            create_particles_render_pipeline(
+                &device,
+                &layout,
+                config.format,
+                Some(Texture::DEPTH_FORMAT),
+                &[Some(Particle3DVertex::desc())],
+                shader,
+                ADDITIVE_BLEND,
+            )
+        };
 
         Self {
             render_pipeline_layout,
@@ -338,8 +367,9 @@ impl ForwardRenderer3D {
             render_pipeline,
             skinned_render_pipeline,
             light_render_pipeline,
-            // cpu_particles_render_pipeline,
-           // bone_matrices_bind_group_layout: bone_matrices_bind_group_layout.clone(),
+            cpu_particles_render_pipeline_alpha,
+            cpu_particles_render_pipeline_additive,
+            // bone_matrices_bind_group_layout: bone_matrices_bind_group_layout.clone(),
         }
     }
 }
