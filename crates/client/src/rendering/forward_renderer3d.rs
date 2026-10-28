@@ -215,7 +215,7 @@ impl Pass for ForwardRenderer3D {
                 render_pass.set_pipeline(pipeline);
                 render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
                 if texture.bind_group.is_some() {
-                    render_pass.set_bind_group(1, texture.bind_group.as_ref().unwrap(), &[]);
+                    render_pass.set_bind_group(2, texture.bind_group.as_ref().unwrap(), &[]);
                 } else {
                 println!("Particles texture bind group is None :(")
                 }
