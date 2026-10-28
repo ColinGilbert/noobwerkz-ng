@@ -188,36 +188,32 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
-            for effect in particle_effects {
-                if particles_ctx.batches.is_empty() {
-                    return;
-                }
-                let Some(fallback) = particles_ctx.textures.get("") else {
-                    println!("Could not get fallback texture. Aborting particle effect draw...");
-                    return;
+
+            let Some(fallback) = particles_ctx.textures.get("") else {
+                println!("Could not get fallback texture. Aborting particle effect draw...");
+                return;
+            };
+            //render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
+            //render_pass.set_bind_group(2, particles_ctx.depth_bind_group, &[]);
+            render_pass.set_vertex_buffer(0, particles_ctx.instance_buffer.slice(..));
+            for batch in &particles_ctx.batches {
+                let texture = particles_ctx
+                    .textures
+                    .get(&batch.texture)
+                    .unwrap_or(fallback);
+                let pipeline = if batch.additive {
+                    println!("Rendering additive");
+                    &self.cpu_particles_render_pipeline_additive
+                } else {
+                    println!("Rendering alpha");
+                    &self.cpu_particles_render_pipeline_alpha
                 };
-                //render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
-                //render_pass.set_bind_group(2, particles_ctx.depth_bind_group, &[]);
-                render_pass.set_vertex_buffer(0, particles_ctx.instance_buffer.slice(..));
-                for batch in &particles_ctx.batches {
-                    let texture = particles_ctx
-                        .textures
-                        .get(&batch.texture)
-                        .unwrap_or(fallback);
-                    let pipeline = if batch.additive {
-                        println!("Rendering additive");
-                        &self.cpu_particles_render_pipeline_additive
-                    } else {
-                        println!("Rendering alpha");
-                        &self.cpu_particles_render_pipeline_alpha
-                    };
-                    render_pass.set_pipeline(pipeline);
-                    if texture.bind_group.is_none() {
-                        println!("Particles texture bind group is None :(")
-                    }
-                    render_pass.set_bind_group(1, texture.bind_group.as_ref().unwrap(), &[]);
-                    render_pass.draw(0..6, batch.start..batch.start + batch.count);
+                render_pass.set_pipeline(pipeline);
+                if texture.bind_group.is_none() {
+                    println!("Particles texture bind group is None :(")
                 }
+                render_pass.set_bind_group(1, texture.bind_group.as_ref().unwrap(), &[]);
+                render_pass.draw(0..6, batch.start..batch.start + batch.count);
             }
         }
 
