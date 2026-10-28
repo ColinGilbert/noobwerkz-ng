@@ -195,7 +195,7 @@ impl AnimationGraph {
             node_names,
             output_locals: LocalToLocalResults::new(),
             output_model: LocalToModelResults::new(),
-            duration: web_time::Duration::new(0,0),
+            duration: web_time::Duration::new(0, 0),
         })
         // Err(anyhow!("Method unimplemented"))
     }
@@ -242,7 +242,8 @@ impl AnimationGraph {
                         let mut from_results = LocalToLocalResults::new(); // TODO: Init inside match clause
                         match from {
                             GenericNode::Sampler(val) => {
-                                self.animations[self.samplers[*val].index].seek(self.duration.as_secs_f32());
+                                self.animations[self.samplers[*val].index]
+                                    .seek(self.duration.as_secs_f32());
                                 from_results =
                                     self.animations[self.samplers[*val].index].playback();
                             }
@@ -255,7 +256,8 @@ impl AnimationGraph {
                         let mut to_results = LocalToLocalResults::new(); // TODO: Init inside match clause
                         match to {
                             GenericNode::Sampler(val) => {
-                                self.animations[self.samplers[*val].index].seek(self.duration.as_secs_f32());
+                                self.animations[self.samplers[*val].index]
+                                    .seek(self.duration.as_secs_f32());
                                 to_results = self.animations[self.samplers[*val].index].playback();
                             }
                             GenericNode::BlendTreeOneDim(_) => {
@@ -319,10 +321,23 @@ impl AnimationGraph {
                     match node {
                         GenericNode::Sampler(val) => {
                             // println!("DT: {:?}", dt);
-                            self.animations[self.samplers[*val].index].seek(self.duration.as_secs_f32());
-                          // self.output_locals = LocalToLocalResults::new();
+                            self.animations[self.samplers[*val].index]
+                                .seek(self.duration.as_secs_f32());
+                            // self.output_locals = LocalToLocalResults::new();
                             self.output_locals =
                                 self.animations[self.samplers[*val].index].playback();
+                            println!(
+                                "Output locals translations length: {}",
+                                self.output_locals.translations.len()
+                            );
+                            println!(
+                                "Output locals rotations length: {}",
+                                self.output_locals.rotations.len()
+                            );
+                            println!(
+                                "Output locals scales length: {}",
+                                self.output_locals.scales.len()
+                            );
                         }
                         GenericNode::BlendTreeOneDim(_) => {
                             // TODO
@@ -333,13 +348,12 @@ impl AnimationGraph {
             }
         }
 
-       // println!("{:?}, {:?}. {:?}", &self.output_locals.translations, &self.output_locals.rotations, &self.output_locals.scales );
+        // println!("{:?}, {:?}. {:?}", &self.output_locals.translations, &self.output_locals.rotations, &self.output_locals.scales );
         self.output_model = local_to_model(self.skeleton.clone(), &self.output_locals);
 
         // Now we check whether or not we are in need of transitioning through the path list
         // let mut first_time_on_transition = false;
         // let mut first_time_on_node = false;
-
 
         Ok(())
     }
