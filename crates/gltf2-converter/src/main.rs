@@ -208,7 +208,7 @@ fn run(path: &str) {
         serialized_materials.push(serialized_material);
     }
 
-    let mut all_joints = Vec::<Vec<SerializedBone3D>>::new();
+    let mut all_joints = Vec::<SerializedBone3D>::new();
     // We need this because we iterate and change over it
     let mut joints = Vec::<SerializedBone3D>::new();
     let mut joint_names = Vec::<String>::new();
@@ -219,7 +219,7 @@ fn run(path: &str) {
     let mut serialized_indices_to_raw_joint_node_indices: HashMap<usize, usize> =
         HashMap::<usize, usize>::new();
     let mut skin_counter = 0;
-    
+
     for skin in document.skins() {
         let mut skin_name = "";
         if skin.name().is_some() {
@@ -293,7 +293,9 @@ fn run(path: &str) {
             //joints.push(temp_joint);
         }
 
-        all_joints.push(joints_temp);
+        for j in joints_temp {
+            all_joints.push(j);
+        }
         println!("Serialized joints: ");
         for (i, j) in all_joints.iter().enumerate() {
             println!("    {}: {:?}", i, j);

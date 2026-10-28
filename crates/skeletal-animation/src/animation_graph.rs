@@ -75,7 +75,7 @@ impl SamplerNode {
 }
 
 pub struct AnimationGraph {
-    skeletons: Vec<Arc<Skeleton>>,
+    skeleton: Arc<Skeleton>,
     graph: Graph<GenericNode, TransitionIndex>,
     animations: Animations<Animation>,
     samplers: SamplerNodesContainer<SamplerNode>,
@@ -94,7 +94,7 @@ pub struct AnimationGraph {
 
 impl AnimationGraph {
     pub fn new(
-        skeletons: Vec<Arc<Skeleton>>,
+        skeleton: Arc<Skeleton>,
         animations: Animations<Animation>,
         animgraph_definition: &AnimationGraphDefinition,
         animations_by_name: &HashMap<String, AnimationIndex>,
@@ -181,7 +181,7 @@ impl AnimationGraph {
         let path = VecDeque::<EdgeIndex>::new();
 
         Ok(AnimationGraph {
-            skeletons: skeletons.clone(),
+            skeleton: skeleton.clone(),
             animations,
             graph,
             samplers,
@@ -204,8 +204,6 @@ impl AnimationGraph {
         self.duration += dt;
         self.output_locals = LocalToLocalResults::new();
         // Handle the transition case
-        println!("Skeletons length: {}", self.skeletons.len());
-        for skel in self.skeletons.clone() {
             if self.on_a_transition {
                 println!("On a transition!");
                 match self.current_edge_idx {
@@ -279,7 +277,7 @@ impl AnimationGraph {
                                 &from_results,
                                 &to_results,
                                 ratio,
-                                &skel.valid,
+                                &self.skeleton.valid,
                             );
                         }
                     }
@@ -353,8 +351,7 @@ impl AnimationGraph {
                         None => return Err(anyhow! {"Invalid current node during evaluation."}),
                     }
                 }
-                self.output_model = local_to_model(skel.clone(), &self.output_locals);
-            }
+                self.output_model = local_to_model(self.skeleton.clone(), &self.output_locals);
             // println!("{:?}, {:?}. {:?}", &self.output_locals.translations, &self.output_locals.rotations, &self.output_locals.scales );
 
             // Now we check whether or not we are in need of transitioning through the path list

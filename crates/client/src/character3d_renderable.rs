@@ -13,7 +13,7 @@ pub struct Character3DRenderable {
 
 impl Character3DRenderable {
     pub fn new(
-        skeletons: Vec<Arc<Skeleton>>,
+        skeleton: Arc<Skeleton>,
         position: glam::Vec3,
         orientation: glam::Quat,
         animgraph_definition: &AnimationGraphDefinition,
@@ -21,7 +21,7 @@ impl Character3DRenderable {
         animations_by_name: &HashMap<String, AnimationIndex>,
     ) -> Option<Self> {
         let common = Character3DCommon::new(position, orientation, 1.0);
-     let anim_graph = AnimationGraph::new(skeletons, animations, animgraph_definition, animations_by_name);
+     let anim_graph = AnimationGraph::new(skeleton, animations, animgraph_definition, animations_by_name);
         match anim_graph {
             Ok(val) => {
                 Some(Self {

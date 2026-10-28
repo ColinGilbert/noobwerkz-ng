@@ -224,67 +224,66 @@ pub fn load_skinned_3d_model_from_serialized(
         model_results.materials.push(material);
     }
 
-    for bones_vec in &model.bones {
-        let mut skeleton = Skeleton::new();
+    let mut skeleton = Skeleton::new();
 
-        for b in bones_vec {
-            let mut bone = Bone::new();
-            bone.position = glam::Vec3::from_array(b.translation);
-            bone.orientation = glam::Quat::from_array(b.rotation);
-            bone.scale = glam::Vec3::from_array(b.scale);
-            skeleton.bones.push(bone);
-            skeleton.parents.push(b.parent);
-        }
+    for b in &model.bones {
+        let mut bone = Bone::new();
+        bone.position = glam::Vec3::from_array(b.translation);
+        bone.orientation = glam::Quat::from_array(b.rotation);
+        bone.scale = glam::Vec3::from_array(b.scale);
+        skeleton.bones.push(bone);
+        skeleton.parents.push(b.parent);
+    }
 
-        skeleton.num_bones = bones_vec.len();
+    skeleton.num_bones = skeleton.bones.len();
 
-        for (i, b) in model.bone_names.iter().enumerate() {
-                skeleton.bone_names_to_idx.insert(b.clone(), i);
-                skeleton.bone_idx_to_names.insert(i, b.clone());
-        }
+    for (i, b) in model.bone_names.iter().enumerate() {
+        skeleton.bone_names_to_idx.insert(b.clone(), i);
+        skeleton.bone_idx_to_names.insert(i, b.clone());
+    }
 
-        println!("Bones              {:?}", model.bone_names);
+    println!("Bones              {:?}", model.bone_names);
 
-        for ibp in &model.inverse_bind_matrices {
-            skeleton
-                .inverse_bind_matrices
-                .push(glam::Mat4::from_cols_array_2d(ibp));
-        }
+    for ibp in &model.inverse_bind_matrices {
+        skeleton
+            .inverse_bind_matrices
+            .push(glam::Mat4::from_cols_array_2d(ibp));
+    }
 
-        let mut anim_channels = Vec::new();
+    let mut anim_channels = Vec::new();
 
-        for a in model.animations.clone() {
-            for s in &a.channels {
-                let channel = AnimationChannel::from_serialized(&s);
-                match channel {
-                    Some(val) => {
-                        anim_channels.push(val);
-                    }
-                    None => {
-                        println!("Invalid animation channel detected.");
-                        return None;
-                    }
+    for a in model.animations.clone() {
+        for s in &a.channels {
+            let channel = AnimationChannel::from_serialized(&s);
+            match channel {
+                Some(val) => {
+                    anim_channels.push(val);
+                }
+                None => {
+                    println!("Invalid animation channel detected.");
+                    return None;
                 }
             }
-
-            let animation = Animation::new(anim_channels.clone(), skeleton.num_bones);
-
-            model_results.animations.push(animation.clone());
         }
 
-        for (n, i) in &model.animations_by_name {
-            model_results
-                .animation_names
-                .insert(AnimationIndex::new(*i), n.clone());
-            model_results
-                .animations_idx_by_name
-                .insert(n.clone(), AnimationIndex::new(*i));
-        }
+        let animation = Animation::new(anim_channels.clone(), skeleton.num_bones);
 
-        println!("Animation names {:?},", model_results.animation_names);
-
-        model_results.skeletons.push(Arc::new(skeleton));
+        model_results.animations.push(animation.clone());
     }
+
+    for (n, i) in &model.animations_by_name {
+        model_results
+            .animation_names
+            .insert(AnimationIndex::new(*i), n.clone());
+        model_results
+            .animations_idx_by_name
+            .insert(n.clone(), AnimationIndex::new(*i));
+    }
+
+    println!("Animation names {:?},", model_results.animation_names);
+
+    model_results.skeleton = Arc::new(skeleton);
+
     Some(model_results)
 }
 
