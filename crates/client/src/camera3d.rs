@@ -215,7 +215,7 @@ impl CameraUniform {
 
     pub fn update_view_proj(&mut self, camera: &Camera3D, projection: &Projection3D) {
         self.view_position = [camera.eye.x, camera.eye.y, camera.eye.z, 1.0];
-        self.view_projection = (projection.calc_matrix() * camera.view_matrix()).to_cols_array_2d();
+        self.view_projection = (camera.view_matrix()* projection.calc_matrix()).to_cols_array_2d();
     }
 }
 
