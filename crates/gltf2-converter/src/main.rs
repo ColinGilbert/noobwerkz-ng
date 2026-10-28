@@ -1,7 +1,6 @@
-use gltf::json::serialize;
 use msgpacker::*;
 use noobwerkz_shared::{bone::*, serialized_model3d::*};
-use std::{collections::{HashMap, HashSet}, fs::*, io::*};
+use std::{collections::{HashMap}, fs::*, io::*};
 
 fn traverse_node_recursive(
     node: &gltf::Node,
@@ -91,7 +90,7 @@ fn traverse_node_recursive(
                 None => {}
             }
             //println!("{:#?}", node.transform());
-            let decomposed =
+            let decomposed = parent_transform *
                 glam::Mat4::from_cols_array_2d(&node.transform().matrix());
             let (scale, rot, trans) = decomposed.to_scale_rotation_translation();
             serialized_mesh.translation = trans.into();
@@ -110,7 +109,7 @@ fn traverse_node_recursive(
             meshes.push(serialized_mesh);
         }
     }
-    let trans = glam::Mat4::from_cols_array_2d(&node.transform().matrix());
+    let trans = glam::Mat4::from_cols_array_2d(&node.transform().matrix()) * parent_transform;
     // Recursively visit all children
     for child in node.children() {
         traverse_node_recursive(&child, trans, meshes, buffers);
@@ -223,10 +222,10 @@ fn run(path: &str) {
     for skin in document.skins() {
         // We need this because we iterate and change over it
         let mut joints = Vec::<SerializedBone3D>::new();
-        let mut skin_name = "";
-        if skin.name().is_some() {
-            skin_name = skin.name().unwrap();
-        }
+        // let mut skin_name = "";
+        // if skin.name().is_some() {
+        //     skin_name = skin.name().unwrap();
+        // }
         let skin_skeleton = skin.skeleton();
         if skin_skeleton.is_some() {
             let skin_skeleton_name = skin_skeleton.unwrap().name();
@@ -241,7 +240,7 @@ fn run(path: &str) {
                 extract_matrices_from_accessor(&ibm_accessor, &buffers).unwrap();
             // println!("IBM Matrices {:?}", inverse_bind_matrices);
         }
-        let mut num_bones = 0usize;
+        // let mut num_bones = 0usize;
         for joint_node in skin.joints() {
             if joint_node.name().is_some() {
                 // println!(
@@ -251,7 +250,7 @@ fn run(path: &str) {
                 // );
                 // println!("Joint children: ");
                 joint_node.children().for_each(|f| {
-                    println!(" {}", f.index());
+                    // println!(" {}", f.index());
                     joint_parents.insert(f.index(), joint_node.index());
                 });
 
@@ -274,7 +273,7 @@ fn run(path: &str) {
                 rotation: xform.1.to_array(),
                 translation: xform.2.to_array(),
             };
-            num_bones += 1;
+            // num_bones += 1;
             let joint_node_index = joint_node.index();
             joints.push(serialized_bone);
             let serialized_joint_index = joints.len() - 1;
@@ -313,7 +312,7 @@ fn run(path: &str) {
     // Here we add the animations extracting code
     let anims = document.animations();
     let mut serialized_animations = Vec::<SerializedAnimation3D>::new();
-    let mut anim_num = 0usize;
+    // let mut anim_num = 0usize;
     println!("Num anims: {}", anims.len());
     let mut anim_name_counter = 0;
     let mut animation_index = 0usize;
@@ -329,11 +328,11 @@ fn run(path: &str) {
         }
         animations_by_name.insert(anim_name, animation_index);
         animation_index += 1;
-        let mut channel_num = 0usize;
+        // let mut channel_num = 0usize;
         let mut serialized_animations_channels = Vec::new();
         for channel in anim.channels() {
             //channel.target().index();
-            let s = channel.sampler();
+            // let s = channel.sampler();
             // println!("Sampler interpolation: {:?}", s.interpolation());
             let target_bone_index =
                 raw_joint_nodes_indices_to_serialized_indices[&channel.target().node().index()];
@@ -418,12 +417,12 @@ fn run(path: &str) {
             //     serialized_channels_keyframes.clone().bone,
             //     joint_names[serialized_channels_keyframes.clone().bone]
             // );
-            channel_num += 1;
+            // channel_num += 1;
         }
         serialized_animations.push(SerializedAnimation3D {
             channels: serialized_animations_channels,
         });
-        anim_num += 1;
+        // anim_num += 1;
     }
 
     let mut serialized_model = SerializedModel3D::new();

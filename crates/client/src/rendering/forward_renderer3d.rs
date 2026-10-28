@@ -30,6 +30,7 @@ pub struct ForwardRenderer3D {
     pub cpu_particles_render_pipeline_alpha: wgpu::RenderPipeline,
     pub cpu_particles_render_pipeline_additive: wgpu::RenderPipeline,
     //pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
+
 }
 
 impl Pass for ForwardRenderer3D {
@@ -137,11 +138,12 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
+
+            render_pass.set_pipeline(&self.skinned_render_pipeline);
+            
             for c in characters_contexts.iter() {
                 let mut count = 0;
                 let mut model_instances = Vec::<SkinnedInstance3DRaw>::new();
-                render_pass.set_pipeline(&self.skinned_render_pipeline);
-
                 let model = &skinned_models[c.skinned_model_node.skinned_model_idx];
 
                 for i in &c.skinned_model_node.instances {
@@ -163,7 +165,7 @@ impl Pass for ForwardRenderer3D {
                             glam::Mat4::from_cols_array_2d(&instance_raw.model);
 
                         let temp = SkinnedInstance3DRaw {
-                            model: (instance_model_mat * mesh_mat).to_cols_array_2d(),
+                            model: (mesh_mat * instance_model_mat).to_cols_array_2d(),
                         };
 
                         mesh_instances.push(temp);
@@ -187,7 +189,7 @@ impl Pass for ForwardRenderer3D {
                         &c.skinned_model_node.bind_group,
                     );
                 }
-                // }
+            // }
             }
 
             let borrowed = particles_ctx.borrow();
@@ -351,6 +353,8 @@ impl ForwardRenderer3D {
             )
         };
 
+
+        
         let cpu_particles_render_pipeline_alpha = {
             let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("CPU Particles Pipeline Layout Alpha"),
@@ -402,6 +406,8 @@ impl ForwardRenderer3D {
                 ADDITIVE_BLEND,
             )
         };
+
+
 
         Self {
             render_pipeline_layout,
