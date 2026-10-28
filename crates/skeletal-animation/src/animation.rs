@@ -115,7 +115,7 @@ impl Animation {
                     KeyframeKeys::Rotation(val) => {
                         let index: usize;
 
-                        if c.seek_results.index == results.rotations.len() - 1 {
+                        if c.seek_results.index >= val.len() - 1 {
                             index = c.seek_results.index - 1;
                         } else {
                             index = c.seek_results.index;
@@ -128,7 +128,7 @@ impl Animation {
                     }
                     KeyframeKeys::Scale(val) => {
                         let index: usize;
-                        if c.seek_results.index == results.scales.len() - 1 {
+                        if c.seek_results.index >= val.len() - 1 {
                             index = c.seek_results.index - 1;
                         } else {
                             index = c.seek_results.index;
