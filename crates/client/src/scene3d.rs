@@ -104,7 +104,7 @@ impl Scene3D {
                     );
                     characters_ctx.skinned_model_node.bones_matrices[skel_index].clear();
                     for (i, o) in output.model_matrices.iter().enumerate() {
-                        characters_ctx.skinned_model_node.bones_matrices[i].push(
+                        characters_ctx.skinned_model_node.bones_matrices[skel_index].push(
                             o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
                                 .skeletons[skel_index]
                                 .inverse_bind_matrices[i],
