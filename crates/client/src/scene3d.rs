@@ -78,8 +78,7 @@ impl Scene3D {
     ) {
         for characters_ctx in self.characters_contexts.iter_mut() {
             characters_ctx.skinned_model_node.instances.clear();
-            characters_ctx.skinned_model_node.bones_matrices.clear();
-
+            
             for c in &mut characters_ctx.characters {
                 let r = c.anim_graph.evaluate(dt);
                 match r {
@@ -93,9 +92,9 @@ impl Scene3D {
                     orientation: c.common.orientation,
                     scale: glam::Vec3A::splat(1.0),
                 };
-
+                
                 characters_ctx.skinned_model_node.instances.push(instance);
-
+                
                 for (skel_index, skel ) in characters_ctx.skinned_model_node.skeletons.iter().enumerate() {
                     let output = &c.anim_graph.output_model;
 
@@ -103,6 +102,7 @@ impl Scene3D {
                         "Output model matrices count {}",
                         output.model_matrices.len()
                     );
+                    characters_ctx.skinned_model_node.bones_matrices[skel_index].clear();
                     for (i, o) in output.model_matrices.iter().enumerate() {
                         characters_ctx.skinned_model_node.bones_matrices[i].push(
                             o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
