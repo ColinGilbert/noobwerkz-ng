@@ -184,7 +184,7 @@ impl GraphicsContext {
             mapped_at_creation: false,
         });
 
-        let particles_ctx = Rc::new(RefCell::new(Particle3DContext::new(particles_instance_buffer, 1000)));
+        let particles_ctx = Rc::new(RefCell::new(Particle3DContext::new(&device, particles_instance_buffer, &depth_texture.view, 1000)));
 
         Self {
             device,

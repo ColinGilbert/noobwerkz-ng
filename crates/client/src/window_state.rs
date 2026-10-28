@@ -73,6 +73,7 @@ impl WindowState {
             &cam_ctx.bind_group_layout,
             &light_ctx.light_bind_group_layout,
             &gfx_ctx.bone_matrices_bind_group_layout,
+            &gfx_ctx.particles_ctx.borrow().depth_bind_group_layout,
             &gfx_ctx.config,
         );
 
@@ -276,7 +277,6 @@ impl WindowState {
         let particle_effects = s.particle_system.borrow_mut().collect();
 
         self.gfx_ctx.particles_ctx.borrow_mut().prepare(&self.gfx_ctx.device, &self.gfx_ctx.queue, &particle_effects);
-        // println!("WINDOW STATE Particle system empty?: {}", s.particle_system.borrow().is_empty());
         // let view_proj = s.cameras[s.active_camera].view_matrix() * s.cameras[s.active_camera].projection.calc_matrix();
 
         self.forward_renderer.draw(

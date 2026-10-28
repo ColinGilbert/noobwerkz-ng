@@ -30,6 +30,7 @@ pub struct ForwardRenderer3D {
     pub cpu_particles_render_pipeline_alpha: wgpu::RenderPipeline,
     pub cpu_particles_render_pipeline_additive: wgpu::RenderPipeline,
     //pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
+
 }
 
 impl Pass for ForwardRenderer3D {
@@ -201,7 +202,6 @@ impl Pass for ForwardRenderer3D {
             //     borrowed.batches.is_empty()
             // );
             //render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
-            //render_pass.set_bind_group(2, particles_ctx.depth_bind_group, &[]);
             render_pass.set_vertex_buffer(0, borrowed.instance_buffer.slice(..));
             for batch in &borrowed.batches {
                 let texture = borrowed.textures.get(&batch.texture).unwrap_or(fallback);
@@ -215,6 +215,7 @@ impl Pass for ForwardRenderer3D {
                 render_pass.set_pipeline(pipeline);
                 render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
                 if texture.bind_group.is_some() {
+                    render_pass.set_bind_group(2, &particles_ctx.borrow().depth_bind_group, &[]);
                     render_pass.set_bind_group(2, texture.bind_group.as_ref().unwrap(), &[]);
                 } else {
                     println!("Particles texture bind group is None :(")
@@ -250,6 +251,7 @@ impl ForwardRenderer3D {
         camera_bind_group_layout: &wgpu::BindGroupLayout,
         light_bind_group_layout: &wgpu::BindGroupLayout,
         bone_matrices_bind_group_layout: &wgpu::BindGroupLayout,
+        depth_bind_group_layout: &wgpu::BindGroupLayout,
         config: &wgpu::SurfaceConfiguration,
     ) -> Self {
         let light_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
@@ -382,7 +384,7 @@ impl ForwardRenderer3D {
                 label: Some("CPU Particles Pipeline Layout Additive"),
                 bind_group_layouts: &[
                     Some(camera_bind_group_layout),
-                    Some(light_bind_group_layout),
+                    Some(depth_bind_group_layout),
                     Some(texture_bind_group_layout),
                 ],
                 immediate_size: 0,
@@ -402,6 +404,8 @@ impl ForwardRenderer3D {
                 ADDITIVE_BLEND,
             )
         };
+
+
 
         Self {
             render_pipeline_layout,

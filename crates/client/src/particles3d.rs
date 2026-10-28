@@ -85,16 +85,49 @@ pub struct Particle3DContext {
     pub instance_buffer: wgpu::Buffer,
     pub instance_capacity: u64,
     pub batches: Vec<ParticlesBatch>,
+    pub depth_bind_group_layout: wgpu::BindGroupLayout,
+    pub depth_bind_group: wgpu::BindGroup,
 }
 
 impl Particle3DContext {
-    pub fn new(instance_buffer: wgpu::Buffer, instance_capacity: u64) -> Self {
+    pub fn new(
+        device: &wgpu::Device,
+        instance_buffer: wgpu::Buffer,
+        depth_texture_view: &wgpu::TextureView,
+        instance_capacity: u64,
+    ) -> Self {
+        let depth_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                label: Some("Particle depth buffer layout"),
+                entries: &[wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: false },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                }],
+            });
+
+        let depth_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Particle depth bind group"),
+            layout: &depth_bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: wgpu::BindingResource::TextureView(depth_texture_view),
+            }],
+        });
+
         Self {
             textures: HashMap::new(),
             instances: Vec::new(),
             instance_buffer,
             instance_capacity,
             batches: Vec::new(),
+            depth_bind_group_layout,
+            depth_bind_group,
         }
     }
 
