@@ -118,7 +118,7 @@ impl AnimationChannel {
         match findings {
             // We found the number
             Ok(val) => {
-                if val == self.times.len() - 1 {
+                if val >= self.times.len() - 1 {
                     self.seek_results = SeekResults {
                         end: true,
                         begin: false,
