@@ -208,8 +208,8 @@ impl CameraUniform {
             view_projection: glam::Mat4::IDENTITY.to_cols_array_2d(),
             near: 0.1,
             far: 1000.0,
-            fade_distance: 10.0,
-            soft_enabled: 1.0,
+            fade_distance: 1.0,
+            soft_enabled: 0.5,
         }
     }
 
