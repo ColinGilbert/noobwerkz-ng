@@ -23,7 +23,7 @@ impl SkinnedModel3DNode {
         skeletons: Vec<Arc<Skeleton>>,
     ) -> Self {
         // let mut playbacks = Vec::new();
-        let mut skeletons = skeletons.clone();
+        //let mut skeletons = skeletons.clone();
         let mut instances = Vec::new();
 
         for instance in instances_arg {

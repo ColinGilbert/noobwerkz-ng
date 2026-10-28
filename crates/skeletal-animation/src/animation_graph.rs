@@ -348,14 +348,15 @@ impl AnimationGraph {
                         }
                         None => return Err(anyhow! {"Invalid current node during evaluation."}),
                     }
-                    self.output_model = local_to_model(skel.clone(), &self.output_locals);
                 }
             }
+            self.output_model = local_to_model(skel.clone(), &self.output_locals);
             // println!("{:?}, {:?}. {:?}", &self.output_locals.translations, &self.output_locals.rotations, &self.output_locals.scales );
 
             // Now we check whether or not we are in need of transitioning through the path list
             // let mut first_time_on_transition = false;
             // let mut first_time_on_node = false;
+
         }
         Ok(())
     }
