@@ -30,7 +30,7 @@ fn traverse_node_recursive(
                     if let Some(positions) = reader.read_positions() {
                         for p in positions {
                             let pp = glam::Vec3::from_array(p);
-                            let final_pos = pp * parent_transform.transform_point3(pp);
+                            let final_pos = parent_transform.transform_point3(pp);
                             serialized_mesh.positions.push(final_pos.to_array());
                             let mut i = 0;
                             while i < 3 {
