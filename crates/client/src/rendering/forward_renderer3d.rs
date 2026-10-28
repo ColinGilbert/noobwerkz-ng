@@ -166,7 +166,7 @@ impl Pass for ForwardRenderer3D {
                             glam::Mat4::from_cols_array_2d(&instance_raw.model);
 
                         let temp = SkinnedInstance3DRaw {
-                            model: (instance_model_mat * mesh_mat).to_cols_array_2d(),
+                            model: (mesh_mat * instance_model_mat).to_cols_array_2d(),
                         };
 
                         mesh_instances.push(temp);

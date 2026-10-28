@@ -1,6 +1,7 @@
+use gltf::json::serialize;
 use msgpacker::*;
 use noobwerkz_shared::{bone::*, serialized_model3d::*};
-use std::{collections::HashMap, fs::*, io::*};
+use std::{collections::{HashMap, HashSet}, fs::*, io::*};
 
 fn traverse_node_recursive(
     node: &gltf::Node,
@@ -219,9 +220,8 @@ fn run(path: &str) {
     let mut all_joints = Vec::<SerializedBone3D>::new();
     
     for skin in document.skins() {
-        
-            // We need this because we iterate and change over it
-            let mut joints = Vec::<SerializedBone3D>::new();
+        // We need this because we iterate and change over it
+        let mut joints = Vec::<SerializedBone3D>::new();
         let mut skin_name = "";
         if skin.name().is_some() {
             skin_name = skin.name().unwrap();
@@ -276,25 +276,32 @@ fn run(path: &str) {
             num_bones += 1;
             let joint_node_index = joint_node.index();
             joints.push(serialized_bone);
-            let serialized_joints_index = joints.len() - 1;
+            let serialized_joint_index = joints.len() - 1;
             raw_joint_nodes_indices_to_serialized_indices
-                .insert(joint_node_index, serialized_joints_index);
+                .insert(joint_node_index, serialized_joint_index);
             serialized_indices_to_raw_joint_node_indices
-                .insert(serialized_joints_index, joint_node_index);
+                .insert(serialized_joint_index, joint_node_index);
+
+            
         }
         println!("Num bones {}", num_bones);
         let mut joints_temp = joints.clone();
-        for j in joints_temp.iter_mut() {
+        all_joints.clear();
+        for (i,j )in joints_temp.iter_mut().enumerate() {
             if raw_joint_nodes_indices_to_serialized_indices.contains_key(&j.parent) {
                 j.parent = raw_joint_nodes_indices_to_serialized_indices[&j.parent];
             } else {
                 j.parent = INVALID_BONE;
             }
+            // 
+            if serialized_indices_to_raw_joint_node_indices.contains_key(&i) {
+                all_joints.push(j.clone());
+            }
         }
 
-        for j in joints_temp {
-            all_joints.push(j);
-        }
+        // for j in joints_temp {
+        //     all_joints.push(j);
+        // }
         println!("Serialized joints: ");
         for (i, j) in all_joints.iter().enumerate() {
             println!("    {}: {:?}", i, j);

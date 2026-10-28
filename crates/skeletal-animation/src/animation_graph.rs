@@ -205,7 +205,7 @@ impl AnimationGraph {
         self.output_locals = LocalToLocalResults::new();
         // Handle the transition case
             if self.on_a_transition {
-                println!("On a transition!");
+                // println!("On a transition!");
                 match self.current_edge_idx {
                     Some(edge_idx) => {
                         let transition_idx = self.graph.edge_weight(edge_idx).unwrap();
