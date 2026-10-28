@@ -284,80 +284,79 @@ impl AnimationGraph {
                     }
                     None => return Err(anyhow! {"Invalid current transition during evaluation."}),
                 }
-            }
 
-            let last_transition_idx = self
-                .graph
-                .edge_weight(self.current_edge_idx.unwrap())
-                .unwrap();
-            let last_transition = &self.transitions[*last_transition_idx];
+                let last_transition_idx = self
+                    .graph
+                    .edge_weight(self.current_edge_idx.unwrap())
+                    .unwrap();
+                let last_transition = &self.transitions[*last_transition_idx];
 
-            if last_transition.seek >= last_transition.duration {
-                self.transitions[*last_transition_idx].reset();
-                match self.path.front() {
-                    Some(val) => {
-                        self.current_edge_idx = Some(*val);
-                        self.current_node_idx = None;
-                        self.path.pop_front();
-                        // first_time_on_transition = true;
-                    }
-                    None => {
-                        // The path is empty. We now set the current node/edge as the "to" node of the current edge
-                        let t = self
-                            .graph
-                            .edge_endpoints(self.current_edge_idx.unwrap())
-                            .unwrap()
-                            .1;
-                        if t != self.target {
-                            return Err(anyhow! {"Path ended on a non-target node"});
+                if last_transition.seek >= last_transition.duration {
+                    self.transitions[*last_transition_idx].reset();
+                    match self.path.front() {
+                        Some(val) => {
+                            self.current_edge_idx = Some(*val);
+                            self.current_node_idx = None;
+                            self.path.pop_front();
+                            // first_time_on_transition = true;
                         }
-                        self.current_node_idx = Some(t);
-                        self.current_edge_idx = None;
-                        // first_time_on_node = true;
-                    }
-                }
-            } else {
-                // If we are on a node. Far simpler to evaluate
-                match self.current_node_idx {
-                    Some(val) => {
-                        let node = self.graph.node_weight(val).unwrap();
-                        match node {
-                            GenericNode::Sampler(val) => {
-                                // println!("DT: {:?}", dt);
-                                self.animations[self.samplers[*val].index]
-                                    .seek(self.duration.as_secs_f32());
-                                // self.output_locals = LocalToLocalResults::new();
-                                self.output_locals =
-                                    self.animations[self.samplers[*val].index].playback();
-                                println!(
-                                    "Output locals translations length: {}",
-                                    self.output_locals.translations.len()
-                                );
-                                println!(
-                                    "Output locals rotations length: {}",
-                                    self.output_locals.rotations.len()
-                                );
-                                println!(
-                                    "Output locals scales length: {}",
-                                    self.output_locals.scales.len()
-                                );
+                        None => {
+                            // The path is empty. We now set the current node/edge as the "to" node of the current edge
+                            let t = self
+                                .graph
+                                .edge_endpoints(self.current_edge_idx.unwrap())
+                                .unwrap()
+                                .1;
+                            if t != self.target {
+                                return Err(anyhow! {"Path ended on a non-target node"});
                             }
-                            GenericNode::BlendTreeOneDim(_) => {
-                                // TODO
-                            }
+                            self.current_node_idx = Some(t);
+                            self.current_edge_idx = None;
+                            // first_time_on_node = true;
                         }
                     }
-                    None => return Err(anyhow! {"Invalid current node during evaluation."}),
+                } else {
+                    // If we are on a node. Far simpler to evaluate
+                    match self.current_node_idx {
+                        Some(val) => {
+                            let node = self.graph.node_weight(val).unwrap();
+                            match node {
+                                GenericNode::Sampler(val) => {
+                                    // println!("DT: {:?}", dt);
+                                    self.animations[self.samplers[*val].index]
+                                        .seek(self.duration.as_secs_f32());
+                                    // self.output_locals = LocalToLocalResults::new();
+                                    self.output_locals =
+                                        self.animations[self.samplers[*val].index].playback();
+                                    println!(
+                                        "Output locals translations length: {}",
+                                        self.output_locals.translations.len()
+                                    );
+                                    println!(
+                                        "Output locals rotations length: {}",
+                                        self.output_locals.rotations.len()
+                                    );
+                                    println!(
+                                        "Output locals scales length: {}",
+                                        self.output_locals.scales.len()
+                                    );
+                                }
+                                GenericNode::BlendTreeOneDim(_) => {
+                                    // TODO
+                                }
+                            }
+                        }
+                        None => return Err(anyhow! {"Invalid current node during evaluation."}),
+                    }
+                    self.output_model = local_to_model(skel.clone(), &self.output_locals);
                 }
-                self.output_model = local_to_model(skel.clone(), &self.output_locals);
             }
+            // println!("{:?}, {:?}. {:?}", &self.output_locals.translations, &self.output_locals.rotations, &self.output_locals.scales );
+
+            // Now we check whether or not we are in need of transitioning through the path list
+            // let mut first_time_on_transition = false;
+            // let mut first_time_on_node = false;
         }
-        // println!("{:?}, {:?}. {:?}", &self.output_locals.translations, &self.output_locals.rotations, &self.output_locals.scales );
-
-        // Now we check whether or not we are in need of transitioning through the path list
-        // let mut first_time_on_transition = false;
-        // let mut first_time_on_node = false;
-
         Ok(())
     }
 
