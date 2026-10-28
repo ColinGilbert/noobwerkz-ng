@@ -148,27 +148,27 @@ impl Pass for ForwardRenderer3D {
 
                 for i in &c.skinned_model_node.instances {
                     model_instances.push(i.to_skinned_raw());
-                    count += 1;
                 }
                 // for (skel_index, _skel) in model.skeletons.iter().enumerate() {
                 for mesh in model.meshes.iter() {
                     let mut mesh_instances = Vec::<SkinnedInstance3DRaw>::new();
-
+                    
                     let mesh_mat = glam::Mat4::from_scale_rotation_translation(
                         mesh.scale,
                         mesh.rotation,
                         mesh.translation,
                     );
-
+                    
                     for instance_raw in &model_instances {
                         let instance_model_mat =
                             glam::Mat4::from_cols_array_2d(&instance_raw.model);
-
-                        let temp = SkinnedInstance3DRaw {
-                            model: (instance_model_mat * mesh_mat).to_cols_array_2d(),
-                        };
-
-                        mesh_instances.push(temp);
+                            
+                            let temp = SkinnedInstance3DRaw {
+                                model: (instance_model_mat * mesh_mat).to_cols_array_2d(),
+                            };
+                            
+                            mesh_instances.push(temp);
+                            count += 1;
                     }
 
                     let instance_buffer =
