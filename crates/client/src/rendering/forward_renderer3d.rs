@@ -213,11 +213,12 @@ impl Pass for ForwardRenderer3D {
                     &self.cpu_particles_render_pipeline_alpha
                 };
                 render_pass.set_pipeline(pipeline);
-                if texture.bind_group.is_none() {
-                    println!("Particles texture bind group is None :(")
-                }
                 render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
-                render_pass.set_bind_group(1, texture.bind_group.as_ref().unwrap(), &[]);
+                if texture.bind_group.is_some() {
+                    render_pass.set_bind_group(1, texture.bind_group.as_ref().unwrap(), &[]);
+                } else {
+                println!("Particles texture bind group is None :(")
+                }
                 render_pass.draw(0..6, batch.start..batch.start + batch.count);
             }
         }
