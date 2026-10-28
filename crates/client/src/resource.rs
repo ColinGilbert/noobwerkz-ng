@@ -25,7 +25,7 @@ pub fn load_serialized_model(filepath: &std::path::Path) -> Option<SerializedMod
     if data.is_err() {
         return None
     }
-    let deserialized_results = SerializedModel3D::unpack(&data);
+    let deserialized_results = SerializedModel3D::unpack(&data.unwrap());
 
     match deserialized_results {
         Ok(deserialized) => {
