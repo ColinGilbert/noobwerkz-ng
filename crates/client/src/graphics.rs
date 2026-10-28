@@ -1,3 +1,6 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use crate::model_material::*;
 use crate::particles3d::{Particle3DContext, Particle3DInstance};
 use crate::texture::*;
@@ -11,7 +14,7 @@ pub struct GraphicsContext {
     pub texture_bind_group_layout: wgpu::BindGroupLayout,
     pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
     pub debug_material: ModelMaterial,
-    pub particles_ctx: Particle3DContext,
+    pub particles_ctx: Rc<RefCell<Particle3DContext>>,
 }
 
 impl GraphicsContext {
@@ -181,7 +184,7 @@ impl GraphicsContext {
             mapped_at_creation: false,
         });
 
-        let particles_ctx = Particle3DContext::new(particles_instance_buffer, 1000);
+        let particles_ctx = Rc::new(RefCell::new(Particle3DContext::new(particles_instance_buffer, 1000)));
 
         Self {
             device,

@@ -1,3 +1,6 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use crate::graphics::*;
 use crate::index_types::*;
 use crate::instance3d::*;
@@ -38,7 +41,7 @@ impl Pass for ForwardRenderer3D {
         skinned_models: &SkinnedModels3D<SkinnedModel3D>,
         model_nodes: &Model3DNodes<Model3DNode>,
         characters_contexts: &Characters3DContexts<Characters3DContext>,
-        particles_ctx: &Particle3DContext,
+        particles_ctx: &Rc<RefCell<Particle3DContext>>,
         particle_effects: &Vec<EffectDraw>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
@@ -188,17 +191,17 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
-
-            let Some(fallback) = particles_ctx.textures.get("") else {
+            let borrowed = particles_ctx.borrow();
+            let Some(fallback) = borrowed.textures.get("") else {
                 println!("Could not get fallback texture. Aborting particle effect draw...");
                 return;
             };
-            println!("ForwardRenderer: Particles batches empty? {}", particles_ctx.batches.is_empty());
+            println!("ForwardRenderer: Particles batches empty? {}", borrowed.batches.is_empty());
             //render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
             //render_pass.set_bind_group(2, particles_ctx.depth_bind_group, &[]);
-            render_pass.set_vertex_buffer(0, particles_ctx.instance_buffer.slice(..));
-            for batch in &particles_ctx.batches {
-                let texture = particles_ctx
+            render_pass.set_vertex_buffer(0, particles_ctx.borrow().instance_buffer.slice(..));
+            for batch in &borrowed.batches {
+                let texture = borrowed
                     .textures
                     .get(&batch.texture)
                     .unwrap_or(fallback);
