@@ -1,17 +1,17 @@
-use std::sync::Arc;
+use crate::{index_types::*, instance3d::Instance3D};
 use noobwerkz_shared::skeleton::*;
-use crate::{instance3d::Instance3D, index_types::*};
+use std::sync::Arc;
 use wgpu::{BindGroupLayout, util::*};
 
 pub struct SkinnedModel3DNode {
     pub skinned_model_idx: SkinnedModel3DIndex,
     pub instances: Vec<Instance3D>,
-    pub num_bones: u32,
-    pub bones_storage_buffer: wgpu::Buffer,
-    pub num_bones_buffer: wgpu::Buffer,
-    pub bind_group: wgpu::BindGroup,
-    pub bone_matrices: Vec<glam::Mat4>,
-    pub skeleton: Arc<Skeleton>,
+    pub numbers_of_bones: Vec<u32>,
+    pub bones_storage_buffers: Vec<wgpu::Buffer>,
+    pub num_bones_buffers: Vec<wgpu::Buffer>,
+    pub bind_groups: Vec<wgpu::BindGroup>,
+    pub bones_matrices: Vec<Vec<glam::Mat4>>,
+    pub skeletons: Vec<Arc<Skeleton>>,
 }
 
 impl SkinnedModel3DNode {
@@ -20,71 +20,92 @@ impl SkinnedModel3DNode {
         bone_matrices_bind_group_layout: &BindGroupLayout,
         skinned_model_idx: SkinnedModel3DIndex,
         instances_arg: &Vec<Instance3D>,
-        skeleton: Arc<Skeleton>,
+        skeletons: Vec<Arc<Skeleton>>,
     ) -> Self {
         // let mut playbacks = Vec::new();
-        let skeleton = skeleton.clone();
-        let num_bones = skeleton.num_bones as u32;
-        // let animation = skeletal_context.animations[0].clone();
-        // let len = instances.len();
-        let mut bone_matrices = Vec::<glam::Mat4>::new();
+        let mut skeletons = skeletons.clone();
         let mut instances = Vec::new();
+
         for instance in instances_arg {
-            let i = Instance3D{ position: instance.position, orientation: instance.orientation, scale: instance.scale};
+            let i = Instance3D {
+                position: instance.position,
+                orientation: instance.orientation,
+                scale: instance.scale,
+            };
             instances.push(i);
         }
-        let num_bones_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Num bones uniform buffer"),
-            contents: bytemuck::cast_slice(&[num_bones]),
-            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-        });
 
-        for _ in 0..instances.len() {
-            // playbacks.push(futures::executor::block_on(OzzPlayback::new(
-            //     &skeleton, &animation,
-            // )));
-            for _ in 0..num_bones + 1 {
-                bone_matrices.push(glam::Mat4::IDENTITY);
+        let mut numbers_of_bones = Vec::new();
+        let mut bones_storage_buffers = Vec::new();
+        let mut num_bones_buffers = Vec::new();
+        let mut bind_groups = Vec::new();
+        let mut bones_matrices = Vec::new();
+
+        for skeleton in skeletons.clone() {
+            let num_bones = skeleton.num_bones as u32;
+            // let animation = skeletal_context.animations[0].clone();
+            // let len = instances.len();
+            let mut bone_matrices = Vec::<glam::Mat4>::new();
+
+            let num_bones_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Num bones uniform buffer"),
+                contents: bytemuck::cast_slice(&[num_bones]),
+                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            });
+
+            for _ in 0..instances.len() {
+                // playbacks.push(futures::executor::block_on(OzzPlayback::new(
+                //     &skeleton, &animation,
+                // )));
+                for _ in 0..num_bones + 1 {
+                    bone_matrices.push(glam::Mat4::IDENTITY);
+                }
             }
+
+            // println!(
+            //     "Bone matrices length: {}, Bone matrices size: {} MiB, num bones: {}",
+            //     bone_matrices.len(),
+            //     (bone_matrices.len() as f32 * 16.0 * 4.0) / (1024.0 * 1024.0),
+            //     num_bones
+            // );
+            let bones_storage_buffer =
+                device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("Animation matrices storage buffer"),
+                    contents: bytemuck::cast_slice(&bone_matrices),
+                    usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+                });
+
+            let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+                layout: bone_matrices_bind_group_layout,
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: bones_storage_buffer.as_entire_binding(),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: num_bones_buffer.as_entire_binding(),
+                    },
+                ],
+                label: Some("Bone matrices bind group"),
+            });
+
+            numbers_of_bones.push(num_bones);
+            bones_storage_buffers.push(bones_storage_buffer);
+            num_bones_buffers.push(num_bones_buffer);
+            bones_matrices.push(bone_matrices);
+            bind_groups.push(bind_group);
         }
-
-        // println!(
-        //     "Bone matrices length: {}, Bone matrices size: {} MiB, num bones: {}",
-        //     bone_matrices.len(),
-        //     (bone_matrices.len() as f32 * 16.0 * 4.0) / (1024.0 * 1024.0),
-        //     num_bones
-        // );
-        let bones_storage_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Animation matrices storage buffer"),
-            contents: bytemuck::cast_slice(&bone_matrices),
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
-        });
-
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: bone_matrices_bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: bones_storage_buffer.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: num_bones_buffer.as_entire_binding(),
-                },
-            ],
-            label: Some("Bone matrices bind group"),
-        });
-
 
         Self {
             skinned_model_idx,
             instances,
-            num_bones,
-            bones_storage_buffer,
-            num_bones_buffer,
-            bind_group,
-            bone_matrices,
-            skeleton,
+            numbers_of_bones,
+            bones_storage_buffers,
+            num_bones_buffers,
+            bind_groups,
+            bones_matrices,
+            skeletons,
         }
     }
 

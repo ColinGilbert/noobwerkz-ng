@@ -159,7 +159,6 @@ fn run(path: &str) {
                     file.write_all(raw_bytes).unwrap();
                     println!("Saved diffuse texture to {}", file_name.clone());
                     serialized_material.diffuse_texture_path = file_name.clone();
-  
                 }
                 gltf::image::Source::Uri { uri, mime_type } => {
                     println!(
@@ -208,9 +207,10 @@ fn run(path: &str) {
         }
         serialized_materials.push(serialized_material);
     }
-    let mut joints = Vec::<SerializedBone3D>::new();
+
+    let mut all_joints = Vec::<Vec::<SerializedBone3D>>::new();
     // We need this because we iterate and change over it
-    let mut joints_temp = Vec::<SerializedBone3D>::new();
+    let mut joints = Vec::<SerializedBone3D>::new();
     let mut joint_names = Vec::<String>::new();
     let mut joint_parents = HashMap::<usize, usize>::new();
     let mut inverse_bind_matrices = Vec::new();
@@ -225,7 +225,13 @@ fn run(path: &str) {
         }
         let skin_skeleton = skin.skeleton();
         if skin_skeleton.is_some() {
-            println!("Skin skeleton node idx: {}", skin_skeleton.unwrap().mesh().unwrap().index());
+            let skin_skeleton_name = skin_skeleton.unwrap().name();
+            if skin_skeleton_name.is_some() {
+                println!(
+                    "Skin skeleton node name: {}",
+                    skin_skeleton_name.unwrap()
+                );
+            }
         }
         println!("Skin name: {:?}", skin_name);
         if let Some(ibm_accessor) = skin.inverse_bind_matrices() {
@@ -268,26 +274,28 @@ fn run(path: &str) {
             };
             num_bones += 1;
             let joint_node_index = joint_node.index();
-            joints_temp.push(serialized_bone);
-            let serialized_joints_index = joints_temp.len() - 1;
+            joints.push(serialized_bone);
+            let serialized_joints_index = joints.len() - 1;
             raw_joint_nodes_indices_to_serialized_indices
                 .insert(joint_node_index, serialized_joints_index);
             serialized_indices_to_raw_joint_node_indices
                 .insert(serialized_joints_index, joint_node_index);
         }
         println!("Num bones {}", num_bones);
-        for j in joints_temp.iter() {
-            let mut temp_joint = j.clone();
+        let mut joints_temp = joints.clone();
+        for j in joints_temp.iter_mut() {
+            //let mut temp_joint = j.clone();
             if raw_joint_nodes_indices_to_serialized_indices.contains_key(&j.parent) {
-                temp_joint.parent = raw_joint_nodes_indices_to_serialized_indices[&j.parent];
+                j.parent = raw_joint_nodes_indices_to_serialized_indices[&j.parent];
             } else {
-                temp_joint.parent = INVALID_BONE;
+                j.parent = INVALID_BONE;
             }
-            joints.push(temp_joint);
+            //joints.push(temp_joint);
         }
-
+        
+        all_joints.push(joints_temp);
         println!("Serialized joints: ");
-        for (i, j) in joints.iter().enumerate() {
+        for (i, j) in all_joints.iter().enumerate() {
             println!("    {}: {:?}", i, j);
         }
     }
@@ -410,7 +418,7 @@ fn run(path: &str) {
     let mut serialized_model = SerializedModel3D::new();
     serialized_model.meshes = serialized_meshes;
     serialized_model.materials = serialized_materials;
-    serialized_model.bones = joints;
+    serialized_model.bones = all_joints;
     serialized_model.bone_names = joint_names;
     serialized_model.inverse_bind_matrices = inverse_bind_matrices;
     serialized_model.animations = serialized_animations;

@@ -23,7 +23,7 @@ pub fn load_serialized_model(filepath: &std::path::Path) -> Option<SerializedMod
     println!("Full path {:?}", path.as_path());
     let data = std::fs::read(path.as_path());
     if data.is_err() {
-        return None
+        return None;
     }
     let deserialized_results = SerializedModel3D::unpack(&data.unwrap());
 
@@ -160,8 +160,13 @@ pub fn load_skinned_3d_model_from_serialized(
                 full_path.push(p);
             }
             full_path.push(&m.diffuse_texture_path);
-            let diffuse_texture_result =
-                futures::executor::block_on(load_texture(&full_path, false, device, queue, texture_layout));
+            let diffuse_texture_result = futures::executor::block_on(load_texture(
+                &full_path,
+                false,
+                device,
+                queue,
+                texture_layout,
+            ));
             match diffuse_texture_result {
                 Ok(value) => {
                     diffuse_texture = value;
@@ -185,8 +190,13 @@ pub fn load_skinned_3d_model_from_serialized(
                 full_path.push(p);
             }
             full_path.push(&m.normals_texture_path);
-            let normal_texture_result =
-                futures::executor::block_on(load_texture(&full_path, true, device, queue, texture_layout));
+            let normal_texture_result = futures::executor::block_on(load_texture(
+                &full_path,
+                true,
+                device,
+                queue,
+                texture_layout,
+            ));
             match normal_texture_result {
                 Ok(value) => {
                     normal_texture = value;
@@ -214,68 +224,67 @@ pub fn load_skinned_3d_model_from_serialized(
         model_results.materials.push(material);
     }
 
-    let mut skeleton = Skeleton::new();
+    for bones_vec in &model.bones {
+        let mut skeleton = Skeleton::new();
 
-    for b in &model.bones {
-        let mut bone = Bone::new();
-        bone.position = glam::Vec3::from_array(b.translation);
-        bone.orientation = glam::Quat::from_array(b.rotation);
-        bone.scale = glam::Vec3::from_array(b.scale);
-        skeleton.bones.push(bone);
-        skeleton.parents.push(b.parent);
-    }
-
-    skeleton.num_bones = model.bones.len();
-
-    for (i, b) in model.bone_names.iter().enumerate() {
-        skeleton.bone_names_to_idx.insert(b.clone(), i);
-        skeleton.bone_idx_to_names.insert(i, b.clone());
-    }
-
-    println!("Bones              {:?}", model.bone_names);
-
-    for ibp in &model.inverse_bind_matrices {
-        skeleton
-            .inverse_bind_matrices
-            .push(glam::Mat4::from_cols_array_2d(ibp));
-    }
-
-    let mut anim_channels = Vec::new();
-
-    for a in model.animations.clone() {
-        for s in &a.channels {
-            let channel = AnimationChannel::from_serialized(&s);
-            match channel {
-                Some(val) => {
-                    anim_channels.push(val);
-                }
-                None => {
-                    println!("Invalid animation channel detected.");
-                    return None;
-                }
-            }
+        for b in bones_vec {
+            let mut bone = Bone::new();
+            bone.position = glam::Vec3::from_array(b.translation);
+            bone.orientation = glam::Quat::from_array(b.rotation);
+            bone.scale = glam::Vec3::from_array(b.scale);
+            skeleton.bones.push(bone);
+            skeleton.parents.push(b.parent);
         }
 
-        let animation = Animation::new(anim_channels.clone(), skeleton.num_bones);
+        skeleton.num_bones = bones_vec.len();
 
-        model_results.animations.push(animation.clone());
+        for (i, b) in model.bone_names.iter().enumerate() {
+            skeleton.bone_names_to_idx.insert(b.clone(), i);
+            skeleton.bone_idx_to_names.insert(i, b.clone());
+        }
+
+        println!("Bones              {:?}", model.bone_names);
+
+        for ibp in &model.inverse_bind_matrices {
+            skeleton
+                .inverse_bind_matrices
+                .push(glam::Mat4::from_cols_array_2d(ibp));
+        }
+
+        let mut anim_channels = Vec::new();
+
+        for a in model.animations.clone() {
+            for s in &a.channels {
+                let channel = AnimationChannel::from_serialized(&s);
+                match channel {
+                    Some(val) => {
+                        anim_channels.push(val);
+                    }
+                    None => {
+                        println!("Invalid animation channel detected.");
+                        return None;
+                    }
+                }
+            }
+
+            let animation = Animation::new(anim_channels.clone(), skeleton.num_bones);
+
+            model_results.animations.push(animation.clone());
+        }
+
+        for (n, i) in &model.animations_by_name {
+            model_results
+                .animation_names
+                .insert(AnimationIndex::new(*i), n.clone());
+            model_results
+                .animations_idx_by_name
+                .insert(n.clone(), AnimationIndex::new(*i));
+        }
+
+        println!("Animation names {:?},", model_results.animation_names);
+
+        model_results.skeletons.push(Arc::new(skeleton));
     }
-
-    for (n, i) in &model.animations_by_name {
-        model_results
-            .animation_names
-            .insert(AnimationIndex::new(*i), n.clone());
-        model_results
-            .animations_idx_by_name
-            .insert(n.clone(), AnimationIndex::new(*i));
-    }
-
-    println!("Animation names {:?},", model_results.animation_names);
-
-
-
-    model_results.skeleton = Arc::new(skeleton);
-
     Some(model_results)
 }
 
@@ -352,8 +361,13 @@ pub fn load_3d_model_from_serialized(
             }
             path.push(&m.diffuse_texture_path);
             let diffuse_path = path.as_path();
-            let diffuse_texture_result =
-                futures::executor::block_on(load_texture(&diffuse_path, false, device, queue, texture_layout));
+            let diffuse_texture_result = futures::executor::block_on(load_texture(
+                &diffuse_path,
+                false,
+                device,
+                queue,
+                texture_layout,
+            ));
             match diffuse_texture_result {
                 Ok(value) => {
                     diffuse_texture = value;
@@ -379,8 +393,13 @@ pub fn load_3d_model_from_serialized(
             }
             path.push(&m.normals_texture_path);
             println!("Normal texture path {:?}", path);
-            let normal_texture_result =
-                futures::executor::block_on(load_texture(path.as_path(), true, device, queue, texture_layout));
+            let normal_texture_result = futures::executor::block_on(load_texture(
+                path.as_path(),
+                true,
+                device,
+                queue,
+                texture_layout,
+            ));
             match normal_texture_result {
                 Ok(value) => {
                     normal_texture = value;
@@ -414,7 +433,7 @@ pub async fn load_texture(
     is_normal_map: bool,
     device: &wgpu::Device,
     queue: &wgpu::Queue,
-    texture_bind_group_layout: &wgpu::BindGroupLayout
+    texture_bind_group_layout: &wgpu::BindGroupLayout,
 ) -> anyhow::Result<texture::Texture> {
     let data = load_binary(filepath).await?;
     texture::Texture::from_bytes(
@@ -424,7 +443,7 @@ pub async fn load_texture(
         filepath.to_str().expect("Filepath must exist"),
         is_normal_map,
         texture_bind_group_layout,
-        None
+        None,
     )
 }
 

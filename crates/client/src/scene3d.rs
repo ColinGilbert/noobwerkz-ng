@@ -10,10 +10,12 @@ use noobwerkz_skeletal_animation::{
     animation_graph_definition::AnimationGraphDefinition,
 };
 
-use simple_particles::{ParticleSystem};
+use simple_particles::ParticleSystem;
 
 use crate::{
-    camera3d::*, character3d_renderable::Character3DRenderable, index_types::*, instance3d::Instance3D, model3d_node::Model3DNode, skinned_model3d::SkinnedModel3D, skinned_model3d_node::SkinnedModel3DNode,
+    camera3d::*, character3d_renderable::Character3DRenderable, index_types::*,
+    instance3d::Instance3D, model3d_node::Model3DNode, skinned_model3d::SkinnedModel3D,
+    skinned_model3d_node::SkinnedModel3DNode,
 };
 
 pub struct Characters3DContext {
@@ -68,7 +70,6 @@ impl Scene3D {
         // println!("Particle system empty? {}", self.particle_system.borrow().is_empty());
     }
 
-
     pub fn update_characters(
         &mut self,
         dt: web_time::Duration,
@@ -77,7 +78,7 @@ impl Scene3D {
     ) {
         for characters_ctx in self.characters_contexts.iter_mut() {
             characters_ctx.skinned_model_node.instances.clear();
-            characters_ctx.skinned_model_node.bone_matrices.clear();
+            characters_ctx.skinned_model_node.bones_matrices.clear();
 
             for c in &mut characters_ctx.characters {
                 let r = c.anim_graph.evaluate(dt);
@@ -95,24 +96,29 @@ impl Scene3D {
 
                 characters_ctx.skinned_model_node.instances.push(instance);
 
-                let output = &c.anim_graph.output_model;
+                for (skel_index, skel ) in characters_ctx.skinned_model_node.skeletons.iter().enumerate() {
+                    let output = &c.anim_graph.output_model;
 
-                println!("Output model matrices count {}", output.model_matrices.len());
-                for (i, o) in output.model_matrices.iter().enumerate() {
-                    characters_ctx.skinned_model_node.bone_matrices.push(
-                        o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
-                            .skeleton
-                            .inverse_bind_matrices[i],
+                    println!(
+                        "Output model matrices count {}",
+                        output.model_matrices.len()
+                    );
+                    for (i, o) in output.model_matrices.iter().enumerate() {
+                        characters_ctx.skinned_model_node.bones_matrices[i].push(
+                            o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
+                                .skeletons[skel_index]
+                                .inverse_bind_matrices[i],
+                        );
+                    }
+                    let bones_storage_buffer = &characters_ctx.skinned_model_node.bones_storage_buffers[skel_index];
+                    queue.write_buffer(
+                        &bones_storage_buffer,
+                        0,
+                        bytemuck::cast_slice(&characters_ctx.skinned_model_node.bones_matrices[skel_index]),
                     );
                 }
             }
 
-            let bones_storage_buffer = &characters_ctx.skinned_model_node.bones_storage_buffer;
-            queue.write_buffer(
-                &bones_storage_buffer,
-                0,
-                bytemuck::cast_slice(&characters_ctx.skinned_model_node.bone_matrices),
-            );
         }
     }
 
@@ -124,7 +130,7 @@ impl Scene3D {
         instances: &Vec<Instance3D>,
         animgraph_definition: &AnimationGraphDefinition,
         animations: Animations<Animation>,
-        skeleton: Arc<Skeleton>,
+        skeletons: Vec<Arc<Skeleton>>,
         animations_by_name: &HashMap<String, AnimationIndex>,
         name: String,
     ) -> Option<Characters3DContextIndex> {
@@ -135,14 +141,14 @@ impl Scene3D {
                 bone_matrices_bind_group_layout,
                 skinned_model_idx,
                 instances,
-                skeleton.clone(),
+                skeletons.clone(),
             ),
         });
         println!("ADDING CHARACTERS: Instance count: {}", instances.len());
         let characters_ctx_idx = Characters3DContextIndex::new(self.characters_contexts.len() - 1);
         for instance in instances {
             let character = Character3DRenderable::new(
-                skeleton.clone(),
+                skeletons.clone(),
                 instance.position.into(),
                 instance.orientation,
                 animgraph_definition,
@@ -172,7 +178,7 @@ impl Scene3D {
         &mut self,
         character_type_idx: Characters3DContextIndex,
         definition: &AnimationGraphDefinition,
-        skeleton: Arc<Skeleton>,
+        skeletons: Vec<Arc<Skeleton>>,
         animations: Animations<Animation>,
         animations_by_name: &HashMap<String, AnimationIndex>,
     ) -> bool {
@@ -181,7 +187,7 @@ impl Scene3D {
             .iter_mut()
         {
             let updated_anim_graph = AnimationGraph::new(
-                skeleton.clone(),
+                skeletons.clone(),
                 animations.clone(),
                 definition,
                 animations_by_name,

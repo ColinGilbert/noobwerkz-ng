@@ -121,7 +121,7 @@ impl SerializedModelMaterial {
 pub struct SerializedModel3D {
     pub meshes: Vec<SerializedMesh3D>,
     pub materials: Vec<SerializedModelMaterial>,
-    pub bones: Vec<SerializedBone3D>,
+    pub bones: Vec<Vec<SerializedBone3D>>,
     pub bone_names: Vec<String>,
     pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
     pub animations: Vec<SerializedAnimation3D>,

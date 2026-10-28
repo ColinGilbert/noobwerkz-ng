@@ -151,7 +151,7 @@ impl Pass for ForwardRenderer3D {
                     model_instances.push(i.to_skinned_raw());
                     count += 1;
                 }
-
+                for (skel_index, _skel) in model.skeletons.iter().enumerate() {
                 for mesh in model.meshes.iter() {
                     let mut mesh_instances = Vec::<SkinnedInstance3DRaw>::new();
 
@@ -187,9 +187,10 @@ impl Pass for ForwardRenderer3D {
                         0..count,
                         &self.camera_bind_group,
                         &self.light_bind_group,
-                        &c.skinned_model_node.bind_group,
+                        &c.skinned_model_node.bind_groups[skel_index],
                     );
                 }
+            }
             }
 
             let borrowed = particles_ctx.borrow();

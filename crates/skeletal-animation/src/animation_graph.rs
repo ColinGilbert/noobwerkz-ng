@@ -75,7 +75,7 @@ impl SamplerNode {
 }
 
 pub struct AnimationGraph {
-    skeleton: Arc<Skeleton>,
+    skeletons: Vec<Arc<Skeleton>>,
     graph: Graph<GenericNode, TransitionIndex>,
     animations: Animations<Animation>,
     samplers: SamplerNodesContainer<SamplerNode>,
@@ -94,7 +94,7 @@ pub struct AnimationGraph {
 
 impl AnimationGraph {
     pub fn new(
-        skeleton: Arc<Skeleton>,
+        skeletons: Vec<Arc<Skeleton>>,
         animations: Animations<Animation>,
         animgraph_definition: &AnimationGraphDefinition,
         animations_by_name: &HashMap<String, AnimationIndex>,
@@ -181,7 +181,7 @@ impl AnimationGraph {
         let path = VecDeque::<EdgeIndex>::new();
 
         Ok(AnimationGraph {
-            skeleton: skeleton.clone(),
+            skeletons: skeletons.clone(),
             animations,
             graph,
             samplers,
@@ -204,82 +204,86 @@ impl AnimationGraph {
         self.duration += dt;
         self.output_locals = LocalToLocalResults::new();
         // Handle the transition case
-        if self.on_a_transition {
-            println!("On a transition!");
-            match self.current_edge_idx {
-                Some(edge_idx) => {
-                    let transition_idx = self.graph.edge_weight(edge_idx).unwrap();
-                    // Calculate the time taken and check whether or not the transition is finished.
-                    self.transitions[*transition_idx].seek += self.duration;
-                    let finished: bool;
-                    if self.transitions[*transition_idx].seek
-                        >= self.transitions[*transition_idx].duration
-                    {
-                        finished = true;
-                    } else {
-                        finished = false;
+        for skel in self.skeletons.clone() {
+            if self.on_a_transition {
+                println!("On a transition!");
+                match self.current_edge_idx {
+                    Some(edge_idx) => {
+                        let transition_idx = self.graph.edge_weight(edge_idx).unwrap();
+                        // Calculate the time taken and check whether or not the transition is finished.
+                        self.transitions[*transition_idx].seek += self.duration;
+                        let finished: bool;
+                        if self.transitions[*transition_idx].seek
+                            >= self.transitions[*transition_idx].duration
+                        {
+                            finished = true;
+                        } else {
+                            finished = false;
+                        }
+                        // If finished, move onto the next node.
+                        if finished {
+                            self.transitions[*transition_idx].reset();
+                            let front = self.path.front();
+                            match front {
+                                Some(val) => {
+                                    self.current_edge_idx = Some(*val);
+                                    self.path.pop_front();
+                                    self.on_a_transition = false;
+                                }
+                                None => {}
+                            }
+                        } else {
+                            // We need to evaluate the
+                            let edge = self
+                                .graph
+                                .edge_endpoints(self.current_edge_idx.unwrap())
+                                .unwrap();
+                            let from = self.graph.node_weight(edge.0).unwrap();
+                            // Otherwise, evaluate the transition
+                            let mut from_results = LocalToLocalResults::new(); // TODO: Init inside match clause
+                            match from {
+                                GenericNode::Sampler(val) => {
+                                    self.animations[self.samplers[*val].index]
+                                        .seek(self.duration.as_secs_f32());
+                                    from_results =
+                                        self.animations[self.samplers[*val].index].playback();
+                                }
+                                GenericNode::BlendTreeOneDim(_) => {
+                                    // self.blend_trees_one_dim[*val].update(dt);
+                                    // TODO
+                                }
+                            }
+                            let to = self.graph.node_weight(edge.1).unwrap();
+                            let mut to_results = LocalToLocalResults::new(); // TODO: Init inside match clause
+                            match to {
+                                GenericNode::Sampler(val) => {
+                                    self.animations[self.samplers[*val].index]
+                                        .seek(self.duration.as_secs_f32());
+                                    to_results =
+                                        self.animations[self.samplers[*val].index].playback();
+                                }
+                                GenericNode::BlendTreeOneDim(_) => {
+                                    // self.blend_trees_one_dim[*val].update(dt);
+                                    // TODO
+                                }
+                            }
+                            // Set the blend layer weights based on time elapsed.
+                            self.transitions[*transition_idx].seek =
+                                self.transitions[*transition_idx].seek + dt;
+                            let ratio = (self.transitions[*transition_idx].duration.as_millis()
+                                as f32
+                                / self.transitions[*transition_idx].seek.as_millis() as f32)
+                                .clamp(0.0, 1.0);
+                            self.output_locals = blend_multiplicative(
+                                &from_results,
+                                &to_results,
+                                ratio,
+                                &skel.valid,
+                            );
+                        }
                     }
-                    // If finished, move onto the next node.
-                    if finished {
-                        self.transitions[*transition_idx].reset();
-                        let front = self.path.front();
-                        match front {
-                            Some(val) => {
-                                self.current_edge_idx = Some(*val);
-                                self.path.pop_front();
-                                self.on_a_transition = false;
-                            }
-                            None => {}
-                        }
-                    } else {
-                        // We need to evaluate the
-                        let edge = self
-                            .graph
-                            .edge_endpoints(self.current_edge_idx.unwrap())
-                            .unwrap();
-                        let from = self.graph.node_weight(edge.0).unwrap();
-                        // Otherwise, evaluate the transition
-                        let mut from_results = LocalToLocalResults::new(); // TODO: Init inside match clause
-                        match from {
-                            GenericNode::Sampler(val) => {
-                                self.animations[self.samplers[*val].index]
-                                    .seek(self.duration.as_secs_f32());
-                                from_results =
-                                    self.animations[self.samplers[*val].index].playback();
-                            }
-                            GenericNode::BlendTreeOneDim(_) => {
-                                // self.blend_trees_one_dim[*val].update(dt);
-                                // TODO
-                            }
-                        }
-                        let to = self.graph.node_weight(edge.1).unwrap();
-                        let mut to_results = LocalToLocalResults::new(); // TODO: Init inside match clause
-                        match to {
-                            GenericNode::Sampler(val) => {
-                                self.animations[self.samplers[*val].index]
-                                    .seek(self.duration.as_secs_f32());
-                                to_results = self.animations[self.samplers[*val].index].playback();
-                            }
-                            GenericNode::BlendTreeOneDim(_) => {
-                                // self.blend_trees_one_dim[*val].update(dt);
-                                // TODO
-                            }
-                        }
-                        // Set the blend layer weights based on time elapsed.
-                        self.transitions[*transition_idx].seek =
-                            self.transitions[*transition_idx].seek + dt;
-                        let ratio = (self.transitions[*transition_idx].duration.as_millis() as f32
-                            / self.transitions[*transition_idx].seek.as_millis() as f32)
-                            .clamp(0.0, 1.0);
-                        self.output_locals = blend_multiplicative(
-                            &from_results,
-                            &to_results,
-                            ratio,
-                            &self.skeleton.valid,
-                        );
-                    }
+                    None => return Err(anyhow! {"Invalid current transition during evaluation."}),
                 }
-                None => return Err(anyhow! {"Invalid current transition during evaluation."}),
             }
 
             let last_transition_idx = self
@@ -312,44 +316,43 @@ impl AnimationGraph {
                         // first_time_on_node = true;
                     }
                 }
-            }
-        } else {
-            // If we are on a node. Far simpler to evaluate
-            match self.current_node_idx {
-                Some(val) => {
-                    let node = self.graph.node_weight(val).unwrap();
-                    match node {
-                        GenericNode::Sampler(val) => {
-                            // println!("DT: {:?}", dt);
-                            self.animations[self.samplers[*val].index]
-                                .seek(self.duration.as_secs_f32());
-                            // self.output_locals = LocalToLocalResults::new();
-                            self.output_locals =
-                                self.animations[self.samplers[*val].index].playback();
-                            println!(
-                                "Output locals translations length: {}",
-                                self.output_locals.translations.len()
-                            );
-                            println!(
-                                "Output locals rotations length: {}",
-                                self.output_locals.rotations.len()
-                            );
-                            println!(
-                                "Output locals scales length: {}",
-                                self.output_locals.scales.len()
-                            );
-                        }
-                        GenericNode::BlendTreeOneDim(_) => {
-                            // TODO
+            } else {
+                // If we are on a node. Far simpler to evaluate
+                match self.current_node_idx {
+                    Some(val) => {
+                        let node = self.graph.node_weight(val).unwrap();
+                        match node {
+                            GenericNode::Sampler(val) => {
+                                // println!("DT: {:?}", dt);
+                                self.animations[self.samplers[*val].index]
+                                    .seek(self.duration.as_secs_f32());
+                                // self.output_locals = LocalToLocalResults::new();
+                                self.output_locals =
+                                    self.animations[self.samplers[*val].index].playback();
+                                println!(
+                                    "Output locals translations length: {}",
+                                    self.output_locals.translations.len()
+                                );
+                                println!(
+                                    "Output locals rotations length: {}",
+                                    self.output_locals.rotations.len()
+                                );
+                                println!(
+                                    "Output locals scales length: {}",
+                                    self.output_locals.scales.len()
+                                );
+                            }
+                            GenericNode::BlendTreeOneDim(_) => {
+                                // TODO
+                            }
                         }
                     }
+                    None => return Err(anyhow! {"Invalid current node during evaluation."}),
                 }
-                None => return Err(anyhow! {"Invalid current node during evaluation."}),
+                self.output_model = local_to_model(skel.clone(), &self.output_locals);
             }
         }
-
         // println!("{:?}, {:?}. {:?}", &self.output_locals.translations, &self.output_locals.rotations, &self.output_locals.scales );
-        self.output_model = local_to_model(self.skeleton.clone(), &self.output_locals);
 
         // Now we check whether or not we are in need of transitioning through the path list
         // let mut first_time_on_transition = false;
