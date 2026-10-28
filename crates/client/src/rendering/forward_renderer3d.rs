@@ -138,7 +138,6 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
-            //  particle_renderer.draw(&mut render_pass);
 
             render_pass.set_pipeline(&self.skinned_render_pipeline);
 
@@ -166,7 +165,7 @@ impl Pass for ForwardRenderer3D {
                             glam::Mat4::from_cols_array_2d(&instance_raw.model);
 
                         let temp = SkinnedInstance3DRaw {
-                            model: (mesh_mat * instance_model_mat).to_cols_array_2d(),
+                            model: (instance_model_mat).to_cols_array_2d(),
                         };
 
                         mesh_instances.push(temp);
