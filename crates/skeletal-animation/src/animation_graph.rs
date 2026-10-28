@@ -204,6 +204,7 @@ impl AnimationGraph {
         self.duration += dt;
         self.output_locals = LocalToLocalResults::new();
         // Handle the transition case
+        println!("Skeletons length: {}", self.skeletons.len());
         for skel in self.skeletons.clone() {
             if self.on_a_transition {
                 println!("On a transition!");
