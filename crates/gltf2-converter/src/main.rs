@@ -19,6 +19,7 @@ fn traverse_node_recursive(
         let mut min_extents = [0.0 as f32; 3];
         let mut max_extents = [0.0 as f32; 3];
         for p in prims {
+            println!("Primitive found: {}", p.index());
             let mode = p.mode();
             match mode {
                 gltf::mesh::Mode::Points => {}
@@ -230,7 +231,7 @@ fn run(path: &str) {
         if skin_skeleton.is_some() {
             let skin_skeleton_name = skin_skeleton.unwrap().name();
             if skin_skeleton_name.is_some() {
-                println!("Skin skeleton node name: {}", skin_skeleton_name.unwrap());
+                // println!("Skin skeleton node name: {}", skin_skeleton_name.unwrap());
             }
             // let skin_skeleton_index = skin_skeleton.unwrap().index();
         }
@@ -302,10 +303,10 @@ fn run(path: &str) {
         // for j in joints_temp {
         //     all_joints.push(j);
         // }
-        println!("Serialized joints: ");
-        for (i, j) in all_joints.iter().enumerate() {
-            println!("    {}: {:?}", i, j);
-        }
+        // println!("Serialized joints: ");
+        // for (i, j) in all_joints.iter().enumerate() {
+        //     println!("    {}: {:?}", i, j);
+        // }
         // skin_counter += 1;
     }
 
@@ -333,11 +334,11 @@ fn run(path: &str) {
         for channel in anim.channels() {
             //channel.target().index();
             let s = channel.sampler();
-            println!("Sampler interpolation: {:?}", s.interpolation());
+            // println!("Sampler interpolation: {:?}", s.interpolation());
             let target_bone_index =
                 raw_joint_nodes_indices_to_serialized_indices[&channel.target().node().index()];
 
-            println!("Target index {}", target_bone_index);
+            // println!("Target index {}", target_bone_index);
 
             let mut times = Vec::new();
             let reader = channel.reader(|buffer| Some(&buffers[buffer.index()]));
@@ -345,8 +346,8 @@ fn run(path: &str) {
                 match inputs {
                     gltf::accessor::Iter::Standard(serialized_times) => {
                         times = serialized_times.collect();
-                        println!("Num timestamps: {}", times.len());
-                        println!("Timetamps: {:?}", times);
+                        // println!("Num timestamps: {}", times.len());
+                        // println!("Timetamps: {:?}", times);
                     }
                     gltf::accessor::Iter::Sparse(_) => {
                         println!("Sparse keyframes not supported :(");
@@ -370,12 +371,12 @@ fn run(path: &str) {
                         });
                         serialized_channels_keyframes.data =
                             SerializedAnimation3DKeyframeTypes::Translations(translations.clone());
-                        println!(
-                            "Anim {}, channel {}, keyframe translations: {}",
-                            anim_num,
-                            channel_num,
-                            translations.len()
-                        );
+                        // println!(
+                        //     "Anim {}, channel {}, keyframe translations: {}",
+                        //     anim_num,
+                        //     channel_num,
+                        //     translations.len()
+                        // );
                     }
                     gltf::animation::util::ReadOutputs::Rotations(rotation) => {
                         let mut rotations = Vec::new();
@@ -384,12 +385,12 @@ fn run(path: &str) {
                         });
                         serialized_channels_keyframes.data =
                             SerializedAnimation3DKeyframeTypes::Rotations(rotations.clone());
-                        println!(
-                            "Anim {}, channel {}, keyframe rotations: {}",
-                            anim_num,
-                            channel_num,
-                            rotations.len()
-                        );
+                        // println!(
+                        //     "Anim {}, channel {}, keyframe rotations: {}",
+                        //     anim_num,
+                        //     channel_num,
+                        //     rotations.len()
+                        // );
                     }
                     gltf::animation::util::ReadOutputs::Scales(scale) => {
                         let mut scales = Vec::new();
@@ -398,25 +399,25 @@ fn run(path: &str) {
                         });
                         serialized_channels_keyframes.data =
                             SerializedAnimation3DKeyframeTypes::Scales(scales.clone());
-                        println!(
-                            "Anim {}, channel {}, keyframe scales: {}",
-                            anim_num,
-                            channel_num,
-                            scales.len()
-                        );
+                        // println!(
+                        //     "Anim {}, channel {}, keyframe scales: {}",
+                        //     anim_num,
+                        //     channel_num,
+                        //     scales.len()
+                        // );
                     }
                     _ => {} // gltf::animation::util::ReadOutputs::MorphTargetWeights(_) => {},
                 }
             };
 
             serialized_animations_channels.push(serialized_channels_keyframes.clone());
-            println!(
-                "Anim {}, channel {}, bone {}, bone name {}",
-                anim_num,
-                channel_num,
-                serialized_channels_keyframes.clone().bone,
-                joint_names[serialized_channels_keyframes.clone().bone]
-            );
+            // println!(
+            //     "Anim {}, channel {}, bone {}, bone name {}",
+            //     anim_num,
+            //     channel_num,
+            //     serialized_channels_keyframes.clone().bone,
+            //     joint_names[serialized_channels_keyframes.clone().bone]
+            // );
             channel_num += 1;
         }
         serialized_animations.push(SerializedAnimation3D {

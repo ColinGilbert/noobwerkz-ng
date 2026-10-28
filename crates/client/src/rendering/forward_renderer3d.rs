@@ -30,6 +30,7 @@ pub struct ForwardRenderer3D {
     pub cpu_particles_render_pipeline_alpha: wgpu::RenderPipeline,
     pub cpu_particles_render_pipeline_additive: wgpu::RenderPipeline,
     //pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
+
 }
 
 impl Pass for ForwardRenderer3D {
@@ -137,18 +138,20 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
+
             render_pass.set_pipeline(&self.skinned_render_pipeline);
 
             for c in characters_contexts.iter() {
+                let mut count = 0;
                 let mut model_instances = Vec::<SkinnedInstance3DRaw>::new();
                 let model = &skinned_models[c.skinned_model_node.skinned_model_idx];
 
                 for i in &c.skinned_model_node.instances {
                     model_instances.push(i.to_skinned_raw());
+                    count += 1;
                 }
                 // for (skel_index, _skel) in model.skeletons.iter().enumerate() {
                 for mesh in model.meshes.iter() {
-                    let mut count = 0;
                     let mut mesh_instances = Vec::<SkinnedInstance3DRaw>::new();
 
                     let mesh_mat = glam::Mat4::from_scale_rotation_translation(
@@ -166,7 +169,6 @@ impl Pass for ForwardRenderer3D {
                         };
 
                         mesh_instances.push(temp);
-                        count += 1;
                     }
 
                     let instance_buffer =
@@ -187,7 +189,7 @@ impl Pass for ForwardRenderer3D {
                         &c.skinned_model_node.bind_group,
                     );
                 }
-                // }
+            // }
             }
 
             let borrowed = particles_ctx.borrow();
@@ -351,6 +353,8 @@ impl ForwardRenderer3D {
             )
         };
 
+
+        
         let cpu_particles_render_pipeline_alpha = {
             let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("CPU Particles Pipeline Layout Alpha"),
@@ -402,6 +406,8 @@ impl ForwardRenderer3D {
                 ADDITIVE_BLEND,
             )
         };
+
+
 
         Self {
             render_pipeline_layout,
