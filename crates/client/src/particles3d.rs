@@ -93,14 +93,16 @@ impl Particle3DContext {
     pub fn new(
         device: &wgpu::Device,
         instance_buffer: wgpu::Buffer,
-        depth_texture_view: &wgpu::TextureView,
+        // depth_texture_view: &wgpu::TextureView,
         instance_capacity: u64,
     ) -> Self {
+
+
         let depth_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 label: Some("Particle depth buffer layout"),
                 entries: &[wgpu::BindGroupLayoutEntry {
-                    binding: 1,
+                    binding: 0,
                     visibility: wgpu::ShaderStages::FRAGMENT,
                     ty: wgpu::BindingType::Texture {
                         sample_type: wgpu::TextureSampleType::Float { filterable: false },
@@ -111,12 +113,31 @@ impl Particle3DContext {
                 }],
             });
 
+        let depth_view = device
+            .create_texture(&wgpu::TextureDescriptor {
+                label: Some("particle_placeholder_depth"),
+                size: wgpu::Extent3d {
+                    width: 1,
+                    height: 1,
+                    depth_or_array_layers: 1,
+                },
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: wgpu::TextureDimension::D2,
+                format: wgpu::TextureFormat::Depth32Float,
+                usage: wgpu::TextureUsages::TEXTURE_BINDING
+                    | wgpu::TextureUsages::RENDER_ATTACHMENT,
+                view_formats: &[],
+            })
+            .create_view(&wgpu::TextureViewDescriptor::default());
+
+
         let depth_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Particle depth bind group"),
             layout: &depth_bind_group_layout,
             entries: &[wgpu::BindGroupEntry {
-                binding: 1,
-                resource: wgpu::BindingResource::TextureView(depth_texture_view),
+                binding: 0,
+                resource: wgpu::BindingResource::TextureView(&depth_view),
             }],
         });
 
