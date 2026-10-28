@@ -135,7 +135,6 @@ impl Particle3DContext {
             }
         }
 
-
         if self.instances.is_empty() {
             return;
         }

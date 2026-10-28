@@ -1,5 +1,5 @@
 use crate::model_material::*;
-use crate::particles3d::Particle3DContext;
+use crate::particles3d::{Particle3DContext, Particle3DInstance};
 use crate::texture::*;
 
 pub struct GraphicsContext {
@@ -176,7 +176,7 @@ impl GraphicsContext {
 
         let particles_instance_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Particles instance buffer"),
-            size: 1000,
+            size: 1024 * std::mem::size_of::<Particle3DInstance>() as u64,
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });

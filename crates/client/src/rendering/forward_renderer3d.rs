@@ -188,15 +188,15 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
-            //for effect in particle_effects {
-            // if self..is_empty() {
-            //     return;
-            // }
+            for effect in particle_effects {
+                if particles_ctx.batches.is_empty() {
+                    return;
+                }
                 let Some(fallback) = particles_ctx.textures.get("") else {
                     println!("Could not get fallback texture. Aborting particle effect draw...");
                     return;
                 };
-                // render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
+                //render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
                 //render_pass.set_bind_group(2, particles_ctx.depth_bind_group, &[]);
                 render_pass.set_vertex_buffer(0, particles_ctx.instance_buffer.slice(..));
                 for batch in &particles_ctx.batches {
@@ -210,15 +210,13 @@ impl Pass for ForwardRenderer3D {
                     } else {
                         println!("Rendering alpha");
                         &self.cpu_particles_render_pipeline_alpha
-
                     };
                     render_pass.set_pipeline(pipeline);
                     render_pass.set_bind_group(1, texture.bind_group.as_ref().unwrap(), &[]);
                     render_pass.draw(0..6, batch.start..batch.start + batch.count);
                 }
             }
-
-        //}
+        }
 
         queue.submit([encoder.finish()]);
     }
