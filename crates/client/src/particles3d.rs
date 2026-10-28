@@ -115,7 +115,7 @@ impl Particle3DContext {
             label: Some("Particle depth bind group"),
             layout: &depth_bind_group_layout,
             entries: &[wgpu::BindGroupEntry {
-                binding: 0,
+                binding: 1,
                 resource: wgpu::BindingResource::TextureView(depth_texture_view),
             }],
         });
