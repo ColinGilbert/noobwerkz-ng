@@ -21,7 +21,10 @@ pub fn load_serialized_model(filepath: &std::path::Path) -> Option<SerializedMod
         path.push(p);
     }
     println!("Full path {:?}", path.as_path());
-    let data = std::fs::read(path.as_path()).unwrap();
+    let data = std::fs::read(path.as_path());
+    if data.is_err() {
+        return None
+    }
     let deserialized_results = SerializedModel3D::unpack(&data);
 
     match deserialized_results {
