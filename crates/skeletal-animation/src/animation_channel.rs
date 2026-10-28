@@ -140,7 +140,9 @@ impl AnimationChannel {
             Err(val) => {
                 let index: usize;
                 if val >= self.times.len() - 1 {
-                    index = self.times.len() - 1;
+                    index = val - 1;
+                } else {
+                    index = val;
                 }
                 let t_between_frames = time - self.times[index];
                 self.seek_results = SeekResults {
