@@ -148,10 +148,10 @@ impl Particle3DContext {
             }
         }
 
-        if self.instances.is_empty() {
-            println!("Particle3DContext: Instanced empty.");
-            return;
-        }
+        // if self.instances.is_empty() {
+        //     println!("Particle3DContext: Instanced empty.");
+        //     return;
+        // }
 
         let data: &[u8] = bytemuck::cast_slice(&self.instances);
         let required = data.len() as u64;
