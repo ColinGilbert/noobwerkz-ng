@@ -109,7 +109,7 @@ fn traverse_node_recursive(
         serialized_mesh.dimensions = dims;
         meshes.push(serialized_mesh);
     }
-    let trans = parent_transform * glam::Mat4::from_cols_array_2d(&node.transform().matrix());
+    let trans = glam::Mat4::from_cols_array_2d(&node.transform().matrix()) * parent_transform;
     // Recursively visit all children
     for child in node.children() {
         traverse_node_recursive(&child, trans, meshes, buffers);
