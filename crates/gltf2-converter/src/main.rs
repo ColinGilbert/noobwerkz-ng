@@ -15,10 +15,10 @@ fn traverse_node_recursive(
     if mesh.is_some() {
         println!("Node {} has mesh", node.name().unwrap_or_default());
         let prims = mesh.unwrap().primitives();
-        let mut serialized_mesh = SerializedMesh3D::new();
-        let mut min_extents = [0.0 as f32; 3];
-        let mut max_extents = [0.0 as f32; 3];
         for p in prims {
+            let mut serialized_mesh = SerializedMesh3D::new();
+            let mut min_extents = [0.0 as f32; 3];
+            let mut max_extents = [0.0 as f32; 3];
             println!("Primitive found: {}", p.index());
             let mode = p.mode();
             match mode {
@@ -90,27 +90,27 @@ fn traverse_node_recursive(
                 }
                 None => {}
             }
+            //println!("{:#?}", node.transform());
+            let decomposed =
+                glam::Mat4::from_cols_array_2d(&node.transform().matrix());
+            let (scale, rot, trans) = decomposed.to_scale_rotation_translation();
+            serialized_mesh.translation = trans.into();
+            serialized_mesh.rotation = rot.into();
+            serialized_mesh.scale = scale.into();
+    
+            let mut dims = [0.0 as f32; 3];
+            let mut i = 0;
+            while i < 3 {
+                dims[i] = max_extents[i] - min_extents[i];
+                i += 1;
+            }
+            serialized_mesh.max_extents = max_extents;
+            serialized_mesh.min_extents = min_extents;
+            serialized_mesh.dimensions = dims;
+            meshes.push(serialized_mesh);
         }
-        //println!("{:#?}", node.transform());
-        let decomposed =
-            parent_transform * glam::Mat4::from_cols_array_2d(&node.transform().matrix());
-        let (scale, rot, trans) = decomposed.to_scale_rotation_translation();
-        serialized_mesh.translation = trans.into();
-        serialized_mesh.rotation = rot.into();
-        serialized_mesh.scale = scale.into();
-
-        let mut dims = [0.0 as f32; 3];
-        let mut i = 0;
-        while i < 3 {
-            dims[i] = max_extents[i] - min_extents[i];
-            i += 1;
-        }
-        serialized_mesh.max_extents = max_extents;
-        serialized_mesh.min_extents = min_extents;
-        serialized_mesh.dimensions = dims;
-        meshes.push(serialized_mesh);
     }
-    let trans = glam::Mat4::from_cols_array_2d(&node.transform().matrix()) * parent_transform;
+    let trans = glam::Mat4::from_cols_array_2d(&node.transform().matrix());
     // Recursively visit all children
     for child in node.children() {
         traverse_node_recursive(&child, trans, meshes, buffers);
@@ -235,21 +235,21 @@ fn run(path: &str) {
             }
             // let skin_skeleton_index = skin_skeleton.unwrap().index();
         }
-        println!("Skin name: {:?}", skin_name);
+        // println!("Skin name: {:?}", skin_name);
         if let Some(ibm_accessor) = skin.inverse_bind_matrices() {
             inverse_bind_matrices =
                 extract_matrices_from_accessor(&ibm_accessor, &buffers).unwrap();
-            println!("IBM Matrices {:?}", inverse_bind_matrices);
+            // println!("IBM Matrices {:?}", inverse_bind_matrices);
         }
         let mut num_bones = 0usize;
         for joint_node in skin.joints() {
             if joint_node.name().is_some() {
-                println!(
-                    "  Joint (Bone) Name: {}, index: {}",
-                    joint_node.name().unwrap(),
-                    joint_node.index(),
-                );
-                println!("Joint children: ");
+                // println!(
+                //     "  Joint (Bone) Name: {}, index: {}",
+                //     joint_node.name().unwrap(),
+                //     joint_node.index(),
+                // );
+                // println!("Joint children: ");
                 joint_node.children().for_each(|f| {
                     println!(" {}", f.index());
                     joint_parents.insert(f.index(), joint_node.index());
@@ -257,7 +257,7 @@ fn run(path: &str) {
 
                 joint_names.push(joint_node.name().unwrap().to_owned());
             } else {
-                println!("  Joint ({}) has no name", joint_node.index().to_string());
+                // println!("  Joint ({}) has no name", joint_node.index().to_string());
                 joint_names.push(joint_node.index().to_string());
             }
             let xform = glam::Mat4::from_cols_array_2d(&joint_node.transform().matrix())
@@ -285,7 +285,7 @@ fn run(path: &str) {
 
             
         }
-        println!("Num bones {}", num_bones);
+        // println!("Num bones {}", num_bones);
         let mut joints_temp = joints.clone();
         all_joints.clear();
         for (i,j )in joints_temp.iter_mut().enumerate() {
@@ -485,6 +485,6 @@ fn main() {
     if let Some(path) = std::env::args().nth(1) {
         run(&path);
     } else {
-        println!("usage: noobwerkz-gltf-converter <FILE>");
+        println!("usage: noobwerkz-gltf2-converter <FILE>");
     }
 }
