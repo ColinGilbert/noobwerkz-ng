@@ -208,7 +208,7 @@ fn run(path: &str) {
         serialized_materials.push(serialized_material);
     }
 
-    let mut all_joints = Vec::<Vec::<SerializedBone3D>>::new();
+    let mut all_joints = Vec::<Vec<SerializedBone3D>>::new();
     // We need this because we iterate and change over it
     let mut joints = Vec::<SerializedBone3D>::new();
     let mut joint_names = Vec::<String>::new();
@@ -218,6 +218,8 @@ fn run(path: &str) {
         HashMap::<usize, usize>::new();
     let mut serialized_indices_to_raw_joint_node_indices: HashMap<usize, usize> =
         HashMap::<usize, usize>::new();
+    let mut skin_counter = 0;
+    
     for skin in document.skins() {
         let mut skin_name = "";
         if skin.name().is_some() {
@@ -227,11 +229,9 @@ fn run(path: &str) {
         if skin_skeleton.is_some() {
             let skin_skeleton_name = skin_skeleton.unwrap().name();
             if skin_skeleton_name.is_some() {
-                println!(
-                    "Skin skeleton node name: {}",
-                    skin_skeleton_name.unwrap()
-                );
+                println!("Skin skeleton node name: {}", skin_skeleton_name.unwrap());
             }
+            // let skin_skeleton_index = skin_skeleton.unwrap().index();
         }
         println!("Skin name: {:?}", skin_name);
         if let Some(ibm_accessor) = skin.inverse_bind_matrices() {
@@ -292,12 +292,13 @@ fn run(path: &str) {
             }
             //joints.push(temp_joint);
         }
-        
+
         all_joints.push(joints_temp);
         println!("Serialized joints: ");
         for (i, j) in all_joints.iter().enumerate() {
             println!("    {}: {:?}", i, j);
         }
+        skin_counter += 1;
     }
 
     // Here we add the animations extracting code
@@ -322,6 +323,7 @@ fn run(path: &str) {
         let mut channel_num = 0usize;
         let mut serialized_animations_channels = Vec::new();
         for channel in anim.channels() {
+            //channel.target().index();
             let s = channel.sampler();
             println!("Sampler interpolation: {:?}", s.interpolation());
             let target_bone_index =
