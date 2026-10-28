@@ -125,6 +125,7 @@ fn run(path: &str) {
     let mut serialized_meshes = Vec::<SerializedMesh3D>::new();
     let mut serialized_materials = Vec::<SerializedModelMaterial>::new();
 
+    println!("Roots length: {}", roots.len());
     for r in roots {
         traverse_node_recursive(&r, glam::Mat4::IDENTITY, &mut serialized_meshes, &buffers);
     }
@@ -207,20 +208,20 @@ fn run(path: &str) {
         }
         serialized_materials.push(serialized_material);
     }
-
-    let mut all_joints = Vec::<SerializedBone3D>::new();
-    // We need this because we iterate and change over it
-    let mut joints = Vec::<SerializedBone3D>::new();
     let mut joint_names = Vec::<String>::new();
     let mut joint_parents = HashMap::<usize, usize>::new();
     let mut inverse_bind_matrices = Vec::new();
     let mut raw_joint_nodes_indices_to_serialized_indices: HashMap<usize, usize> =
-        HashMap::<usize, usize>::new();
+    HashMap::<usize, usize>::new();
     let mut serialized_indices_to_raw_joint_node_indices: HashMap<usize, usize> =
-        HashMap::<usize, usize>::new();
-    let mut skin_counter = 0;
-
+    HashMap::<usize, usize>::new();
+    // let mut skin_counter = 0;
+    let mut all_joints = Vec::<SerializedBone3D>::new();
+    
     for skin in document.skins() {
+        
+            // We need this because we iterate and change over it
+            let mut joints = Vec::<SerializedBone3D>::new();
         let mut skin_name = "";
         if skin.name().is_some() {
             skin_name = skin.name().unwrap();
@@ -284,13 +285,11 @@ fn run(path: &str) {
         println!("Num bones {}", num_bones);
         let mut joints_temp = joints.clone();
         for j in joints_temp.iter_mut() {
-            //let mut temp_joint = j.clone();
             if raw_joint_nodes_indices_to_serialized_indices.contains_key(&j.parent) {
                 j.parent = raw_joint_nodes_indices_to_serialized_indices[&j.parent];
             } else {
                 j.parent = INVALID_BONE;
             }
-            //joints.push(temp_joint);
         }
 
         for j in joints_temp {
@@ -300,7 +299,7 @@ fn run(path: &str) {
         for (i, j) in all_joints.iter().enumerate() {
             println!("    {}: {:?}", i, j);
         }
-        skin_counter += 1;
+        // skin_counter += 1;
     }
 
     // Here we add the animations extracting code
