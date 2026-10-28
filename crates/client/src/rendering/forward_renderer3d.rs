@@ -353,6 +353,8 @@ impl ForwardRenderer3D {
             )
         };
 
+
+        
         let cpu_particles_render_pipeline_alpha = {
             let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("CPU Particles Pipeline Layout Alpha"),
