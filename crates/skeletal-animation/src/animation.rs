@@ -97,16 +97,15 @@ impl Animation {
             }
             // For all other cases, we blend between two sequential keyframes
             else {
-                let index: usize;
-                if c.seek_results.index == results.translations.len() - 1 {
-                    index = c.seek_results.index - 1;
-                } else {
-                    index = c.seek_results.index;
-                }
-
                 // println!("Playback blending two frames");
                 match &c.data {
                     KeyframeKeys::Translation(val) => {
+                        let index: usize;
+                        if c.seek_results.index == results.translations.len() - 1 {
+                            index = c.seek_results.index - 1;
+                        } else {
+                            index = c.seek_results.index;
+                        }
                         results.translations[c.bone_index] = glam::Vec3::lerp(
                             val[index],
                             val[index + 1],
@@ -114,6 +113,13 @@ impl Animation {
                         );
                     }
                     KeyframeKeys::Rotation(val) => {
+                        let index: usize;
+
+                        if c.seek_results.index == results.rotations.len() - 1 {
+                            index = c.seek_results.index - 1;
+                        } else {
+                            index = c.seek_results.index;
+                        }
                         results.rotations[c.bone_index] = glam::Quat::slerp(
                             val[index],
                             val[index + 1],
@@ -121,6 +127,12 @@ impl Animation {
                         );
                     }
                     KeyframeKeys::Scale(val) => {
+                        let index: usize;
+                        if c.seek_results.index == results.scales.len() - 1 {
+                            index = c.seek_results.index - 1;
+                        } else {
+                            index = c.seek_results.index;
+                        }
                         results.scales[c.bone_index] = glam::Vec3::lerp(
                             val[index],
                             val[index + 1],
