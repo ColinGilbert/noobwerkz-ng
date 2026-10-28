@@ -202,6 +202,7 @@ impl AnimationGraph {
 
     pub fn evaluate(&mut self, dt: web_time::Duration) -> Result<(), anyhow::Error> {
         self.duration += dt;
+        self.output_locals = LocalToLocalResults::new();
         // Handle the transition case
         if self.on_a_transition {
             match self.current_edge_idx {
