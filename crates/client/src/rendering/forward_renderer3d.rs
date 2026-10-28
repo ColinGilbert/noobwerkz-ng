@@ -358,7 +358,8 @@ impl ForwardRenderer3D {
                 label: Some("CPU Particles Pipeline Layout Alpha"),
                 bind_group_layouts: &[
                     Some(camera_bind_group_layout),
-                    Some(light_bind_group_layout),
+                    // Some(light_bind_group_layout),
+                    Some(depth_bind_group_layout),
                     Some(texture_bind_group_layout),
                 ],
                 immediate_size: 0,
