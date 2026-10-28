@@ -11,6 +11,12 @@ struct Camera {
 @group(0) @binding(0)
 var<uniform> camera: Camera;
 
+@group(1) @binding(0)
+var particle_texture: texture_2d<f32>;
+@group(1) @binding(1)
+var particle_sampler: sampler;
+
+
 // struct Light {
 //     position: vec3<f32>,
 //     color: vec3<f32>,
@@ -88,10 +94,6 @@ fn vs_main(
 }
 
 
-@group(1) @binding(0)
-var particle_texture: texture_2d<f32>;
-@group(1) @binding(1)
-var particle_sampler: sampler;
 
 // Fragment shader
 
