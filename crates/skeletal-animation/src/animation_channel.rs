@@ -138,13 +138,17 @@ impl AnimationChannel {
             }
             // We didn't find the specific number
             Err(val) => {
-                let t_between_frames = time - self.times[val];
+                let index: usize;
+                if val >= self.times.len() - 1 {
+                    index = self.times.len() - 1;
+                }
+                let t_between_frames = time - self.times[index];
                 self.seek_results = SeekResults {
                     end: false,
                     begin: false,
                     interpolation_needed: true,
                     t_between_frames,
-                    index: val,
+                    index,
                 };
             }
         }
