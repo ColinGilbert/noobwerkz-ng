@@ -78,6 +78,7 @@ impl Scene3D {
     ) {
         for characters_ctx in self.characters_contexts.iter_mut() {
             characters_ctx.skinned_model_node.instances.clear();
+            characters_ctx.skinned_model_node.bone_matrices.clear();
 
             for c in &mut characters_ctx.characters {
                 let r = c.anim_graph.evaluate(dt);
@@ -101,7 +102,6 @@ impl Scene3D {
                     "Output model matrices count {}",
                     output.model_matrices.len()
                 );
-                characters_ctx.skinned_model_node.bone_matrices.clear();
                 for (i, o) in output.model_matrices.iter().enumerate() {
                     characters_ctx.skinned_model_node.bone_matrices.push(
                         o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
