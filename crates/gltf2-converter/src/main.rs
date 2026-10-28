@@ -219,7 +219,11 @@ fn run(path: &str) {
     let mut serialized_indices_to_raw_joint_node_indices: HashMap<usize, usize> =
         HashMap::<usize, usize>::new();
     for skin in document.skins() {
-        println!("Skin name: {:?}", skin.name().unwrap());
+        let mut skin_name = "";
+        if skin.name().is_some() {
+            skin_name = skin.name().unwrap();
+        }
+        println!("Skin name: {:?}", skin_name);
         if let Some(ibm_accessor) = skin.inverse_bind_matrices() {
             inverse_bind_matrices =
                 extract_matrices_from_accessor(&ibm_accessor, &buffers).unwrap();
