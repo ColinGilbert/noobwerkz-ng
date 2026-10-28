@@ -317,6 +317,7 @@ impl AnimationGraph {
                     }
                 } else {
                     // If we are on a node. Far simpler to evaluate
+                    println!("On a node!");
                     match self.current_node_idx {
                         Some(val) => {
                             let node = self.graph.node_weight(val).unwrap();
