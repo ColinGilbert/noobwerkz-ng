@@ -98,7 +98,7 @@ impl Animation {
             // For all other cases, we blend between two sequential keyframes
             else {
                 let index: usize;
-                if c.seek_results.index >= results.translations.len() - 1 {
+                if c.seek_results.index == results.translations.len() - 1 {
                     index = c.seek_results.index - 1;
                 } else {
                     index = c.seek_results.index;
