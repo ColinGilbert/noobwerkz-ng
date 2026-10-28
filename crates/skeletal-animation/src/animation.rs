@@ -101,8 +101,8 @@ impl Animation {
                 match &c.data {
                     KeyframeKeys::Translation(val) => {
                         let index: usize;
-                        if c.seek_results.index >= results.translations.len() - 1 {
-                            index = results.translations.len() - 2;
+                        if c.seek_results.index == val.len() - 1 {
+                            index = c.seek_results.index - 1;
                         } else {
                             index = c.seek_results.index;
                         }
