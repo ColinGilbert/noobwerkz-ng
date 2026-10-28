@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use simple_particles::{BlendMode, EffectDraw};
 
-use crate::{texture::{RawTextureBytes, Texture}, vertex::Vertex};
+use crate::{
+    texture::{RawTextureBytes, Texture},
+    vertex::Vertex,
+};
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
@@ -102,7 +105,15 @@ impl Particle3DContext {
         texture_layout: &wgpu::BindGroupLayout,
     ) {
         let circle = create_soft_circle_texture();
-        let results = self.register_texture(device, queue, "", &circle.bytes, circle.width,  circle.height, texture_layout );
+        let results = self.register_texture(
+            device,
+            queue,
+            "",
+            &circle.bytes,
+            circle.width,
+            circle.height,
+            texture_layout,
+        );
         println!("Register fallback circle texture success? {} ", results);
         // let results = self.register_texture(device, queue, "circle", &circle, texture_layout);
         // println!("Register explicit circle texture success? {} ", results);
@@ -155,7 +166,6 @@ impl Particle3DContext {
             self.instance_capacity = new_capacity;
         }
         queue.write_buffer(&self.instance_buffer, 0, data);
-
     }
 
     pub fn register_texture(
@@ -171,19 +181,26 @@ impl Particle3DContext {
         let raw_bytes = RawTextureBytes {
             width,
             height,
-            bytes: Vec::from(rgba)
+            bytes: Vec::from(rgba),
         };
 
-        let texture = Texture::from_bytes(device, queue, rgba, name, false, texture_layout, Some(raw_bytes));
+        let texture = Texture::from_bytes(
+            device,
+            queue,
+            rgba,
+            name,
+            false,
+            texture_layout,
+            Some(raw_bytes),
+        );
         if texture.is_ok() {
             self.textures.insert(name.to_owned(), texture.unwrap());
             return true;
-        }
-        else {
+        } else {
             println!("Error registering texture: {:?}", texture.err());
-        return false;
+            return false;
+        }
     }
-}
 }
 
 pub struct ParticlesBatch {
@@ -204,14 +221,14 @@ fn create_soft_circle_texture() -> RawTextureBytes {
         let alpha = (1.0 - distance).clamp(0.0, 1.0);
         pixel.copy_from_slice(&[255, 255, 255, (alpha * alpha * 255.0) as u8]);
     }
-    
+
     let results = RawTextureBytes {
-    width: size,
-    height: size,
-    bytes: pixels
+        width: size,
+        height: size,
+        bytes: pixels,
     };
 
-    return results
+    return results;
 }
 
 // Texture::from_bytes(device, queue,pixels, "Soft circle texture fallback for particles", false, texture_bind_group_layout)
