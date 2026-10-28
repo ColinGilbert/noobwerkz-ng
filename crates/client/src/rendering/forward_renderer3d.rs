@@ -199,7 +199,7 @@ impl Pass for ForwardRenderer3D {
             println!("ForwardRenderer: Particles batches empty? {}", borrowed.batches.is_empty());
             //render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
             //render_pass.set_bind_group(2, particles_ctx.depth_bind_group, &[]);
-            render_pass.set_vertex_buffer(0, particles_ctx.borrow().instance_buffer.slice(..));
+            render_pass.set_vertex_buffer(0, borrowed.instance_buffer.slice(..));
             for batch in &borrowed.batches {
                 let texture = borrowed
                     .textures
