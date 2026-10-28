@@ -83,7 +83,7 @@ fn vs_main(
     let cell = corner + vec2<f32>(0.5, 0.5);
     let sheet_uv = vec2<f32>(
         (column + cell.x) / columns,
-        (row + 1.0 - cell.y) / rows,
+        (row + cell.y) / rows,
     );
 
     var output: VertexOutput;
