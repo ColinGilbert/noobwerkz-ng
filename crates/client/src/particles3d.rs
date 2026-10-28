@@ -112,11 +112,11 @@ impl Particle3DContext {
         self.instances.clear();
         self.batches.clear();
         for draw in draws {
-            println!("Draw");
+            // println!("Draw");
             let start = self.instances.len() as u32;
             let sheet = [draw.sheet[0].max(1) as f32, draw.sheet[1].max(1) as f32];
             for particle in &draw.instances {
-                println!("Instance!");
+                // println!("Instance!");
                 self.instances.push(Particle3DInstance {
                     position: particle.position,
                     size: particle.size,
