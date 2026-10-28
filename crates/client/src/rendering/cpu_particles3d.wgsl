@@ -83,7 +83,7 @@ fn vs_main(
     let cell = corner + vec2<f32>(0.5, 0.5);
     let sheet_uv = vec2<f32>(
         (column + cell.x) / columns,
-        (row + cell.y) / rows,
+        (row + 1.0 - cell.y) / rows,
     );
 
     var output: VertexOutput;
@@ -99,7 +99,7 @@ fn vs_main(
 
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
-        let texel = textureSample(particle_texture, particle_sampler, in.uv);
+    let texel = textureSample(particle_texture, particle_sampler, in.uv);
     var color = texel * in.color;
     return color;
 }
