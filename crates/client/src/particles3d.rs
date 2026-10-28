@@ -36,7 +36,7 @@ impl Vertex for Particle3DInstance {
         use std::mem;
         wgpu::VertexBufferLayout {
             array_stride: mem::size_of::<Particle3DInstance>() as wgpu::BufferAddress,
-            step_mode: wgpu::VertexStepMode::Vertex,
+            step_mode: wgpu::VertexStepMode::Instance,
             attributes: &[
                 // Positions
                 wgpu::VertexAttribute {
