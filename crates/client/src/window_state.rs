@@ -275,7 +275,7 @@ impl WindowState {
         //println!("Scene {} active", u.active_scene);
         let particle_effects = s.particle_system.borrow().collect();
 
-        println!("WINDOW STATE Particle system empty?: {}", s.particle_system.borrow().is_empty());
+        // println!("WINDOW STATE Particle system empty?: {}", s.particle_system.borrow().is_empty());
         // let view_proj = s.cameras[s.active_camera].view_matrix() * s.cameras[s.active_camera].projection.calc_matrix();
         self.gfx_ctx.particles_ctx.prepare(&self.gfx_ctx.device, &self.gfx_ctx.queue, &particle_effects);
 

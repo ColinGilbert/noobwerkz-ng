@@ -143,7 +143,7 @@ impl Particle3DContext {
         if required > self.instance_capacity {
             let new_capacity = required.next_power_of_two();
             self.instance_buffer = device.create_buffer(&wgpu::BufferDescriptor {
-                label: Some("particle_instance_buffer"),
+                label: Some("Particle instance buffer"),
                 size: new_capacity,
                 usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
                 mapped_at_creation: false,
