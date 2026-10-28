@@ -207,7 +207,7 @@ impl Pass for ForwardRenderer3D {
                 let texture = borrowed.textures.get(&batch.texture).unwrap_or(fallback);
                 let pipeline = if batch.additive {
                     // println!("Rendering additive");
-                    &self.cpu_particles_render_pipeline_alpha
+                    &self.cpu_particles_render_pipeline_additive
                 } else {
                     // println!("Rendering alpha");
                     &self.cpu_particles_render_pipeline_alpha
