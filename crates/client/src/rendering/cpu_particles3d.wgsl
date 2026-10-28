@@ -95,7 +95,7 @@ fn vs_main(
     );
 
     var output: VertexOutput;
-    output.clip_position = camera.view_proj * vec4<f32>(world_pos, 1.0);
+    output.clip_position = camera.view_proj * vec4<f32>(world_pos, 0.0);
     output.uv = sheet_uv;
     output.color = instance.color;
     return output;
