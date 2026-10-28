@@ -223,6 +223,10 @@ fn run(path: &str) {
         if skin.name().is_some() {
             skin_name = skin.name().unwrap();
         }
+        let skin_skeleton = skin.skeleton();
+        if skin_skeleton.is_some() {
+            println!("Skin skeleton node idx: {}", skin_skeleton.unwrap().mesh().unwrap().index());
+        }
         println!("Skin name: {:?}", skin_name);
         if let Some(ibm_accessor) = skin.inverse_bind_matrices() {
             inverse_bind_matrices =
