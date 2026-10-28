@@ -207,7 +207,7 @@ impl Pass for ForwardRenderer3D {
                 let texture = borrowed.textures.get(&batch.texture).unwrap_or(fallback);
                 let pipeline = if batch.additive {
                     // println!("Rendering additive");
-                    &self.cpu_particles_render_pipeline_additive
+                    &self.cpu_particles_render_pipeline_alpha
                 } else {
                     // println!("Rendering alpha");
                     &self.cpu_particles_render_pipeline_alpha
@@ -358,7 +358,6 @@ impl ForwardRenderer3D {
                 label: Some("CPU Particles Pipeline Layout Alpha"),
                 bind_group_layouts: &[
                     Some(camera_bind_group_layout),
-                    // Some(light_bind_group_layout),
                     Some(depth_bind_group_layout),
                     Some(texture_bind_group_layout),
                 ],
