@@ -209,7 +209,7 @@ impl CameraUniform {
             near: 0.1,
             far: 1000.0,
             fade_distance: 100.0,
-            soft_enabled: 0.0,
+            soft_enabled: 1.0,
         }
     }
 
