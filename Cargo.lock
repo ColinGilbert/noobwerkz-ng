@@ -2977,6 +2977,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "noobwerkz-example"
+version = "0.1.0"
+dependencies = [
+ "image",
+ "noobwerkz-client",
+ "noobwerkz-shared",
+ "noobwerkz-skeletal-animation",
+]
+
+[[package]]
 name = "noobwerkz-gltf2-converter"
 version = "0.1.0"
 dependencies = [
