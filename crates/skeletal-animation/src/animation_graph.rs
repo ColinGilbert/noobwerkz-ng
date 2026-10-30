@@ -245,7 +245,7 @@ impl AnimationGraph {
                                     self.animations[self.samplers[*val].index]
                                         .seek(self.duration.as_secs_f32());
                                     from_results =
-                                        self.animations[self.samplers[*val].index].playback();
+                                        self.animations[self.samplers[*val].index].playback(self.skeleton.clone());
                                 }
                                 GenericNode::BlendTreeOneDim(_) => {
                                     // self.blend_trees_one_dim[*val].update(dt);
@@ -259,7 +259,7 @@ impl AnimationGraph {
                                     self.animations[self.samplers[*val].index]
                                         .seek(self.duration.as_secs_f32());
                                     to_results =
-                                        self.animations[self.samplers[*val].index].playback();
+                                        self.animations[self.samplers[*val].index].playback(self.skeleton.clone());
                                 }
                                 GenericNode::BlendTreeOneDim(_) => {
                                     // self.blend_trees_one_dim[*val].update(dt);
@@ -329,7 +329,7 @@ impl AnimationGraph {
                                         .seek(self.duration.as_secs_f32());
                                     // self.output_locals = LocalToLocalResults::new();
                                     self.output_locals =
-                                        self.animations[self.samplers[*val].index].playback();
+                                        self.animations[self.samplers[*val].index].playback(self.skeleton.clone());
                                     // println!(
                                     //     "Output locals translations length: {}",
                                     //     self.output_locals.translations.len()

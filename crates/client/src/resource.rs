@@ -242,7 +242,7 @@ pub fn load_skinned_3d_model_from_serialized(
         skeleton.bone_idx_to_names.insert(i, b.clone());
     }
 
-    println!("Bones              {:?}", model.bone_names);
+    //println!("Bones              {:?}", model.bone_names);
 
     for ibp in &model.inverse_bind_matrices {
         skeleton
@@ -266,7 +266,7 @@ pub fn load_skinned_3d_model_from_serialized(
             }
         }
 
-        let animation = Animation::new(anim_channels.clone(), skeleton.num_bones);
+        let animation = Animation::new(anim_channels.clone());
 
         model_results.animations.push(animation.clone());
     }
@@ -280,7 +280,7 @@ pub fn load_skinned_3d_model_from_serialized(
             .insert(n.clone(), AnimationIndex::new(*i));
     }
 
-    println!("Animation names {:?},", model_results.animation_names);
+    // println!("Animation names {:?},", model_results.animation_names);
 
     model_results.skeleton = Arc::new(skeleton);
 

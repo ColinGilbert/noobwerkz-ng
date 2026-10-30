@@ -12,6 +12,7 @@ pub struct SkinnedModel3DNode {
     pub bind_group: wgpu::BindGroup,
     pub bone_matrices: Vec<glam::Mat4>,
     pub skeleton: Arc<Skeleton>,
+    // pub global_inverse_transform: glam::Mat4,
 }
 
 impl SkinnedModel3DNode {
@@ -91,9 +92,9 @@ impl SkinnedModel3DNode {
             bind_group,
             bone_matrices,
             skeleton,
+            // global_inverse_transform: glam::Mat4::IDENTITY,
         }
     }
-
     // pub fn update(
     //     &mut self,
     //     queue: &mut wgpu::Queue,

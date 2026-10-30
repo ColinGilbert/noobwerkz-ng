@@ -3,6 +3,7 @@ use std::ops::Range;
 use crate::index_types::*;
 use crate::model_material::*;
 use crate::vertex::*;
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Model3DVertex {

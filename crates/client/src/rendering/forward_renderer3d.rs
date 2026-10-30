@@ -15,7 +15,7 @@ use crate::vertex::*;
 
 // use crate::skinned_model_node::*;
 use crate::texture::*;
-use simple_particles::EffectDraw;
+// use simple_particles::EffectDraw;
 // use crate::character::Character;
 use wgpu::util::DeviceExt;
 
@@ -43,7 +43,7 @@ impl Pass for ForwardRenderer3D {
         model_nodes: &Model3DNodes<Model3DNode>,
         characters_contexts: &Characters3DContexts<Characters3DContext>,
         particles_ctx: &Rc<RefCell<Particle3DContext>>,
-        particle_effects: &Vec<EffectDraw>,
+        // particle_effects: &Vec<EffectDraw>,
         depth_texture_view: &wgpu::TextureView,
         view: &wgpu::TextureView,
     ) {
@@ -246,7 +246,7 @@ impl ForwardRenderer3D {
         device: &wgpu::Device,
         light_buffer: &wgpu::Buffer,
         camera_buffer: &wgpu::Buffer,
-        particles_instance_buffer: wgpu::Buffer,
+        // particles_instance_buffer: wgpu::Buffer,
         texture_bind_group_layout: &wgpu::BindGroupLayout,
         camera_bind_group_layout: &wgpu::BindGroupLayout,
         light_bind_group_layout: &wgpu::BindGroupLayout,

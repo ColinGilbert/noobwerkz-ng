@@ -6,7 +6,7 @@ use crate::graphics::*;
 use crate::light3d::*;
 use crate::rendering::{Pass, forward_renderer3d::*};
 use crate::texture::*;
-use egui::Key::G;
+// use egui::Key::G;
 use egui_wgpu::ScreenDescriptor;
 
 use std::f64;
@@ -68,7 +68,7 @@ impl WindowState {
             &gfx_ctx.device,
             &light_ctx.light_buffer,
             &cam_ctx.buffer,
-            gfx_ctx.particles_ctx.borrow().instance_buffer.clone(),
+            // gfx_ctx.particles_ctx.borrow().instance_buffer.clone(),
             &gfx_ctx.texture_bind_group_layout,
             &cam_ctx.bind_group_layout,
             &light_ctx.light_bind_group_layout,
@@ -273,11 +273,10 @@ impl WindowState {
         let u = &mut self.user_ctx;
 
         let s = &u.scenes[u.active_scene];
-        //println!("Scene {} active", u.active_scene);
+        
         let particle_effects = s.particle_system.borrow_mut().collect();
 
         self.gfx_ctx.particles_ctx.borrow_mut().prepare(&self.gfx_ctx.device, &self.gfx_ctx.queue, &particle_effects);
-        // let view_proj = s.cameras[s.active_camera].view_matrix() * s.cameras[s.active_camera].projection.calc_matrix();
 
         self.forward_renderer.draw(
             &self.gfx_ctx.device,
@@ -287,7 +286,7 @@ impl WindowState {
             &s.model_nodes,
             &s.characters_contexts,
             &self.gfx_ctx.particles_ctx,
-            &particle_effects,
+            // &particle_effects,
             &self.gfx_ctx.depth_texture.view,
             &view,
         );

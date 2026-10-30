@@ -1,7 +1,7 @@
 use noobwerkz_client::camera3d::CameraContext;
+use noobwerkz_client::client_user_context::ClientUserContext;
 use noobwerkz_client::graphics::*;
 use noobwerkz_client::light3d::*;
-use noobwerkz_client::client_user_context::ClientUserContext;
 use noobwerkz_client::web_time::Duration;
 use std::f32::consts::PI;
 
@@ -32,10 +32,11 @@ pub fn user_update(
 
     // Update the light
     let old_position: noobwerkz_client::glam::Vec3 = light_ctx.light_uniforms[0].position.into();
-    light_ctx.light_uniforms[0].position =
-        (noobwerkz_client::glam::Quat::from_axis_angle(noobwerkz_client::glam::Vec3::Y, PI * dt.as_secs_f32())
-            * old_position)
-            .into();
+    light_ctx.light_uniforms[0].position = (noobwerkz_client::glam::Quat::from_axis_angle(
+        noobwerkz_client::glam::Vec3::Y,
+        PI * dt.as_secs_f32(),
+    ) * old_position)
+        .into();
     gfx_ctx.queue.write_buffer(
         &light_ctx.light_buffer,
         0,
@@ -45,11 +46,13 @@ pub fn user_update(
     let fps = Duration::from_micros((1_000_000.0 / 60.0) as u64);
     u.time_elapsed += dt.as_micros();
     if u.time_elapsed > fps.as_micros() {
-       s.update_characters(dt, &u.asset_mgr.skinned_models, &gfx_ctx.queue);
+        s.update_characters(dt, &u.asset_mgr.skinned_models, &gfx_ctx.queue);
         u.time_elapsed -= fps.as_micros();
     }
 
     // println!("Particle system empty? {}", s.particle_system.borrow().is_empty());
 
-    let _user_data = USER_DATA.lock().expect("UserData poisoned during user_update()");
+    let _user_data = USER_DATA
+        .lock()
+        .expect("UserData poisoned during user_update()");
 }

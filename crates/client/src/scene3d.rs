@@ -76,11 +76,11 @@ impl Scene3D {
         skinned_models: &SkinnedModels3D<SkinnedModel3D>,
         queue: &wgpu::Queue,
     ) {
-        println!("Number of characters: {}", self.characters_contexts.len());
+        // println!("Number of characters: {}", self.characters_contexts.len());
         for characters_ctx in self.characters_contexts.iter_mut() {
             characters_ctx.skinned_model_node.instances.clear();
             characters_ctx.skinned_model_node.bone_matrices.clear();
-
+ 
             for c in &mut characters_ctx.characters {
                 let r = c.anim_graph.evaluate(dt);
                 match r {
@@ -99,10 +99,10 @@ impl Scene3D {
 
                 let output = &c.anim_graph.output_model;
 
-                println!(
-                    "Output model matrices count {}",
-                    output.model_matrices.len()
-                );
+                // println!(
+                //     "Output model matrices count {}",
+                //     output.model_matrices.len()
+                // );
                 for (i, o) in output.model_matrices.iter().enumerate() {
                     characters_ctx.skinned_model_node.bone_matrices.push(
                         o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]

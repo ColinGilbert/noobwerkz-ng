@@ -35,7 +35,6 @@ pub struct SerializedAnimation3DChannel{
     pub bone: usize,
     pub data: SerializedAnimation3DKeyframeTypes,
     pub times: Vec<f32>,
-
 }
 
 impl SerializedAnimation3DChannel {
@@ -125,7 +124,8 @@ pub struct SerializedModel3D {
     pub bone_names: Vec<String>,
     pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
     pub animations: Vec<SerializedAnimation3D>,
-    pub animations_by_name: HashMap<String, usize>
+    pub animations_by_name: HashMap<String, usize>,
+    pub global_inverse_transform: [[f32; 4]; 4],
 }
 
 impl SerializedModel3D {
@@ -138,6 +138,7 @@ impl SerializedModel3D {
             inverse_bind_matrices: Vec::new(),
             animations: Vec::new(),
             animations_by_name: HashMap::new(),
+            global_inverse_transform: glam::Mat4::IDENTITY.to_cols_array_2d()
         }
     }
 

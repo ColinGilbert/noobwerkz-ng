@@ -19,6 +19,7 @@ pub struct SkinnedModel3D {
     pub animations_idx_by_name: HashMap<String, AnimationIndex>,
     pub animation_names: HashMap<AnimationIndex, String>,
     pub animations: Animations<Animation>,
+    pub global_inverse_transform: glam::Mat4,
 }
 
 impl SkinnedModel3D {
@@ -31,6 +32,7 @@ impl SkinnedModel3D {
             animations_idx_by_name: HashMap::new(),
             animation_names: HashMap::new(),
             animations: Animations::new(),
+            global_inverse_transform: glam::Mat4::IDENTITY,
         }
     }
 }
@@ -69,7 +71,7 @@ impl SkinnedModelVertex3D {
             normal: [0.0; 3],
             tangent: [0.0; 3],
             bitangent: [0.0; 3],
-            bone_indices: [0; 4],
+            bone_indices: [u32::MAX; 4],
             bone_weights: [0.0; 4],
         }
     }
@@ -80,7 +82,7 @@ impl SkinnedModelVertex3D {
             normal: model_vert.normal,
             tangent: model_vert.tangent,
             bitangent: model_vert.bitangent,
-            bone_indices: [0; 4],
+            bone_indices: [u32::MAX; 4],
             bone_weights: [0.0; 4],
         }
     }

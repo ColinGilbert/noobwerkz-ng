@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/shared", "crates/client", "crates/server", "crates/skeletal-animation", "crates/gltf2-converter", "crates/example"]
+members = ["crates/shared", "crates/client", "crates/server", "crates/skeletal-animation", "crates/gltf2-converter", "crates/example", "crates/assimp-converter"]
 resolver = "3"
 
 [workspace.dependencies]

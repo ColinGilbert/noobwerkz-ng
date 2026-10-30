@@ -1,6 +1,6 @@
 use noobwerkz_client::camera3d::*;
 use noobwerkz_client::client_user_context::ClientUserContext;
-use noobwerkz_client::glam::Vec3;
+// use noobwerkz_client::glam::Vec3;
 use noobwerkz_client::graphics::*;
 use noobwerkz_client::index_types::*;
 use noobwerkz_client::instance3d::*;
@@ -12,7 +12,7 @@ use noobwerkz_skeletal_animation::animation_graph_definition::*;
 // use noobwerkz::simple_animgraph::edge_definitions::TransitionDefinition;
 use crate::user_data::*;
 
-use image::*;
+// use image::*;
 
 // MODIFY ME!
 pub fn user_setup(
@@ -86,7 +86,7 @@ pub fn user_setup(
                     3.0,
                     SPACE_BETWEEN * inner as f32,
                 ]),
-                orientation: noobwerkz_client::glam::Quat::IDENTITY,
+                orientation: noobwerkz_client::glam::Quat::from_rotation_z(degrees_to_radians(90.0)) * noobwerkz_client::glam::Quat::from_rotation_x(degrees_to_radians(-90.0)),
                 scale: noobwerkz_client::glam::Vec3A::splat(1.0),
             });
             inner += 1;
@@ -182,7 +182,7 @@ pub fn user_setup(
                     -2.0,
                     SPACE_BETWEEN * inner as f32,
                 ]),
-                orientation: noobwerkz_client::glam::Quat::from_axis_angle(noobwerkz_client::glam::Vec3::Y, 90.0),
+                orientation: noobwerkz_client::glam::Quat::from_rotation_x(degrees_to_radians(90.0)) * noobwerkz_client::glam::Quat::from_rotation_z(degrees_to_radians(180.0)),
                 scale: noobwerkz_client::glam::Vec3A::splat(1.0),
             });
             inner += 1;
