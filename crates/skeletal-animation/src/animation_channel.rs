@@ -104,28 +104,28 @@ impl AnimationChannel {
 
     //  Returns the index of the first of two animations
     pub fn seek(&mut self, time: f32) {
-        if time == 0.0 {
-            self.seek_results = SeekResults {
-                begin: true,
-                end: false,
-                interpolation_needed: false,
-                t_between_frames: 0.0,
-                index: 0,
-            };
-        }
 
         let findings = self.times.binary_search_by(|t| t.total_cmp(&time));
+
         match findings {
             // We found the number
             Ok(val) => {
-                if val >= self.times.len() - 1 {
+                if val >= self.times.len() - 1 && self.looping {
+                    self.seek_results = SeekResults {
+                        end: false,
+                        begin: true,
+                        interpolation_needed: false,
+                        t_between_frames: 0.0,
+                        index: val - 1,
+                    }
+                } else if val >= self.times.len() - 1 && !self.looping {
                     self.seek_results = SeekResults {
                         end: true,
                         begin: false,
                         interpolation_needed: false,
                         t_between_frames: 0.0,
-                        index: val,
-                    }
+                        index: 0,
+                    };
                 } else {
                     self.seek_results = SeekResults {
                         end: false,
@@ -133,26 +133,38 @@ impl AnimationChannel {
                         interpolation_needed: false,
                         t_between_frames: 0.0,
                         index: val,
-                    };
+                    }
                 }
             }
             // We didn't find the specific number
             Err(val) => {
-                let index: usize;
-                if val >= self.times.len() - 1 {
-                    index = val - 1;
+                if val >= self.times.len() - 1 && self.looping {
+                    self.seek_results = SeekResults {
+                        end: false,
+                        begin: false,
+                        interpolation_needed: true,
+                        t_between_frames: (time - self.times[0]) / (self.times[1] - self.times[0]),// time - self.times[self.times.len() - 1],
+                        index: 0,
+                    };
+                } else if val >= self.times.len() - 1 && !self.looping {
+                    self.seek_results = SeekResults {
+                        end: true,
+                        begin: false,
+                        interpolation_needed: false,
+                        t_between_frames: 0.0,
+                        index: val - 1,
+                    };
                 } else {
-                    index = val;
+                    self.seek_results = SeekResults {
+                        end: false,
+                        begin: false,
+                        interpolation_needed: true,
+                        t_between_frames: (time - self.times[val]) / (self.times[val + 1] - self.times[val]),
+                        index: val,
+                    };
                 }
-                let t_between_frames = time - self.times[index];
-                self.seek_results = SeekResults {
-                    end: false,
-                    begin: false,
-                    interpolation_needed: true,
-                    t_between_frames,
-                    index,
-                };
             }
         }
     }
+    // }
 }

@@ -324,24 +324,10 @@ impl AnimationGraph {
                             let node = self.graph.node_weight(val).unwrap();
                             match node {
                                 GenericNode::Sampler(val) => {
-                                    // println!("DT: {:?}", dt);
                                     self.animations[self.samplers[*val].index]
                                         .seek(self.duration.as_secs_f32());
-                                    // self.output_locals = LocalToLocalResults::new();
                                     self.output_locals =
                                         self.animations[self.samplers[*val].index].playback(self.skeleton.clone());
-                                    // println!(
-                                    //     "Output locals translations length: {}",
-                                    //     self.output_locals.translations.len()
-                                    // );
-                                    // println!(
-                                    //     "Output locals rotations length: {}",
-                                    //     self.output_locals.rotations.len()
-                                    // );
-                                    // println!(
-                                    //     "Output locals scales length: {}",
-                                    //     self.output_locals.scales.len()
-                                    // );
                                 }
                                 GenericNode::BlendTreeOneDim(_) => {
                                     // TODO

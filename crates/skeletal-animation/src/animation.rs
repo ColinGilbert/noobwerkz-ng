@@ -9,9 +9,8 @@ use crate::operation_result::*;
 
 pub struct Animation {
     pub length: f32,
-    pub seek: f32,
     pub channels: Vec<AnimationChannel>,
-    pub looping: bool,    
+    pub looping: bool,
 }
 
 impl Animation {
@@ -21,10 +20,8 @@ impl Animation {
             let last_time = c.times[c.times.len() - 1];
             latest_time = latest_time.max(last_time);
         }
-        // println!("Latest anim time: {}", latest_time);
         Self {
             length: latest_time,
-            seek: 0.0,
             channels: anim_channels,
             looping: false,
         }
@@ -32,29 +29,19 @@ impl Animation {
 
     pub fn seek(&mut self, time: f32) {
         let new_time = time % self.length;
-        // let mut temp_finished = true;
         for c in self.channels.iter_mut() {
             c.seek(new_time);
         }
     }
 
     pub fn playback(&mut self, skeleton: Arc<Skeleton>) -> LocalToLocalResults {
-        // println!("Animations num_bones: {}", self.num_bones);
         let mut results = LocalToLocalResults::new();
-        results
-            .translations
-            .resize(skeleton.num_bones, glam::Vec3::ZERO);
-        results
-            .rotations
-            .resize(skeleton.num_bones, glam::Quat::IDENTITY);
-        results
-            .scales
-            .resize(skeleton.num_bones, glam::Vec3::splat(1.0));
 
-        for i in 0..skeleton.num_bones {
-            results.translations[i] = skeleton.bones[i].position;
-            results.rotations[i] = skeleton.bones[i].orientation;
-            results.scales[i] = skeleton.bones[i].scale;
+        // This was important.
+        for b in skeleton.bones.to_vec() {
+            results.translations.push(b.position);
+            results.rotations.push(b.orientation);
+            results.scales.push(b.scale);
         }
         // Here we do the actual playback
         // For each animation channel:
@@ -104,68 +91,58 @@ impl Animation {
                     }
                 }
             }
-            // For all other cases, we blend between two sequential keyframes
-            else {
+            // Now we do a blend
+            else if c.seek_results.interpolation_needed {
                 // println!("Playback blending two frames");
                 match &c.data {
                     KeyframeKeys::Translation(val) => {
-                        let index: usize;
-                        index = c.seek_results.index;
-                        // if c.seek_results.index == val.len() {
-                        //     index = c.seek_results.index - 1;
-                        // } else {
-                        //     index = c.seek_results.index;
-                        // }
-                        if val.len() > 1 && index < val.len() - 1 {
-                            results.translations[c.bone_index] = glam::Vec3::lerp(
-                                val[index],
-                                val[index + 1],
-                                c.seek_results.t_between_frames,
-                            );
-                        } else {
-                            results.translations[c.bone_index] = val[index];
-                        }
+                        let index = c.seek_results.index;
+                        //if val.len() > 1 {
+                        results.translations[c.bone_index] = glam::Vec3::lerp(
+                            val[index],
+                            val[index + 1],
+                            c.seek_results.t_between_frames,
+                        );
+                        //}
                     }
                     KeyframeKeys::Rotation(val) => {
-                        let index: usize;
-                        index = c.seek_results.index;
-
-                        // if c.seek_results.index == val.len() {
-                        //     index = c.seek_results.index - 1;
-                        // } else {
-                        //     index = c.seek_results.index;
-                        // }
-                        if val.len() > 1 && index < val.len() - 1 {
-                            results.rotations[c.bone_index] = glam::Quat::slerp(
-                                val[index],
-                                val[index + 1],
-                                c.seek_results.t_between_frames,
-                            );
-                        } 
-                        else {
-                            results.rotations[c.bone_index] = val[index];
-                        }
+                        let index = c.seek_results.index;
+                        //if val.len() > 1 {
+                        results.rotations[c.bone_index] = glam::Quat::slerp(
+                            val[index],
+                            val[index + 1],
+                            c.seek_results.t_between_frames,
+                        );
+                        //}
                     }
                     KeyframeKeys::Scale(val) => {
-                        let index: usize;
-                        index = c.seek_results.index;
-
-                        // if c.seek_results.index == val.len() {
-                        //     index = c.seek_results.index - 1;
-                        // } else {
-                        //     index = c.seek_results.index;
+                        let index = c.seek_results.index;
+                        // if val.len() > 1 {
+                        results.scales[c.bone_index] = glam::Vec3::lerp(
+                            val[index],
+                            val[index + 1],
+                            c.seek_results.t_between_frames,
+                        );
                         // }
-                        if val.len() > 1 && index < val.len() - 1 {
-                            results.scales[c.bone_index] = glam::Vec3::lerp(
-                                val[index],
-                                val[index + 1],
-                                c.seek_results.t_between_frames,
-                            );
-                        } else {
-                            results.scales[c.bone_index] = val[index];
-                        }
                     }
                 }
+            } else if !c.seek_results.interpolation_needed {
+                match &c.data {
+                    KeyframeKeys::Translation(val) => {
+                        let index = c.seek_results.index;
+                        results.translations[c.bone_index] = val[index];
+                    }
+                    KeyframeKeys::Rotation(val) => {
+                        let index = c.seek_results.index;
+                        results.rotations[c.bone_index] = val[index];
+                    }
+                    KeyframeKeys::Scale(val) => {
+                        let index = c.seek_results.index;
+                        results.scales[c.bone_index] = val[index];
+                    }
+                }
+            } else {
+                println!("Unhandled interpolation mode.")
             }
         }
         results

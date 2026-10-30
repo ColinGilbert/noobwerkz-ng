@@ -222,7 +222,7 @@ fn run(path: &str) {
     let mut serialized_indices_to_raw_joint_node_indices: BTreeMap<usize, usize> =
         BTreeMap::<usize, usize>::new();
     // let mut skin_counter = 0;
-    let mut all_joints = Vec::<SerializedBone3D>::new();
+    // let mut all_joints = Vec::<SerializedBone3D>::new();
     let mut joints = Vec::<SerializedBone3D>::new();
     let mut joint_nodes_index_set = HashSet::new();
     for skin in document.skins() {
@@ -307,16 +307,16 @@ fn run(path: &str) {
         // skin_counter += 1;
     }
     let mut all_joints = joints.clone();
-    for (i, j) in all_joints.iter_mut().enumerate() {
+    for j in all_joints.iter_mut() {
         if raw_joint_nodes_indices_to_serialized_indices.contains_key(&j.parent) {
             j.parent = raw_joint_nodes_indices_to_serialized_indices[&j.parent];
         } else {
             j.parent = INVALID_BONE;
         }
         //
-        if serialized_indices_to_raw_joint_node_indices.contains_key(&i) {
-            //joints.push(j.clone());
-        }
+        // if serialized_indices_to_raw_joint_node_indices.contains_key(&i) {
+        //     //joints.push(j.clone());
+        // }
     }
     // Now we redo the bone indices for the meshes:
     // for m in &mut serialized_meshes {
