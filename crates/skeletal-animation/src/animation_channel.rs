@@ -115,12 +115,12 @@ impl AnimationChannel {
                 if val >= self.times.len() - 1 && looping {
                     self.seek_results = SeekResults {
                         t_between_frames: 0.0,
-                        index: val - 1,
+                        index: 0,
                     }
                 } else if val >= self.times.len() - 1 && !looping {
                     self.seek_results = SeekResults {
                         t_between_frames: 0.0,
-                        index: 0,
+                        index: val - 1,
                     };
                 } else {
                     self.seek_results = SeekResults {
