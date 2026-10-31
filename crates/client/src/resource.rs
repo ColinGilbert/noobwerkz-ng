@@ -266,7 +266,7 @@ pub fn load_skinned_3d_model_from_serialized(
             }
         }
 
-        let animation = Animation::new(anim_channels.clone());
+        let animation = Animation::new(anim_channels.clone(), true);
 
         model_results.animations.push(animation.clone());
     }

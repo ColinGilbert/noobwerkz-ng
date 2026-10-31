@@ -2,6 +2,7 @@
 // This is because each bone may have a different set of keyframes.
 
 use noobwerkz_shared::serialized_model3d::*;
+
 #[derive(Clone)]
 pub enum KeyframeKeys {
     Translation(Vec<glam::Vec3>),
@@ -10,10 +11,24 @@ pub enum KeyframeKeys {
 }
 
 #[derive(Clone)]
+pub struct KeyframeResult {
+    pub translation: glam::Vec3,
+    pub orientation: glam::Quat,
+    pub scale: glam::Vec3,
+}
+
+impl KeyframeResult {
+    pub fn new() -> Self {
+        Self {
+            translation: glam::Vec3::splat(0.0),
+            orientation: glam::Quat::IDENTITY,
+            scale: glam::Vec3::splat(1.0),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct SeekResults {
-    pub end: bool,
-    pub begin: bool,
-    pub interpolation_needed: bool,
     pub t_between_frames: f32,
     pub index: usize,
 }
@@ -24,7 +39,6 @@ pub struct AnimationChannel {
     pub bone_index: usize,
     pub data: KeyframeKeys,
     pub times: Vec<f32>,
-    pub looping: bool,
     pub seek_results: SeekResults,
 }
 
@@ -42,11 +56,7 @@ impl AnimationChannel {
                     bone_index,
                     data: KeyframeKeys::Translation(translation_keys),
                     times: serialized.times.clone(),
-                    looping: false,
                     seek_results: SeekResults {
-                        end: false,
-                        begin: true,
-                        interpolation_needed: false,
                         t_between_frames: 0.0,
                         index: 0,
                     },
@@ -63,11 +73,7 @@ impl AnimationChannel {
                     bone_index,
                     data: KeyframeKeys::Rotation(rotation_keys),
                     times: serialized.times.clone(),
-                    looping: false,
                     seek_results: SeekResults {
-                        end: false,
-                        begin: true,
-                        interpolation_needed: false,
                         t_between_frames: 0.0,
                         index: 0,
                     },
@@ -84,11 +90,7 @@ impl AnimationChannel {
                     bone_index,
                     data: KeyframeKeys::Scale(scale_keys),
                     times: serialized.times.clone(),
-                    looping: false,
                     seek_results: SeekResults {
-                        end: false,
-                        begin: true,
-                        interpolation_needed: false,
                         t_between_frames: 0.0,
                         index: 0,
                     },
@@ -103,34 +105,25 @@ impl AnimationChannel {
     }
 
     //  Returns the index of the first of two animations
-    pub fn seek(&mut self, time: f32) {
+    pub fn seek(&mut self, time: f32, looping: bool) {
 
         let findings = self.times.binary_search_by(|t| t.total_cmp(&time));
 
         match findings {
             // We found the number
             Ok(val) => {
-                if val >= self.times.len() - 1 && self.looping {
+                if val >= self.times.len() - 1 && looping {
                     self.seek_results = SeekResults {
-                        end: false,
-                        begin: true,
-                        interpolation_needed: false,
                         t_between_frames: 0.0,
                         index: val - 1,
                     }
-                } else if val >= self.times.len() - 1 && !self.looping {
+                } else if val >= self.times.len() - 1 && !looping {
                     self.seek_results = SeekResults {
-                        end: true,
-                        begin: false,
-                        interpolation_needed: false,
                         t_between_frames: 0.0,
                         index: 0,
                     };
                 } else {
                     self.seek_results = SeekResults {
-                        end: false,
-                        begin: false,
-                        interpolation_needed: false,
                         t_between_frames: 0.0,
                         index: val,
                     }
@@ -138,27 +131,20 @@ impl AnimationChannel {
             }
             // We didn't find the specific number
             Err(val) => {
-                if val >= self.times.len() - 1 && self.looping {
+                // println!("Animation Channel: Didn't find index.");
+                if val >= self.times.len() - 1 && looping {
                     self.seek_results = SeekResults {
-                        end: false,
-                        begin: false,
-                        interpolation_needed: true,
-                        t_between_frames: (time - self.times[0]) / (self.times[1] - self.times[0]),// time - self.times[self.times.len() - 1],
+                        t_between_frames: (time - self.times[0]) / (self.times[1] - self.times[0]),
                         index: 0,
                     };
-                } else if val >= self.times.len() - 1 && !self.looping {
+                } else if val >= self.times.len() - 1 && !looping {
+                    println!("Found end of animation.");
                     self.seek_results = SeekResults {
-                        end: true,
-                        begin: false,
-                        interpolation_needed: false,
                         t_between_frames: 0.0,
                         index: val - 1,
                     };
                 } else {
                     self.seek_results = SeekResults {
-                        end: false,
-                        begin: false,
-                        interpolation_needed: true,
                         t_between_frames: (time - self.times[val]) / (self.times[val + 1] - self.times[val]),
                         index: val,
                     };
