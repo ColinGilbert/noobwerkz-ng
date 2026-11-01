@@ -194,14 +194,15 @@ pub fn user_setup(
     let mut king_animgraph_definition = AnimationGraphDefinition::new();
     let root_node_def = GenericNodeDefinition::Sampler(SamplerNodeDefinition {
         speed: 1.0,
-        animation_name: "CharacterArmature|Walk".to_owned(),
+        animation_name: "CharacterArmature|Idle".to_owned(),
         looping: true,
-        name: "Walk".to_owned(),
+        name: "Idle".to_owned(),
     });
 
     let root = king_animgraph_definition
         .graph
         .add_node(root_node_def);
+
     king_animgraph_definition.root = Some(root);
 
     match king {

@@ -104,8 +104,11 @@ impl Scene3D {
                 //     output.model_matrices.len()
                 // );
                 for (i, o) in output.model_matrices.iter().enumerate() {
+                    // let b = characters_ctx.skinned_model_node.skeleton.bones[i];
+                    // let skel_matrix = glam::Mat4::from_scale_rotation_translation(b.scale, b.orientation, b.position);
+                    // let inv_skel_matrix = skel_matrix.inverse();
                     characters_ctx.skinned_model_node.bone_matrices.push(
-                        o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
+                         o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
                             .skeleton
                             .inverse_bind_matrices[i],
                     );

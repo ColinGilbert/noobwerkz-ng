@@ -11,6 +11,7 @@ use noobwerkz_shared::skeleton::Skeleton;
 use noobwerkz_skeletal_animation::animation::Animation;
 use noobwerkz_skeletal_animation::animation_channel::AnimationChannel;
 use noobwerkz_skeletal_animation::animation_graph::AnimationIndex;
+use std::collections::HashMap;
 use std::path::*;
 use std::sync::Arc;
 use wgpu::util::DeviceExt;
@@ -249,12 +250,35 @@ pub fn load_skinned_3d_model_from_serialized(
             .inverse_bind_matrices
             .push(glam::Mat4::from_cols_array_2d(ibp));
     }
+    model_results.skeleton = Arc::new(skeleton);
 
     let mut anim_channels = Vec::new();
 
     for a in model.animations.clone() {
-        for s in &a.channels {
-            let channel = AnimationChannel::from_serialized(&s);
+        let mut serialized_keyframes_by_bone_idx =
+        HashMap::<usize, Vec<SerializedAnimation3DKeyframeTypes>>::new();
+        let mut serialized_times_by_bone_idx = HashMap::<usize, Vec<f32>>::new();
+            for s in &a.channels {
+                if !serialized_keyframes_by_bone_idx.contains_key(&s.bone) {
+                serialized_keyframes_by_bone_idx.insert(s.bone, Vec::new());
+
+            }
+            let serialized_keyframes =
+            serialized_keyframes_by_bone_idx.get_mut(&s.bone).unwrap();
+            serialized_keyframes.push(s.data.clone());
+            serialized_times_by_bone_idx.insert(s.bone, s.times.clone());
+        }
+        
+
+
+        // let ser/ialized_keyframes = serialized_keyframes_by_bone_idx[&s.bone];
+        for (i, sk) in serialized_keyframes_by_bone_idx {
+            let channel = AnimationChannel::from_serialized(
+                model_results.skeleton.clone(),
+                &sk,
+                &serialized_times_by_bone_idx[&i],
+                i,
+            );
             match channel {
                 Some(val) => {
                     anim_channels.push(val);
@@ -265,7 +289,6 @@ pub fn load_skinned_3d_model_from_serialized(
                 }
             }
         }
-
         let animation = Animation::new(anim_channels.clone(), true);
 
         model_results.animations.push(animation.clone());
@@ -281,8 +304,6 @@ pub fn load_skinned_3d_model_from_serialized(
     }
 
     // println!("Animation names {:?},", model_results.animation_names);
-
-    model_results.skeleton = Arc::new(skeleton);
 
     Some(model_results)
 }

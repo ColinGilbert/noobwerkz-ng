@@ -205,7 +205,7 @@ impl AnimationGraph {
         self.output_locals = LocalToLocalResults::new();
         // Handle the transition case
             if self.on_a_transition {
-                // println!("On a transition!");
+                println!("On a transition!");
                 match self.current_edge_idx {
                     Some(edge_idx) => {
                         let transition_idx = self.graph.edge_weight(edge_idx).unwrap();
@@ -326,6 +326,9 @@ impl AnimationGraph {
                                 GenericNode::Sampler(val) => {
                                     self.animations[self.samplers[*val].index]
                                         .seek(self.duration.as_secs_f32());
+                                    // self.output_locals.rotations.clear();
+                                    // self.output_locals.translations.clear();
+                                    // self.output_locals.scales.clear();
                                     self.output_locals =
                                         self.animations[self.samplers[*val].index].playback(self.skeleton.clone());
                                 }

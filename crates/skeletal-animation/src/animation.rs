@@ -12,15 +12,24 @@ pub struct Animation {
     pub channels: Vec<AnimationChannel>,
     pub current_time: f32,
     pub looping: bool,
+    
 }
 
 impl Animation {
     pub fn new(anim_channels: Vec<AnimationChannel>, looping: bool) -> Self {
         let mut latest_time: f32 = 0.0;
         for c in &anim_channels {
-            let last_time = c.times[c.times.len() - 1];
+            let mut last_t = 0.0;
+            for (i, k) in c.keyframes.iter().enumerate() {
+                if k.time < last_t {
+                    println!("Animation channel times out of order, index: {}", i);
+                }
+                last_t = k.time;
+            }
+            let last_time = c.keyframes[c.keyframes.len() - 1].time;
             latest_time = latest_time.max(last_time);
         }
+
         Self {
             length: latest_time,
             channels: anim_channels,
@@ -30,10 +39,13 @@ impl Animation {
     }
 
     pub fn seek(&mut self, time: f32) {
-        let new_time = time % self.length;
-        for c in self.channels.iter_mut() {
-            c.seek(new_time, self.looping);
+        if self.looping {
+            self.current_time = time % self.length;
         }
+        
+        // for c in self.channels.iter_mut() {
+        //     c.seek(new_time, self.looping);
+        // }
     }
 
     pub fn playback(&mut self, skeleton: Arc<Skeleton>) -> LocalToLocalResults {
@@ -47,22 +59,24 @@ impl Animation {
         }
         // Here we do the actual playback
         // For each animation channel:
-        for c in self.channels.iter() {
-            match &c.data {
-                KeyframeKeys::Translation(val) => {
-                    let index = c.seek_results.index;
-                    results.translations[c.bone_index] = val[index];
-                }
-                KeyframeKeys::Rotation(val) => {
-                    let index = c.seek_results.index;
-                    results.rotations[c.bone_index] = val[index];
-                }
-                KeyframeKeys::Scale(val) => {
-                    let index = c.seek_results.index;
-                    results.scales[c.bone_index] = val[index];
-                }
-            }
+        for c in &self.channels {
+            let k = c.seek(self.current_time, self.looping);
+            results.translations[c.bone_index] = k.translation;
+            results.rotations[c.bone_index] = k.orientation;
+            results.scales[c.bone_index] = k.scale;
+            // let t = c.seek_results.t_between_frames;
+            // let index = c.seek_results.index;
+            // results.translations[c.bone_index] = c.keyframes[index]
+            //     .translation
+            //     .lerp(c.keyframes[index + 1].translation, t);
+            // results.rotations[c.bone_index] = c.keyframes[index]
+            //     .orientation
+            //     .slerp(c.keyframes[index + 1].orientation, t);
+            // results.scales[c.bone_index] = c.keyframes[index]
+            //     .scale
+            //     .lerp(c.keyframes[index + 1].scale, t);
         }
+
         results
     }
 
