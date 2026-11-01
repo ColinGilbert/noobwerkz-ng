@@ -15,7 +15,11 @@ fn traverse_node_recursive(
     buffers: &Vec<gltf::buffer::Data>,
 ) {
     // Process the current node (e.g., access its mesh, transform, etc.)
-    println!("Node name {}, index {}", node.name().unwrap_or_default(), node.index());
+    println!(
+        "Node name {}, index {}",
+        node.name().unwrap_or_default(),
+        node.index()
+    );
     node_index_to_name_map.insert(node.index(), node.name().unwrap_or_default().to_owned());
     let mesh = node.mesh();
     let decomposed = parent_transform * glam::Mat4::from_cols_array_2d(&node.transform().matrix());
@@ -147,7 +151,13 @@ fn run(path: &str) {
     let mut node_index_to_name_map = HashMap::new();
     println!("Roots length: {}", roots.len());
     for r in roots {
-        traverse_node_recursive(&r, glam::Mat4::IDENTITY, &mut serialized_meshes, &mut node_index_to_name_map, &buffers);
+        traverse_node_recursive(
+            &r,
+            glam::Mat4::IDENTITY,
+            &mut serialized_meshes,
+            &mut node_index_to_name_map,
+            &buffers,
+        );
     }
     for mat in document.materials() {
         let mut serialized_material = SerializedModelMaterial::new();
@@ -305,7 +315,9 @@ fn run(path: &str) {
                     .insert(serialized_joint_index, joint_node_index);
                 println!(
                     "Inserting joint {} index {} to serialized index {} ",
-                    joint_name.clone(), joint_node_index, serialized_joint_index
+                    joint_name.clone(),
+                    joint_node_index,
+                    serialized_joint_index
                 );
                 joint_nodes_index_set.insert(joint_node_index);
             }
@@ -319,10 +331,6 @@ fn run(path: &str) {
             println!("Joint parent not found. {}", j.parent);
             j.parent = INVALID_BONE;
         }
-        //
-        // if serialized_indices_to_raw_joint_node_indices.contains_key(&i) {
-        //     //joints.push(j.clone());
-        // }
     }
     let mut temp_set = HashSet::<usize>::new();
     // Now we redo the bone indices for the meshes:
@@ -332,10 +340,26 @@ fn run(path: &str) {
                 let old_index = bi[i] as usize;
                 if !joint_nodes_index_set.contains(&old_index) {
                     if !temp_set.contains(&old_index) {
-                        println!("Old bone index {} without a new index. Node name for old index: {}", old_index, node_index_to_name_map[&old_index]);
+                        println!(
+                            "Old bone index {} without a new index. Node name for old index: {}",
+                            old_index, node_index_to_name_map[&old_index]
+                        );
                         temp_set.insert(old_index);
                     }
                 }
+            }
+        }
+    }
+
+    // Here we validate for non-normalized bone weights
+    for m in &mut serialized_meshes {
+        for bw in m.bone_weights.iter() {
+            let mut accum = 0.0;
+            for i in 0..4 {
+                accum += bw[i];
+            }
+            if accum > 1.00001 || accum < 0.99999 {
+                println!("Bone weights not normalized");
             }
         }
     }
@@ -357,19 +381,15 @@ fn run(path: &str) {
                 anim_name_counter += 1;
             }
         }
-        animations_by_name.insert(anim_name, animation_index);
+        animations_by_name.insert(anim_name.clone(), animation_index);
         animation_index += 1;
+        println!("Animation name: {}", anim_name.clone());
         // let mut channel_num = 0usize;
         let mut serialized_animations_channels = Vec::new();
         for channel in anim.channels() {
-            //channel.target().index();
-            // let s = channel.sampler();
-            // println!("Sampler interpolation: {:?}", s.interpolation());
             let target_bone_index =
                 raw_joint_nodes_indices_to_serialized_indices[&channel.target().node().index()];
-
-            // println!("Target index {}", target_bone_index);
-
+                
             let mut times = Vec::new();
             let reader = channel.reader(|buffer| Some(&buffers[buffer.index()]));
             let _keyframe_times = if let Some(inputs) = reader.read_inputs() {
@@ -384,12 +404,11 @@ fn run(path: &str) {
                     }
                 }
             };
-            let mut serialized_channels_keyframes: SerializedAnimation3DChannel =
-                SerializedAnimation3DChannel {
-                    bone: target_bone_index,
-                    data: SerializedAnimation3DKeyframeTypes::Invalid,
-                    times,
-                };
+            let mut serialized_channels_keyframes = SerializedAnimation3DChannel {
+                bone: target_bone_index,
+                data: SerializedAnimation3DKeyframeTypes::Invalid,
+                times,
+            };
             if let Some(outputs) = reader.read_outputs() {
                 match outputs {
                     gltf::animation::util::ReadOutputs::Translations(translation) => {
@@ -416,16 +435,16 @@ fn run(path: &str) {
                         serialized_channels_keyframes.data =
                             SerializedAnimation3DKeyframeTypes::Scales(scales.clone());
                     }
-                    _ => {} // gltf::animation::util::ReadOutputs::MorphTargetWeights(_) => {},
+                    gltf::animation::util::ReadOutputs::MorphTargetWeights(_) => {
+                        println!("Morph weights not supported");
+                    }
                 }
             };
-
             serialized_animations_channels.push(serialized_channels_keyframes.clone());
         }
         serialized_animations.push(SerializedAnimation3D {
             channels: serialized_animations_channels.clone(),
         });
-        // anim_num += 1;
     }
 
     let mut serialized_model = SerializedModel3D::new();

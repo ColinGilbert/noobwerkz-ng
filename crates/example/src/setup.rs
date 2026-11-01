@@ -173,9 +173,9 @@ pub fn user_setup(
 
     let mut king_skeletal_anim_instances = Vec::<Instance3D>::new();
     let mut outer = 0;
-    while outer < 1 {
+    while outer < 2 {
         let mut inner = 0;
-        while inner < 1 {
+        while inner < 2 {
             king_skeletal_anim_instances.push(Instance3D {
                 position: noobwerkz_client::glam::Vec3::from_array([
                     SPACE_BETWEEN * outer as f32,
@@ -194,9 +194,9 @@ pub fn user_setup(
     let mut king_animgraph_definition = AnimationGraphDefinition::new();
     let root_node_def = GenericNodeDefinition::Sampler(SamplerNodeDefinition {
         speed: 1.0,
-        animation_name: "CharacterArmature|Idle".to_owned(),
+        animation_name: "Walk".to_owned(),
         looping: true,
-        name: "Idle".to_owned(),
+        name: "Walk".to_owned(),
     });
 
     let root = king_animgraph_definition
