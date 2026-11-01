@@ -81,13 +81,13 @@ pub fn user_setup(
         let mut inner = 0;
         while inner < 10 {
             cesium_man_skeletal_anim_instances.push(Instance3D {
-                position: noobwerkz_client::glam::Vec3A::from_array([
+                position: noobwerkz_client::glam::Vec3::from_array([
                     SPACE_BETWEEN * outer as f32,
                     3.0,
                     SPACE_BETWEEN * inner as f32,
                 ]),
                 orientation: noobwerkz_client::glam::Quat::IDENTITY,//from_rotation_z(degrees_to_radians(90.0)) * noobwerkz_client::glam::Quat::from_rotation_x(degrees_to_radians(-90.0)),
-                scale: noobwerkz_client::glam::Vec3A::splat(1.0),
+                scale: noobwerkz_client::glam::Vec3::splat(1.0),
             });
             inner += 1;
         }
@@ -177,13 +177,13 @@ pub fn user_setup(
         let mut inner = 0;
         while inner < 1 {
             king_skeletal_anim_instances.push(Instance3D {
-                position: noobwerkz_client::glam::Vec3A::from_array([
+                position: noobwerkz_client::glam::Vec3::from_array([
                     SPACE_BETWEEN * outer as f32,
                     -2.0,
                     SPACE_BETWEEN * inner as f32,
                 ]),
                 orientation: noobwerkz_client::glam::Quat::IDENTITY,//from_rotation_x(degrees_to_radians(-90.0)) * noobwerkz_client::glam::Quat::from_rotation_z(degrees_to_radians(-180.0)),
-                scale: noobwerkz_client::glam::Vec3A::splat(1.0),
+                scale: noobwerkz_client::glam::Vec3::splat(1.0),
             });
             inner += 1;
         }
@@ -240,9 +240,9 @@ pub fn user_setup(
         Ok(val) => {
             let mut instances = Instances::<Instance3D>::new();
             instances.push(Instance3D {
-                position: noobwerkz_client::glam::Vec3A::from_array([0.0, 0.0, 0.0]),
+                position: noobwerkz_client::glam::Vec3::from_array([0.0, 0.0, 0.0]),
                 orientation: noobwerkz_client::glam::Quat::IDENTITY,
-                scale: noobwerkz_client::glam::Vec3A::splat(10.0),
+                scale: noobwerkz_client::glam::Vec3::splat(10.0),
             });
             s.model_nodes.push(Model3DNode::new(val, instances));
         }

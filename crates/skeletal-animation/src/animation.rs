@@ -12,7 +12,6 @@ pub struct Animation {
     pub channels: Vec<AnimationChannel>,
     pub current_time: f32,
     pub looping: bool,
-    
 }
 
 impl Animation {
@@ -41,15 +40,19 @@ impl Animation {
     pub fn seek(&mut self, time: f32) {
         if self.looping {
             self.current_time = time % self.length;
+        } else {
+            self.current_time = time
         }
-        
+
         // for c in self.channels.iter_mut() {
         //     c.seek(new_time, self.looping);
         // }
     }
 
-    pub fn playback(&mut self, skeleton: Arc<Skeleton>) -> LocalToLocalResults {
-        let mut results = LocalToLocalResults::new();
+    pub fn playback(&mut self, skeleton: Arc<Skeleton>, results: &mut LocalToLocalResults) {
+        results.translations.clear();
+        results.rotations.clear();
+        results.scales.clear();
 
         // This was important.
         for b in skeleton.bones.to_vec() {
@@ -58,26 +61,12 @@ impl Animation {
             results.scales.push(b.scale);
         }
         // Here we do the actual playback
-        // For each animation channel:
         for c in &self.channels {
-            let k = c.seek(self.current_time, self.looping);
+            let k = c.seek(self.current_time);
             results.translations[c.bone_index] = k.translation;
             results.rotations[c.bone_index] = k.orientation;
             results.scales[c.bone_index] = k.scale;
-            // let t = c.seek_results.t_between_frames;
-            // let index = c.seek_results.index;
-            // results.translations[c.bone_index] = c.keyframes[index]
-            //     .translation
-            //     .lerp(c.keyframes[index + 1].translation, t);
-            // results.rotations[c.bone_index] = c.keyframes[index]
-            //     .orientation
-            //     .slerp(c.keyframes[index + 1].orientation, t);
-            // results.scales[c.bone_index] = c.keyframes[index]
-            //     .scale
-            //     .lerp(c.keyframes[index + 1].scale, t);
         }
-
-        results
     }
 
     pub fn reset(&mut self) {

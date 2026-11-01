@@ -1,7 +1,8 @@
+use gltf::Semantic;
 use msgpacker::*;
 use noobwerkz_shared::{bone::*, serialized_model3d::*};
 use std::{
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::{HashMap, HashSet},
     fs::*,
     io::*,
 };
@@ -10,10 +11,12 @@ fn traverse_node_recursive(
     node: &gltf::Node,
     parent_transform: glam::Mat4,
     meshes: &mut Vec<SerializedMesh3D>,
+    node_index_to_name_map: &mut HashMap<usize, String>, // For debugging.
     buffers: &Vec<gltf::buffer::Data>,
 ) {
     // Process the current node (e.g., access its mesh, transform, etc.)
-    println!("Node name {}", node.name().unwrap_or_default());
+    println!("Node name {}, index {}", node.name().unwrap_or_default(), node.index());
+    node_index_to_name_map.insert(node.index(), node.name().unwrap_or_default().to_owned());
     let mesh = node.mesh();
     let decomposed = parent_transform * glam::Mat4::from_cols_array_2d(&node.transform().matrix());
     if mesh.is_some() {
@@ -78,6 +81,17 @@ fn traverse_node_recursive(
                             serialized_mesh.bone_weights.push(w);
                         }
                     }
+
+                    let weight_set_count = p
+                        .attributes()
+                        .filter(|(semantic, _)| matches!(semantic, Semantic::Weights(_)))
+                        .count();
+
+                    println!(
+                        "Primitive has {} set(s) of skinning weights.",
+                        weight_set_count
+                    );
+
                     if let Some(indices) = reader.read_indices() {
                         for i in indices.into_u32() {
                             serialized_mesh.indices.push(i);
@@ -117,7 +131,7 @@ fn traverse_node_recursive(
     }
     // Recursively visit all children
     for child in node.children() {
-        traverse_node_recursive(&child, decomposed, meshes, buffers);
+        traverse_node_recursive(&child, decomposed, meshes, node_index_to_name_map, buffers);
     }
 }
 
@@ -130,10 +144,10 @@ fn run(path: &str) {
     let roots = scene.nodes();
     let mut serialized_meshes = Vec::<SerializedMesh3D>::new();
     let mut serialized_materials = Vec::<SerializedModelMaterial>::new();
-
+    let mut node_index_to_name_map = HashMap::new();
     println!("Roots length: {}", roots.len());
     for r in roots {
-        traverse_node_recursive(&r, glam::Mat4::IDENTITY, &mut serialized_meshes, &buffers);
+        traverse_node_recursive(&r, glam::Mat4::IDENTITY, &mut serialized_meshes, &mut node_index_to_name_map, &buffers);
     }
     for mat in document.materials() {
         let mut serialized_material = SerializedModelMaterial::new();
@@ -219,51 +233,52 @@ fn run(path: &str) {
     let mut inverse_bind_matrices = Vec::new();
     let mut raw_joint_nodes_indices_to_serialized_indices: HashMap<usize, usize> =
         HashMap::<usize, usize>::new();
-    let mut serialized_indices_to_raw_joint_node_indices: BTreeMap<usize, usize> =
-        BTreeMap::<usize, usize>::new();
-    // let mut skin_counter = 0;
-    // let mut all_joints = Vec::<SerializedBone3D>::new();
+    let mut serialized_indices_to_raw_joint_node_indices: HashMap<usize, usize> =
+        HashMap::<usize, usize>::new();
     let mut joints = Vec::<SerializedBone3D>::new();
     let mut joint_nodes_index_set = HashSet::new();
     for skin in document.skins() {
-        // We need this because we iterate and change over it
-        // let mut skin_name = "";
-        // if skin.name().is_some() {
-        //     skin_name = skin.name().unwrap();
-        // }
         let skin_skeleton = skin.skeleton();
         if skin_skeleton.is_some() {
             let skin_skeleton_name = skin_skeleton.unwrap().name();
             if skin_skeleton_name.is_some() {
-                // println!("Skin skeleton node name: {}", skin_skeleton_name.unwrap());
+                println!("Skin skeleton node name: {}", skin_skeleton_name.unwrap());
             }
             // let skin_skeleton_index = skin_skeleton.unwrap().index();
         }
         // println!("Skin name: {:?}", skin_name);
         if let Some(ibm_accessor) = skin.inverse_bind_matrices() {
-            inverse_bind_matrices =
+            let inverse_bind_matrices_temp =
                 extract_matrices_from_accessor(&ibm_accessor, &buffers).unwrap();
+
+            // Validate whether or not the inverse bind matrices differ from one skin to the next.
+            for (a, b) in inverse_bind_matrices
+                .iter()
+                .zip(inverse_bind_matrices_temp.iter())
+            {
+                if a != b {
+                    println!("Inverse bind matrices mismatch! {:?} != {:?}", a, b);
+                }
+            }
+            inverse_bind_matrices = inverse_bind_matrices_temp;
             println!("IBM Matrices length: {}", inverse_bind_matrices.len());
             // println!("IBM Matrices {:?}", inverse_bind_matrices);
         }
         // let mut num_bones = 0usize;
         for joint_node in skin.joints() {
+            let joint_name;
             if joint_node.name().is_some() {
-                // println!(
-                //     "  Joint (Bone) Name: {}, index: {}",
-                //     joint_node.name().unwrap(),
-                //     joint_node.index(),
-                // );
                 // println!("Joint children: ");
                 joint_node.children().for_each(|f| {
                     // println!(" {}", f.index());
                     joint_parents.insert(f.index(), joint_node.index());
                 });
-
-                joint_names.push(joint_node.name().unwrap().to_owned());
+                joint_name = joint_node.name().unwrap().to_owned();
+                joint_names.push(joint_name.clone());
             } else {
                 // println!("  Joint ({}) has no name", joint_node.index().to_string());
-                joint_names.push(joint_node.index().to_string());
+                joint_name = joint_node.index().to_string();
+                joint_names.push(joint_name.clone());
             }
 
             let mut joint_parent = INVALID_BONE;
@@ -280,7 +295,6 @@ fn run(path: &str) {
                 rotation: xform_rot.to_array(),
                 translation: xform_trans.to_array(),
             };
-            // num_bones += 1;
             let joint_node_index = joint_node.index();
             if !joint_nodes_index_set.contains(&joint_node_index) {
                 joints.push(serialized_bone);
@@ -289,28 +303,20 @@ fn run(path: &str) {
                     .insert(joint_node_index, serialized_joint_index);
                 serialized_indices_to_raw_joint_node_indices
                     .insert(serialized_joint_index, joint_node_index);
+                println!(
+                    "Inserting joint {} index {} to serialized index {} ",
+                    joint_name.clone(), joint_node_index, serialized_joint_index
+                );
                 joint_nodes_index_set.insert(joint_node_index);
             }
         }
-        // println!("Num bones {}", num_bones);
-        //let mut joints_temp = joints.clone();
-
-        // all_joints.clear();
-
-        // for j in joints_temp {
-        //     all_joints.push(j);
-        // }
-        // println!("Serialized joints: ");
-        // for (i, j) in all_joints.iter().enumerate() {
-        //     println!("    {}: {:?}", i, j);
-        // }
-        // skin_counter += 1;
     }
     let mut all_joints = joints.clone();
     for j in all_joints.iter_mut() {
-        if raw_joint_nodes_indices_to_serialized_indices.contains_key(&j.parent) {
+        if joint_nodes_index_set.contains(&j.parent) {
             j.parent = raw_joint_nodes_indices_to_serialized_indices[&j.parent];
         } else {
+            println!("Joint parent not found. {}", j.parent);
             j.parent = INVALID_BONE;
         }
         //
@@ -318,16 +324,21 @@ fn run(path: &str) {
         //     //joints.push(j.clone());
         // }
     }
+    let mut temp_set = HashSet::<usize>::new();
     // Now we redo the bone indices for the meshes:
-    // for m in &mut serialized_meshes {
-    //     for bi in m.bone_indices.iter_mut() {
-    //         for i in 0..4 {
-    //             let old_index = bi[i];
-    //             let new_index = raw_joint_nodes_indices_to_serialized_indices[&(old_index as usize)];
-    //             bi[i] = new_index as u32;
-    //         }
-    //     }
-    // }
+    for m in &mut serialized_meshes {
+        for bi in m.bone_indices.iter() {
+            for i in 0..4 {
+                let old_index = bi[i] as usize;
+                if !joint_nodes_index_set.contains(&old_index) {
+                    if !temp_set.contains(&old_index) {
+                        println!("Old bone index {} without a new index. Node name for old index: {}", old_index, node_index_to_name_map[&old_index]);
+                        temp_set.insert(old_index);
+                    }
+                }
+            }
+        }
+    }
 
     // Here we add the animations extracting code
     let anims = document.animations();
@@ -384,18 +395,10 @@ fn run(path: &str) {
                     gltf::animation::util::ReadOutputs::Translations(translation) => {
                         let mut translations = Vec::new();
                         translation.for_each(|tr| {
-                            // println!("Translation:");
-                            // dbg!(tr);
                             translations.push(tr);
                         });
                         serialized_channels_keyframes.data =
                             SerializedAnimation3DKeyframeTypes::Translations(translations.clone());
-                        // println!(
-                        //     "Anim {}, channel {}, keyframe translations: {}",
-                        //     anim_num,
-                        //     channel_num,
-                        //     translations.len()
-                        // );
                     }
                     gltf::animation::util::ReadOutputs::Rotations(rotation) => {
                         let mut rotations = Vec::new();
@@ -404,12 +407,6 @@ fn run(path: &str) {
                         });
                         serialized_channels_keyframes.data =
                             SerializedAnimation3DKeyframeTypes::Rotations(rotations.clone());
-                        // println!(
-                        //     "Anim {}, channel {}, keyframe rotations: {}",
-                        //     anim_num,
-                        //     channel_num,
-                        //     rotations.len()
-                        // );
                     }
                     gltf::animation::util::ReadOutputs::Scales(scale) => {
                         let mut scales = Vec::new();
@@ -418,26 +415,12 @@ fn run(path: &str) {
                         });
                         serialized_channels_keyframes.data =
                             SerializedAnimation3DKeyframeTypes::Scales(scales.clone());
-                        // println!(
-                        //     "Anim {}, channel {}, keyframe scales: {}",
-                        //     anim_num,
-                        //     channel_num,
-                        //     scales.len()
-                        // );
                     }
                     _ => {} // gltf::animation::util::ReadOutputs::MorphTargetWeights(_) => {},
                 }
             };
 
             serialized_animations_channels.push(serialized_channels_keyframes.clone());
-            // println!(
-            //     "Anim {}, channel {}, bone {}, bone name {}",
-            //     anim_num,
-            //     channel_num,
-            //     serialized_channels_keyframes.clone().bone,
-            //     joint_names[serialized_channels_keyframes.clone().bone]
-            // );
-            // channel_num += 1;
         }
         serialized_animations.push(SerializedAnimation3D {
             channels: serialized_animations_channels.clone(),

@@ -239,13 +239,13 @@ impl AnimationGraph {
                                 .unwrap();
                             let from = self.graph.node_weight(edge.0).unwrap();
                             // Otherwise, evaluate the transition
-                            let mut from_results = LocalToLocalResults::new(); // TODO: Init inside match clause
+                            let from_results = LocalToLocalResults::new(); // TODO: Init inside match clause
                             match from {
                                 GenericNode::Sampler(val) => {
                                     self.animations[self.samplers[*val].index]
                                         .seek(self.duration.as_secs_f32());
-                                    from_results =
-                                        self.animations[self.samplers[*val].index].playback(self.skeleton.clone());
+                                    let mut from_results = LocalToLocalResults::new();
+                                        self.animations[self.samplers[*val].index].playback(self.skeleton.clone(), &mut from_results);
                                 }
                                 GenericNode::BlendTreeOneDim(_) => {
                                     // self.blend_trees_one_dim[*val].update(dt);
@@ -253,13 +253,13 @@ impl AnimationGraph {
                                 }
                             }
                             let to = self.graph.node_weight(edge.1).unwrap();
-                            let mut to_results = LocalToLocalResults::new(); // TODO: Init inside match clause
+                            let to_results = LocalToLocalResults::new(); // TODO: Init inside match clause
                             match to {
                                 GenericNode::Sampler(val) => {
                                     self.animations[self.samplers[*val].index]
                                         .seek(self.duration.as_secs_f32());
-                                    to_results =
-                                        self.animations[self.samplers[*val].index].playback(self.skeleton.clone());
+                                    let mut to_results = LocalToLocalResults::new();
+                                        self.animations[self.samplers[*val].index].playback(self.skeleton.clone(), &mut to_results);
                                 }
                                 GenericNode::BlendTreeOneDim(_) => {
                                     // self.blend_trees_one_dim[*val].update(dt);
@@ -329,8 +329,7 @@ impl AnimationGraph {
                                     // self.output_locals.rotations.clear();
                                     // self.output_locals.translations.clear();
                                     // self.output_locals.scales.clear();
-                                    self.output_locals =
-                                        self.animations[self.samplers[*val].index].playback(self.skeleton.clone());
+                                        self.animations[self.samplers[*val].index].playback(self.skeleton.clone(), &mut self.output_locals);
                                 }
                                 GenericNode::BlendTreeOneDim(_) => {
                                     // TODO

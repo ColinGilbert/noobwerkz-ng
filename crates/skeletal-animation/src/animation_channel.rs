@@ -31,18 +31,11 @@ impl Keyframe {
     }
 }
 
-#[derive(Clone)]
-pub struct SeekResults {
-    pub t_between_frames: f32,
-    pub index: usize,
-}
-
 // Consists of several keyframes
 #[derive(Clone)]
 pub struct AnimationChannel {
     pub bone_index: usize,
     pub keyframes: Vec<Keyframe>,
-    pub seek_results: SeekResults,
 }
 
 impl AnimationChannel {
@@ -112,20 +105,13 @@ impl AnimationChannel {
         let channel = Self {
             bone_index,
             keyframes,
-            seek_results: SeekResults {
-                t_between_frames: 0.0,
-                index: 0,
-            },
         };
-        // println!("Keyframes:");
-        // for k in &channel.keyframes {
-        //     print!("{} ", k.time);
-        // }
+
         Some(channel)
     }
 
     //  Returns the index of the first of two animations
-    pub fn seek(&self, time: f32, looping: bool) -> Keyframe {
+    pub fn seek(&self, time: f32) -> Keyframe {
         if self.keyframes.is_empty() {
             return Keyframe {
                 translation: glam::Vec3::ZERO,
@@ -138,12 +124,8 @@ impl AnimationChannel {
             return self.keyframes.first().unwrap().clone();
         }
         if time >= self.keyframes.last().unwrap().time {
-            if looping {
-                return self.keyframes.first().unwrap().clone();
-            }
             return self.keyframes.last().unwrap().clone();
         }
-
         let mut i = 0;
         while i < self.keyframes.len() - 1 {
             let k1 = &self.keyframes[i];

@@ -80,7 +80,7 @@ impl Scene3D {
         for characters_ctx in self.characters_contexts.iter_mut() {
             characters_ctx.skinned_model_node.instances.clear();
             characters_ctx.skinned_model_node.bone_matrices.clear();
- 
+
             for c in &mut characters_ctx.characters {
                 let r = c.anim_graph.evaluate(dt);
                 match r {
@@ -90,25 +90,27 @@ impl Scene3D {
                     }
                 }
                 let instance = Instance3D {
-                    position: c.common.position.into(),
+                    position: c.common.position,
                     orientation: c.common.orientation,
-                    scale: glam::Vec3A::splat(1.0),
+                    scale: glam::Vec3::splat(1.0),
                 };
 
                 characters_ctx.skinned_model_node.instances.push(instance);
 
                 let output = &c.anim_graph.output_model;
 
-                // println!(
-                //     "Output model matrices count {}",
-                //     output.model_matrices.len()
-                // );
+                if output.model_matrices.len()
+                    != skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
+                        .skeleton
+                        .inverse_bind_matrices
+                        .len()
+                {
+                    println!("Discrepancy in size between output model matrices and IBM's");
+                }
+
                 for (i, o) in output.model_matrices.iter().enumerate() {
-                    // let b = characters_ctx.skinned_model_node.skeleton.bones[i];
-                    // let skel_matrix = glam::Mat4::from_scale_rotation_translation(b.scale, b.orientation, b.position);
-                    // let inv_skel_matrix = skel_matrix.inverse();
                     characters_ctx.skinned_model_node.bone_matrices.push(
-                         o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
+                        o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
                             .skeleton
                             .inverse_bind_matrices[i],
                     );

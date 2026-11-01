@@ -2,9 +2,9 @@ use crate::vertex::*;
 use std::mem;
 
 pub struct Instance3D {
-    pub position: glam::Vec3A,
+    pub position: glam::Vec3,
     pub orientation: glam::Quat,
-    pub scale: glam::Vec3A,
+    pub scale: glam::Vec3,
 }
 
 impl Instance3D {
