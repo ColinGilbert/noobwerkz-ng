@@ -1,3 +1,4 @@
+use clap::Parser;
 use gltf::Semantic;
 use msgpacker::*;
 use noobwerkz_shared::{bone::*, serialized_model3d::*};
@@ -5,6 +6,7 @@ use std::{
     collections::{HashMap, HashSet},
     fs::*,
     io::*,
+    str::FromStr,
 };
 
 fn traverse_node_recursive(
@@ -139,8 +141,8 @@ fn traverse_node_recursive(
     }
 }
 
-fn run(path: &str) {
-    let (document, buffers, _images) = gltf::import(path).unwrap();
+fn run(input_path: &str, output_path: &str) {
+    let (document, buffers, _images) = gltf::import(input_path).unwrap();
     let mut scenes = document.scenes();
     let scene = scenes.next().unwrap();
     let scene_name = scene.name().unwrap_or_default();
@@ -164,7 +166,7 @@ fn run(path: &str) {
         println!("ModelMaterial name: {} ", mat.name().unwrap_or_default());
 
         serialized_material.base_colour = mat.pbr_metallic_roughness().base_color_factor();
-        serialized_material.metallic  = mat.pbr_metallic_roughness().metallic_factor();
+        serialized_material.metallic = mat.pbr_metallic_roughness().metallic_factor();
         serialized_material.roughness = mat.pbr_metallic_roughness().roughness_factor();
 
         if let Some(pbr) = mat.pbr_metallic_roughness().base_color_texture() {
@@ -189,11 +191,19 @@ fn run(path: &str) {
                         _ => ".bin",
                     };
 
-                    let file_name = format!("texture_diffuse.{}", ext);
-                    let mut file = std::fs::File::create(file_name.clone()).unwrap();
+                    let mut truncated_path = std::path::PathBuf::from_str(&output_path).unwrap();
+                    let file_name = format!("{}-texture_diffuse.{}", truncated_path.clone().file_stem().unwrap().to_string_lossy(), ext);
+                    truncated_path.pop();
+                    truncated_path.push(file_name);
+                    let mut file = std::fs::File::create(truncated_path.clone()).unwrap();
                     file.write_all(raw_bytes).unwrap();
-                    println!("Saved diffuse texture to {}", file_name.clone());
-                    serialized_material.diffuse_texture_path = file_name.clone();
+                    println!(
+                        "Saved diffuse texture to {}",
+                        truncated_path.clone().display()
+                    );
+
+                    serialized_material.diffuse_texture_path =
+                        truncated_path.clone().file_name().unwrap().to_string_lossy().to_string();
                 }
                 gltf::image::Source::Uri { uri, mime_type } => {
                     println!(
@@ -224,11 +234,18 @@ fn run(path: &str) {
                         _ => ".bin",
                     };
 
-                    let file_name = format!("texture_normal.{}", ext);
-                    let mut file = std::fs::File::create(file_name.clone()).unwrap();
+                    let mut truncated_path = std::path::PathBuf::from_str(&output_path).unwrap();
+                    let file_name = format!("{}-texture_normal.{}", truncated_path.clone().file_stem().unwrap().to_string_lossy(), ext);
+                    truncated_path.pop();
+                    truncated_path.push(file_name);
+                    let mut file = std::fs::File::create(truncated_path.clone()).unwrap();
                     file.write_all(raw_bytes).unwrap();
-                    println!("Saved normal texture to {}", file_name.clone());
-                    serialized_material.normals_texture_path = file_name.clone();
+                    println!(
+                        "Saved normal texture to {}",
+                        truncated_path.clone().display()
+                    );
+                    serialized_material.normals_texture_path =
+                        truncated_path.clone().file_name().unwrap().to_string_lossy().to_string();
                 }
                 gltf::image::Source::Uri { uri, mime_type } => {
                     println!(
@@ -463,7 +480,7 @@ fn run(path: &str) {
 
     let mut buf = Vec::new();
     let _n = serialized_model.pack(&mut buf);
-    let mut file = File::create("model.bin").unwrap();
+    let mut file = File::create(output_path).unwrap();
     let results = file.write_all(&buf);
     match results {
         Ok(_data) => {
@@ -506,11 +523,14 @@ fn extract_matrices_from_accessor(
         Err(anyhow::anyhow!("Invalid buffer format"))
     }
 }
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    pub input: String,
+    pub output: String,
+}
 
 fn main() {
-    if let Some(path) = std::env::args().nth(1) {
-        run(&path);
-    } else {
-        println!("usage: noobwerkz-gltf2-converter <FILE>");
-    }
+    let args = Args::parse();
+    run(args.input.as_str(), args.output.as_str());
 }
