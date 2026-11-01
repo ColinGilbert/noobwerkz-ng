@@ -168,7 +168,7 @@ impl Particle3DContext {
             circle.height,
             texture_layout,
         );
-        println!("Register fallback circle texture success? {} ", results);
+        println!("Particle system - Register fallback circle texture success? {} ", results);
         // let results = self.register_texture(device, queue, "circle", &circle, texture_layout);
         // println!("Register explicit circle texture success? {} ", results);
     }
@@ -201,12 +201,6 @@ impl Particle3DContext {
                 });
             }
         }
-
-        // if self.instances.is_empty() {
-        //     println!("Particle3DContext: Instanced empty.");
-        //     return;
-        // }
-
         let data: &[u8] = bytemuck::cast_slice(&self.instances);
         let required = data.len() as u64;
         if required > self.instance_capacity {

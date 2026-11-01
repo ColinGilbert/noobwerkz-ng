@@ -86,7 +86,7 @@ pub fn user_setup(
                     3.0,
                     SPACE_BETWEEN * inner as f32,
                 ]),
-                orientation: noobwerkz_client::glam::Quat::IDENTITY,//from_rotation_z(degrees_to_radians(90.0)) * noobwerkz_client::glam::Quat::from_rotation_x(degrees_to_radians(-90.0)),
+                orientation: noobwerkz_client::glam::Quat::IDENTITY, //from_rotation_z(degrees_to_radians(90.0)) * noobwerkz_client::glam::Quat::from_rotation_x(degrees_to_radians(-90.0)),
                 scale: noobwerkz_client::glam::Vec3::splat(1.0),
             });
             inner += 1;
@@ -173,16 +173,16 @@ pub fn user_setup(
 
     let mut king_skeletal_anim_instances = Vec::<Instance3D>::new();
     let mut outer = 0;
-    while outer < 1 {
+    while outer < 10 {
         let mut inner = 0;
-        while inner < 1 {
+        while inner < 10 {
             king_skeletal_anim_instances.push(Instance3D {
                 position: noobwerkz_client::glam::Vec3::from_array([
                     SPACE_BETWEEN * outer as f32,
                     -2.0,
                     SPACE_BETWEEN * inner as f32,
                 ]),
-                orientation: noobwerkz_client::glam::Quat::IDENTITY,//from_rotation_x(degrees_to_radians(-90.0)) * noobwerkz_client::glam::Quat::from_rotation_z(degrees_to_radians(-180.0)),
+                orientation: noobwerkz_client::glam::Quat::IDENTITY, //from_rotation_x(degrees_to_radians(-90.0)) * noobwerkz_client::glam::Quat::from_rotation_z(degrees_to_radians(-180.0)),
                 scale: noobwerkz_client::glam::Vec3::splat(1.0),
             });
             inner += 1;
@@ -190,18 +190,15 @@ pub fn user_setup(
         outer += 1;
     }
 
-
     let mut king_animgraph_definition = AnimationGraphDefinition::new();
     let root_node_def = GenericNodeDefinition::Sampler(SamplerNodeDefinition {
         speed: 1.0,
-        animation_name: "Idle".to_owned(),
+        animation_name: "Walk".to_owned(),
         looping: true,
-        name: "Idle".to_owned(),
+        name: "Walk".to_owned(),
     });
 
-    let root = king_animgraph_definition
-        .graph
-        .add_node(root_node_def);
+    let root = king_animgraph_definition.graph.add_node(root_node_def);
 
     king_animgraph_definition.root = Some(root);
 
@@ -282,12 +279,11 @@ pub fn user_setup(
     gfx_ctx.particles_ctx.borrow_mut().register_texture(
         &gfx_ctx.device,
         &gfx_ctx.queue,
-        "yellow-spark",
+        "spark",
         rgba,
         image.width(),
         image.height(),
         &gfx_ctx.texture_bind_group_layout,
-        
     );
 
     s.particle_system.borrow_mut().register(
@@ -299,15 +295,26 @@ pub fn user_setup(
         ),
     );
 
-    let emitter = s
-        .particle_system
-        .borrow_mut()
-        .spawn("yellow-spark", [0.0, 1.0, 0.0]);
+    // let mut i = 0usize;
+    for x in 0..10 {
+        for z in 0..10 {
+            // if i % 2 == 0 {
+            //     s.particle_system
+            //         .borrow_mut()
+            //         .spawn("yellow-spark", [x as f32, 1.0, z as f32]);
+            // } else {
+            s.particle_system
+                .borrow_mut()
+                .spawn("yellow-spark", [x as f32, 1.0, z as f32]);
+            // }
+            // i += 1;
+            // println!(
+            //     "(Scene setup): Particle system empty? {}",
+            //     s.particle_system.borrow().is_empty()
+            // );
+            // println!("Emitter ID: {:?}", emitter);
+        }
+    }
 
-    println!(
-        "(Scene setup): Particle system empty? {}",
-        s.particle_system.borrow().is_empty()
-    );
-    println!("Emitter ID: {:?}", emitter);
     u.scenes.push(s);
 }
