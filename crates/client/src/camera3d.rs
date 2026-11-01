@@ -195,10 +195,6 @@ impl Projection3D {
 pub struct CameraUniform {
     pub view_position: [f32; 4],
     pub view_projection: [[f32; 4]; 4],
-    pub near: f32,
-    pub far: f32,
-    pub fade_distance: f32,
-    pub soft_enabled: f32,
 }
 
 impl CameraUniform {
@@ -206,10 +202,6 @@ impl CameraUniform {
         Self {
             view_position: [0.0, 0.0, 0.0, 1.0],
             view_projection: glam::Mat4::IDENTITY.to_cols_array_2d(),
-            near: 0.001,
-            far: 100.0,
-            fade_distance: 1.0,
-            soft_enabled: 0.0,
         }
     }
 

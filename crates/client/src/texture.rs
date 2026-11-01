@@ -2,7 +2,9 @@
 
 use anyhow::*;
 use image::GenericImageView;
-use wgpu::BindGroupLayout;
+use wgpu::{BindGroupLayout, util::DeviceExt};
+
+use crate::model_material::ModelMaterialPBRUniform;
 
 pub struct RawTextureBytes {
     pub width: u32,
@@ -199,6 +201,12 @@ impl Texture {
             mipmap_filter: wgpu::MipmapFilterMode::Nearest,
             ..Default::default()
         });
+        let pbr_uniform = ModelMaterialPBRUniform {color: [1.0, 1.0, 1.0, 1.0], metallic: 1.0, roughness: 1.0, _padding: [0.0, 0.0] };
+        let pbr_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("PBR Uniform Buffer"),
+            contents: bytemuck::cast_slice(&[pbr_uniform]),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
 
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: &texture_bind_group_layout,
@@ -219,8 +227,12 @@ impl Texture {
                 wgpu::BindGroupEntry {
                     binding: 3,
                     resource: wgpu::BindingResource::Sampler(&sampler),
-                },
-            ],
+                },// To match PBR info. Horrible hack.
+                wgpu::BindGroupEntry {
+                    binding: 4,
+                    resource: pbr_buffer.as_entire_binding(),
+                }
+              ],
             label: Some("Texture bind group"),
         });
 

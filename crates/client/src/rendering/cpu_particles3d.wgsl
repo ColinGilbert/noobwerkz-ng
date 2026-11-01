@@ -3,10 +3,6 @@
 struct Camera {
     view_pos: vec4<f32>,
     view_proj: mat4x4<f32>,
-    near: f32,
-    far: f32,
-    fade_distance: f32,
-    soft_enabled: f32,
 }
 @group(0) @binding(0)
 var<uniform> camera: Camera;
@@ -40,11 +36,6 @@ struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
     @location(0) uv: vec2<f32>,
     @location(1) color: vec4<f32>,
-}
-
-fn view_distance(depth: f32) -> f32 {
-    return camera.near * camera.far
-        / (camera.far - depth * (camera.far - camera.near));
 }
 
 @vertex
@@ -109,10 +100,5 @@ fn vs_main(
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let texel = textureSample(particle_texture, particle_sampler, in.uv);
     var color = texel * in.color;
-    if camera.soft_enabled > 0.5 {
-        let scene = textureLoad(scene_depth, vec2<i32>(in.clip_position.xy), 0).r;
-        let gap = view_distance(scene) - view_distance(in.clip_position.z);
-        color.a *= clamp(gap / camera.fade_distance, 0.0, 1.0);
-    }
     return color;
 }

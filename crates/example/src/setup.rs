@@ -33,8 +33,8 @@ pub fn user_setup(
         gfx_ctx.config.height,
         gfx_ctx.config.width,
         degrees_to_radians(45.0),
-        0.0001,
-        1000.0,
+        0.01,
+        100.0,
     );
 
     let mut s = Scene3D::new(&noobwerkz_client::glam::Vec3 {
@@ -72,7 +72,6 @@ pub fn user_setup(
         &mut gfx_ctx.queue,
         &gfx_ctx.debug_material,
         &gfx_ctx.texture_bind_group_layout,
-        &gfx_ctx.pbr_material_bind_group_layout
     );
 
     const SPACE_BETWEEN: f32 = 1.6;
@@ -170,14 +169,13 @@ pub fn user_setup(
         &mut gfx_ctx.queue,
         &gfx_ctx.debug_material,
         &gfx_ctx.texture_bind_group_layout,
-        &gfx_ctx.pbr_material_bind_group_layout
     );
 
     let mut king_skeletal_anim_instances = Vec::<Instance3D>::new();
     let mut outer = 0;
-    while outer < 2 {
+    while outer < 1 {
         let mut inner = 0;
-        while inner < 2 {
+        while inner < 1 {
             king_skeletal_anim_instances.push(Instance3D {
                 position: noobwerkz_client::glam::Vec3::from_array([
                     SPACE_BETWEEN * outer as f32,
@@ -236,7 +234,6 @@ pub fn user_setup(
         &mut gfx_ctx.queue,
         &gfx_ctx.debug_material,
         &gfx_ctx.texture_bind_group_layout,
-        &gfx_ctx.pbr_material_bind_group_layout
     );
 
     match avocado {

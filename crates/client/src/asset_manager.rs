@@ -52,7 +52,6 @@ impl AssetManager {
         queue: &mut wgpu::Queue,
         default_material: &ModelMaterial,
         texture_layout: &wgpu::BindGroupLayout,
-        pbr_layout: &wgpu::BindGroupLayout
     ) -> anyhow::Result<Model3DIndex> {
         let serialized_opt = load_serialized_model(filepath.as_path());
 
@@ -67,7 +66,6 @@ impl AssetManager {
                     device,
                     queue,
                     texture_layout,
-                    pbr_layout,
                 );
                 match model {
                     Some(val) => {
@@ -97,7 +95,6 @@ impl AssetManager {
         queue: &mut wgpu::Queue,
         default_material: &ModelMaterial,
         texture_layout: &wgpu::BindGroupLayout,
-        pbr_layout: &wgpu::BindGroupLayout,
     ) -> anyhow::Result<SkinnedModel3DIndex> {
         let serialized_opt = load_serialized_model(filepath.as_path());
         match serialized_opt {
@@ -111,7 +108,6 @@ impl AssetManager {
                     device,
                     queue,
                     texture_layout,
-                    pbr_layout,
                 );
                 match model {
                     Some(val) => {

@@ -7,17 +7,19 @@ pub struct ModelMaterial {
     pub name: String,
     pub diffuse_texture: texture::Texture,
     pub normal_texture: texture::Texture,
-    pub texture_bind_group: wgpu::BindGroup,
+    pub bind_group: wgpu::BindGroup,
     pub uniform: ModelMaterialPBRUniform,
+    pbr_buffer: wgpu::Buffer,
 }
 
 #[repr(C)]
 // Derive the required traits for safe casting.
 #[derive(Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct ModelMaterialPBRUniform {
-    pub color: [f32;4],
+    pub color: [f32; 4],
     pub metallic: f32,
     pub roughness: f32,
+    pub _padding: [f32;2]
 }
 
 impl ModelMaterial {
@@ -27,25 +29,25 @@ impl ModelMaterial {
         diffuse_texture: texture::Texture,
         normal_texture: texture::Texture,
         texture_layout: &wgpu::BindGroupLayout,
-        pbr_layout: &wgpu::BindGroupLayout,
         color: [f32; 4],
         metallic: f32,
         roughness: f32,
     ) -> Self {
 
-        let uniform = ModelMaterialPBRUniform{ color, metallic, roughness};
+        let uniform = ModelMaterialPBRUniform {
+            color,
+            metallic,
+            roughness,
+            _padding: [0.0, 0.0],
+        };
 
-        let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        let pbr_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("PBR Uniform Buffer"),
             contents: bytemuck::cast_slice(&[uniform]),
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
 
-
-
-
-
-        let texture_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: texture_layout,
             entries: &[
                 wgpu::BindGroupEntry {
@@ -64,6 +66,10 @@ impl ModelMaterial {
                     binding: 3,
                     resource: wgpu::BindingResource::Sampler(&normal_texture.sampler),
                 },
+                wgpu::BindGroupEntry {
+                    binding: 4,
+                    resource: pbr_buffer.as_entire_binding(),
+                },
             ],
             label: Some(name),
         });
@@ -72,8 +78,9 @@ impl ModelMaterial {
             name: String::from(name),
             diffuse_texture,
             normal_texture,
-            texture_bind_group,
+            bind_group,
             uniform,
+            pbr_buffer,
         }
     }
 }

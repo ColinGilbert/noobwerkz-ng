@@ -12,7 +12,6 @@ pub struct GraphicsContext {
     pub surface_format: wgpu::TextureFormat,
     pub depth_texture: Texture,
     pub texture_bind_group_layout: wgpu::BindGroupLayout,
-    pub pbr_material_bind_group_layout: wgpu::BindGroupLayout,
     pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
     pub debug_material: ModelMaterial,
     pub particles_ctx: Rc<RefCell<Particle3DContext>>,
@@ -99,24 +98,21 @@ impl GraphicsContext {
                         ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
                         count: None,
                     },
+                    // PBR materials
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 4,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Uniform,
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    },
                 ],
-                label: Some("textures bind group layout"),
+                label: Some("Materials bind group layout"),
             });
 
-        let pbr_material_bind_group_layout =
-            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                entries: &[wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None,
-                }],
-                label: Some("pbr_uniform_bind_group_layout"),
-            });
 
         let bone_matrices_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -192,7 +188,6 @@ impl GraphicsContext {
                 diffuse_texture,
                 normal_texture,
                 &texture_bind_group_layout,
-                &pbr_material_bind_group_layout,
                 [1.0, 1.0, 1.0, 1.0],
                 1.0,
                 1.0,
@@ -219,7 +214,6 @@ impl GraphicsContext {
             surface_format,
             depth_texture,
             texture_bind_group_layout,
-            pbr_material_bind_group_layout,
             bone_matrices_bind_group_layout,
             debug_material,
             particles_ctx,
