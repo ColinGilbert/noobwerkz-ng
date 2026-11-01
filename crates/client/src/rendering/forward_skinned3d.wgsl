@@ -1,4 +1,5 @@
 // Vertex shader
+
 struct Camera {
     view_pos: vec4<f32>,
     view_proj: mat4x4<f32>,
@@ -25,6 +26,8 @@ struct BoneMatrix {
 var<storage, read> bone_matrices: BoneMatrix;
 @group(3) @binding(1)
 var<uniform> num_bones: u32;
+
+
 
 struct VertexInput {
     @builtin(instance_index) instance_index: u32,
@@ -94,12 +97,21 @@ fn vs_main(
 
 @group(0) @binding(0)
 var t_diffuse: texture_2d<f32>;
-@group(0)@binding(1)
+@group(0) @binding(1)
 var s_diffuse: sampler;
-@group(0)@binding(2)
+@group(0) @binding(2)
 var t_normal: texture_2d<f32>;
 @group(0) @binding(3)
 var s_normal: sampler;
+
+struct PbrMaterial {
+    color: vec4<f32>,
+    metallic: f32,
+    roughness: f32,
+}
+
+@group(0) @binding(4)
+var<uniform> pbr: PbrMaterial;
 
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {

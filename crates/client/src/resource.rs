@@ -60,6 +60,7 @@ pub fn load_skinned_3d_model_from_serialized(
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
+    pbr_layout: &wgpu::BindGroupLayout,
 ) -> Option<SkinnedModel3D> {
     let mut model_results = SkinnedModel3D::new();
     for m in model.meshes.iter_mut() {
@@ -220,6 +221,10 @@ pub fn load_skinned_3d_model_from_serialized(
             diffuse_texture,
             normal_texture,
             texture_layout,
+            pbr_layout,
+            m.base_colour,
+            m.metallic,
+            m.roughness
         );
 
         model_results.materials.push(material);
@@ -315,6 +320,7 @@ pub fn load_3d_model_from_serialized(
     device: &mut wgpu::Device,
     queue: &mut wgpu::Queue,
     texture_layout: &wgpu::BindGroupLayout,
+    pbr_layout: &wgpu::BindGroupLayout
 ) -> Option<Model3D> {
     let mut model_results = Model3D::new();
     for m in model.meshes.iter_mut() {
@@ -441,6 +447,10 @@ pub fn load_3d_model_from_serialized(
             diffuse_texture,
             normal_texture,
             texture_layout,
+            pbr_layout,
+            m.base_colour,
+            m.metallic,
+            m.roughness
         );
         model_results.materials.push(material);
     }

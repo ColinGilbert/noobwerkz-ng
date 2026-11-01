@@ -163,6 +163,10 @@ fn run(path: &str) {
         let mut serialized_material = SerializedModelMaterial::new();
         println!("ModelMaterial name: {} ", mat.name().unwrap_or_default());
 
+        serialized_material.base_colour = mat.pbr_metallic_roughness().base_color_factor();
+        serialized_material.metallic  = mat.pbr_metallic_roughness().metallic_factor();
+        serialized_material.roughness = mat.pbr_metallic_roughness().roughness_factor();
+
         if let Some(pbr) = mat.pbr_metallic_roughness().base_color_texture() {
             let texture = document
                 .textures()
@@ -389,7 +393,7 @@ fn run(path: &str) {
         for channel in anim.channels() {
             let target_bone_index =
                 raw_joint_nodes_indices_to_serialized_indices[&channel.target().node().index()];
-                
+
             let mut times = Vec::new();
             let reader = channel.reader(|buffer| Some(&buffers[buffer.index()]));
             let _keyframe_times = if let Some(inputs) = reader.read_inputs() {

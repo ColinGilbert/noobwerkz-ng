@@ -297,7 +297,7 @@ impl ForwardRenderer3D {
 
         let render_pipeline = {
             let shader = wgpu::ShaderModuleDescriptor {
-                label: Some("Normal Shader"),
+                label: Some("Regular Shader"),
                 source: wgpu::ShaderSource::Wgsl(include_str!("forward_shader3d.wgsl").into()),
             };
 

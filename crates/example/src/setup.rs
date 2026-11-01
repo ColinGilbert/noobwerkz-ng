@@ -72,6 +72,7 @@ pub fn user_setup(
         &mut gfx_ctx.queue,
         &gfx_ctx.debug_material,
         &gfx_ctx.texture_bind_group_layout,
+        &gfx_ctx.pbr_material_bind_group_layout
     );
 
     const SPACE_BETWEEN: f32 = 1.6;
@@ -169,6 +170,7 @@ pub fn user_setup(
         &mut gfx_ctx.queue,
         &gfx_ctx.debug_material,
         &gfx_ctx.texture_bind_group_layout,
+        &gfx_ctx.pbr_material_bind_group_layout
     );
 
     let mut king_skeletal_anim_instances = Vec::<Instance3D>::new();
@@ -194,9 +196,9 @@ pub fn user_setup(
     let mut king_animgraph_definition = AnimationGraphDefinition::new();
     let root_node_def = GenericNodeDefinition::Sampler(SamplerNodeDefinition {
         speed: 1.0,
-        animation_name: "Walk".to_owned(),
+        animation_name: "Idle".to_owned(),
         looping: true,
-        name: "Walk".to_owned(),
+        name: "Idle".to_owned(),
     });
 
     let root = king_animgraph_definition
@@ -234,6 +236,7 @@ pub fn user_setup(
         &mut gfx_ctx.queue,
         &gfx_ctx.debug_material,
         &gfx_ctx.texture_bind_group_layout,
+        &gfx_ctx.pbr_material_bind_group_layout
     );
 
     match avocado {
@@ -287,6 +290,7 @@ pub fn user_setup(
         image.width(),
         image.height(),
         &gfx_ctx.texture_bind_group_layout,
+        
     );
 
     s.particle_system.borrow_mut().register(
