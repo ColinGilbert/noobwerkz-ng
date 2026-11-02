@@ -30,19 +30,6 @@ pub fn load_serialized_model(filepath: &std::path::Path) -> Option<SerializedMod
 
     match deserialized_results {
         Ok(deserialized) => {
-            println!("Dimensions {:?}", deserialized.meshes[0].dimensions);
-            println!("Scale {:?}", deserialized.meshes[0].scale);
-            println!("Translation {:?}", deserialized.meshes[0].translation);
-            println!("Rotation {:?}", deserialized.meshes[0].rotation);
-            println!(
-                "Diffuse texture {}",
-                deserialized.materials[0].diffuse_texture_path
-            );
-            println!(
-                "Normals texture {}",
-                deserialized.materials[0].normals_texture_path
-            );
-
             Some(deserialized)
         }
         Err(err) => {
@@ -63,7 +50,7 @@ pub fn load_skinned_3d_model_from_serialized(
 ) -> Option<SkinnedModel3D> {
     let mut model_results = SkinnedModel3D::new();
     for m in model.meshes.iter_mut() {
-        println!("Mesh {}", m.name);
+        // println!("Mesh {}", m.name);
         let mut verts = Vec::<Model3DVertex>::new();
         let mut indices = Vec::<u32>::new();
         if m.positions.len() != m.normals.len() {

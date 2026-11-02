@@ -68,12 +68,10 @@ pub fn user_setup(
     cesium_man_path.push("cesium-man-model.bin");
 
     const SPACE_BETWEEN: f32 = 1.6;
-    let mut cesium_man_skeletal_instances = Vec::<Instance3D>::new();
-    let mut outer = 0;
-    while outer < 10 {
-        let mut inner = 0;
-        while inner < 10 {
-            cesium_man_skeletal_instances.push(Instance3D {
+    let mut cesium_man_instances = Vec::<Instance3D>::new();
+    for outer in 0..10 {
+        for inner in 0..10 {
+            cesium_man_instances.push(Instance3D {
                 position: noobwerkz_client::glam::Vec3::from_array([
                     SPACE_BETWEEN * outer as f32,
                     3.0,
@@ -82,9 +80,7 @@ pub fn user_setup(
                 orientation: noobwerkz_client::glam::Quat::IDENTITY, //from_rotation_z(degrees_to_radians(90.0)) * noobwerkz_client::glam::Quat::from_rotation_x(degrees_to_radians(-90.0)),
                 scale: noobwerkz_client::glam::Vec3::splat(1.0),
             });
-            inner += 1;
         }
-        outer += 1;
     }
 
     let mut cesium_man_animgraph_definition = AnimationGraphDefinition::new();
@@ -100,17 +96,15 @@ pub fn user_setup(
         .add_node(root_node_def);
     cesium_man_animgraph_definition.root = Some(root);
 
-    u.load_character(&cesium_man_path, "CesiumMan", current_scene, &cesium_man_skeletal_instances, &cesium_man_animgraph_definition, &mut gfx_ctx.device, &mut gfx_ctx.queue, &gfx_ctx.debug_material, &gfx_ctx.texture_bind_group_layout, &gfx_ctx.bone_matrices_bind_group_layout);
+    u.load_character(&cesium_man_path, "CesiumMan", current_scene, &cesium_man_instances, &cesium_man_animgraph_definition, &mut gfx_ctx.device, &mut gfx_ctx.queue, &gfx_ctx.debug_material, &gfx_ctx.texture_bind_group_layout, &gfx_ctx.bone_matrices_bind_group_layout);
 
     let mut king_path = path.clone();
     king_path.push("King.bin");
 
-    let mut king_skeletal_anim_instances = Vec::<Instance3D>::new();
-    let mut outer = 0;
-    while outer < 10 {
-        let mut inner = 0;
-        while inner < 10 {
-            king_skeletal_anim_instances.push(Instance3D {
+    let mut king_instances = Vec::<Instance3D>::new();
+    for outer in 0..10 {
+        for inner in 0..10 {
+            king_instances.push(Instance3D {
                 position: noobwerkz_client::glam::Vec3::from_array([
                     SPACE_BETWEEN * outer as f32,
                     -2.0,
@@ -119,9 +113,7 @@ pub fn user_setup(
                 orientation: noobwerkz_client::glam::Quat::IDENTITY, //from_rotation_x(degrees_to_radians(-90.0)) * noobwerkz_client::glam::Quat::from_rotation_z(degrees_to_radians(-180.0)),
                 scale: noobwerkz_client::glam::Vec3::splat(1.0),
             });
-            inner += 1;
         }
-        outer += 1;
     }
 
     let mut king_animgraph_definition = AnimationGraphDefinition::new();
@@ -129,14 +121,14 @@ pub fn user_setup(
         speed: 1.0,
         animation_name: "Walk".to_owned(),
         looping: true,
-        name: "Walk".to_owned(),
+        name: "walk".to_owned(),
     });
 
     let root = king_animgraph_definition.graph.add_node(root_node_def);
 
     king_animgraph_definition.root = Some(root);
 
-    u.load_character(&king_path, "King", current_scene, &king_skeletal_anim_instances, &king_animgraph_definition, &mut gfx_ctx.device, &mut gfx_ctx.queue, &gfx_ctx.debug_material, &gfx_ctx.texture_bind_group_layout, &gfx_ctx.bone_matrices_bind_group_layout);
+    u.load_character(&king_path, "King", current_scene, &king_instances, &king_animgraph_definition, &mut gfx_ctx.device, &mut gfx_ctx.queue, &gfx_ctx.debug_material, &gfx_ctx.texture_bind_group_layout, &gfx_ctx.bone_matrices_bind_group_layout);
  
     let mut avocado_path = path.clone();
     avocado_path.push("Avocado.bin");
