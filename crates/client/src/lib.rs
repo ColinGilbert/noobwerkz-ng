@@ -1,3 +1,5 @@
+#![recursion_limit = "1024"]
+
 pub mod window_state;
 pub mod app;
 pub mod graphics;

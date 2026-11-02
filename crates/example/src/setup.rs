@@ -37,11 +37,13 @@ pub fn user_setup(
         100.0,
     );
 
-    let mut s = Scene3D::new(&noobwerkz_client::glam::Vec3 {
+    let s = Scene3D::new(&noobwerkz_client::glam::Vec3 {
         x: 0.0,
         y: -9.81,
         z: 0.0,
     });
+
+    let current_scene = u.add_scene(s);
 
     let c = Camera3D::new(
         &noobwerkz_client::glam::Vec3 {
@@ -65,22 +67,13 @@ pub fn user_setup(
     let mut cesium_man_path = path.clone();
     cesium_man_path.push("cesium-man-model.bin");
 
-    let cesium_man = u.asset_mgr.load_skinned_3d_model_from_file(
-        &cesium_man_path,
-        "Cesium Man",
-        &mut gfx_ctx.device,
-        &mut gfx_ctx.queue,
-        &gfx_ctx.debug_material,
-        &gfx_ctx.texture_bind_group_layout,
-    );
-
     const SPACE_BETWEEN: f32 = 1.6;
-    let mut cesium_man_skeletal_anim_instances = Vec::<Instance3D>::new();
+    let mut cesium_man_skeletal_instances = Vec::<Instance3D>::new();
     let mut outer = 0;
     while outer < 10 {
         let mut inner = 0;
         while inner < 10 {
-            cesium_man_skeletal_anim_instances.push(Instance3D {
+            cesium_man_skeletal_instances.push(Instance3D {
                 position: noobwerkz_client::glam::Vec3::from_array([
                     SPACE_BETWEEN * outer as f32,
                     3.0,
@@ -93,25 +86,6 @@ pub fn user_setup(
         }
         outer += 1;
     }
-
-    // let mut skeletal_anim_instances_two = Vec::<Instance3D>::new();
-    // let mut outer = 0;
-    // while outer < 2 {
-    //     let mut inner = 0;
-    //     while inner < 2 {
-    //         skeletal_anim_instances_two.push(Instance3D {
-    //             position: noobwerkz_client::glam::Vec3A::from_array([
-    //                 SPACE_BETWEEN * outer as f32,
-    //                 0.0,
-    //                 SPACE_BETWEEN * inner as f32,
-    //             ]),
-    //             orientation: noobwerkz_client::glam::Quat::IDENTITY,
-    //             scale: noobwerkz_client::glam::Vec3A::splat(1.0),
-    //         });
-    //         inner += 1;
-    //     }
-    //     outer += 1;
-    // }
 
     let mut cesium_man_animgraph_definition = AnimationGraphDefinition::new();
     let root_node_def = GenericNodeDefinition::Sampler(SamplerNodeDefinition {
@@ -126,50 +100,10 @@ pub fn user_setup(
         .add_node(root_node_def);
     cesium_man_animgraph_definition.root = Some(root);
 
-    match cesium_man {
-        Ok(val) => {
-            s.add_characters(
-                &mut gfx_ctx.device,
-                &gfx_ctx.bone_matrices_bind_group_layout,
-                val,
-                &cesium_man_skeletal_anim_instances,
-                &cesium_man_animgraph_definition,
-                u.asset_mgr.skinned_models[val].animations.clone(),
-                u.asset_mgr.skinned_models[val].skeleton.clone(),
-                &u.asset_mgr.skinned_models[val].animations_idx_by_name,
-                "cesium-man".to_owned(),
-            );
-            // s.add_characters(
-            //     &mut gfx_ctx.device,
-            //     &gfx_ctx.bone_matrices_bind_group_layout,
-            //     val,
-            //     &skeletal_anim_instances_two,
-            //     &animgraph_definition,
-            //     u.asset_mgr.skinned_models[val].animations.clone(),
-            //     u.asset_mgr.skinned_models[val].skeleton.clone(),
-            //     &u.asset_mgr.skinned_models[val].animations_idx_by_name,
-            //     "cesium-man-two".to_owned(),
-            // );
-        }
-        Err(err) => {
-            println!(
-                "Could not load skinned model for Cesium Man. Error: {}",
-                err
-            );
-        }
-    }
+    u.load_character(&cesium_man_path, "CesiumMan", current_scene, &cesium_man_skeletal_instances, &cesium_man_animgraph_definition, &mut gfx_ctx.device, &mut gfx_ctx.queue, &gfx_ctx.debug_material, &gfx_ctx.texture_bind_group_layout, &gfx_ctx.bone_matrices_bind_group_layout);
 
     let mut king_path = path.clone();
     king_path.push("King.bin");
-
-    let king = u.asset_mgr.load_skinned_3d_model_from_file(
-        &king_path,
-        "King",
-        &mut gfx_ctx.device,
-        &mut gfx_ctx.queue,
-        &gfx_ctx.debug_material,
-        &gfx_ctx.texture_bind_group_layout,
-    );
 
     let mut king_skeletal_anim_instances = Vec::<Instance3D>::new();
     let mut outer = 0;
@@ -202,25 +136,8 @@ pub fn user_setup(
 
     king_animgraph_definition.root = Some(root);
 
-    match king {
-        Ok(val) => {
-            s.add_characters(
-                &mut gfx_ctx.device,
-                &gfx_ctx.bone_matrices_bind_group_layout,
-                val,
-                &king_skeletal_anim_instances,
-                &king_animgraph_definition,
-                u.asset_mgr.skinned_models[val].animations.clone(),
-                u.asset_mgr.skinned_models[val].skeleton.clone(),
-                &u.asset_mgr.skinned_models[val].animations_idx_by_name,
-                "king".to_owned(),
-            );
-        }
-        Err(err) => {
-            println!("Could not load skinned mode for King. Error: {}", err);
-        }
-    }
-
+    u.load_character(&king_path, "King", current_scene, &king_skeletal_anim_instances, &king_animgraph_definition, &mut gfx_ctx.device, &mut gfx_ctx.queue, &gfx_ctx.debug_material, &gfx_ctx.texture_bind_group_layout, &gfx_ctx.bone_matrices_bind_group_layout);
+ 
     let mut avocado_path = path.clone();
     avocado_path.push("Avocado.bin");
 
@@ -241,7 +158,7 @@ pub fn user_setup(
                 orientation: noobwerkz_client::glam::Quat::IDENTITY,
                 scale: noobwerkz_client::glam::Vec3::splat(10.0),
             });
-            s.model_nodes.push(Model3DNode::new(val, instances));
+            u.scenes[current_scene].model_nodes.push(Model3DNode::new(val, instances));
         }
         Err(err) => {
             println!("Could not load model from file. Error {}", err)
@@ -261,7 +178,7 @@ pub fn user_setup(
         },
     ));
 
-    s.cameras.push(c);
+    u.scenes[current_scene].cameras.push(c);
 
     let mut particles_definition_path = path.clone();
     particles_definition_path.push("spark.particle");
@@ -286,7 +203,7 @@ pub fn user_setup(
         &gfx_ctx.texture_bind_group_layout,
     );
 
-    s.particle_system.borrow_mut().register(
+    u.scenes[current_scene].particle_system.borrow_mut().register(
         "yellow-spark",
         ParticleEffect::parse(
             std::fs::read_to_string(particles_definition_path)
@@ -295,26 +212,12 @@ pub fn user_setup(
         ),
     );
 
-    // let mut i = 0usize;
     for x in 0..10 {
         for z in 0..10 {
-            // if i % 2 == 0 {
-            //     s.particle_system
-            //         .borrow_mut()
-            //         .spawn("yellow-spark", [x as f32, 1.0, z as f32]);
-            // } else {
-            s.particle_system
+            u.scenes[current_scene].particle_system
                 .borrow_mut()
-                .spawn("yellow-spark", [x as f32, 1.0, z as f32]);
-            // }
-            // i += 1;
-            // println!(
-            //     "(Scene setup): Particle system empty? {}",
-            //     s.particle_system.borrow().is_empty()
-            // );
-            // println!("Emitter ID: {:?}", emitter);
+                .spawn("yellow-spark", [SPACE_BETWEEN * x as f32, 1.0, SPACE_BETWEEN * z as f32]);
         }
     }
 
-    u.scenes.push(s);
 }

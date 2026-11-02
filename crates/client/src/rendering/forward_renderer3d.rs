@@ -41,7 +41,7 @@ impl Pass for ForwardRenderer3D {
         models: &Models3D<Model3D>,
         skinned_models: &SkinnedModels3D<SkinnedModel3D>,
         model_nodes: &Model3DNodes<Model3DNode>,
-        characters_contexts: &Characters3DContexts<Characters3DContext>,
+        characters_contexts: &Vec<Characters3DContext>,
         particles_ctx: &Rc<RefCell<Particle3DContext>>,
         // particle_effects: &Vec<EffectDraw>,
         depth_texture_view: &wgpu::TextureView,

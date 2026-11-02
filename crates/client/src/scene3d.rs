@@ -18,6 +18,7 @@ use crate::{
     skinned_model3d_node::SkinnedModel3DNode,
 };
 
+use rayon::prelude::*;
 pub struct Characters3DContext {
     pub characters: Characters3D<Character3DRenderable>,
     pub skinned_model_node: SkinnedModel3DNode,
@@ -28,7 +29,7 @@ pub struct Scene3D {
     pub model_nodes: Model3DNodes<Model3DNode>,
     pub active_camera: Camera3DIndex,
     pub physics_context: Physics3DContext,
-    pub characters_contexts: Characters3DContexts<Characters3DContext>,
+    pub characters_contexts: Vec<Characters3DContext>,
     pub character_types_by_name: HashMap<String, Characters3DContextIndex>,
     pub particle_system: Rc<RefCell<ParticleSystem>>,
 }
@@ -36,30 +37,16 @@ pub struct Scene3D {
 impl Scene3D {
     pub fn new(gravity: &glam::Vec3) -> Self {
         let cameras = Cameras3D::new();
-        //cameras.push(Camera::new(&glam::Vec3{x: 0.0, y:0.0, z: 0.0}, &glam::Vec3{x: 0.0, y: 0.0, z: 0.0}, &glam::Vec3::Y, 1.0, 1.0, Projection::new(600, 800, 1.0, 0.0, 100.0)));
         Self {
             cameras,
             model_nodes: Model3DNodes::new(),
             active_camera: Camera3DIndex::new(0),
             physics_context: Physics3DContext::new(gravity),
-            characters_contexts: Characters3DContexts::new(),
+            characters_contexts: Vec::new(),
             character_types_by_name: HashMap::new(),
             particle_system: Rc::new(RefCell::new(ParticleSystem::new())),
         }
     }
-
-    // pub fn load_physics(&mut self, data: &Vec<u8>) {
-    //     self.physics_context = wincode::decode_from_slice(data)
-    //         .unwrap()
-    //         .0;
-    // }
-
-    // pub fn save_physics(&self) -> Vec<u8> {
-    //     let serialized =
-    //         wincode::encode_to_vec(&self.physics_context, wincode::config::standard())
-    //             .unwrap();
-    //     serialized
-    // }
 
     pub fn step_physics(&mut self) {
         self.physics_context.rigid_world.step()
@@ -77,7 +64,7 @@ impl Scene3D {
         queue: &wgpu::Queue,
     ) {
         // println!("Number of characters: {}", self.characters_contexts.len());
-        for characters_ctx in self.characters_contexts.iter_mut() {
+        self.characters_contexts.par_iter_mut().for_each(|characters_ctx: &mut Characters3DContext| {
             characters_ctx.skinned_model_node.instances.clear();
             characters_ctx.skinned_model_node.bone_matrices.clear();
 
@@ -122,7 +109,7 @@ impl Scene3D {
                     bytemuck::cast_slice(&characters_ctx.skinned_model_node.bone_matrices),
                 );
             }
-        }
+        });
     }
 
     pub fn add_characters(
@@ -160,7 +147,7 @@ impl Scene3D {
             );
             match character {
                 Some(val) => {
-                    self.characters_contexts[characters_ctx_idx]
+                    self.characters_contexts[characters_ctx_idx.get()]
                         .characters
                         .push(val);
                 }
@@ -185,7 +172,7 @@ impl Scene3D {
         animations: Animations<Animation>,
         animations_by_name: &HashMap<String, AnimationIndex>,
     ) -> bool {
-        for c in self.characters_contexts[character_type_idx]
+        for c in self.characters_contexts[character_type_idx.get()]
             .characters
             .iter_mut()
         {
