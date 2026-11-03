@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-russimp-ng = { version = "3.2.7", features=["static-link"] }
+#russimp-ng = { version = "3.2.7", features=["static-link"] }
 noobwerkz-shared = { path = "../shared" }
 glam = { workspace = true }
 anyhow = { workspace = true }
