@@ -96,7 +96,18 @@ pub fn user_setup(
         .add_node(root_node_def);
     cesium_man_animgraph_definition.root = Some(root);
 
-    u.load_character(&cesium_man_path, "CesiumMan", current_scene, &cesium_man_instances, &cesium_man_animgraph_definition, &mut gfx_ctx.device, &mut gfx_ctx.queue, &gfx_ctx.debug_material, &gfx_ctx.texture_bind_group_layout, &gfx_ctx.bone_matrices_bind_group_layout);
+    u.load_character(
+        &cesium_man_path,
+        "CesiumMan",
+        current_scene,
+        &cesium_man_instances,
+        &cesium_man_animgraph_definition,
+        &mut gfx_ctx.device,
+        &mut gfx_ctx.queue,
+        &gfx_ctx.debug_material,
+        &gfx_ctx.texture_bind_group_layout,
+        &gfx_ctx.bone_matrices_bind_group_layout,
+    );
 
     let mut king_path = path.clone();
     king_path.push("King.bin");
@@ -128,8 +139,19 @@ pub fn user_setup(
 
     king_animgraph_definition.root = Some(root);
 
-    u.load_character(&king_path, "King", current_scene, &king_instances, &king_animgraph_definition, &mut gfx_ctx.device, &mut gfx_ctx.queue, &gfx_ctx.debug_material, &gfx_ctx.texture_bind_group_layout, &gfx_ctx.bone_matrices_bind_group_layout);
- 
+    u.load_character(
+        &king_path,
+        "King",
+        current_scene,
+        &king_instances,
+        &king_animgraph_definition,
+        &mut gfx_ctx.device,
+        &mut gfx_ctx.queue,
+        &gfx_ctx.debug_material,
+        &gfx_ctx.texture_bind_group_layout,
+        &gfx_ctx.bone_matrices_bind_group_layout,
+    );
+
     let mut avocado_path = path.clone();
     avocado_path.push("Avocado.bin");
 
@@ -145,12 +167,22 @@ pub fn user_setup(
     match avocado {
         Ok(val) => {
             let mut instances = Instances::<Instance3D>::new();
-            instances.push(Instance3D {
-                position: noobwerkz_client::glam::Vec3::from_array([0.0, 0.0, 0.0]),
-                orientation: noobwerkz_client::glam::Quat::IDENTITY,
-                scale: noobwerkz_client::glam::Vec3::splat(10.0),
-            });
-            u.scenes[current_scene].model_nodes.push(Model3DNode::new(val, instances));
+            for x in 0..10 {
+                for z in 0..10 {
+                    instances.push(Instance3D {
+                        position: noobwerkz_client::glam::Vec3::from_array([
+                            SPACE_BETWEEN * x as f32,
+                            0.0,
+                            SPACE_BETWEEN * z as f32,
+                        ]),
+                        orientation: noobwerkz_client::glam::Quat::IDENTITY,
+                        scale: noobwerkz_client::glam::Vec3::splat(10.0),
+                    });
+                }
+            }
+            u.scenes[current_scene]
+                .model_nodes
+                .push(Model3DNode::new(val, instances));
         }
         Err(err) => {
             println!("Could not load model from file. Error {}", err)
@@ -184,7 +216,11 @@ pub fn user_setup(
         .unwrap();
 
     let rgba = image.as_bytes();
-    println!("Image width: {}, height: {}", image.width(), image.height());
+    println!(
+        "Particle image width: {}, height: {}",
+        image.width(),
+        image.height()
+    );
     gfx_ctx.particles_ctx.borrow_mut().register_texture(
         &gfx_ctx.device,
         &gfx_ctx.queue,
@@ -195,21 +231,24 @@ pub fn user_setup(
         &gfx_ctx.texture_bind_group_layout,
     );
 
-    u.scenes[current_scene].particle_system.borrow_mut().register(
-        "yellow-spark",
-        ParticleEffect::parse(
-            std::fs::read_to_string(particles_definition_path)
-                .unwrap()
-                .as_str(),
-        ),
-    );
+    u.scenes[current_scene]
+        .particle_system
+        .borrow_mut()
+        .register(
+            "yellow-spark",
+            ParticleEffect::parse(
+                std::fs::read_to_string(particles_definition_path)
+                    .unwrap()
+                    .as_str(),
+            ),
+        );
 
     for x in 0..10 {
         for z in 0..10 {
-            u.scenes[current_scene].particle_system
-                .borrow_mut()
-                .spawn("yellow-spark", [SPACE_BETWEEN * x as f32, 1.0, SPACE_BETWEEN * z as f32]);
+            u.scenes[current_scene].particle_system.borrow_mut().spawn(
+                "yellow-spark",
+                [SPACE_BETWEEN * x as f32, 1.0, SPACE_BETWEEN * z as f32],
+            );
         }
     }
-
 }

@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/shared", "crates/client", "crates/server", "crates/skeletal-animation", "crates/gltf2-converter", "crates/example", "crates/assimp-converter"]
+members = ["crates/shared", "crates/client", "crates/server", "crates/skeletal-animation", "crates/gltf2-converter", "crates/example", "crates/assimp-converter", "crates/code-transforms"]
 resolver = "3"
 
 [workspace.dependencies]
@@ -9,14 +9,12 @@ web-time = "1.1.0"
 safe_index = "0.10.0"
 netcode-rs = "1.4.0"
 zero_ecs = "0.3.4"
-bevy_ballistic_stripped = { git = "https://github.com/colingilbert/bevy_ballistic.git", branch = "main" }
 once_cell = "1.21.4"
 msgpacker = "0.7.2"
 rayon = "1.12.0"
 anyhow = "1.0.104"
 petgraph = "0.8.3"
 clap = { version = "4.6.7", features=["derive"] }
-boolmesh = { git = "https://www.github.com/ColinGilbert/", branch="main" }
 landmark = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
 waymark = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
 waymark-crowd = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
