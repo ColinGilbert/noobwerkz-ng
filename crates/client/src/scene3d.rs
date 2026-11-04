@@ -1,6 +1,9 @@
 // This is where our game world resides.
+#[allow(unused)]
+use crate::ecs_components_common::*;
+use crate::ecs::*;
 
-use std::{cell::RefCell, collections::HashMap, rc::Rc, sync::Arc};
+use std::{cell::RefCell, collections::{HashMap, VecDeque}, rc::Rc, sync::Arc};
 
 // use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
 use noobwerkz_shared::{physics3d_context::*, skeleton::*};
@@ -19,6 +22,7 @@ use crate::{
 };
 
 use rayon::prelude::*;
+
 pub struct Characters3DContext {
     pub characters: Characters3D<Character3DRenderable>,
     pub skinned_model_node: SkinnedModel3DNode,
@@ -32,7 +36,10 @@ pub struct Scene3D {
     pub characters_contexts: Vec<Characters3DContext>,
     pub character_types_by_name: HashMap<String, Characters3DContextIndex>,
     pub particle_system: Rc<RefCell<ParticleSystem>>,
+    pub ecs: World,
+    
 }
+
 
 impl Scene3D {
     pub fn new(gravity: &glam::Vec3) -> Self {
@@ -45,6 +52,7 @@ impl Scene3D {
             characters_contexts: Vec::new(),
             character_types_by_name: HashMap::new(),
             particle_system: Rc::new(RefCell::new(ParticleSystem::new())),
+            ecs: World::default(),
         }
     }
 
@@ -63,6 +71,7 @@ impl Scene3D {
         skinned_models: &SkinnedModels3D<SkinnedModel3D>,
         queue: &wgpu::Queue,
     ) {
+        self.ecs.update_positions(&DeltaTimeResource { val: dt.as_secs_f32() }, &mut CharactersContextsResource::new(&mut self.characters_contexts));
         // println!("Number of characters: {}", self.characters_contexts.len());
         self.characters_contexts.par_iter_mut().for_each(|characters_ctx: &mut Characters3DContext| {
             characters_ctx.skinned_model_node.instances.clear();
@@ -150,6 +159,8 @@ impl Scene3D {
                     self.characters_contexts[characters_ctx_idx.get()]
                         .characters
                         .push(val);
+                    let i = self.characters_contexts[characters_ctx_idx.get()].characters.len() - 1;
+                    self.ecs.create(CharacterEntity { type_idx: CharacterTypeIndexComponent { val: characters_ctx_idx}, instance_idx: CharacterInstanceIndexComponent { val: Character3DIndex::new(i) }, position: PositionComponent { val: instance.position }, velocity: VelocityComponent { val: glam::Vec3::ONE }, orientation: OrientationComponent { val: instance.orientation }, speed: SpeedComponent { val: 1.0 }, path: PathComponent { val: VecDeque::new() }, ..Default::default()});
                 }
                 None => {
                     println!("[Scene] add_character: Could not create anim graph from definition");
@@ -157,6 +168,7 @@ impl Scene3D {
                 }
             }
         }
+
 
         self.character_types_by_name
             .insert(name, characters_ctx_idx);

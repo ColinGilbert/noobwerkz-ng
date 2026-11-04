@@ -10,8 +10,8 @@ zero_ecs = { workspace = true }
 safe_index = {workspace = true }
 once_cell = {workspace = true }
 rapier3d = { workspace = true }
-landmark = { workspace = true }
-waymark = { workspace = true }
-waymark-crowd = { workspace = true }
-waymark-dynamic = { workspace = true }
-waymark-tilecache = { workspace = true }
+#landmark = { workspace = true }
+#waymark = { workspace = true }
+#waymark-crowd = { workspace = true }
+#waymark-dynamic = { workspace = true }
+#waymark-tilecache = { workspace = true }

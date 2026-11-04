@@ -13,6 +13,13 @@ zero_ecs = { workspace = true }
 rapier3d = { workspace = true }
 msgpacker = { workspace = true }
 rayon = { workspace = true }
+#landmark = { workspace = true }
+#waymark = { workspace = true }
+#waymark-crowd = { workspace = true }
+#waymark-dynamic = { workspace = true }
+#waymark-tilecache = { workspace = true }
+polyanya = { workspace = true }
+rerecast = { workspace = true }
 image = { version = "0.25.10", features = ["default-formats"] }
 bytemuck = {version = "1.25.2", default-features = false}
 egui = {version= "0.37.0", features=["default_fonts"]}

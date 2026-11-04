@@ -24,6 +24,9 @@ pub mod character3d_renderable;
 pub mod asset_manager;
 pub mod egui_renderer;
 pub mod particles3d;
+pub mod ecs_components_common;
+pub mod ecs;
+
 
 pub use bytemuck as bytemuck;
 pub use egui as egui;

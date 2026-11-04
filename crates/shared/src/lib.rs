@@ -10,3 +10,4 @@ pub mod serialized_model3d;
 pub mod skeleton;
 pub mod bone;
 pub mod prng;
+mod ecs_components_common;

@@ -4,8 +4,7 @@ fn main() {
     println!("Running code transform");
 
     let files_to_copy_out = vec![
-        "components_common.rs".to_owned(),
-        "entities_common.rs".to_owned(),
+        "ecs_components_common.rs".to_owned(),
     ];
 
     let mut shared_base_path = PathBuf::new();

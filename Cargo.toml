@@ -15,8 +15,10 @@ rayon = "1.12.0"
 anyhow = "1.0.104"
 petgraph = "0.8.3"
 clap = { version = "4.6.7", features=["derive"] }
-landmark = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
-waymark = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
-waymark-crowd = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
-waymark-dynamic = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
-waymark-tilecache = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
+polyanya = { version = "0.18.0"}
+rerecast = { version = "0.5.0" }
+#landmark = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
+#waymark = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
+#waymark-crowd = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
+#waymark-dynamic = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
+#waymark-tilecache = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
