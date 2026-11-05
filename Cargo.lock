@@ -1768,9 +1768,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "899def5c37c4fd7b2664648c28120ecec138e4d395b459e5ca34f9cce2dd77fd"
 dependencies = [
  "cfg-if",
+ "js-sys",
  "libc",
  "r-efi 5.3.0",
  "wasip2",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -2773,10 +2775,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4a4b5a344fca34d42db960a588704f762847eaadda0e84095602509e61294ddd"
 dependencies = [
  "monstertruck-core",
+ "monstertruck-fillet",
  "monstertruck-geometry",
+ "monstertruck-healing",
  "monstertruck-mesh",
  "monstertruck-meshing",
  "monstertruck-modeling",
+ "monstertruck-solid",
  "monstertruck-topology",
  "monstertruck-traits",
 ]
@@ -2807,6 +2812,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "monstertruck-fillet"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "512bba6a317473cd83210019054373af9d13af4273417f28ee54bee5d16bc6c3"
+dependencies = [
+ "ahash",
+ "derive_more",
+ "getrandom 0.3.4",
+ "itertools 0.14.0",
+ "monstertruck-core",
+ "monstertruck-geometry",
+ "monstertruck-meshing",
+ "monstertruck-topology",
+ "monstertruck-traits",
+ "smallvec",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "monstertruck-geometry"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2818,6 +2842,23 @@ dependencies = [
  "serde",
  "smallvec",
  "thiserror 2.0.21",
+]
+
+[[package]]
+name = "monstertruck-healing"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3fd6d6800716835c77d7e5c1a5ce8061b23f5baf100a39307097aa07c93ac35f"
+dependencies = [
+ "ahash",
+ "getrandom 0.3.4",
+ "itertools 0.14.0",
+ "monstertruck-geometry",
+ "monstertruck-meshing",
+ "monstertruck-topology",
+ "monstertruck-traits",
+ "rustc-hash 2.1.3",
+ "web-time",
 ]
 
 [[package]]
@@ -2866,6 +2907,7 @@ dependencies = [
  "derive_more",
  "itertools 0.14.0",
  "monstertruck-core",
+ "monstertruck-fillet",
  "monstertruck-geometry",
  "monstertruck-mesh",
  "monstertruck-topology",
@@ -2875,6 +2917,27 @@ dependencies = [
  "serde",
  "thiserror 2.0.21",
  "web-time",
+]
+
+[[package]]
+name = "monstertruck-solid"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "29e8fab1d370bfe553a171c0b0948810eefc66ecb2e3dca87e26c985bda27e50"
+dependencies = [
+ "ahash",
+ "derive_more",
+ "getrandom 0.3.4",
+ "itertools 0.14.0",
+ "monstertruck-core",
+ "monstertruck-geometry",
+ "monstertruck-meshing",
+ "monstertruck-topology",
+ "monstertruck-traits",
+ "rustc-hash 2.1.3",
+ "serde",
+ "smallvec",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -3181,9 +3244,14 @@ dependencies = [
  "env_logger",
  "glam 0.33.12",
  "libm",
+ "monstertruck",
  "msgpacker",
+ "polyanya",
  "rapier3d",
+ "rerecast",
  "safe_index",
+ "serde",
+ "serde_json",
  "web-time",
  "zero_ecs",
 ]

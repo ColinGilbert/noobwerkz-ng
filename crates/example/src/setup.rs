@@ -28,7 +28,6 @@ pub fn user_setup(
     if user_data.works {
         println!("User data initialized");
     }
-
     let projection = Projection3D::new(
         gfx_ctx.config.height,
         gfx_ctx.config.width,
@@ -36,12 +35,17 @@ pub fn user_setup(
         0.01,
         100.0,
     );
+    
+    let mut path = std::path::PathBuf::new();
+    path.push("res");
+    let mut navmesh_config_path = path.clone();
+    navmesh_config_path.push("navmesh_config.json");
 
     let s = Scene3D::new(&noobwerkz_client::glam::Vec3 {
         x: 0.0,
         y: -9.81,
         z: 0.0,
-    });
+    }, navmesh_config_path);
 
     let current_scene = u.add_scene(s);
 
@@ -62,8 +66,6 @@ pub fn user_setup(
         projection,
     );
 
-    let mut path = std::path::PathBuf::new();
-    path.push("res");
     let mut cesium_man_path = path.clone();
     cesium_man_path.push("cesium-man-model.bin");
 

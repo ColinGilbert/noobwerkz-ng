@@ -17,6 +17,9 @@ petgraph = "0.8.3"
 clap = { version = "4.6.7", features=["derive"] }
 polyanya = { version = "0.18.0"}
 rerecast = { version = "0.5.0" }
+monstertruck = { version="0.4.1", features=["solid"]}
+serde_json = {version = "1.0.154"}
+serde = {version = "1.0.229" }
 #landmark = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
 #waymark = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
 #waymark-crowd = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }

@@ -10,4 +10,6 @@ pub mod serialized_model3d;
 pub mod skeleton;
 pub mod bone;
 pub mod prng;
+pub mod csg_shapes;
+pub mod navmesh_context;
 mod ecs_components_common;

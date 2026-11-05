@@ -1,18 +1,24 @@
 // This is where our game world resides.
+use crate::ecs::*;
 #[allow(unused)]
 use crate::ecs_components_common::*;
-use crate::ecs::*;
 
-use std::{cell::RefCell, collections::{HashMap, VecDeque}, rc::Rc, sync::Arc};
+use rerecast::{AreaType, Config, ConvexVolume, DetailNavmesh, HeightfieldBuilder};
 
-// use simple_animgraph::{animgraph::AnimGraph, animgraph_definition::AnimGraphDefinition};
-use noobwerkz_shared::{physics3d_context::*, skeleton::*};
+use std::{
+    cell::RefCell, collections::{HashMap, VecDeque}, path::PathBuf, rc::Rc, sync::Arc,
+};
+
+use noobwerkz_shared::{
+    csg_shapes::*, navmesh_context::NavMeshContext, physics3d_context::*, serialized_model3d::SerializedModel3D, skeleton::*,
+};
 use noobwerkz_skeletal_animation::{
     animation::Animation,
     animation_graph::{AnimationGraph, AnimationIndex, Animations},
     animation_graph_definition::AnimationGraphDefinition,
 };
 
+use rapier3d::geometry::{Group, InteractionGroups};
 use simple_particles::ParticleSystem;
 
 use crate::{
@@ -21,6 +27,7 @@ use crate::{
     skinned_model3d_node::SkinnedModel3DNode,
 };
 
+use rapier3d::prelude::*;
 use rayon::prelude::*;
 
 pub struct Characters3DContext {
@@ -37,15 +44,16 @@ pub struct Scene3D {
     pub character_types_by_name: HashMap<String, Characters3DContextIndex>,
     pub particle_system: Rc<RefCell<ParticleSystem>>,
     pub ecs: World,
-    
+    pub navmesh_context: NavMeshContext,
+
 }
 
-
 impl Scene3D {
-    pub fn new(gravity: &glam::Vec3) -> Self {
-        let cameras = Cameras3D::new();
+    pub fn new(gravity: &glam::Vec3, navmesh_config_path: PathBuf) -> Self {
+        let config_str = std::fs::read_to_string(navmesh_config_path).unwrap();
+        let navmesh_context = NavMeshContext::new(config_str);
         Self {
-            cameras,
+            cameras: Cameras3D::new(),
             model_nodes: Model3DNodes::new(),
             active_camera: Camera3DIndex::new(0),
             physics_context: Physics3DContext::new(gravity),
@@ -53,6 +61,7 @@ impl Scene3D {
             character_types_by_name: HashMap::new(),
             particle_system: Rc::new(RefCell::new(ParticleSystem::new())),
             ecs: World::default(),
+            navmesh_context,
         }
     }
 
@@ -65,60 +74,101 @@ impl Scene3D {
         // println!("Particle system empty? {}", self.particle_system.borrow().is_empty());
     }
 
+    pub fn build_navmesh(&mut self) {
+        self.navmesh_context.navmesh = polyanya::Mesh::default();
+        for (rigid_body_handle, _rigid_body) in self.physics_context.rigid_world.rigid_bodies() {
+            if self.navmesh_context.terrain_bodies.contains_key(&rigid_body_handle) {
+                // self.navmesh. = polyanya::Triangulation::
+            }
+        }
+    }
+
+    pub fn add_terrain(&mut self, translation: glam::Vec3, orientation: glam::Quat) {
+        let euler = orientation.to_euler(glam::EulerRot::default());
+        let rigid_body = RigidBodyBuilder::fixed()
+            .translation(translation)
+            .rotation(Vec3::new(euler.0, euler.1, euler.2));
+        let mut collider =
+            rapier3d::geometry::ColliderBuilder::new(SharedShape::cuboid(50.0, 0.1, 50.0))
+                .translation(Vector::new(0.0, 0.0, 0.0))
+                .build();
+        let groups = InteractionGroups::new(
+            Group::GROUP_1,
+            Group::GROUP_2,
+            rapier3d::geometry::InteractionTestMode::And,
+        );
+        collider.set_collision_groups(groups);
+        let (rigid_body_handle, collider_handle) = self
+            .physics_context
+            .rigid_world
+            .insert(rigid_body, collider);
+        let solid = cuboid(50.0, 0.1, 50.0);
+        self.navmesh_context.terrain_bodies
+            .insert(rigid_body_handle, get_rerecast_mesh(&solid));
+    }
+
     pub fn update_characters(
         &mut self,
         dt: web_time::Duration,
         skinned_models: &SkinnedModels3D<SkinnedModel3D>,
         queue: &wgpu::Queue,
     ) {
-        self.ecs.update_positions(&DeltaTimeResource { val: dt.as_secs_f32() }, &mut CharactersContextsResource::new(&mut self.characters_contexts));
+        self.ecs.update_positions(
+            &DeltaTimeResource {
+                val: dt.as_secs_f32(),
+            },
+            &mut CharactersContextsResource::new(&mut self.characters_contexts),
+        );
         // println!("Number of characters: {}", self.characters_contexts.len());
-        self.characters_contexts.par_iter_mut().for_each(|characters_ctx: &mut Characters3DContext| {
-            characters_ctx.skinned_model_node.instances.clear();
-            characters_ctx.skinned_model_node.bone_matrices.clear();
+        self.characters_contexts.par_iter_mut().for_each(
+            |characters_ctx: &mut Characters3DContext| {
+                characters_ctx.skinned_model_node.instances.clear();
+                characters_ctx.skinned_model_node.bone_matrices.clear();
 
-            for c in &mut characters_ctx.characters {
-                let r = c.anim_graph.evaluate(dt);
-                match r {
-                    Ok(_) => {}
-                    Err(err) => {
-                        println!("Could not evaluate character's anim graph: {}", err)
+                for c in &mut characters_ctx.characters {
+                    let r = c.anim_graph.evaluate(dt);
+                    match r {
+                        Ok(_) => {}
+                        Err(err) => {
+                            println!("Could not evaluate character's anim graph: {}", err)
+                        }
                     }
-                }
-                let instance = Instance3D {
-                    position: c.common.position,
-                    orientation: c.common.orientation,
-                    scale: glam::Vec3::splat(1.0),
-                };
+                    let instance = Instance3D {
+                        position: c.common.position,
+                        orientation: c.common.orientation,
+                        scale: glam::Vec3::splat(1.0),
+                    };
 
-                characters_ctx.skinned_model_node.instances.push(instance);
+                    characters_ctx.skinned_model_node.instances.push(instance);
 
-                let output = &c.anim_graph.output_model;
+                    let output = &c.anim_graph.output_model;
 
-                if output.model_matrices.len()
-                    != skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
-                        .skeleton
-                        .inverse_bind_matrices
-                        .len()
-                {
-                    println!("Discrepancy in size between output model matrices and IBM's");
-                }
-
-                for (i, o) in output.model_matrices.iter().enumerate() {
-                    characters_ctx.skinned_model_node.bone_matrices.push(
-                        o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
+                    if output.model_matrices.len()
+                        != skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
                             .skeleton
-                            .inverse_bind_matrices[i],
+                            .inverse_bind_matrices
+                            .len()
+                    {
+                        println!("Discrepancy in size between output model matrices and IBM's");
+                    }
+
+                    for (i, o) in output.model_matrices.iter().enumerate() {
+                        characters_ctx.skinned_model_node.bone_matrices.push(
+                            o * skinned_models[characters_ctx.skinned_model_node.skinned_model_idx]
+                                .skeleton
+                                .inverse_bind_matrices[i],
+                        );
+                    }
+                    let bones_storage_buffer =
+                        &characters_ctx.skinned_model_node.bones_storage_buffer;
+                    queue.write_buffer(
+                        &bones_storage_buffer,
+                        0,
+                        bytemuck::cast_slice(&characters_ctx.skinned_model_node.bone_matrices),
                     );
                 }
-                let bones_storage_buffer = &characters_ctx.skinned_model_node.bones_storage_buffer;
-                queue.write_buffer(
-                    &bones_storage_buffer,
-                    0,
-                    bytemuck::cast_slice(&characters_ctx.skinned_model_node.bone_matrices),
-                );
-            }
-        });
+            },
+        );
     }
 
     pub fn add_characters(
@@ -159,8 +209,32 @@ impl Scene3D {
                     self.characters_contexts[characters_ctx_idx.get()]
                         .characters
                         .push(val);
-                    let i = self.characters_contexts[characters_ctx_idx.get()].characters.len() - 1;
-                    self.ecs.create(CharacterEntity { type_idx: CharacterTypeIndexComponent { val: characters_ctx_idx}, instance_idx: CharacterInstanceIndexComponent { val: Character3DIndex::new(i) }, position: PositionComponent { val: instance.position }, velocity: VelocityComponent { val: glam::Vec3::ONE }, orientation: OrientationComponent { val: instance.orientation }, speed: SpeedComponent { val: 1.0 }, path: PathComponent { val: VecDeque::new() }, ..Default::default()});
+                    let i = self.characters_contexts[characters_ctx_idx.get()]
+                        .characters
+                        .len()
+                        - 1;
+                    self.ecs.create(CharacterEntity {
+                        type_idx: CharacterTypeIndexComponent {
+                            val: characters_ctx_idx,
+                        },
+                        instance_idx: CharacterInstanceIndexComponent {
+                            val: Character3DIndex::new(i),
+                        },
+                        position: PositionComponent {
+                            val: instance.position,
+                        },
+                        velocity: VelocityComponent {
+                            val: glam::Vec3::ZERO,
+                        },
+                        orientation: OrientationComponent {
+                            val: instance.orientation,
+                        },
+                        speed: SpeedComponent { val: 1.0 },
+                        path: PathComponent {
+                            val: VecDeque::new(),
+                        },
+                        ..Default::default()
+                    });
                 }
                 None => {
                     println!("[Scene] add_character: Could not create anim graph from definition");
@@ -168,7 +242,6 @@ impl Scene3D {
                 }
             }
         }
-
 
         self.character_types_by_name
             .insert(name, characters_ctx_idx);

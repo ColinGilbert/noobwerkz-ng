@@ -10,6 +10,11 @@ rapier3d = { workspace = true }
 web-time = { workspace = true}
 msgpacker = { workspace = true }
 zero_ecs = { workspace = true }
+monstertruck = { workspace = true }
+polyanya = { workspace = true }
+rerecast = { workspace = true }
+serde_json = { workspace = true }
+serde = { workspace = true }
 #dodgy_3d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 #dodgy_2d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 libm = "0.2.16"
