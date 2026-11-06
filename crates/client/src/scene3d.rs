@@ -1,14 +1,16 @@
+use crate::asset_manager::AssetManager;
 // This is where our game world resides.
 use crate::ecs::*;
 #[allow(unused)]
 use crate::ecs_components_common::*;
+use crate::model_material::*;
+use crate::resource::*;
 
-use polyanya::RecastFullMesh;
 use rerecast::{DetailNavmesh, HeightfieldBuilder};
 
 use std::{
     cell::RefCell,
-    collections::{HashMap, VecDeque},
+    collections::{HashMap, HashSet, VecDeque},
     path::PathBuf,
     rc::Rc,
     sync::Arc,
@@ -40,6 +42,18 @@ pub struct Characters3DContext {
     pub skinned_model_node: SkinnedModel3DNode,
 }
 
+pub struct TerrainContext {
+    pub model_node_indices: HashMap<Model3DIndex, HashSet<usize>>, // HashSet contains the indices of the model instances
+}
+
+impl TerrainContext {
+    pub fn new() -> Self {
+        Self {
+            model_node_indices: HashMap::new(),
+        }
+    }
+}
+
 pub struct Scene3D {
     pub cameras: Cameras3D<Camera3D>,
     pub model_nodes: Model3DNodes<Model3DNode>,
@@ -50,6 +64,7 @@ pub struct Scene3D {
     pub particle_system: Rc<RefCell<ParticleSystem>>,
     pub ecs: World,
     pub navmesh_context: NavMeshContext,
+    pub terrain_context: TerrainContext,
 }
 
 impl Scene3D {
@@ -66,6 +81,7 @@ impl Scene3D {
             particle_system: Rc::new(RefCell::new(ParticleSystem::new())),
             ecs: World::default(),
             navmesh_context,
+            terrain_context: TerrainContext::new(),
         }
     }
 
@@ -182,18 +198,29 @@ impl Scene3D {
         )
         .unwrap();
 
-        self.navmesh_context.navmesh = RecastFullMesh::new(poly_mesh, detail_mesh)
+        self.navmesh_context.navmesh = polyanya::RecastFullMesh::new(poly_mesh, detail_mesh)
             .try_into()
             .unwrap();
+
+        self.navmesh_context.navmesh.bake();
     }
 
-    pub fn add_terrain(&mut self, translation: glam::Vec3, orientation: glam::Quat) {
+    pub fn add_terrain(
+        &mut self,
+        translation: glam::Vec3,
+        orientation: glam::Quat,
+        asset_mgr: &mut AssetManager,
+        device: &mut wgpu::Device,
+        queue: &mut wgpu::Queue,
+        default_material: &ModelMaterial,
+        texture_layout: &wgpu::BindGroupLayout,
+    ) {
         let euler = orientation.to_euler(glam::EulerRot::default());
         let rigid_body = RigidBodyBuilder::fixed()
             .translation(translation)
             .rotation(Vec3::new(euler.0, euler.1, euler.2));
         let mut collider =
-            rapier3d::geometry::ColliderBuilder::new(SharedShape::cuboid(50.0, 0.2, 50.0))
+            rapier3d::geometry::ColliderBuilder::new(SharedShape::cuboid(50.0, 1.2, 50.0))
                 .translation(Vector::new(0.0, 0.0, 0.0))
                 .build();
         let groups = InteractionGroups::new(
@@ -206,10 +233,51 @@ impl Scene3D {
             .physics_context
             .rigid_world
             .insert(rigid_body, collider);
-        let solid = cuboid(50.0, 0.2, 50.0);
+        let solid = cuboid(50.0, 1.2, 50.0);
         self.navmesh_context
             .terrain_bodies
             .insert(rigid_body_handle, get_rerecast_mesh(&solid));
+
+        let mut texture_filepath = PathBuf::new();
+        texture_filepath.push("res");
+        let mut serialized_model = get_serialized_model(&solid);
+
+        /*
+
+                &mut self,
+        serialized: &mut SerializedModel3D,
+        name: &str,
+        texture_filepath: &PathBuf,
+        device: &mut wgpu::Device,
+        queue: &mut wgpu::Queue,
+        default_material: &ModelMaterial,
+        texture_layout: &wgpu::BindGroupLayout,
+
+         */
+        let terrain_model = asset_mgr.load_serialized_3d_model_from_mem(
+            &mut serialized_model,
+            "",
+            &texture_filepath,
+            device,
+            queue,
+            default_material,
+            texture_layout,
+        );
+        match terrain_model {
+            Ok(val) => {
+                let mut instances = Instances::new();
+                instances.push(Instance3D {
+                    position: translation,
+                    orientation,
+                    scale: glam::Vec3::splat(1.0),
+                });
+                let model_node = Model3DNode::new(val, instances);
+                self.model_nodes.push(model_node);
+            }
+            Err(err) => {
+                println!("Could not add terrain model: {}", err)
+            }
+        }
     }
 
     pub fn update_characters(
@@ -266,6 +334,7 @@ impl Scene3D {
                     }
                     let bones_storage_buffer =
                         &characters_ctx.skinned_model_node.bones_storage_buffer;
+
                     queue.write_buffer(
                         &bones_storage_buffer,
                         0,
@@ -286,7 +355,7 @@ impl Scene3D {
                 }
                 Some(results)
             }
-            None => { None }
+            None => None,
         }
     }
 

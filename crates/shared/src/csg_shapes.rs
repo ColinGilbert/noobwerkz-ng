@@ -115,7 +115,7 @@ pub fn capsule_y(length: f64, radius: f64) -> Solid {
     capsule
 }
 
-pub fn get_model(solid: &Solid) -> SerializedModel3D {
+pub fn get_serialized_model(solid: &Solid) -> SerializedModel3D {
     let mut result = SerializedModel3D::new();
     result.meshes.push(SerializedMesh3D::new());
     let polygon_mesh = solid.triangulation(0.005).to_polygon();
@@ -194,5 +194,25 @@ pub fn get_rerecast_mesh(solid: &Solid) -> rerecast::TriMesh {
             p.x as f32, p.y as f32, p.z as f32,
         ]));
     }
+    result
+}
+
+pub fn get_serialized_mesh(solid: &Solid) -> SerializedMesh3D {
+    let mut result = SerializedMesh3D::new();
+    let polygon_mesh = solid.triangulation(0.005).to_polygon();
+    for f in polygon_mesh.face_iter() {
+        result.indices.push(f[0].pos as u32);
+        result.indices.push(f[1].pos as u32);
+        result.indices.push(f[1].pos as u32);
+    }
+
+    for p in polygon_mesh.positions() {
+        result.positions.push([p.x as f32, p.y as f32, p.z as f32]);
+    }
+
+    for n in polygon_mesh.normals() {
+        result.normals.push([n.x as f32, n.y as f32, n.z as f32]);
+    }
+
     result
 }

@@ -254,7 +254,7 @@ pub fn user_setup(
         }
     }
 
-    u.scenes[current_scene].add_terrain(glam::Vec3::ZERO, glam::Quat::IDENTITY);
+    u.scenes[current_scene].add_terrain(glam::Vec3::ZERO, glam::Quat::IDENTITY, &mut u.asset_mgr, &mut gfx_ctx.device, &mut gfx_ctx.queue, &gfx_ctx.debug_material, &gfx_ctx.texture_bind_group_layout);
     u.scenes[current_scene].build_navmesh();
 
 }
