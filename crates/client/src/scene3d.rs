@@ -3,14 +3,20 @@ use crate::ecs::*;
 #[allow(unused)]
 use crate::ecs_components_common::*;
 
+use polyanya::RecastFullMesh;
 use rerecast::{AreaType, Config, ConvexVolume, DetailNavmesh, HeightfieldBuilder};
 
 use std::{
-    cell::RefCell, collections::{HashMap, VecDeque}, path::PathBuf, rc::Rc, sync::Arc,
+    cell::RefCell,
+    collections::{HashMap, VecDeque},
+    path::PathBuf,
+    rc::Rc,
+    sync::Arc,
 };
 
 use noobwerkz_shared::{
-    csg_shapes::*, navmesh_context::NavMeshContext, physics3d_context::*, serialized_model3d::SerializedModel3D, skeleton::*,
+    csg_shapes::*, navmesh_context::NavMeshContext, physics3d_context::*,
+    serialized_model3d::SerializedModel3D, skeleton::*,
 };
 use noobwerkz_skeletal_animation::{
     animation::Animation,
@@ -45,7 +51,6 @@ pub struct Scene3D {
     pub particle_system: Rc<RefCell<ParticleSystem>>,
     pub ecs: World,
     pub navmesh_context: NavMeshContext,
-
 }
 
 impl Scene3D {
@@ -76,11 +81,111 @@ impl Scene3D {
 
     pub fn build_navmesh(&mut self) {
         self.navmesh_context.navmesh = polyanya::Mesh::default();
+        let mut trimesh = rerecast::TriMesh::default();
         for (rigid_body_handle, _rigid_body) in self.physics_context.rigid_world.rigid_bodies() {
-            if self.navmesh_context.terrain_bodies.contains_key(&rigid_body_handle) {
-                // self.navmesh. = polyanya::Triangulation::
+            if self
+                .navmesh_context
+                .terrain_bodies
+                .contains_key(&rigid_body_handle)
+            {
+                let temp = &self.navmesh_context.terrain_bodies[&rigid_body_handle];
+                // println!("Found terrain to add to mesh! Verts {}, indices {}", temp.vertices.len(), temp.indices.len());
+                // for v in &temp.vertices {
+                //     trimesh.vertices.push(*v);
+                // }
+                // for i in &temp.indices {
+                //     trimesh.indices.push(*i);
+                // }
+                // for a in &temp.area_types {
+                //     trimesh.area_types.push(*a);
+                // }
+                trimesh.extend(temp.clone());
             }
         }
+        trimesh.mark_walkable_triangles(self.navmesh_context.recast_config.walkable_slope_angle);
+        let aabb = trimesh.compute_aabb().unwrap();
+        println!("Navmesh AABB: {:?}", aabb);
+
+        let mut heightfield = HeightfieldBuilder {
+            aabb,
+            cell_size: self.navmesh_context.recast_config.cell_size,
+            cell_height: self.navmesh_context.recast_config.cell_height,
+        }
+        .build()
+        .unwrap();
+
+        heightfield
+            .rasterize_triangles(&trimesh, self.navmesh_context.recast_config.walkable_climb)
+            .unwrap();
+        heightfield.filter_low_hanging_walkable_obstacles(
+            self.navmesh_context.recast_config.walkable_climb,
+        );
+        heightfield.filter_ledge_spans(
+            self.navmesh_context.recast_config.walkable_height,
+            self.navmesh_context.recast_config.walkable_climb,
+        );
+        heightfield
+            .filter_walkable_low_height_spans(self.navmesh_context.recast_config.walkable_height);
+
+        let mut compact_heightfield = heightfield
+            .into_compact(
+                self.navmesh_context.recast_config.walkable_height,
+                self.navmesh_context.recast_config.walkable_climb,
+            )
+            .unwrap();
+
+        compact_heightfield.erode_walkable_area(self.navmesh_context.recast_config.walkable_radius);
+
+        // Add obstacles...
+        /*
+                let volumes = load_json::<CppVolumes>(project, "convex_volumes");
+                for volume in volumes.volumes {
+                    let volume = ConvexVolume {
+                        vertices: volume
+                            .verts
+                            .iter()
+                            .map(|[x, _y, z]| Vec2::new(*x, *z))
+                            .collect(),
+                        min_y: volume.hmin,
+                        max_y: volume.hmax,
+                        area: AreaType::from(volume.area),
+                    };
+                    compact_heightfield.mark_convex_poly_area(&volume);
+                }
+        */
+
+        compact_heightfield.build_distance_field();
+
+        compact_heightfield
+            .build_regions(
+                self.navmesh_context.recast_config.border_size,
+                self.navmesh_context.recast_config.min_region_area,
+                self.navmesh_context.recast_config.merge_region_area,
+            )
+            .unwrap();
+
+        let contours = compact_heightfield.build_contours(
+            self.navmesh_context.recast_config.max_simplification_error,
+            self.navmesh_context.recast_config.max_edge_len,
+            self.navmesh_context.recast_config.contour_flags,
+        );
+        // compact_heightfield.assert_eq(project, "compact_heightfield_contours");
+
+        let poly_mesh = contours
+            .into_polygon_mesh(self.navmesh_context.recast_config.max_vertices_per_polygon)
+            .unwrap();
+
+        let detail_mesh = DetailNavmesh::new(
+            &poly_mesh,
+            &compact_heightfield,
+            self.navmesh_context.recast_config.detail_sample_dist,
+            self.navmesh_context.recast_config.detail_sample_max_error,
+        )
+        .unwrap();
+
+        self.navmesh_context.navmesh = RecastFullMesh::new(poly_mesh, detail_mesh).try_into().unwrap();
+
+
     }
 
     pub fn add_terrain(&mut self, translation: glam::Vec3, orientation: glam::Quat) {
@@ -89,7 +194,7 @@ impl Scene3D {
             .translation(translation)
             .rotation(Vec3::new(euler.0, euler.1, euler.2));
         let mut collider =
-            rapier3d::geometry::ColliderBuilder::new(SharedShape::cuboid(50.0, 0.1, 50.0))
+            rapier3d::geometry::ColliderBuilder::new(SharedShape::cuboid(50.0, 0.2, 50.0))
                 .translation(Vector::new(0.0, 0.0, 0.0))
                 .build();
         let groups = InteractionGroups::new(
@@ -102,8 +207,9 @@ impl Scene3D {
             .physics_context
             .rigid_world
             .insert(rigid_body, collider);
-        let solid = cuboid(50.0, 0.1, 50.0);
-        self.navmesh_context.terrain_bodies
+        let solid = cuboid(50.0, 0.2, 50.0);
+        self.navmesh_context
+            .terrain_bodies
             .insert(rigid_body_handle, get_rerecast_mesh(&solid));
     }
 
