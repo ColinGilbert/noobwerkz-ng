@@ -4,7 +4,6 @@ use crate::ecs::*;
 #[allow(unused)]
 use crate::ecs_components_common::*;
 use crate::model_material::*;
-use crate::resource::*;
 
 use rerecast::{DetailNavmesh, HeightfieldBuilder};
 
@@ -17,7 +16,7 @@ use std::{
 };
 
 use noobwerkz_shared::{
-    csg_shapes::*, navmesh_context::NavMeshContext, physics3d_context::*, skeleton::*,
+    csg::*, navmesh_context::NavMeshContext, physics3d_context::*, skeleton::*,
 };
 use noobwerkz_skeletal_animation::{
     animation::Animation,
