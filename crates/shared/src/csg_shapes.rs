@@ -1,10 +1,9 @@
 use crate::serialized_model3d::*;
+
 use glam::*;
 use monstertruck::meshing::tessellation::{MeshableShape, MeshedShape};
-use monstertruck::meshing::*;
 use monstertruck::modeling::*;
 use rerecast::AreaType;
-use std::f64::consts::PI;
 
 pub fn cube(scale: f64) -> Solid {
     let v = builder::vertex(Point3::new(-scale / 2.0, -scale / 2.0, -scale / 2.0));

@@ -4,7 +4,7 @@ use crate::ecs::*;
 use crate::ecs_components_common::*;
 
 use polyanya::RecastFullMesh;
-use rerecast::{AreaType, Config, ConvexVolume, DetailNavmesh, HeightfieldBuilder};
+use rerecast::{DetailNavmesh, HeightfieldBuilder};
 
 use std::{
     cell::RefCell,
@@ -15,8 +15,7 @@ use std::{
 };
 
 use noobwerkz_shared::{
-    csg_shapes::*, navmesh_context::NavMeshContext, physics3d_context::*,
-    serialized_model3d::SerializedModel3D, skeleton::*,
+    csg_shapes::*, navmesh_context::NavMeshContext, physics3d_context::*, skeleton::*,
 };
 use noobwerkz_skeletal_animation::{
     animation::Animation,
@@ -183,9 +182,9 @@ impl Scene3D {
         )
         .unwrap();
 
-        self.navmesh_context.navmesh = RecastFullMesh::new(poly_mesh, detail_mesh).try_into().unwrap();
-
-
+        self.navmesh_context.navmesh = RecastFullMesh::new(poly_mesh, detail_mesh)
+            .try_into()
+            .unwrap();
     }
 
     pub fn add_terrain(&mut self, translation: glam::Vec3, orientation: glam::Quat) {
@@ -203,7 +202,7 @@ impl Scene3D {
             rapier3d::geometry::InteractionTestMode::And,
         );
         collider.set_collision_groups(groups);
-        let (rigid_body_handle, collider_handle) = self
+        let (rigid_body_handle, _collider_handle) = self
             .physics_context
             .rigid_world
             .insert(rigid_body, collider);
@@ -275,6 +274,20 @@ impl Scene3D {
                 }
             },
         );
+    }
+
+    pub fn find_path(&self, from: glam::Vec3, to: glam::Vec3) -> Option<VecDeque<glam::Vec3>> {
+        let path = self.navmesh_context.navmesh.path_3d(from, to);
+        let mut results = VecDeque::new();
+        match path {
+            Some(val) => {
+                for v in val {
+                    results.push_back(v);
+                }
+                Some(results)
+            }
+            None => { None }
+        }
     }
 
     pub fn add_characters(

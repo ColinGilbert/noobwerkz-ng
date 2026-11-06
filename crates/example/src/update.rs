@@ -1,5 +1,6 @@
 use noobwerkz_client::camera3d::CameraContext;
 use noobwerkz_client::client_user_context::ClientUserContext;
+use noobwerkz_client::glam;
 use noobwerkz_client::graphics::*;
 use noobwerkz_client::light3d::*;
 use noobwerkz_client::web_time::Duration;
@@ -50,6 +51,12 @@ pub fn user_update(
         u.time_elapsed -= fps.as_micros();
     }
 
+    let path_results = s.find_path(glam::Vec3::ZERO, glam::Vec3::from_array([20.0, 5.0, -20.0]));
+
+    match path_results {
+        Some(val) => { println!("Path found! {:?}", val)}
+        None => { println!("Could not find path")}
+    }
     // println!("Particle system empty? {}", s.particle_system.borrow().is_empty());
 
     let _user_data = USER_DATA
