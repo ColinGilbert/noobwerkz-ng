@@ -51,7 +51,7 @@ pub fn user_update(
         u.time_elapsed -= fps.as_micros();
     }
 
-    let path_results = s.find_path(glam::Vec3::ZERO, glam::Vec3::from_array([20.0, 5.0, -20.0]));
+    let path_results = s.find_path(glam::Vec3::new(1.0, 1.0, -1.0), glam::Vec3::from_array([5.0, 1.0, -10.0]));
 
     match path_results {
         Some(val) => { println!("Path found! {:?}", val)}

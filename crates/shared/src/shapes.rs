@@ -2,9 +2,10 @@ use crate::{csg::*, serialized_model3d::*};
 use rapier3d::prelude::*;
 
 use binary_greedy_meshing as bgm;
+use rerecast::AreaType;
 use std::collections::BTreeSet;
 
-pub enum Shape {
+pub enum Shape3D {
     Cube(f32),
     Cuboid(f32, f32, f32),
     Sphere(f32),
@@ -14,43 +15,43 @@ pub enum Shape {
     Voxels(glam::Vec3, Vec<glam::IVec3>),
 }
 
-pub fn shape_to_collider(shape: Shape) -> Option<Collider> {
+pub fn shape_to_collider(shape: &Shape3D) -> Option<Collider> {
     match shape {
-        Shape::Cube(scale) => {
+        Shape3D::Cube(scale) => {
             return Some(
                 ColliderBuilder::new(SharedShape::cuboid(scale / 2.0, scale / 2.0, scale / 2.0))
                     .build(),
             );
         }
-        Shape::Cuboid(x, y, z) => {
-            return Some(ColliderBuilder::new(SharedShape::cuboid(x, y, z)).build());
+        Shape3D::Cuboid(x, y, z) => {
+            return Some(ColliderBuilder::new(SharedShape::cuboid(*x, *y, *z)).build());
         }
-        Shape::Sphere(radius) => {
-            return Some(ColliderBuilder::new(SharedShape::ball(radius)).build());
+        Shape3D::Sphere(radius) => {
+            return Some(ColliderBuilder::new(SharedShape::ball(*radius)).build());
         }
-        Shape::CapsuleX(length, radius) => {
+        Shape3D::CapsuleX(length, radius) => {
             return Some(
-                ColliderBuilder::new(SharedShape::capsule_x(length / 2.0, radius)).build(),
+                ColliderBuilder::new(SharedShape::capsule_x(length / 2.0, *radius)).build(),
             );
         }
-        Shape::CapsuleY(length, radius) => {
+        Shape3D::CapsuleY(length, radius) => {
             return Some(
-                ColliderBuilder::new(SharedShape::capsule_y(length / 2.0, radius)).build(),
+                ColliderBuilder::new(SharedShape::capsule_y(length / 2.0, *radius)).build(),
             );
         }
-        Shape::Trimesh(mesh) => {
+        Shape3D::Trimesh(mesh) => {
             let indices = Vec::new();
             let mut counter = 0;
             let mut accum = [0, 0, 0];
-            for i in mesh.indices {
-                accum[counter] = i;
+            for i in &mesh.indices {
+                accum[counter] = *i;
                 if counter > 2 {
                     counter = 0;
                 }
                 counter += 1;
             }
             let shape = SharedShape::trimesh(
-                mesh.positions
+                mesh.clone().positions
                     .into_iter()
                     .map(glam::Vec3::from_array)
                     .collect(),
@@ -66,35 +67,35 @@ pub fn shape_to_collider(shape: Shape) -> Option<Collider> {
                 }
             }
         }
-        Shape::Voxels(voxel_size, grid_coords) => {
+        Shape3D::Voxels(voxel_size, grid_coords) => {
             return Some(
-                ColliderBuilder::new(SharedShape::voxels(voxel_size, &grid_coords)).build(),
+                ColliderBuilder::new(SharedShape::voxels(*voxel_size, &grid_coords)).build(),
             );
         }
     }
 }
 
-pub fn shape_to_mesh(shape: Shape) -> Option<SerializedModel3D> {
+pub fn shape_to_serialized_model(shape: &Shape3D) -> Option<SerializedModel3D> {
     match shape {
-        Shape::Cube(scale) => Some(get_serialized_model(&cube(scale as f64))),
-        Shape::Cuboid(x, y, z) => Some(get_serialized_model(&cuboid(x as f64, y as f64, z as f64))),
-        Shape::Sphere(radius) => Some(get_serialized_model(&sphere(radius as f64))),
-        Shape::CapsuleX(length, radius) => None,
-        Shape::CapsuleY(length, radius) => Some(get_serialized_model(&capsule_y(
-            length as f64,
-            radius as f64,
+        Shape3D::Cube(scale) => Some(get_serialized_model(&cube(*scale as f64))),
+        Shape3D::Cuboid(x, y, z) => Some(get_serialized_model(&cuboid(*x as f64, *y as f64, *z as f64))),
+        Shape3D::Sphere(radius) => Some(get_serialized_model(&sphere(*radius as f64))),
+        Shape3D::CapsuleX(length, radius) => None,
+        Shape3D::CapsuleY(length, radius) => Some(get_serialized_model(&capsule_y(
+            *length as f64,
+            *radius as f64,
         ))),
-        Shape::Trimesh(mesh) => {
+        Shape3D::Trimesh(mesh) => {
             let mut results = SerializedModel3D::new();
-            results.meshes.push(mesh);
+            results.meshes.push(mesh.clone());
             Some(results)
         }
-        Shape::Voxels(voxel_size, grid_coords) => {
+        Shape3D::Voxels(voxel_size, grid_coords) => {
             // We first find out the smallest values, in order to offset into the voxels array.
             let mut x_min = 0;
             let mut y_min = 0;
             let mut z_min = 0;
-            for c in &grid_coords {
+            for c in grid_coords {
                 x_min = x_min.min(c.x);
                 y_min = y_min.min(c.y);
                 z_min = z_min.min(c.z);
@@ -139,7 +140,7 @@ pub fn shape_to_mesh(shape: Shape) -> Option<SerializedModel3D> {
             }
             const VOXELS_EXTENTS: usize = 64;
             let mut voxels = [0u16; bgm::Mesher::<VOXELS_EXTENTS>::CS_P3];
-            for c in &grid_coords {
+            for c in grid_coords {
                 voxels[bgm::pad_linearize::<VOXELS_EXTENTS>(
                     (c.x + x_offset) as usize,
                     (c.y + y_offset) as usize,
@@ -171,6 +172,7 @@ pub fn shape_to_mesh(shape: Shape) -> Option<SerializedModel3D> {
             let mut max_z = 0.0;
 
             mesh.indices = bgm::indices(mesh.positions.len() / 4);
+
             for p in mesh.positions.iter_mut() {
                 p[0] = (p[0] - x_offset as f32) * voxel_size.x;
                 min_x = min_x.min(p[0]);
@@ -186,8 +188,23 @@ pub fn shape_to_mesh(shape: Shape) -> Option<SerializedModel3D> {
             mesh.max_extents = [max_x, max_y, max_z];
 
             results.meshes.push(mesh);
-            
+
             Some(results)
         }
     }
+}
+
+
+pub fn mesh_to_recast_mesh(mesh: &SerializedMesh3D) -> rerecast::TriMesh {
+        let mut result = rerecast::TriMesh::default();
+    for indices in mesh.indices.chunks(3) {
+        let face = glam::UVec3::new(indices[0] , indices[1], indices[2]);
+        result.indices.push(face);
+        result.area_types.push(AreaType::NOT_WALKABLE);
+    }
+
+    for p in &mesh.positions {
+        result.vertices.push(glam::Vec3A::from_array([p[0], p[1], p[2]]));
+    }
+    result
 }

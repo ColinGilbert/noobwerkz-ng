@@ -9,10 +9,10 @@ use noobwerkz_client::light3d::Light3DUniform;
 use noobwerkz_client::model3d_node::*;
 use noobwerkz_client::scene3d::*;
 use noobwerkz_client::simple_particles::ParticleEffect;
+use noobwerkz_shared::shapes::*;
 use noobwerkz_skeletal_animation::animation_graph_definition::*;
 // use noobwerkz::simple_animgraph::edge_definitions::TransitionDefinition;
 use crate::user_data::*;
-
 
 // MODIFY ME!
 pub fn user_setup(
@@ -35,17 +35,20 @@ pub fn user_setup(
         0.01,
         100.0,
     );
-    
+
     let mut path = std::path::PathBuf::new();
     path.push("res");
     let mut navmesh_config_path = path.clone();
     navmesh_config_path.push("navmesh_config.json");
 
-    let s = Scene3D::new(&noobwerkz_client::glam::Vec3 {
-        x: 0.0,
-        y: -9.81,
-        z: 0.0,
-    }, navmesh_config_path);
+    let s = Scene3D::new(
+        &noobwerkz_client::glam::Vec3 {
+            x: 0.0,
+            y: -9.81,
+            z: 0.0,
+        },
+        navmesh_config_path,
+    );
 
     let current_scene = u.add_scene(s);
 
@@ -253,8 +256,23 @@ pub fn user_setup(
             );
         }
     }
+    let mut voxels = Vec::new();
+    voxels.push(glam::IVec3::new(0, 0, 0));
+    voxels.push(glam::IVec3::new(0, 1, 0));
+    voxels.push(glam::IVec3::new(0, -1, 0));
+    voxels.push(glam::IVec3::new(1, 0, 0));
+    voxels.push(glam::IVec3::new(0, 1, 1));
+    voxels.push(glam::IVec3::new(0, 1, 2));
 
-    u.scenes[current_scene].add_terrain(glam::Vec3::ZERO, glam::Quat::IDENTITY, &mut u.asset_mgr, &mut gfx_ctx.device, &mut gfx_ctx.queue, &gfx_ctx.debug_material, &gfx_ctx.texture_bind_group_layout);
+    u.scenes[current_scene].add_terrain(
+        Shape3D::Voxels(glam::Vec3::new(15.0, 0.1, 25.0), voxels),
+        glam::Vec3::ZERO,
+        glam::Quat::IDENTITY,
+        &mut u.asset_mgr,
+        &mut gfx_ctx.device,
+        &mut gfx_ctx.queue,
+        &gfx_ctx.debug_material,
+        &gfx_ctx.texture_bind_group_layout,
+    );
     u.scenes[current_scene].build_navmesh();
-
 }

@@ -16,7 +16,7 @@ use std::{
 };
 
 use noobwerkz_shared::{
-    csg::*, navmesh_context::NavMeshContext, physics3d_context::*, skeleton::*,
+    csg::*, navmesh_context::NavMeshContext, physics3d_context::*, skeleton::*, shapes::*,
 };
 use noobwerkz_skeletal_animation::{
     animation::Animation,
@@ -206,6 +206,7 @@ impl Scene3D {
 
     pub fn add_terrain(
         &mut self,
+        shape: Shape3D,
         translation: glam::Vec3,
         orientation: glam::Quat,
         asset_mgr: &mut AssetManager,
@@ -218,10 +219,12 @@ impl Scene3D {
         let rigid_body = RigidBodyBuilder::fixed()
             .translation(translation)
             .rotation(Vec3::new(euler.0, euler.1, euler.2));
-        let mut collider =
-            rapier3d::geometry::ColliderBuilder::new(SharedShape::cuboid(50.0, 1.2, 50.0))
-                .translation(Vector::new(0.0, 0.0, 0.0))
-                .build();
+        let collider = shape_to_collider(&shape);
+        if collider.is_none() {
+            println!("Could not add nonexistent collider to scene terrain.");
+            return;
+        }
+        let mut collider = collider.unwrap();
         let groups = InteractionGroups::new(
             Group::GROUP_1,
             Group::GROUP_2,
@@ -232,15 +235,20 @@ impl Scene3D {
             .physics_context
             .rigid_world
             .insert(rigid_body, collider);
-        let solid = cuboid(50.0, 1.2, 50.0);
+
+
+        let serialized_model = shape_to_serialized_model(&shape);
+        if serialized_model.is_none() {
+            println!("Could not create serialized model for scene terrain.")
+        }
+        
+        let mesh = &serialized_model.as_ref().unwrap().meshes[0];
         self.navmesh_context
             .terrain_bodies
-            .insert(rigid_body_handle, get_rerecast_mesh(&solid));
+            .insert(rigid_body_handle, mesh_to_recast_mesh(mesh));
 
         let mut texture_filepath = PathBuf::new();
         texture_filepath.push("res");
-        let mut serialized_model = get_serialized_model(&solid);
-
         /*
 
                 &mut self,
@@ -254,7 +262,7 @@ impl Scene3D {
 
          */
         let terrain_model = asset_mgr.load_serialized_3d_model_from_mem(
-            &mut serialized_model,
+            &mut serialized_model.unwrap(),
             "",
             &texture_filepath,
             device,
