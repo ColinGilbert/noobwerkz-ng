@@ -33,7 +33,7 @@ pub fn user_setup(
         gfx_ctx.config.width,
         degrees_to_radians(45.0),
         0.01,
-        100.0,
+        1000.0,
     );
 
     let mut path = std::path::PathBuf::new();
@@ -261,12 +261,12 @@ pub fn user_setup(
     voxels.push(glam::IVec3::new(0, 1, 0));
     voxels.push(glam::IVec3::new(0, -1, 0));
     voxels.push(glam::IVec3::new(1, 0, 0));
-    voxels.push(glam::IVec3::new(0, 1, 1));
-    voxels.push(glam::IVec3::new(0, 1, 2));
+    voxels.push(glam::IVec3::new(0, 0, 1));
+    voxels.push(glam::IVec3::new(0, 0, 2));
 
     u.scenes[current_scene].add_terrain(
-        Shape3D::Voxels(glam::Vec3::new(15.0, 0.1, 25.0), voxels),
-        glam::Vec3::ZERO,
+        Shape3D::Voxels(glam::Vec3::new(1.0, 1.0, 1.0), voxels),
+        glam::Vec3::new(2.0, 0.0, 2.0),
         glam::Quat::IDENTITY,
         &mut u.asset_mgr,
         &mut gfx_ctx.device,

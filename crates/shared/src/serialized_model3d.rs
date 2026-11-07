@@ -1,9 +1,8 @@
-use crate::{bone::*};
+use crate::bone::*;
 
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 use msgpacker::*;
-
 
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
@@ -14,10 +13,10 @@ pub struct SerializedAnimation3D {
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub enum SerializedAnimation3DKeyframeTypes {
-    Translations(Vec<[f32;3]>),
-    Rotations(Vec<[f32;4]>),
-    Scales(Vec<[f32;3]>),
-    Invalid
+    Translations(Vec<[f32; 3]>),
+    Rotations(Vec<[f32; 4]>),
+    Scales(Vec<[f32; 3]>),
+    Invalid,
 }
 
 #[repr(C)]
@@ -31,7 +30,7 @@ pub struct SerializedBone3D {
 
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
-pub struct SerializedAnimation3DChannel{
+pub struct SerializedAnimation3DChannel {
     pub bone: usize,
     pub data: SerializedAnimation3DKeyframeTypes,
     pub times: Vec<f32>,
@@ -87,6 +86,69 @@ impl SerializedMesh3D {
             material_index: 0,
         }
     }
+
+    pub fn recalculate_normals(&mut self) {
+        // for (int i = 0; i < num_vertices; i++) {
+        //     vertex[i].normal = Vector3(0, 0, 0);
+        // }
+        self.normals.clear();
+        for _ in &self.positions {
+            self.normals.push([0.0, 0.0, 0.0]);
+        }
+
+        for indices in self.indices.chunks(3) {
+            let id_a = indices[0];
+            let id_b = indices[1];
+            let id_c = indices[2];
+
+            let a = glam::Vec3::from_array(self.positions[id_a as usize]);
+            let b = glam::Vec3::from_array(self.positions[id_b as usize]);
+            let c = glam::Vec3::from_array(self.positions[id_c as usize]);
+
+            let edge_1 = b - a;
+            let edge_2 = c - a;
+            let face_normal = edge_1.cross(edge_2);
+
+            let normal_a = glam::Vec3::from_array(self.normals[id_a as usize]) + face_normal;
+            let normal_b = glam::Vec3::from_array(self.normals[id_b as usize]) + face_normal;
+            let normal_c = glam::Vec3::from_array(self.normals[id_c as usize]) + face_normal;
+
+            self.normals[id_a as usize] = normal_a.to_array();
+            self.normals[id_b as usize] = normal_b.to_array();
+            self.normals[id_c as usize] = normal_c.to_array();
+        }
+        #[allow(unused)]
+        for mut n in self.normals.iter_mut() {
+            let normalized = glam::Vec3::new(n[0], n[1], n[2]).normalize();
+            n = &mut normalized.to_array();
+        }
+
+        // // 2. Loop through all triangles
+        // for (int i = 0; i < num_triangles; i++) {
+        //     Index idxA = triangle[i].a;
+        //     Index idxB = triangle[i].b;
+        //     Index idxC = triangle[i].c;
+
+        //     Vector3 A = vertex[idxA].position;
+        //     Vector3 B = vertex[idxB].position;
+        //     Vector3 C = vertex[idxC].position;
+
+        //     // Calculate face normal via cross product
+        //     Vector3 edge1 = B - A;
+        //     Vector3 edge2 = C - A;
+        //     Vector3 faceNormal = cross(edge1, edge2);
+
+        //     // Accumulate onto each vertex of the triangle
+        //     vertex[idxA].normal += faceNormal;
+        //     vertex[idxB].normal += faceNormal;
+        //     vertex[idxC].normal += faceNormal;
+        // }
+
+        // // 3. Normalize all vertex normals
+        // for (int i = 0; i < num_vertices; i++) {
+        //     vertex[i].normal = normalize(vertex[i].normal);
+        // }
+    }
 }
 
 #[repr(C)]
@@ -138,7 +200,7 @@ impl SerializedModel3D {
             inverse_bind_matrices: Vec::new(),
             animations: Vec::new(),
             animations_by_name: HashMap::new(),
-            global_inverse_transform: glam::Mat4::IDENTITY.to_cols_array_2d()
+            global_inverse_transform: glam::Mat4::IDENTITY.to_cols_array_2d(),
         }
     }
 

@@ -16,7 +16,7 @@ use std::{
 };
 
 use noobwerkz_shared::{
-    csg::*, navmesh_context::NavMeshContext, physics3d_context::*, skeleton::*, shapes::*,
+    navmesh_context::NavMeshContext, physics3d_context::*, skeleton::*, shapes::*,
 };
 use noobwerkz_skeletal_animation::{
     animation::Animation,

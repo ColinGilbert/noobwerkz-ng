@@ -80,7 +80,7 @@ pub fn shape_to_serialized_model(shape: &Shape3D) -> Option<SerializedModel3D> {
         Shape3D::Cube(scale) => Some(get_serialized_model(&cube(*scale as f64))),
         Shape3D::Cuboid(x, y, z) => Some(get_serialized_model(&cuboid(*x as f64, *y as f64, *z as f64))),
         Shape3D::Sphere(radius) => Some(get_serialized_model(&sphere(*radius as f64))),
-        Shape3D::CapsuleX(length, radius) => None,
+        Shape3D::CapsuleX(_length, _radius) => None,
         Shape3D::CapsuleY(length, radius) => Some(get_serialized_model(&capsule_y(
             *length as f64,
             *radius as f64,
@@ -154,13 +154,13 @@ pub fn shape_to_serialized_model(shape: &Shape3D) -> Option<SerializedModel3D> {
             let mut mesh = SerializedMesh3D::new();
             for (face_n, quads) in mesher.quads.iter().enumerate() {
                 let face: bgm::Face = (face_n as u8).into();
-                let n = face.n().map(|v| v as f32);
+                //let n = face.n().map(|v| v as f32);
                 for q in quads {
                     let vertices_packed = face.vertices_packed(*q);
                     for vertex in vertices_packed.iter() {
                         let [x, y, z] = vertex.xyz();
                         mesh.positions.push([x as f32, y as f32, z as f32]);
-                        mesh.normals.push(n.clone());
+                        //mesh.normals.push(n.clone());
                     }
                 }
             }
@@ -187,8 +187,10 @@ pub fn shape_to_serialized_model(shape: &Shape3D) -> Option<SerializedModel3D> {
             mesh.min_extents = [min_x, min_y, min_z];
             mesh.max_extents = [max_x, max_y, max_z];
 
-            results.meshes.push(mesh);
+            mesh.recalculate_normals();
 
+            results.meshes.push(mesh);
+            
             Some(results)
         }
     }
