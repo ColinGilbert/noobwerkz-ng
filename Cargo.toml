@@ -21,6 +21,7 @@ monstertruck = { version="0.4.1", features = ["solid"]}
 serde_json = {version = "1.0.154"}
 serde = {version = "1.0.229" }
 binary-greedy-meshing = "0.6.1"
+quick-noise = "0.3.0"
 #landmark = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
 #waymark = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
 #waymark-crowd = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }

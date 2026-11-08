@@ -13,4 +13,6 @@ pub mod prng;
 pub mod shapes;
 pub mod csg;
 pub mod navmesh_context;
+pub mod noise;
+
 mod ecs_components_common;
