@@ -24,6 +24,22 @@ safe_index::new! {
 }
 
 safe_index::new! {
+  TerrainModel3DIndex,
+  map: TerrainModels3D,
+}
+
+safe_index::new! {
+  TerrainModel3DNodeIndex,
+  map: TerrainModel3DNodes,
+}
+
+// safe_index::new! {
+//   TerrainInstance3DIndex,
+//   map: TerrainInstances3D,
+// }
+
+
+safe_index::new! {
   Characters3DContextIndex,
   map: Characters3DContexts
 }

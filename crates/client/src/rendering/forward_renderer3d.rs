@@ -11,6 +11,9 @@ use crate::particles3d::Particle3DInstance;
 use crate::rendering::Pass;
 use crate::scene3d::Characters3DContext;
 use crate::skinned_model3d::*;
+use crate::terrain_model::TerrainModel3D;
+use crate::terrain_model::TerrainModel3DVertex;
+use crate::terrain_model_node::TerrainModel3DNode;
 use crate::vertex::*;
 
 // use crate::skinned_model_node::*;
@@ -26,11 +29,11 @@ pub struct ForwardRenderer3D {
     pub camera_bind_group: wgpu::BindGroup,
     pub render_pipeline: wgpu::RenderPipeline,
     pub skinned_render_pipeline: wgpu::RenderPipeline,
+    pub terrain_render_pipeline: wgpu::RenderPipeline,
     pub light_render_pipeline: wgpu::RenderPipeline,
     pub cpu_particles_render_pipeline_alpha: wgpu::RenderPipeline,
     pub cpu_particles_render_pipeline_additive: wgpu::RenderPipeline,
     //pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
-
 }
 
 impl Pass for ForwardRenderer3D {
@@ -40,7 +43,9 @@ impl Pass for ForwardRenderer3D {
         queue: &wgpu::Queue,
         models: &Models3D<Model3D>,
         skinned_models: &SkinnedModels3D<SkinnedModel3D>,
+        terrain_models: &TerrainModels3D<TerrainModel3D>,
         model_nodes: &Model3DNodes<Model3DNode>,
+        terrain_nodes: &TerrainModel3DNodes<TerrainModel3DNode>,
         characters_contexts: &Vec<Characters3DContext>,
         particles_ctx: &Rc<RefCell<Particle3DContext>>,
         // particle_effects: &Vec<EffectDraw>,
@@ -80,12 +85,12 @@ impl Pass for ForwardRenderer3D {
                 multiview_mask: None,
             });
 
-            // render_pass.set_pipeline(&self.light_render_pipeline);
-            // render_pass.draw_light_model(
-            //     &models[0],
-            //     &self.camera_bind_group,
-            //     &self.light_bind_group,
-            // );
+            render_pass.set_pipeline(&self.light_render_pipeline);
+            render_pass.draw_light_model(
+                &models[Model3DIndex::new(0)],
+                &self.camera_bind_group,
+                &self.light_bind_group,
+            );
 
             render_pass.set_pipeline(&self.render_pipeline);
 
@@ -138,9 +143,8 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
-
             render_pass.set_pipeline(&self.skinned_render_pipeline);
-            
+
             for c in characters_contexts.iter() {
                 let mut count = 0;
                 let mut model_instances = Vec::<SkinnedInstance3DRaw>::new();
@@ -163,9 +167,10 @@ impl Pass for ForwardRenderer3D {
                     for instance_raw in &model_instances {
                         let instance_model_mat =
                             glam::Mat4::from_cols_array_2d(&instance_raw.model);
-
+                        let instance_normal_mat = glam::Mat3::from_cols_array_2d(&instance_raw.normal);
                         let temp = SkinnedInstance3DRaw {
                             model: (instance_model_mat * mesh_mat).to_cols_array_2d(),
+                            normal: instance_normal_mat.to_cols_array_2d(),
                         };
 
                         mesh_instances.push(temp);
@@ -189,7 +194,48 @@ impl Pass for ForwardRenderer3D {
                         &c.skinned_model_node.bind_group,
                     );
                 }
-            // }
+                // }
+            }
+
+            render_pass.set_pipeline(&self.terrain_render_pipeline);
+
+            let mut count = 0;
+            for node in terrain_nodes.iter() {
+                let model = &terrain_models[node.model_idx];
+                let instance = node.instance.to_terrain_raw();
+                count += 1;
+                for mesh in model.meshes.iter() {
+                    let mesh_m_mat = glam::Mat4::from_scale_rotation_translation(
+                        mesh.scale,
+                        mesh.rotation,
+                        mesh.translation,
+                    );
+
+                    let mesh_n_mat = glam::Mat3::from_quat(mesh.rotation);
+                    // let model_m_mat = glam::Mat4::from_cols_array_2d(&instance.model);
+                    // let model_n_mat = glam::Mat3::from_cols_array_2d(&instance.normal);
+                    // temp_terrain_instance_3d_raw = TerrainInstance3DRaw {
+                    //     model: (mesh_m_mat).to_cols_array_2d(),
+                    //     normal: (mesh_n_mat).to_cols_array_2d(),
+                    // };
+
+                    let instance_buffer =
+                        device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                            label: Some("Instance Buffer"),
+                            contents: bytemuck::cast_slice(&[instance]),
+                            usage: wgpu::BufferUsages::VERTEX,
+                        });
+
+                    render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
+
+                    render_pass.draw_mesh_instanced(
+                        &mesh,
+                        &model.materials[mesh.material],
+                        0..count,
+                        &self.camera_bind_group,
+                        &self.light_bind_group,
+                    );
+                }
             }
 
             let borrowed = particles_ctx.borrow();
@@ -283,6 +329,17 @@ impl ForwardRenderer3D {
                 immediate_size: 0,
             });
 
+        let terrain_render_pipeline_layout =
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("Terrain render Pipeline Layout"),
+                bind_group_layouts: &[
+                    Some(texture_bind_group_layout),
+                    Some(camera_bind_group_layout),
+                    Some(light_bind_group_layout),
+                ],
+                immediate_size: 0,
+            });
+
         let skinned_render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Skinned Pipeline Layout"),
@@ -329,6 +386,24 @@ impl ForwardRenderer3D {
             )
         };
 
+        let terrain_render_pipeline = {
+            let shader = wgpu::ShaderModuleDescriptor {
+                label: Some("Terrain Shader"),
+                source: wgpu::ShaderSource::Wgsl(include_str!("forward_terrain3d.wgsl").into()),
+            };
+            create_indexed_mesh_render_pipeline(
+                &device,
+                &terrain_render_pipeline_layout,
+                config.format,
+                Some(Texture::DEPTH_FORMAT),
+                &[
+                    Some(TerrainModel3DVertex::desc()),
+                    Some(TerrainInstance3DRaw::desc()),
+                ],
+                shader,
+            )
+        };
+
         let light_render_pipeline = {
             let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Light Pipeline Layout"),
@@ -353,8 +428,6 @@ impl ForwardRenderer3D {
             )
         };
 
-
-        
         let cpu_particles_render_pipeline_alpha = {
             let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("CPU Particles Pipeline Layout Alpha"),
@@ -407,8 +480,6 @@ impl ForwardRenderer3D {
             )
         };
 
-
-
         Self {
             render_pipeline_layout,
             skinned_render_pipeline_layout,
@@ -416,6 +487,7 @@ impl ForwardRenderer3D {
             camera_bind_group,
             render_pipeline,
             skinned_render_pipeline,
+            terrain_render_pipeline,
             light_render_pipeline,
             cpu_particles_render_pipeline_alpha,
             cpu_particles_render_pipeline_additive,

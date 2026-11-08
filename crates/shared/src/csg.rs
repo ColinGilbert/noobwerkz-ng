@@ -180,6 +180,74 @@ pub fn get_serialized_model(solid: &Solid) -> SerializedModel3D {
     result
 }
 
+
+
+pub fn get_serialized_terrain_model(solid: &Solid) -> SerializedTerrainModel3D {
+    let mut result = SerializedTerrainModel3D::new();
+    result.meshes.push(SerializedMesh3D::new());
+    let polygon_mesh = solid.triangulation(0.005).to_polygon();
+
+    for f in polygon_mesh.face_iter() {
+        for ff in f {
+            result.meshes[0].indices.push(ff.pos as u32);
+        }
+    }
+    let mut max_extents = [0.0 as f32; 3];
+    let mut min_extents = [0.0 as f32; 3];
+    for p in polygon_mesh.positions() {
+        result.meshes[0]
+            .positions
+            .push([p.x as f32, p.y as f32, p.z as f32]);
+        let mut i = 0;
+        while i < 3 {
+            let biggest: f32;
+            if max_extents[i] > p[i] as f32 {
+                biggest = max_extents[i] as f32;
+            } else {
+                biggest = p[i] as f32;
+            }
+            max_extents[i] = biggest;
+
+            let smallest: f32;
+            if min_extents[i] < p[i] as f32 {
+                smallest = min_extents[i];
+            } else {
+                smallest = p[i] as f32;
+            }
+            min_extents[i] = smallest;
+
+            i += 1;
+        }
+    }
+
+    result.meshes[0].max_extents = max_extents;
+    result.meshes[0].min_extents = min_extents;
+
+    let mut dims = [0.0 as f32; 3];
+    let mut i = 0;
+    while i < 3 {
+        dims[i] = max_extents[i] - min_extents[i];
+        i += 1;
+    }
+    result.meshes[0].dimensions = dims;
+
+    for n in polygon_mesh.normals() {
+        result.meshes[0]
+            .normals
+            .push([n.x as f32, n.y as f32, n.z as f32]);
+    }
+
+    for t in polygon_mesh.uv_coords() {
+        result.meshes[0].uvs.push([t.x as f32, t.y as f32])
+    }
+
+    result.meshes[0].scale = [1.0, 1.0, 1.0];
+    result.meshes[0].rotation = glam::Quat::IDENTITY.to_array();
+
+    result
+}
+
+
 pub fn get_rerecast_mesh(solid: &Solid) -> rerecast::TriMesh {
     let mut result = rerecast::TriMesh::default();
     let polygon_mesh = solid.triangulation(0.005).to_polygon();

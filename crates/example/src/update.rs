@@ -35,7 +35,7 @@ pub fn user_update(
     let old_position: noobwerkz_client::glam::Vec3 = light_ctx.light_uniforms[0].position.into();
     light_ctx.light_uniforms[0].position = (noobwerkz_client::glam::Quat::from_axis_angle(
         noobwerkz_client::glam::Vec3::Y,
-        PI * dt.as_secs_f32(),
+        PI * 0.1 * dt.as_secs_f32(),
     ) * old_position)
         .into();
     gfx_ctx.queue.write_buffer(
@@ -51,11 +51,16 @@ pub fn user_update(
         u.time_elapsed -= fps.as_micros();
     }
 
-    let path_results = s.find_path(glam::Vec3::new(1.0, 1.0, -1.0), glam::Vec3::from_array([5.0, 1.0, -10.0]));
+    let path_results = s.find_path(
+        glam::Vec3::new(5.0, 2.0, 5.0),
+        glam::Vec3::from_array([5.0, 2.0, 5.5]),
+    );
 
     match path_results {
-        Some(val) => { println!("Path found! {:?}", val)}
-        None => { println!("Could not find path")}
+        Some(_val) => {
+            // println!("Path found! {:?}", val)
+        }
+        None => {}
     }
     // println!("Particle system empty? {}", s.particle_system.borrow().is_empty());
 

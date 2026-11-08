@@ -68,7 +68,6 @@ impl WindowState {
             &gfx_ctx.device,
             &light_ctx.light_buffer,
             &cam_ctx.buffer,
-            // gfx_ctx.particles_ctx.borrow().instance_buffer.clone(),
             &gfx_ctx.texture_bind_group_layout,
             &cam_ctx.bind_group_layout,
             &light_ctx.light_bind_group_layout,
@@ -167,17 +166,17 @@ impl WindowState {
     }
 
     pub fn handle_mouse_button(&mut self, button: MouseButton, pressed: bool) {
-        if !self
-            .egui_renderer
-            .state
-            .egui_ctx()
-            .egui_wants_pointer_input()
-        {
+        // if !self
+        //     .egui_renderer
+        //     .state
+        //     .egui_ctx()
+        //     .egui_wants_pointer_input() && !self.egui_renderer.state.egui_ctx().is_pointer_over_egui()
+        // {
             match button {
                 MouseButton::Left => self.mouse_pressed = pressed,
                 _ => {}
             }
-        }
+        // }
     }
 
     pub fn handle_mouse_motion(&mut self, dx: f64, dy: f64) {
@@ -283,7 +282,9 @@ impl WindowState {
             &self.gfx_ctx.queue,
             &u.asset_mgr.models,
             &u.asset_mgr.skinned_models,
+            &u.asset_mgr.terrain_models,
             &s.model_nodes,
+            &s.terrain_nodes,
             &s.characters_contexts,
             &self.gfx_ctx.particles_ctx,
             // &particle_effects,

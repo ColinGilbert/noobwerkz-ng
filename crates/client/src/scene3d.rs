@@ -1,4 +1,5 @@
-use crate::asset_manager::AssetManager;
+use crate::terrain_model_node::TerrainModel3DNode;
+use crate::{asset_manager::AssetManager, terrain_model::TerrainModel3D};
 // This is where our game world resides.
 use crate::ecs::*;
 #[allow(unused)]
@@ -16,7 +17,7 @@ use std::{
 };
 
 use noobwerkz_shared::{
-    navmesh_context::NavMeshContext, physics3d_context::*, skeleton::*, shapes::*,
+    navmesh_context::NavMeshContext, physics3d_context::*, shapes::*, skeleton::*,
 };
 use noobwerkz_skeletal_animation::{
     animation::Animation,
@@ -41,21 +42,10 @@ pub struct Characters3DContext {
     pub skinned_model_node: SkinnedModel3DNode,
 }
 
-pub struct TerrainContext {
-    pub model_node_indices: HashMap<Model3DIndex, HashSet<usize>>, // HashSet contains the indices of the model instances
-}
-
-impl TerrainContext {
-    pub fn new() -> Self {
-        Self {
-            model_node_indices: HashMap::new(),
-        }
-    }
-}
-
 pub struct Scene3D {
     pub cameras: Cameras3D<Camera3D>,
     pub model_nodes: Model3DNodes<Model3DNode>,
+    pub terrain_nodes: TerrainModel3DNodes<TerrainModel3DNode>,
     pub active_camera: Camera3DIndex,
     pub physics_context: Physics3DContext,
     pub characters_contexts: Vec<Characters3DContext>,
@@ -63,7 +53,6 @@ pub struct Scene3D {
     pub particle_system: Rc<RefCell<ParticleSystem>>,
     pub ecs: World,
     pub navmesh_context: NavMeshContext,
-    pub terrain_context: TerrainContext,
 }
 
 impl Scene3D {
@@ -73,6 +62,7 @@ impl Scene3D {
         Self {
             cameras: Cameras3D::new(),
             model_nodes: Model3DNodes::new(),
+            terrain_nodes: TerrainModel3DNodes::new(),
             active_camera: Camera3DIndex::new(0),
             physics_context: Physics3DContext::new(gravity),
             characters_contexts: Vec::new(),
@@ -80,7 +70,6 @@ impl Scene3D {
             particle_system: Rc::new(RefCell::new(ParticleSystem::new())),
             ecs: World::default(),
             navmesh_context,
-            terrain_context: TerrainContext::new(),
         }
     }
 
@@ -213,6 +202,7 @@ impl Scene3D {
         device: &mut wgpu::Device,
         queue: &mut wgpu::Queue,
         default_material: &ModelMaterial,
+        texture_filepath: &PathBuf,
         texture_layout: &wgpu::BindGroupLayout,
     ) {
         let euler = orientation.to_euler(glam::EulerRot::default());
@@ -222,7 +212,7 @@ impl Scene3D {
         let collider = shape_to_collider(&shape);
         if collider.is_none() {
             println!("Could not add nonexistent collider to scene terrain.");
-            return;
+            return
         }
         let mut collider = collider.unwrap();
         let groups = InteractionGroups::new(
@@ -236,34 +226,19 @@ impl Scene3D {
             .rigid_world
             .insert(rigid_body, collider);
 
-
-        let serialized_model = shape_to_serialized_model(&shape);
+        let serialized_model = shape_to_serialized_terrain_model(&shape);
         if serialized_model.is_none() {
-            println!("Could not create serialized model for scene terrain.")
+            println!("Could not create serialized model for scene terrain.");
+            return
         }
-        
+
         let mesh = &serialized_model.as_ref().unwrap().meshes[0];
         self.navmesh_context
             .terrain_bodies
             .insert(rigid_body_handle, mesh_to_recast_mesh(mesh));
 
-        let mut texture_filepath = PathBuf::new();
-        texture_filepath.push("res");
-        /*
-
-                &mut self,
-        serialized: &mut SerializedModel3D,
-        name: &str,
-        texture_filepath: &PathBuf,
-        device: &mut wgpu::Device,
-        queue: &mut wgpu::Queue,
-        default_material: &ModelMaterial,
-        texture_layout: &wgpu::BindGroupLayout,
-
-         */
-        let terrain_model = asset_mgr.load_serialized_3d_model_from_mem(
+        let terrain_model = asset_mgr.load_terrain_3d_model_from_mem(
             &mut serialized_model.unwrap(),
-            "",
             &texture_filepath,
             device,
             queue,
@@ -272,17 +247,19 @@ impl Scene3D {
         );
         match terrain_model {
             Ok(val) => {
-                let mut instances = Instances::new();
-                instances.push(Instance3D {
-                    position: translation,
-                    orientation,
-                    scale: glam::Vec3::splat(1.0),
-                });
-                let model_node = Model3DNode::new(val, instances);
-                self.model_nodes.push(model_node);
+                let model_node = TerrainModel3DNode::new(
+                    val,
+                    Instance3D {
+                        position: translation,
+                        orientation,
+                        scale: glam::Vec3::splat(1.0),
+                    },
+                );
+                self.terrain_nodes.push(model_node);
             }
             Err(err) => {
-                println!("Could not add terrain model: {}", err)
+                println!("Could not add terrain model: {}", err);
+                return
             }
         }
     }

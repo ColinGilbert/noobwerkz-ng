@@ -25,7 +25,9 @@ pub mod egui_renderer;
 pub mod particles3d;
 pub mod ecs_components_common;
 pub mod ecs;
-
+pub mod event_bindings;
+pub mod terrain_model;
+pub mod terrain_model_node;
 
 pub use bytemuck as bytemuck;
 pub use egui as egui;

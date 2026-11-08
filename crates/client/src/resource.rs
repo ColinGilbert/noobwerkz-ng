@@ -2,6 +2,8 @@ use crate::index_types::*;
 use crate::model_material::*;
 use crate::model3d::*;
 use crate::skinned_model3d::*;
+use crate::terrain_model::TerrainModel3D;
+use crate::terrain_model::TerrainModel3DVertex;
 use crate::texture;
 use crate::texture::Texture;
 use msgpacker::*;
@@ -29,9 +31,7 @@ pub fn load_serialized_model(filepath: &std::path::Path) -> Option<SerializedMod
     let deserialized_results = SerializedModel3D::unpack(&data.unwrap());
 
     match deserialized_results {
-        Ok(deserialized) => {
-            Some(deserialized)
-        }
+        Ok(deserialized) => Some(deserialized),
         Err(err) => {
             println!("Error loading 3D model: {}", err);
             None
@@ -73,6 +73,8 @@ pub fn load_skinned_3d_model_from_serialized(
         }
         let mut i = 0;
 
+        m.recalculate_normals();
+
         // let matrix = glam::Mat4::from_quat(glam::Quat::from_axis_angle(glam::Vec3{x: 1.0, y: 0.0, z: 0.0}, 90.0));
         while i < m.positions.len() {
             let mut v = Model3DVertex::new();
@@ -88,7 +90,6 @@ pub fn load_skinned_3d_model_from_serialized(
             indices.push(m.indices[i]);
             i += 1;
         }
-
         calculate_tangents_and_bitangents(&mut verts, &indices);
 
         let mut skinned_verts = Vec::<SkinnedModelVertex3D>::new();
@@ -209,7 +210,7 @@ pub fn load_skinned_3d_model_from_serialized(
             texture_layout,
             m.base_colour,
             m.metallic,
-            m.roughness
+            m.roughness,
         );
 
         model_results.materials.push(material);
@@ -246,20 +247,16 @@ pub fn load_skinned_3d_model_from_serialized(
 
     for a in model.animations.clone() {
         let mut serialized_keyframes_by_bone_idx =
-        HashMap::<usize, Vec<SerializedAnimation3DKeyframeTypes>>::new();
+            HashMap::<usize, Vec<SerializedAnimation3DKeyframeTypes>>::new();
         let mut serialized_times_by_bone_idx = HashMap::<usize, Vec<f32>>::new();
-            for s in &a.channels {
-                if !serialized_keyframes_by_bone_idx.contains_key(&s.bone) {
+        for s in &a.channels {
+            if !serialized_keyframes_by_bone_idx.contains_key(&s.bone) {
                 serialized_keyframes_by_bone_idx.insert(s.bone, Vec::new());
-
             }
-            let serialized_keyframes =
-            serialized_keyframes_by_bone_idx.get_mut(&s.bone).unwrap();
+            let serialized_keyframes = serialized_keyframes_by_bone_idx.get_mut(&s.bone).unwrap();
             serialized_keyframes.push(s.data.clone());
             serialized_times_by_bone_idx.insert(s.bone, s.times.clone());
         }
-        
-
 
         // let ser/ialized_keyframes = serialized_keyframes_by_bone_idx[&s.bone];
         for (i, sk) in serialized_keyframes_by_bone_idx {
@@ -316,6 +313,7 @@ pub fn load_3d_model_from_serialized(
         if m.positions.len() != m.uvs.len() {
             m.uvs.resize(m.positions.len(), [0.0, 0.0]);
         }
+        m.recalculate_normals();
         let mut i = 0;
         while i < m.positions.len() {
             let mut v = Model3DVertex::new();
@@ -330,6 +328,8 @@ pub fn load_3d_model_from_serialized(
             indices.push(m.indices[i]);
             i += 1;
         }
+
+        //;
         calculate_tangents_and_bitangents(&mut verts, &indices);
 
         // println!("Full path: {}", full_path);
@@ -433,11 +433,154 @@ pub fn load_3d_model_from_serialized(
             texture_layout,
             m.base_colour,
             m.metallic,
-            m.roughness
+            m.roughness,
         );
         model_results.materials.push(material);
     }
 
+    Some(model_results)
+}
+
+pub fn load_3d_terrain_model_from_serialized(
+    model: &mut SerializedTerrainModel3D,
+    default_material: &ModelMaterial,
+    filepath: &std::path::Path,
+    device: &mut wgpu::Device,
+    queue: &mut wgpu::Queue,
+    texture_layout: &wgpu::BindGroupLayout,
+) -> Option<TerrainModel3D> {
+    // This is the function we port...
+    let mut model_results = TerrainModel3D::new();
+    for m in model.meshes.iter_mut() {
+        let mut verts = Vec::<TerrainModel3DVertex>::new();
+        let mut indices = Vec::<u32>::new();
+        if m.positions.len() != m.normals.len() {
+            return Option::None;
+        }
+        if m.positions.len() != m.uvs.len() {
+            m.uvs.resize(m.positions.len(), [0.0, 0.0]);
+        }
+        let mut i = 0;
+        while i < m.positions.len() {
+            let mut v = TerrainModel3DVertex::new();
+            v.position = m.positions[i];
+            v.normal = m.normals[i];
+            i += 1;
+            verts.push(v);
+        }
+        i = 0;
+        while i < m.indices.len() {
+            indices.push(m.indices[i]);
+            i += 1;
+        }
+
+        // println!("Full path: {}", full_path);
+        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some(&format!("{:?} Vertex Buffer", m.name)),
+            contents: bytemuck::cast_slice(&verts),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
+        let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some(&format!("{:?} Index Buffer", m.name)),
+            contents: bytemuck::cast_slice(&indices),
+            usage: wgpu::BufferUsages::INDEX,
+        });
+
+        model_results.meshes.push(TexturedMesh3D {
+            name: m.name.clone(),
+            vertex_buffer,
+            index_buffer,
+            num_elements: indices.len() as u32,
+            material: ModelMaterialIndex::new(m.material_index as usize),
+            translation: glam::Vec3::from_array(m.translation),
+            rotation: glam::Quat::from_array(m.rotation),
+            scale: glam::Vec3::from_array(m.scale),
+            dimensions: glam::Vec3::from_array(m.dimensions),
+        });
+    }
+
+    if model.materials.len() == 0 {
+        model_results.materials.push(default_material.clone());
+    }
+
+    for m in model.materials.iter_mut() {
+        let name = &m.name;
+        let diffuse_texture: Texture;
+        if m.diffuse_texture_path != "" {
+            let mut path = PathBuf::new();
+            for p in filepath {
+                path.push(p);
+            }
+            path.push(&m.diffuse_texture_path);
+            let diffuse_path = path.as_path();
+            let diffuse_texture_result = futures::executor::block_on(load_texture(
+                &diffuse_path,
+                false,
+                device,
+                queue,
+                texture_layout,
+            ));
+            match diffuse_texture_result {
+                Ok(value) => {
+                    diffuse_texture = value;
+                }
+                Err(value) => {
+                    println!(
+                        "Could not load diffuse texture {}, error: {}",
+                        m.diffuse_texture_path, value
+                    );
+                    diffuse_texture = default_material.diffuse_texture.clone();
+                }
+            }
+        } else {
+            diffuse_texture = default_material.diffuse_texture.clone();
+        }
+
+        let normal_texture: texture::Texture;
+        // let normals_path = path.clone() + &"/".to_owned() + &m.normals_texture_path;
+        if m.normals_texture_path != "" {
+            let mut path = PathBuf::new();
+            for p in filepath {
+                path.push(p);
+            }
+            path.push(&m.normals_texture_path);
+            println!("Normal texture path {:?}", path);
+            let normal_texture_result = futures::executor::block_on(load_texture(
+                path.as_path(),
+                true,
+                device,
+                queue,
+                texture_layout,
+            ));
+            match normal_texture_result {
+                Ok(value) => {
+                    normal_texture = value;
+                }
+                Err(value) => {
+                    println!(
+                        "Could not load normals texture {}, error: {}",
+                        m.normals_texture_path, value
+                    );
+                    normal_texture = default_material.normal_texture.clone();
+                }
+            }
+        } else {
+            normal_texture = default_material.normal_texture.clone();
+        }
+        let material = ModelMaterial::new(
+            device,
+            name,
+            diffuse_texture,
+            normal_texture,
+            texture_layout,
+            m.base_colour,
+            m.metallic,
+            m.roughness,
+        );
+        model_results.materials.push(material);
+
+        ////////////////////////////
+    }
     Some(model_results)
 }
 

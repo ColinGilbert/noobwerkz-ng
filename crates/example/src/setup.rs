@@ -196,15 +196,20 @@ pub fn user_setup(
 
     lights.push(Light3DUniform::new(
         noobwerkz_client::glam::Vec3 {
-            x: 3.0,
+            x: 5.0,
             y: 2.0,
-            z: 3.0,
+            z: 5.0,
         },
         noobwerkz_client::glam::Vec3 {
             x: 1.0,
             y: 1.0,
             z: 1.0,
         },
+        noobwerkz_client::glam::Vec3 {
+            x: 1.0,
+            y: -1.0,
+            z: 0.0,
+        }
     ));
 
     u.scenes[current_scene].cameras.push(c);
@@ -248,14 +253,14 @@ pub fn user_setup(
             ),
         );
 
-    for x in 0..10 {
-        for z in 0..10 {
-            u.scenes[current_scene].particle_system.borrow_mut().spawn(
-                "yellow-spark",
-                [SPACE_BETWEEN * x as f32, 1.0, SPACE_BETWEEN * z as f32],
-            );
-        }
-    }
+    // for x in 0..10 {
+    //     for z in 0..10 {
+    //         u.scenes[current_scene].particle_system.borrow_mut().spawn(
+    //             "yellow-spark",
+    //             [SPACE_BETWEEN * x as f32, 1.0, SPACE_BETWEEN * z as f32],
+    //         );
+    //     }
+    // }
     let mut voxels = Vec::new();
     voxels.push(glam::IVec3::new(0, 0, 0));
     voxels.push(glam::IVec3::new(0, 1, 0));
@@ -264,14 +269,18 @@ pub fn user_setup(
     voxels.push(glam::IVec3::new(0, 0, 1));
     voxels.push(glam::IVec3::new(0, 0, 2));
 
+
+    let mut terrain_texture_path = path.clone();
+    //terrain_texture_path.push("");
     u.scenes[current_scene].add_terrain(
         Shape3D::Voxels(glam::Vec3::new(1.0, 1.0, 1.0), voxels),
-        glam::Vec3::new(2.0, 0.0, 2.0),
+        glam::Vec3::new(0.0, -2.0, 0.0),
         glam::Quat::IDENTITY,
         &mut u.asset_mgr,
         &mut gfx_ctx.device,
         &mut gfx_ctx.queue,
         &gfx_ctx.debug_material,
+        &terrain_texture_path,
         &gfx_ctx.texture_bind_group_layout,
     );
     u.scenes[current_scene].build_navmesh();

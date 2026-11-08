@@ -1,11 +1,11 @@
 // This code serves as a simplified way for asset loading.
 use crate::{
     index_types::*, model_material::ModelMaterial, model3d::*, resource::*, skinned_model3d::*,
-    texture::*,
+    terrain_model::*, texture::*,
 };
 use anyhow::*;
 use kira::sound::static_sound::StaticSoundData;
-use noobwerkz_shared::serialized_model3d::SerializedModel3D;
+use noobwerkz_shared::serialized_model3d::{SerializedModel3D, SerializedTerrainModel3D};
 use std::{collections::*, path::*, result::Result::*};
 
 pub struct AssetManager {
@@ -21,6 +21,7 @@ pub struct AssetManager {
 
     pub models: Models3D<Model3D>,
     pub skinned_models: SkinnedModels3D<SkinnedModel3D>,
+    pub terrain_models: TerrainModels3D<TerrainModel3D>,
     pub textures: Textures<Texture>,
     pub audio_clips: AudioClips<StaticSoundData>, // pub skeletons: Vec<Arc<ozz_animation_rs::Skeleton>>,
                                                   // pub animations: Vec<Arc<ozz_animation_rs::Animation>>,
@@ -39,6 +40,7 @@ impl AssetManager {
             audio_clip_names: HashMap::new(),
             models: Models3D::new(),
             skinned_models: SkinnedModels3D::<SkinnedModel3D>::new(),
+            terrain_models: TerrainModels3D::<TerrainModel3D>::new(),
             textures: Textures::new(),
             audio_clips: AudioClips::new(),
             // skeletons: Vec::<Arc<ozz_animation_rs::Skeleton>>::new(),
@@ -117,7 +119,7 @@ impl AssetManager {
             }
             None => {
                 return anyhow::Result::Err(anyhow!(format!(
-                    "Could not load model {} from file",
+                    "Could not load model {} from memory",
                     name
                 )));
             }
@@ -156,15 +158,46 @@ impl AssetManager {
                     }
                     None => {
                         return anyhow::Result::Err(anyhow!(format!(
-                            "Skinned model {} refused to load properly",
+                            "Skinned model {} refused to load properly from file.",
                             name
                         )));
                     }
                 }
             }
             None => Err(anyhow!(
-                "AssetManager: Could not load serialized 3D skinned model"
+                "AssetManager: Could not load serialized 3D skinned model from file."
             )),
+        }
+    }
+
+    pub fn load_terrain_3d_model_from_mem(
+        &mut self,
+        serialized: &mut SerializedTerrainModel3D,
+        texture_filepath: &PathBuf,
+        device: &mut wgpu::Device,
+        queue: &mut wgpu::Queue,
+        default_material: &ModelMaterial,
+        texture_layout: &wgpu::BindGroupLayout,
+    ) -> anyhow::Result<TerrainModel3DIndex> {
+        let model = load_3d_terrain_model_from_serialized(
+            serialized,
+            default_material,
+            &texture_filepath.as_path(),
+            device,
+            queue,
+            texture_layout,
+        );
+        match model {
+            Some(val) => {
+                self.terrain_models.push(val);
+                let idx = TerrainModel3DIndex::new(self.terrain_models.len() - 1);
+                return anyhow::Result::Ok(idx);
+            }
+            None => {
+                return anyhow::Result::Err(anyhow!(format!(
+                    "Could not load terrain model from memory.",
+                )));
+            }
         }
     }
 

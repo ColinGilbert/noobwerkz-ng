@@ -203,18 +203,21 @@ impl SerializedModel3D {
             global_inverse_transform: glam::Mat4::IDENTITY.to_cols_array_2d(),
         }
     }
+}
 
-    // pub fn rotate(&mut self, rotation: glam::Quat) {
-    //     let matrix = glam::Mat4::from_quat(rotation);
-    //     for m in self.meshes.iter_mut() {
-    //         let mut i = 0;
-    //         while i < m.positions.len() {
-    //             let p = m.positions[i];
-    //             let mut pp = glam::Vec4::from_array([p[0], p[1], p[2], 1.0]);
-    //             pp = matrix * pp;
-    //             m.positions[i] = [pp[0], pp[1], pp[2]];
-    //             i += 1;
-    //         }
-    //     }
-    // }
+
+#[repr(C)]
+#[derive(Clone, Debug, PartialEq, MsgPacker)]
+pub struct SerializedTerrainModel3D {
+    pub meshes: Vec<SerializedMesh3D>,
+    pub materials: Vec<SerializedModelMaterial>,
+}
+
+impl SerializedTerrainModel3D {
+    pub fn new() -> Self {
+        Self {
+            meshes: Vec::new(),
+            materials: Vec::new(),
+        }
+    }
 }

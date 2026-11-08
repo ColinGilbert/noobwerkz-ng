@@ -10,6 +10,7 @@ var<uniform> camera: Camera;
 struct Light {
     position: vec3<f32>,
     color: vec3<f32>,
+    direction: vec3<f32>,
 }
 @group(2) @binding(0)
 var<uniform> light: Light;
@@ -41,6 +42,10 @@ struct InstanceInput {
     @location(8) model_matrix_1: vec4<f32>,
     @location(9) model_matrix_2: vec4<f32>,
     @location(10) model_matrix_3: vec4<f32>,
+    @location(11) normal_matrix_0: vec3<f32>,
+    @location(12) normal_matrix_1: vec3<f32>,
+    @location(13) normal_matrix_2: vec3<f32>,
+
 }
 
 struct VertexOutput {
@@ -49,6 +54,7 @@ struct VertexOutput {
     @location(1) tangent_position: vec3<f32>,
     @location(2) tangent_light_position: vec3<f32>,
     @location(3) tangent_view_position: vec3<f32>,
+    @location(4) normal: vec3<f32>,
 }
 
 @vertex
@@ -63,14 +69,20 @@ fn vs_main(
         instance.model_matrix_3,
     );
  
+    let normal_matrix = mat3x3<f32>(
+        instance.normal_matrix_0,
+        instance.normal_matrix_1,
+        instance.normal_matrix_2,
+    );
+
     let offset = num_bones * model.instance_index;
     let bone_transform = mat4x4<f32>(
         (bone_matrices.data[offset + model.bone_indices.x] * model.bone_weights.x) + (bone_matrices.data[offset + model.bone_indices.y] * model.bone_weights.y) + (bone_matrices.data[offset + model.bone_indices.z] * model.bone_weights.z) + (bone_matrices.data[offset + model.bone_indices.w] * model.bone_weights.w )
     );
-
+    let bone_normal_mat = mat3x3<f32>(bone_transform[0].xyz, bone_transform[1].xyz, bone_transform[2].xyz);
     let world_matrix = model_matrix * bone_transform;
     let world_position = world_matrix * vec4<f32>(model.position, 1.0);
-    let skinned_normal = normalize(mat3x3<f32>(world_matrix[0].xyz, world_matrix[1].xyz, world_matrix[2].xyz) * model.normal);
+    let skinned_normal = (bone_transform * vec4<f32>(model.normal, 0.0)).xyz;
     let transformed_tangent = bone_transform * vec4<f32>(model.tangent, 0.0);
     let skinned_tangent = normalize(transformed_tangent.xyz);
     let skinned_bitangent = cross(skinned_normal, skinned_tangent);
@@ -86,6 +98,7 @@ fn vs_main(
     out.tangent_position = tbn_matrix * world_position.xyz;
     out.tangent_view_position = tbn_matrix * camera.view_pos.xyz;
     out.tangent_light_position = tbn_matrix * light.position;
+    out.normal = skinned_normal;
     return out;
 }
 
@@ -113,25 +126,30 @@ var<uniform> pbr: PbrMaterial;
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let tex_color: vec4<f32> = textureSample(t_diffuse, s_diffuse, in.tex_coords);
     let object_color:vec4<f32> = pbr.color * tex_color;
-    let object_normal: vec4<f32> = textureSample(t_normal, s_normal, in.tex_coords);
+    let object_normal: vec3<f32> = normalize(in.normal);//textureSample(t_normal, s_normal, in.tex_coords);
+
+    // let object_normal: vec4<f32> = textureSample(t_normal, s_normal, in.tex_coords);
     
     // We don't need (or want) much ambient light, so 0.1 is fine
     let ambient_strength = 0.1;
     let ambient_color = light.color * ambient_strength;
 
     // Create the lighting vectors
-    let tangent_normal = normalize(object_normal.xyz) * 2.0 - 1.0;
-    let light_dir = normalize(in.tangent_light_position - in.tangent_position);
-    let view_dir = normalize(in.tangent_view_position - in.tangent_position);
+    let tangent_normal = normalize(object_normal * 2.0 - 1.0);
+    // let tangent_normal = normalize(object_normal.xyz) * 2.0 - 1.0;
+    // let light_dir = normalize(in.tangent_light_position - in.tangent_position);
+    // let view_dir = normalize(in.tangent_view_position - in.tangent_position);
+    let light_dir = normalize(in.tangent_position - in.tangent_light_position);
+    let view_dir = normalize(in.tangent_position - in.tangent_view_position);
     let half_dir = normalize(view_dir + light_dir);
 
     let diffuse_strength = max(dot(tangent_normal, light_dir), 0.0);
     let diffuse_color = light.color * diffuse_strength;
 
-    // let specular_strength = pow(max(dot(tangent_normal, half_dir), 0.0), 32.0);
-    // let specular_color = specular_strength * light.color;
+    let specular_strength = pow(max(dot(tangent_normal, half_dir), 0.0), 32.0);
+    let specular_color = specular_strength * light.color;
 
-    let result = (ambient_color + diffuse_color ) * object_color.xyz;
+    let result = (ambient_color + diffuse_color + specular_color) * object_color.xyz;
 
     return vec4<f32>(result, object_color.a);
 }
