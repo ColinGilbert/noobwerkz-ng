@@ -58,7 +58,9 @@ struct InstanceInput {
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
     @location(0) normal: vec3<f32>,
-    @location(1) obj_position: vec3<f32>
+    @location(1) obj_position: vec3<f32>,
+    @location(2) surface_to_light: vec3<f32>,
+    @location(3) surface_to_view:  vec3<f32>,
     // @location(1) tangent_position: vec3<f32>,
     // @location(2) tangent_view_position: vec3<f32>,
     // @location(3) tangent_light_position: vec3<f32>,
@@ -82,6 +84,7 @@ fn vs_main(
     );
 
    
+    let world_position = model_matrix * vec4<f32>(model.position, 1.0);
     // Construct the tangent matrix
     let world_normal = normalize(normal_matrix * model.normal);
     // let world_tangent = normalize(normal_matrix * model.tangent);
@@ -93,12 +96,13 @@ fn vs_main(
     // ));
 
 
-    let world_position = model_matrix * vec4<f32>(model.position, 1.0);
-    var out: VertexOutput;
     
+    var out: VertexOutput;
     out.clip_position = camera.view_proj * world_position;
     out.normal = world_normal;
     out.obj_position = model.position;
+    out.surface_to_light = light.position - world_position.xyz;
+    out.surface_to_view = camera.view_pos.xyz - world_position.xyz;
     // out.tangent_position = tangent_matrix * world_position.xyz;
     // out.tangent_view_position = tangent_matrix * camera.view_pos.xyz;
     // out.tangent_light_position = tangent_matrix * light.position;
@@ -130,6 +134,7 @@ var<uniform> pbr: PbrMaterial;
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     let position = normalize(in.obj_position);
+    let object_normal = normalize(in.normal);
     let blending = normalize(abs(in.normal));
     let b = blending.x + blending.y + blending.z;    
     let final_blend = vec3(blending.x / b, blending.y/b, blending.z/b);
@@ -139,23 +144,29 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let y_axis = textureSample(t_diffuse, s_diffuse, position.xz);
     let z_axis = textureSample(t_diffuse, s_diffuse, position.xy);
     let ambient_strength = 0.1;
-    let ambient_color = light.color * ambient_strength;
+    let ambient_light = light.color * ambient_strength;
 
+   let directional_light = dot(object_normal, -light.direction);
+    
+    let surface_to_light_direction = normalize(in.surface_to_light);
+    let surface_to_view_direction = normalize(in.surface_to_view);
+    let half_vector = normalize(surface_to_light_direction + surface_to_view_direction);
+    let specular_light = dot(object_normal, half_vector);
 
     // let tbn_matrix = calculate_tangents_no_uv(in.clip_position.xyz, in.normal);
     // let tangent = tbn_matrix[0];
     // let bitangent = tbn_matrix[1];
     // Create the lighting vectors
    
-    let light_dir = normalize(light.position - in.obj_position.xyz);
-    let view_dir = normalize(camera.view_pos.xyz - in.obj_position.xyz);
-    let half_dir = normalize(view_dir + light_dir);
+    // let light_dir = normalize(light.position - in.obj_position.xyz);
+    // let view_dir = normalize(camera.view_pos.xyz - in.obj_position.xyz);
+    // let half_dir = normalize(view_dir + light_dir);
 
-    let diffuse_strength = max(dot(in.normal, light_dir), 0.0);
-    let diffuse_color = light.color * diffuse_strength;
+    // let diffuse_strength = max(dot(in.normal, light_dir), 0.0);
+    // let diffuse_color = light.color * diffuse_strength;
 
-    let specular_strength = pow(max(dot(in.normal, half_dir), 0.0), 32.0);
-    let specular_color = specular_strength * light.color;
+    // let specular_strength = pow(max(dot(in.normal, half_dir), 0.0), 32.0);
+    // let specular_color = specular_strength * light.color;
 
     // let diffuse_strength = max(dot(tangent_normal, light_dir), 0.0);
     // let diffuse_color = light.color * diffuse_strength;
@@ -163,7 +174,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     // let specular_strength = pow(max(dot(tangent_normal, half_dir), 0.0), 32.0);
     // let specular_color = specular_strength * light.color;
     let object_color = x_axis * blending.x + y_axis * blending.y + z_axis * blending.z;
-    let result = (ambient_color + diffuse_color + specular_color) * object_color.xyz;
+    let result = (ambient_light + directional_light + specular_light) * object_color.xyz;
 
     return vec4<f32>(result, 1.0);
 }

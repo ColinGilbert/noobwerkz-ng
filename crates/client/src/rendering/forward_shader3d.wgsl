@@ -107,7 +107,7 @@ var<uniform> pbr: PbrMaterial;
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let object_color: vec4<f32> = pbr.color * textureSample(t_diffuse, s_diffuse, in.tex_coords);
-    let object_normal = normalize(in.normal);//textureSample(t_normal, s_normal, in.tex_coords);
+    let object_normal = normalize(in.normal);// * textureSample(t_normal, s_normal, in.tex_coords).xyz;
     
     // We don't need (or want) much ambient light, so 0.1 is fine
     let ambient_strength = 0.1;
@@ -119,6 +119,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let surface_to_view_direction = normalize(in.surface_to_view);
     let half_vector = normalize(surface_to_light_direction + surface_to_view_direction);
     let specular_light = dot(object_normal, half_vector);
+
     // // Create the lighting vectors
     // let tangent_normal = object_normal.xyz * 2.0 - 1.0;
     // let light_dir = normalize(in.tangent_light_position - in.tangent_position);
