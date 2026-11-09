@@ -32,12 +32,11 @@ pub fn user_update(
     );
 
     // Update the light
-    let old_position: noobwerkz_client::glam::Vec4 = light_ctx.light_uniforms[0].position.into();
-    let old_position_vec3 = noobwerkz_client::glam::Vec3::new(old_position.x, old_position.y, old_position.z);
+    let old_position: noobwerkz_client::glam::Vec3 = light_ctx.light_uniforms[0].position.into();
     light_ctx.light_uniforms[0].position = (noobwerkz_client::glam::Quat::from_axis_angle(
         noobwerkz_client::glam::Vec3::Y,
-        PI * 0.1 * dt.as_secs_f32(),
-    ) * old_position_vec3).extend(0.0)
+        PI * 0.5 * dt.as_secs_f32(),
+    ) * old_position)
         .into();
     gfx_ctx.queue.write_buffer(
         &light_ctx.light_buffer,

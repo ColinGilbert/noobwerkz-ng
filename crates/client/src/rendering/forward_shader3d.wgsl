@@ -8,10 +8,14 @@ struct Camera {
 var<uniform> camera: Camera;
 
 struct Light {
-    position: vec4<f32>,
-    color: vec4<f32>,
-    direction: vec4<f32>,
+    position: vec3<f32>,
+    _padding_0: f32,
+    color: vec3<f32>,
+    _padding_1: f32,
+    direction: vec3<f32>,
+    _padding_2: f32,
 }
+
 @group(2) @binding(0)
 var<uniform> light: Light;
 

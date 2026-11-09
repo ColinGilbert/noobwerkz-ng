@@ -195,23 +195,20 @@ pub fn user_setup(
     }
 
     lights.push(Light3DUniform::new(
-        noobwerkz_client::glam::Vec4 {
+        noobwerkz_client::glam::Vec3 {
             x: 5.0,
             y: 2.0,
             z: 5.0,
-            w: 0.0,
         },
-        noobwerkz_client::glam::Vec4 {
+        noobwerkz_client::glam::Vec3 {
             x: 1.0,
             y: 1.0,
             z: 1.0,
-            w: 0.0,
         },
-        noobwerkz_client::glam::Vec4 {
+        noobwerkz_client::glam::Vec3 {
             x: 0.0,
-            y: 0.0,
-            z: -1.0,
-            w: 0.0,
+            y: -1.0,
+            z: 0.0,
         }
     ));
 

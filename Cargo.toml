@@ -23,6 +23,7 @@ serde = {version = "1.0.229" }
 binary-greedy-meshing = "0.6.1"
 quick-noise = "0.3.0"
 prost = "0.14.4"
+prost-types = "0.14.4"
 #landmark = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
 #waymark = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
 #waymark-crowd = { git = "https://www.github.com/ColinGilbert/recast-rs.git", branch = "main" }
