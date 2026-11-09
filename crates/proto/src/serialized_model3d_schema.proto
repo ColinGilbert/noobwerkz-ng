@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package noobwerkz;
+
+message Vec2f {
+    float vec2f_x = 1;
+    float vec2f_y = 2;
+}
+
+message Vec3f {
+    float vec3f_x = 1;
+    float vec3f_y = 2;
+    float vec3f_z = 3;
+}
+
+message Vec4f {
+    float vec4f_x = 1;
+    float vec4f_y = 2;
+    float vec4f_z = 3;
+    float vec4f_1w = 4;
+}
+
+message Vec4u {
+    uint32 vec4u_x = 1;
+    uint32 vec4u_y = 2;
+    uint32 vec4u_z = 3;
+    uint32 vec4u_w = 4;
+}
+
+message SerializedMesh3D {
+    string name = 1;
+    Vec3f translation = 2;
+    Vec3f scale = 3;
+    Vec3f max_extents = 4;
+    Vec3f min_extents = 5;
+    Vec3f dimensions = 6;
+    Vec4f rotation = 7;
+    repeated Vec3f positions = 8;
+    repeated Vec3f normals = 9; 
+    repeated Vec2f uvs = 10;
+    repeated Vec4u bone_indices = 11;
+    repeated Vec4f bone_weights = 12;
+    repeated uint32 indices = 13;
+    repeated string bone_names = 14;
+    uint32 material_index = 15;
+
+}

@@ -22,3 +22,6 @@ prost-types = { workspace = true }
 #dodgy_2d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 libm = "0.2.16"
 env_logger = "0.11.11"
+
+[build-dependencies]
+prost-build = {workspace = true }
