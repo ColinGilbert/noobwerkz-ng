@@ -53,23 +53,23 @@ impl Light3DContext {
 
 pub struct Light3DUniform {
     pub position: [f32; 3],
-    _padding_0: f32,
+    point_light_intensity: f32,
     // Due to uniforms requiring 16 byte (4 float) spacing, we need to use a padding field here
     pub color: [f32; 3],
-    _padding_1: f32,
+    ambient_light_intensity: f32,
     pub direction: [f32; 3],
-    _padding_2: f32,
+    directional_light_intensity: f32,
 }
 
 impl Light3DUniform {
-    pub fn new(position: glam::Vec3, color: glam::Vec3, direction: glam::Vec3) -> Self {
+    pub fn new(position: glam::Vec3, color: glam::Vec3, direction: glam::Vec3, ambient_light_intensity: f32, point_light_intensity: f32, directional_light_intensity: f32 ) -> Self {
         Self {
             position: position.into(),
-            _padding_0: 0.0,
+            point_light_intensity,
             color: color.into(),
-            _padding_1: 0.0,
+            ambient_light_intensity,
             direction: direction.into(),
-            _padding_2: 0.0,
+            directional_light_intensity,
         }
     }
 }

@@ -207,9 +207,12 @@ pub fn user_setup(
         },
         noobwerkz_client::glam::Vec3 {
             x: 0.0,
-            y: -1.0,
-            z: 0.0,
-        }
+            y: 1.0,
+            z: 1.0,
+        },
+        0.3,
+        0.4,
+        0.2,
     ));
 
     u.scenes[current_scene].cameras.push(c);

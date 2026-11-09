@@ -9,11 +9,11 @@ var<uniform> camera: Camera;
 
 struct Light {
     position: vec3<f32>,
-    _padding_0: f32,
+    point_light_intensity: f32,
     color: vec3<f32>,
-    _padding_1: f32,
+    ambient_light_intensity: f32,
     direction: vec3<f32>,
-    _padding_2: f32,
+    directional_light_intensity: f32,
 }
 @group(2) @binding(0)
 var<uniform> light: Light;
@@ -134,15 +134,14 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     // let object_normal: vec4<f32> = textureSample(t_normal, s_normal, in.tex_coords);
     
     // We don't need (or want) much ambient light, so 0.1 is fine
-    let ambient_strength = 0.1;
-    let ambient_light = light.color.xyz * ambient_strength;
+    let ambient_light = light.color.xyz * light.ambient_light_intensity;
 
-    let directional_light = dot(object_normal, -light.direction.xyz);
+    let directional_light = light.color.xyz * dot(object_normal, -light.direction.xyz) * light.directional_light_intensity;
     
     let surface_to_light_direction = normalize(in.surface_to_light);
     let surface_to_view_direction = normalize(in.surface_to_view);
     let half_vector = normalize(surface_to_light_direction + surface_to_view_direction);
-    let specular_light = dot(object_normal, half_vector);
+    let specular_light = light.color.xyz * dot(object_normal, half_vector) * light.point_light_intensity;
 
 
     // // Create the lighting vectors
