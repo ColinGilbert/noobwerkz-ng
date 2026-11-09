@@ -1,5 +1,5 @@
 use crate::terrain_model_node::TerrainModel3DNode;
-use crate::{asset_manager::AssetManager, terrain_model::TerrainModel3D};
+use crate::{asset_manager::AssetManager};
 // This is where our game world resides.
 use crate::ecs::*;
 #[allow(unused)]
@@ -10,7 +10,7 @@ use rerecast::{DetailNavmesh, HeightfieldBuilder};
 
 use std::{
     cell::RefCell,
-    collections::{HashMap, HashSet, VecDeque},
+    collections::{HashMap, VecDeque},
     path::PathBuf,
     rc::Rc,
     sync::Arc,

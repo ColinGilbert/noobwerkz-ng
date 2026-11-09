@@ -205,13 +205,13 @@ impl Pass for ForwardRenderer3D {
                 let instance = node.instance.to_terrain_raw();
                 count += 1;
                 for mesh in model.meshes.iter() {
-                    let mesh_m_mat = glam::Mat4::from_scale_rotation_translation(
-                        mesh.scale,
-                        mesh.rotation,
-                        mesh.translation,
-                    );
+                    // let mesh_m_mat = glam::Mat4::from_scale_rotation_translation(
+                    //     mesh.scale,
+                    //     mesh.rotation,
+                    //     mesh.translation,
+                    // );
 
-                    let mesh_n_mat = glam::Mat3::from_quat(mesh.rotation);
+                    // let mesh_n_mat = glam::Mat3::from_quat(mesh.rotation);
                     // let model_m_mat = glam::Mat4::from_cols_array_2d(&instance.model);
                     // let model_n_mat = glam::Mat3::from_cols_array_2d(&instance.normal);
                     // temp_terrain_instance_3d_raw = TerrainInstance3DRaw {
