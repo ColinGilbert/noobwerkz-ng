@@ -2,46 +2,106 @@ syntax = "proto3";
 
 package noobwerkz;
 
-message Vec2f {
-    float vec2f_x = 1;
-    float vec2f_y = 2;
+message Vec2fProtobuf {
+  float vec2f_x = 1;
+  float vec2f_y = 2;
 }
 
-message Vec3f {
-    float vec3f_x = 1;
-    float vec3f_y = 2;
-    float vec3f_z = 3;
+message Vec3fProtobuf {
+  float vec3f_x = 1;
+  float vec3f_y = 2;
+  float vec3f_z = 3;
 }
 
-message Vec4f {
-    float vec4f_x = 1;
-    float vec4f_y = 2;
-    float vec4f_z = 3;
-    float vec4f_1w = 4;
+message Vec4fProtobuf {
+  float vec4f_x = 1;
+  float vec4f_y = 2;
+  float vec4f_z = 3;
+  float vec4f_1w = 4;
 }
 
-message Vec4u {
-    uint32 vec4u_x = 1;
-    uint32 vec4u_y = 2;
-    uint32 vec4u_z = 3;
-    uint32 vec4u_w = 4;
+message Vec4uProtobuf {
+  uint32 vec4u_x = 1;
+  uint32 vec4u_y = 2;
+  uint32 vec4u_z = 3;
+  uint32 vec4u_w = 4;
 }
 
-message SerializedMesh3D {
-    string name = 1;
-    Vec3f translation = 2;
-    Vec3f scale = 3;
-    Vec3f max_extents = 4;
-    Vec3f min_extents = 5;
-    Vec3f dimensions = 6;
-    Vec4f rotation = 7;
-    repeated Vec3f positions = 8;
-    repeated Vec3f normals = 9; 
-    repeated Vec2f uvs = 10;
-    repeated Vec4u bone_indices = 11;
-    repeated Vec4f bone_weights = 12;
-    repeated uint32 indices = 13;
-    repeated string bone_names = 14;
-    uint32 material_index = 15;
+message Mat4fProtobuf {
+  Vec4fProtobuf mat4f_a = 1;
+  Vec4fProtobuf ma4tf_b = 2;
+  Vec4fProtobuf mat4f_c = 3;
+  Vec4fProtobuf mat4f_d = 4;
+}
 
+message SerializedMesh3DProtobuf {
+  string name = 1;
+  Vec3fProtobuf translation = 2;
+  Vec3fProtobuf scale = 3;
+  Vec3fProtobuf max_extents = 4;
+  Vec3fProtobuf min_extents = 5;
+  Vec3fProtobuf dimensions = 6;
+  Vec4fProtobuf rotation = 7;
+  repeated Vec3fProtobuf positions = 8;
+  repeated Vec3fProtobuf normals = 9;
+  repeated Vec2fProtobuf uvs = 10;
+  repeated Vec4uProtobuf bone_indices = 11;
+  repeated Vec4fProtobuf bone_weights = 12;
+  repeated uint32 indices = 13;
+  repeated string bone_names = 14;
+  uint32 material_index = 15;
+}
+
+message SerializedAnimation3DProtobuf {
+  repeated SerializedAnimation3DChannelProtobuf channels = 1;
+}
+
+message SerializedAnimation3DKeyframeTypesProtobuf {
+  repeated Vec3fProtobuf translations = 1;
+  repeated Vec4fProtobuf rotations = 2;
+  repeated Vec3fProtobuf scales = 3;
+}
+
+message SerializedBone3DProtobuf {
+  uint64 parent = 1;
+  Vec3fProtobuf scale = 2;
+  Vec3fProtobuf translation = 3;
+  Vec4fProtobuf rotation = 4;
+}
+
+message SerializedAnimation3DChannelProtobuf {
+  uint64 bone = 1;
+  SerializedAnimation3DKeyframeTypesProtobuf data = 2;
+  repeated float times = 3;
+}
+
+message SerializedModelMaterialProtobuf {
+  string name = 1;
+  Vec4fProtobuf base_colour = 2;
+  float metallic = 3;
+  float roughness = 4;
+  string diffuse_texture_path = 5;
+  string normals_texture_path = 6;
+  string specular_texture_path = 7;
+}
+
+message AnimationByNameValuesProtobuf {
+  string name = 1;
+  uint64 index = 2;
+}
+
+message SerializedModel3DProtobuf {
+  repeated SerializedMesh3DProtobuf meshes = 1;
+  repeated SerializedModelMaterialProtobuf materials = 2;
+  repeated SerializedBone3DProtobuf bones = 3;
+  repeated string bone_names = 4;
+  repeated Mat4fProtobuf inverse_bind_matrices = 5;
+  repeated SerializedAnimation3DProtobuf animations = 6;
+  repeated AnimationByNameValuesProtobuf animations_by_name = 7;
+  Mat4fProtobuf global_inverse_transform = 8;
+}
+
+message SertializedTerrainModel3DProtobuf {
+  repeated SerializedMesh3DProtobuf meshes = 1;
+  repeated SerializedModelMaterialProtobuf materials = 2;
 }
