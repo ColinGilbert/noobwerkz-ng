@@ -16,7 +16,6 @@ rerecast = { workspace = true }
 serde_json = { workspace = true }
 serde = { workspace = true }
 binary-greedy-meshing = { workspace = true }
-quick-noise = { workspace = true }
 #dodgy_3d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 #dodgy_2d = { git = "https://github.com/colingilbert/dodgy.git", branch = "main" }
 libm = "0.2.16"

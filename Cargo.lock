@@ -3253,7 +3253,6 @@ dependencies = [
  "monstertruck",
  "msgpacker",
  "polyanya",
- "quick-noise",
  "rapier3d",
  "rerecast",
  "safe_index",
@@ -4150,15 +4149,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a993555f31e5a609f617c12db6250dedcac1b0a85076912c436e6fc9b2c8e6a3"
 
 [[package]]
-name = "quick-noise"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4abc949dda92b7a41fef7195fea7c292d6d6c6816cae7234f2ac869894e0202"
-dependencies = [
- "simply-simd",
-]
-
-[[package]]
 name = "quick-xml"
 version = "0.41.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4788,29 +4778,6 @@ dependencies = [
  "inner-space",
  "scalars",
  "vector-basis",
-]
-
-[[package]]
-name = "simply-simd"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b71cbdd555e42332c1ce7891819c9081a95f3a6ead77f741f14e1670c437e94b"
-dependencies = [
- "itertools 0.14.0",
- "num-traits",
- "simply-simd-macros",
-]
-
-[[package]]
-name = "simply-simd-macros"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07a202557206f7930912b2ceb85cae9504e4d9d04d66155f2228454e5c0674d5"
-dependencies = [
- "proc-macro-crate",
- "proc-macro2",
- "quote",
- "syn 3.0.9",
 ]
 
 [[package]]

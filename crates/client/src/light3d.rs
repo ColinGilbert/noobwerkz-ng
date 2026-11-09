@@ -52,20 +52,20 @@ impl Light3DContext {
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 
 pub struct Light3DUniform {
-    pub position: [f32; 3],
+    pub position: [f32; 4],
     // Due to uniforms requiring 16 byte (4 float) spacing, we need to use a padding field here
-    pub color: [f32; 3],
-    pub direction: [f32; 3],
-    _padding: [f32;6],
+    pub color: [f32; 4],
+    pub direction: [f32; 4],
+    _padding: [f32;3],
 }
 
 impl Light3DUniform {
-    pub fn new(position: glam::Vec3, color: glam::Vec3, direction: glam::Vec3) -> Self {
+    pub fn new(position: glam::Vec4, color: glam::Vec4, direction: glam::Vec4) -> Self {
         Self {
             position: position.into(),
             color: color.into(),
             direction: direction.into(),
-            _padding: [0.0;6],
+            _padding: [0.0; 3],
         }
     }
 }

@@ -33,9 +33,9 @@ struct Camera {
 var<uniform> camera: Camera;
 
 struct Light {
-    position: vec3<f32>,
-    color: vec3<f32>,
-    direction: vec3<f32>,
+    position: vec4<f32>,
+    color: vec4<f32>,
+    direction: vec4<f32>,
 }
 @group(2) @binding(0)
 var<uniform> light: Light;
@@ -101,7 +101,7 @@ fn vs_main(
     out.clip_position = camera.view_proj * world_position;
     out.normal = world_normal;
     out.obj_position = model.position;
-    out.surface_to_light = light.position - world_position.xyz;
+    out.surface_to_light = light.position.xyz - world_position.xyz;
     out.surface_to_view = camera.view_pos.xyz - world_position.xyz;
     // out.tangent_position = tangent_matrix * world_position.xyz;
     // out.tangent_view_position = tangent_matrix * camera.view_pos.xyz;
@@ -144,9 +144,9 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let y_axis = textureSample(t_diffuse, s_diffuse, position.xz);
     let z_axis = textureSample(t_diffuse, s_diffuse, position.xy);
     let ambient_strength = 0.1;
-    let ambient_light = light.color * ambient_strength;
+    let ambient_light = light.color.xyz * ambient_strength;
 
-   let directional_light = dot(object_normal, -light.direction);
+   let directional_light = dot(object_normal, -light.direction.xyz);
     
     let surface_to_light_direction = normalize(in.surface_to_light);
     let surface_to_view_direction = normalize(in.surface_to_view);

@@ -195,20 +195,23 @@ pub fn user_setup(
     }
 
     lights.push(Light3DUniform::new(
-        noobwerkz_client::glam::Vec3 {
+        noobwerkz_client::glam::Vec4 {
             x: 5.0,
             y: 2.0,
             z: 5.0,
+            w: 0.0,
         },
-        noobwerkz_client::glam::Vec3 {
+        noobwerkz_client::glam::Vec4 {
             x: 1.0,
             y: 1.0,
             z: 1.0,
+            w: 0.0,
         },
-        noobwerkz_client::glam::Vec3 {
-            x: 1.0,
-            y: -1.0,
-            z: 0.0,
+        noobwerkz_client::glam::Vec4 {
+            x: 0.0,
+            y: 0.0,
+            z: -1.0,
+            w: 0.0,
         }
     ));
 
@@ -270,7 +273,7 @@ pub fn user_setup(
     voxels.push(glam::IVec3::new(0, 0, 2));
 
 
-    let mut terrain_texture_path = path.clone();
+    let terrain_texture_path = path.clone();
     //terrain_texture_path.push("");
     u.scenes[current_scene].add_terrain(
         Shape3D::Voxels(glam::Vec3::new(1.0, 1.0, 1.0), voxels),
