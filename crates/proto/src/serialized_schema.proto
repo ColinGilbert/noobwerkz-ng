@@ -17,7 +17,7 @@ message Vec4fProtobuf {
   float vec4f_x = 1;
   float vec4f_y = 2;
   float vec4f_z = 3;
-  float vec4f_1w = 4;
+  float vec4f_w = 4;
 }
 
 message Vec4uProtobuf {

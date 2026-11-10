@@ -3273,6 +3273,7 @@ dependencies = [
  "libm",
  "monstertruck",
  "msgpacker",
+ "noobwerkz-proto",
  "polyanya",
  "prost",
  "prost-build",
