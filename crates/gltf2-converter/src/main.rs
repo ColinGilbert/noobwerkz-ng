@@ -476,7 +476,7 @@ fn run(input_path: &str, output_path: &str) {
     serialized_model.inverse_bind_matrices = inverse_bind_matrices;
     serialized_model.animations = serialized_animations;
     serialized_model.animations_by_name = animations_by_name;
-    serialized_model.global_inverse_transform = glam::Mat4::IDENTITY.to_cols_array_2d();
+    // serialized_model.global_inverse_transform = glam::Mat4::IDENTITY.to_cols_array_2d();
 
     let mut buf = Vec::new();
     let _n = serialized_model.pack(&mut buf);

@@ -3,12 +3,36 @@ use crate::bone::*;
 use std::collections::HashMap;
 
 use msgpacker::*;
-use noobwerkz_proto::{protobuf_schema::*, *};
+use noobwerkz_proto::{protobuf_schema::*};
 
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, MsgPacker)]
 pub struct SerializedAnimation3D {
     pub channels: Vec<SerializedAnimation3DChannel>,
+}
+
+impl SerializedAnimation3D {
+    pub fn from_protobuf(other: SerializedAnimation3DProtobuf) -> Option<Self> {
+        let mut channels = Vec::new();
+        for channel_proto in other.channels {
+            let c = SerializedAnimation3DChannel::from_protobuf(channel_proto);
+            if c.is_none() {
+                return None;
+            }
+            channels.push(c.unwrap());
+        }
+        Some(Self { channels })
+    }
+
+    pub fn to_protobuf(&self) -> SerializedAnimation3DProtobuf {
+        let mut results = SerializedAnimation3DProtobuf::default();
+        for c in &self.channels {
+            results
+                .channels
+                .push(SerializedAnimation3DChannel::to_protobuf(c));
+        }
+        results
+    }
 }
 
 #[repr(C)]
@@ -441,6 +465,44 @@ impl SerializedModelMaterial {
             specular_texture_path: "".to_owned(),
         }
     }
+
+    pub fn from_protobuf(other: SerializedModelMaterialProtobuf) -> Option<Self> {
+        if other.base_colour.is_none() {
+            return None;
+        }
+        Some(SerializedModelMaterial {
+            name: other.name.clone(),
+            base_colour: [
+                other.base_colour.unwrap().vec4f_x,
+                other.base_colour.unwrap().vec4f_y,
+                other.base_colour.unwrap().vec4f_z,
+                other.base_colour.unwrap().vec4f_w,
+            ],
+            metallic: other.metallic,
+            roughness: other.roughness,
+            diffuse_texture_path: other.diffuse_texture_path.clone(),
+            normals_texture_path: other.normals_texture_path.clone(),
+            specular_texture_path: other.specular_texture_path.clone(),
+        })
+    }
+
+    pub fn to_protobuf(&self) -> SerializedModelMaterialProtobuf {
+        let mut results = SerializedModelMaterialProtobuf::default();
+        results.name = self.name.clone();
+        results.base_colour = Some(Vec4fProtobuf {
+            vec4f_x: self.base_colour[0],
+            vec4f_y: self.base_colour[1],
+            vec4f_z: self.base_colour[2],
+            vec4f_w: self.base_colour[3],
+        });
+        results.metallic = self.metallic;
+        results.roughness = self.roughness;
+        results.diffuse_texture_path = self.diffuse_texture_path.clone();
+        results.normals_texture_path = self.normals_texture_path.clone();
+        results.specular_texture_path = self.specular_texture_path.clone();
+
+        results
+    }
 }
 
 #[repr(C)]
@@ -453,7 +515,7 @@ pub struct SerializedModel3D {
     pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
     pub animations: Vec<SerializedAnimation3D>,
     pub animations_by_name: HashMap<String, usize>,
-    pub global_inverse_transform: [[f32; 4]; 4],
+    // pub global_inverse_transform: [[f32; 4]; 4],
 }
 
 impl SerializedModel3D {
@@ -466,8 +528,143 @@ impl SerializedModel3D {
             inverse_bind_matrices: Vec::new(),
             animations: Vec::new(),
             animations_by_name: HashMap::new(),
-            global_inverse_transform: glam::Mat4::IDENTITY.to_cols_array_2d(),
+            // global_inverse_transform: glam::Mat4::IDENTITY.to_cols_array_2d(),
         }
+    }
+
+    pub fn from_protobuf(other: SerializedModel3DProtobuf) -> Option<Self> {
+        let mut meshes = Vec::new();
+        for mesh_proto in other.meshes {
+            let m = SerializedMesh3D::from_protobuf(mesh_proto);
+            if m.is_none() {
+                return None;
+            }
+            meshes.push(m.unwrap());
+        }
+
+        let mut materials = Vec::new();
+        for mat_proto in other.materials {
+            let m = SerializedModelMaterial::from_protobuf(mat_proto);
+            if m.is_none() {
+                return None;
+            }
+            materials.push(m.unwrap());
+        }
+
+        let mut bones = Vec::new();
+        for bone_proto in other.bones {
+            let b = SerializedBone3D::from_protobuf(bone_proto);
+            if b.is_none() {
+                return None;
+            }
+            bones.push(b.unwrap());
+        }
+
+        let mut inverse_bind_matrices = Vec::new();
+        for ibm_proto in other.inverse_bind_matrices {
+            if ibm_proto.mat4f_a.is_none()
+                || ibm_proto.ma4tf_b.is_none()
+                || ibm_proto.mat4f_c.is_none()
+                || ibm_proto.mat4f_d.is_none()
+            {
+                return None;
+            }
+            let a = ibm_proto.mat4f_a.unwrap();
+            let b = ibm_proto.mat4f_a.unwrap();
+            let c = ibm_proto.mat4f_a.unwrap();
+            let d = ibm_proto.mat4f_a.unwrap();
+            inverse_bind_matrices.push([
+                [a.vec4f_x, a.vec4f_y, a.vec4f_z, a.vec4f_w],
+                [b.vec4f_x, b.vec4f_y, b.vec4f_z, b.vec4f_w],
+                [c.vec4f_x, c.vec4f_y, c.vec4f_z, c.vec4f_w],
+                [d.vec4f_x, d.vec4f_y, d.vec4f_z, d.vec4f_w],
+            ]);
+        }
+
+        let mut animations = Vec::new();
+        for anim_proto in other.animations {
+            let a = SerializedAnimation3D::from_protobuf(anim_proto);
+            if a.is_none() {
+                return None;
+            }
+            animations.push(a.unwrap());
+        }
+
+        let mut animations_by_name = HashMap::new();
+
+        for anim_name_proto in other.animations_by_name {
+            let i = anim_name_proto.index as usize;
+            let name = anim_name_proto.name;
+            animations_by_name.insert(name, i);
+        }
+
+        Some(Self {
+            meshes,
+            materials,
+            bones,
+            bone_names: other.bone_names.clone(),
+            inverse_bind_matrices,
+            animations,
+            animations_by_name,
+        })
+    }
+
+    pub fn to_protobuf(&self) -> SerializedModel3DProtobuf {
+        let mut results = SerializedModel3DProtobuf::default();
+
+        for m in &self.meshes {
+            results.meshes.push(m.to_protobuf());
+        }
+
+        for m in &self.materials {
+            results
+                .materials
+                .push(m.to_protobuf());
+        }
+
+        for b in &self.bones {
+            results.bones.push(b.to_protobuf());
+        }
+
+        results.bone_names = self.bone_names.clone();
+        for ibm in &self.inverse_bind_matrices {
+            results.inverse_bind_matrices.push(Mat4fProtobuf {
+                mat4f_a: Some(Vec4fProtobuf {
+                    vec4f_x: ibm[0][0],
+                    vec4f_y: ibm[0][1],
+                    vec4f_z: ibm[0][2],
+                    vec4f_w: ibm[0][3],
+                }),
+                ma4tf_b: Some(Vec4fProtobuf {
+                    vec4f_x: ibm[1][0],
+                    vec4f_y: ibm[1][1],
+                    vec4f_z: ibm[1][2],
+                    vec4f_w: ibm[1][3],
+                }),
+                mat4f_c: Some(Vec4fProtobuf {
+                    vec4f_x: ibm[2][0],
+                    vec4f_y: ibm[2][1],
+                    vec4f_z: ibm[2][2],
+                    vec4f_w: ibm[2][3],
+                }),
+                mat4f_d: Some(Vec4fProtobuf {
+                    vec4f_x: ibm[3][0],
+                    vec4f_y: ibm[3][1],
+                    vec4f_z: ibm[3][2],
+                    vec4f_w: ibm[3][3],
+                }),
+            })
+        }
+
+        for a in &self.animations {
+            results.animations.push(a.to_protobuf());
+        }
+
+        for (name, index) in &self.animations_by_name {
+            results.animations_by_name.push(AnimationByNameValuesProtobuf { name: name.clone(), index: *index as u64 })
+        }
+
+        results
     }
 }
 
@@ -484,5 +681,33 @@ impl SerializedTerrainModel3D {
             meshes: Vec::new(),
             materials: Vec::new(),
         }
+    }
+    pub fn from_protobuf(other: SerializedTerrainModel3DProtobuf) -> Option<Self> {
+
+        let mut results = SerializedTerrainModel3D::new();
+        for mesh_proto in other.meshes {
+            let m = SerializedMesh3D::from_protobuf(mesh_proto);
+            if m.is_none() { return None; }
+            results.meshes.push(m.unwrap());
+        }
+        for mat_proto in other.materials {
+            let m = SerializedModelMaterial::from_protobuf(mat_proto);
+            if m.is_none() { return None; }
+            results.materials.push(m.unwrap());
+        }
+
+        Some(results)
+    }
+
+
+    pub fn to_protobuf(&self) -> SerializedTerrainModel3DProtobuf {
+        let mut results = SerializedTerrainModel3DProtobuf::default();
+        for m in &self.meshes {
+            results.meshes.push(m.to_protobuf());
+        }
+        for m in &self.materials {
+            results.materials.push(m.to_protobuf());
+        }
+        results
     }
 }
