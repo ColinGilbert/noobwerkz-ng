@@ -198,7 +198,6 @@ impl AnimationGraph {
             output_model: LocalToModelResults::new(),
             duration: web_time::Duration::new(0, 0),
         })
-        // Err(anyhow!("Method unimplemented"))
     }
 
     pub fn evaluate(&mut self, dt: web_time::Duration) -> Result<(), anyhow::Error> {
@@ -230,10 +229,12 @@ impl AnimationGraph {
                                 self.path.pop_front();
                                 self.on_a_transition = false;
                             }
-                            None => {}
+                            None => {
+                                println!("[Animgraph] No more edges in path.");
+                            }
                         }
                     } else {
-                        // We need to evaluate the
+                        // We need to evaluate the graph
                         let edge = self
                             .graph
                             .edge_endpoints(self.current_edge_idx.unwrap())
@@ -283,7 +284,11 @@ impl AnimationGraph {
                         );
                     }
                 }
-                None => return Err(anyhow! {"Invalid current transition during evaluation."}),
+                None => {
+                    return Err(
+                        anyhow! {"[Animgraph] Invalid current transition during evaluation."},
+                    );
+                }
             }
 
             let last_transition_idx = self
@@ -359,7 +364,6 @@ impl AnimationGraph {
         None
     }
 
-    // TODO
     pub fn set_target_node_by_idx(&mut self, target_node: NodeIndex) {
         let n;
         if self.current_node_idx.is_none() {
@@ -384,13 +388,7 @@ impl AnimationGraph {
         } else {
             n = self.current_node_idx.unwrap();
         }
-        let res = astar(
-            &self.graph,
-            n,
-            |finish| finish == target_node,
-            |_| 1,
-            |_| 0,
-        );
+        let res = astar(&self.graph, n, |finish| finish == target_node, |_| 1, |_| 0);
         if res.is_none() {
             println!("[Animgraph] While setting target node, could not find path.");
             return;
@@ -403,7 +401,9 @@ impl AnimationGraph {
             }
             let e = self.graph.find_edge(previous_node, i);
             if e.is_none() {
-                println!("[AnimGraph] While setting target node, could not find edge between nodes in path.");
+                println!(
+                    "[AnimGraph] While setting target node, could not find edge between nodes in path."
+                );
             }
             self.path.push_back(e.unwrap());
             previous_node = n;
