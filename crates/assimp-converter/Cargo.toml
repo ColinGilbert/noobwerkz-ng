@@ -8,4 +8,3 @@ edition = "2024"
 noobwerkz-shared = { path = "../shared" }
 glam = { workspace = true }
 anyhow = { workspace = true }
-msgpacker = { workspace = true }

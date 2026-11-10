@@ -13,6 +13,7 @@ use noobwerkz_shared::shapes::*;
 use noobwerkz_skeletal_animation::animation_graph_definition::*;
 // use noobwerkz::simple_animgraph::edge_definitions::TransitionDefinition;
 use crate::user_data::*;
+use quick_noise::*;
 
 // MODIFY ME!
 pub fn user_setup(
@@ -272,7 +273,6 @@ pub fn user_setup(
     voxels.push(glam::IVec3::new(0, 0, 1));
     voxels.push(glam::IVec3::new(0, 0, 2));
 
-
     let terrain_texture_path = path.clone();
     //terrain_texture_path.push("");
     u.scenes[current_scene].add_terrain(
@@ -286,5 +286,47 @@ pub fn user_setup(
         &terrain_texture_path,
         &gfx_ctx.texture_bind_group_layout,
     );
+
+    let grid = Grid::<2>::new(1024, 1024)
+        .grid_position(0.0, 0.0) // Position of the grid region in sample space.
+        .seed(102); // Seed for deterministic random results.
+
+    let mut result = vec![0.0; 1024 * 1024];
+
+    // FBM Grid noise with all parameters.
+    let _noise = grid
+        .builder::<Fbm, Perlin>()
+        .seed(0) // Acts a second seed in combination with the grid's seed.
+        .octaves(1) // Number of noise passes.
+        .frequency(0.03125) // How fast the noise changes across sample space.
+        .lacunarity(2.0) // Multiplier to the frequency after each subsequent octave.
+        .persistence(0.5) // Multiplier to the weight after each subsequent octave.
+        .amplitude(1.0) // The maximum absolute value the noise can produce (For Fbm).
+        .normalization(true) // Whether or not to normalize the output.
+        .scaling(1.0, 1.0) // How much is the noise stretched in each dimension.
+        .initialize(true) // Setting to false adds noise to current values.
+        .finalize(true) // Some combiners have a finalization stage.
+        .fill(result.as_mut_slice());
+
+    u.scenes[current_scene].add_terrain(
+        Shape3D::HeightMap(
+            result,
+            1024,
+            glam::Vec3 {
+                x: 50.0,
+                y: 1.0,
+                z: 50.0,
+            },
+        ),
+        glam::Vec3::ZERO,
+        glam::Quat::IDENTITY,
+        &mut u.asset_mgr,
+        &mut gfx_ctx.device,
+        &mut gfx_ctx.queue,
+        &gfx_ctx.debug_material,
+        &terrain_texture_path,
+        &gfx_ctx.texture_bind_group_layout,
+    );
+
     u.scenes[current_scene].build_navmesh();
 }

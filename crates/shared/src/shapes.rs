@@ -1,5 +1,5 @@
 use crate::{csg::*, serialized_model3d::*};
-use rapier3d::{parry::{self, *}, prelude::*};
+use rapier3d::{parry, prelude::*};
 
 use binary_greedy_meshing as bgm;
 use rerecast::AreaType;

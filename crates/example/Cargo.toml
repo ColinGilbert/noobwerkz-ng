@@ -8,4 +8,5 @@ image = "0.25.10"
 noobwerkz-client = { path = "../client" }
 noobwerkz-shared = { path = "../shared" }
 noobwerkz-skeletal-animation = { path = "../skeletal-animation" }
+quick-noise.workspace = true
 

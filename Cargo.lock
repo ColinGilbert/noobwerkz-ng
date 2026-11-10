@@ -2993,28 +2993,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "msgpacker"
-version = "0.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c5c0ac43666318ea49105bbc10246a9609d9a5a20b6c2d2f934b32d19e685bf5"
-dependencies = [
- "bytes",
- "msgpacker-derive",
- "serde",
-]
-
-[[package]]
-name = "msgpacker-derive"
-version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5aa6c602164791e82913716444fefa7d6bb8902a788ead4d1e20d688cd2642a0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
-]
-
-[[package]]
 name = "multimap"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3177,7 +3155,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "glam 0.33.12",
- "msgpacker",
  "noobwerkz-shared",
 ]
 
@@ -3229,6 +3206,7 @@ dependencies = [
  "noobwerkz-client",
  "noobwerkz-shared",
  "noobwerkz-skeletal-animation",
+ "quick-noise",
 ]
 
 [[package]]
@@ -3273,7 +3251,6 @@ dependencies = [
  "glam 0.33.12",
  "libm",
  "monstertruck",
- "msgpacker",
  "noobwerkz-proto",
  "polyanya",
  "prost",
@@ -4236,6 +4213,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a993555f31e5a609f617c12db6250dedcac1b0a85076912c436e6fc9b2c8e6a3"
 
 [[package]]
+name = "quick-noise"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4abc949dda92b7a41fef7195fea7c292d6d6c6816cae7234f2ac869894e0202"
+dependencies = [
+ "simply-simd",
+]
+
+[[package]]
 name = "quick-xml"
 version = "0.41.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4865,6 +4851,29 @@ dependencies = [
  "inner-space",
  "scalars",
  "vector-basis",
+]
+
+[[package]]
+name = "simply-simd"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b71cbdd555e42332c1ce7891819c9081a95f3a6ead77f741f14e1670c437e94b"
+dependencies = [
+ "itertools 0.14.0",
+ "num-traits",
+ "simply-simd-macros",
+]
+
+[[package]]
+name = "simply-simd-macros"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "07a202557206f7930912b2ceb85cae9504e4d9d04d66155f2228454e5c0674d5"
+dependencies = [
+ "proc-macro-crate",
+ "proc-macro2",
+ "quote",
+ "syn 3.0.9",
 ]
 
 [[package]]

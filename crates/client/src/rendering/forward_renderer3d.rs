@@ -199,8 +199,8 @@ impl Pass for ForwardRenderer3D {
 
             render_pass.set_pipeline(&self.terrain_render_pipeline);
 
-            let mut count = 0;
             for node in terrain_nodes.iter() {
+                let mut count = 0;
                 let model = &terrain_models[node.model_idx];
                 let instance = node.instance.to_terrain_raw();
                 count += 1;

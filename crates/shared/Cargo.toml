@@ -9,7 +9,6 @@ glam = { workspace = true }
 safe_index = { workspace = true }
 rapier3d = { workspace = true }
 web-time = { workspace = true}
-msgpacker = { workspace = true }
 zero_ecs = { workspace = true }
 monstertruck = { workspace = true }
 polyanya = { workspace = true }
