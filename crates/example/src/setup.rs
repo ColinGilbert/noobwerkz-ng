@@ -160,7 +160,7 @@ pub fn user_setup(
     let mut avocado_path = path.clone();
     avocado_path.push("Avocado.bin");
 
-    let avocado = u.asset_mgr.load_3d_model_from_file(
+    let avocado = u.asset_mgr.load_protobuf_3d_model_from_file(
         &avocado_path,
         "Avocado",
         &mut gfx_ctx.device,

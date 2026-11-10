@@ -6,10 +6,10 @@ use crate::terrain_model::TerrainModel3D;
 use crate::terrain_model::TerrainModel3DVertex;
 use crate::texture;
 use crate::texture::Texture;
-use msgpacker::*;
 use noobwerkz_shared::bone::Bone;
 use noobwerkz_shared::serialized_model3d::*;
 use noobwerkz_shared::skeleton::Skeleton;
+use noobwerkz_proto::protobuf_schema::*;
 use noobwerkz_skeletal_animation::animation::Animation;
 use noobwerkz_skeletal_animation::animation_channel::AnimationChannel;
 use noobwerkz_skeletal_animation::animation_graph::AnimationIndex;
@@ -17,8 +17,9 @@ use std::collections::HashMap;
 use std::path::*;
 use std::sync::Arc;
 use wgpu::util::DeviceExt;
+use prost::Message;
 
-pub fn load_serialized_model(filepath: &std::path::Path) -> Option<SerializedModel3D> {
+pub fn load_protobuf_model(filepath: &std::path::Path) -> Option<SerializedModel3DProtobuf> {
     let mut path = PathBuf::new();
     for p in filepath {
         path.push(p);
@@ -28,8 +29,8 @@ pub fn load_serialized_model(filepath: &std::path::Path) -> Option<SerializedMod
     if data.is_err() {
         return None;
     }
-    let deserialized_results = SerializedModel3D::unpack(&data.unwrap());
-
+    // let deserialized_results = SerializedModel3D::unpack(&data.unwrap());
+    let deserialized_results  = SerializedModel3DProtobuf::decode(&*data.unwrap());
     match deserialized_results {
         Ok(deserialized) => Some(deserialized),
         Err(err) => {
@@ -40,8 +41,8 @@ pub fn load_serialized_model(filepath: &std::path::Path) -> Option<SerializedMod
 }
 
 // TODO: Robustify
-pub fn load_skinned_3d_model_from_serialized(
-    model: &mut SerializedModel3D,
+pub fn load_skinned_3d_model_from_protobuf(
+    model_proto: SerializedModel3DProtobuf,
     default_material: &ModelMaterial,
     path: &std::path::Path,
     device: &mut wgpu::Device,
@@ -49,6 +50,12 @@ pub fn load_skinned_3d_model_from_serialized(
     texture_layout: &wgpu::BindGroupLayout,
 ) -> Option<SkinnedModel3D> {
     let mut model_results = SkinnedModel3D::new();
+    let model = SerializedModel3D::from_protobuf(model_proto);
+    if model.is_none() {
+        println!("Could not load skinned 3d model from protobuf");
+        return None
+    }
+    let mut model = model.unwrap();
     for m in model.meshes.iter_mut() {
         // println!("Mesh {}", m.name);
         let mut verts = Vec::<Model3DVertex>::new();
@@ -56,7 +63,7 @@ pub fn load_skinned_3d_model_from_serialized(
         if m.positions.len() != m.normals.len() {
             println!("Not enough normals");
             // TODO: Generate normals
-            return Option::None;
+            return None;
         }
         if m.positions.len() != m.uvs.len() {
             println!("Not enough UVs");
@@ -73,7 +80,7 @@ pub fn load_skinned_3d_model_from_serialized(
         }
         let mut i = 0;
 
-        m.recalculate_normals();
+        //m.recalculate_normals();
 
         // let matrix = glam::Mat4::from_quat(glam::Quat::from_axis_angle(glam::Vec3{x: 1.0, y: 0.0, z: 0.0}, 90.0));
         while i < m.positions.len() {
@@ -93,8 +100,6 @@ pub fn load_skinned_3d_model_from_serialized(
         calculate_tangents_and_bitangents(&mut verts, &indices);
 
         let mut skinned_verts = Vec::<SkinnedModelVertex3D>::new();
-
-        // let skeleton = Skeleton::new();
 
         for (i, v) in verts.iter().enumerate() {
             let mut sv = SkinnedModelVertex3D::from_vert(&v);
@@ -258,7 +263,6 @@ pub fn load_skinned_3d_model_from_serialized(
             serialized_times_by_bone_idx.insert(s.bone, s.times.clone());
         }
 
-        // let ser/ialized_keyframes = serialized_keyframes_by_bone_idx[&s.bone];
         for (i, sk) in serialized_keyframes_by_bone_idx {
             let channel = AnimationChannel::from_serialized(
                 model_results.skeleton.clone(),
@@ -295,6 +299,7 @@ pub fn load_skinned_3d_model_from_serialized(
     Some(model_results)
 }
 
+
 pub fn load_3d_model_from_serialized(
     model: &mut SerializedModel3D,
     default_material: &ModelMaterial,
@@ -304,6 +309,7 @@ pub fn load_3d_model_from_serialized(
     texture_layout: &wgpu::BindGroupLayout,
 ) -> Option<Model3D> {
     let mut model_results = Model3D::new();
+
     for m in model.meshes.iter_mut() {
         let mut verts = Vec::<Model3DVertex>::new();
         let mut indices = Vec::<u32>::new();
@@ -441,6 +447,37 @@ pub fn load_3d_model_from_serialized(
     Some(model_results)
 }
 
+pub fn load_3d_model_from_protobuf(
+    model_proto: SerializedModel3DProtobuf,
+    default_material: &ModelMaterial,
+    filepath: &std::path::Path,
+    device: &mut wgpu::Device,
+    queue: &mut wgpu::Queue,
+    texture_layout: &wgpu::BindGroupLayout,
+) -> Option<Model3D> {
+    // let mut model_results = Model3D::new();
+    let model = SerializedModel3D::from_protobuf(model_proto);
+    if model.is_none() { return None }
+    return load_3d_model_from_serialized(&mut model.unwrap(), default_material, filepath, device, queue, texture_layout);
+}
+
+pub fn load_3d_terrain_model_from_protobuf(
+    model_proto: SerializedTerrainModel3DProtobuf,
+    default_material: &ModelMaterial,
+    filepath: &std::path::Path,
+    device: &mut wgpu::Device,
+    queue: &mut wgpu::Queue,
+    texture_layout: &wgpu::BindGroupLayout,
+) -> Option<TerrainModel3D> {
+    // This is the function we port...
+    let model = SerializedTerrainModel3D::from_protobuf(model_proto);
+    if model.is_none() {
+        return None;
+    }
+    return load_3d_terrain_model_from_serialized(&mut model.unwrap(), default_material, filepath, device, queue, texture_layout);
+}
+
+
 pub fn load_3d_terrain_model_from_serialized(
     model: &mut SerializedTerrainModel3D,
     default_material: &ModelMaterial,
@@ -455,7 +492,7 @@ pub fn load_3d_terrain_model_from_serialized(
         let mut verts = Vec::<TerrainModel3DVertex>::new();
         let mut indices = Vec::<u32>::new();
         if m.positions.len() != m.normals.len() {
-            return Option::None;
+            return None;
         }
         if m.positions.len() != m.uvs.len() {
             m.uvs.resize(m.positions.len(), [0.0, 0.0]);
@@ -583,6 +620,8 @@ pub fn load_3d_terrain_model_from_serialized(
     }
     Some(model_results)
 }
+
+
 
 pub async fn load_texture(
     filepath: &Path,

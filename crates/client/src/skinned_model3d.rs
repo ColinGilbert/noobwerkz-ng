@@ -19,7 +19,7 @@ pub struct SkinnedModel3D {
     pub animations_idx_by_name: HashMap<String, AnimationIndex>,
     pub animation_names: HashMap<AnimationIndex, String>,
     pub animations: Animations<Animation>,
-    pub global_inverse_transform: glam::Mat4,
+    //pub global_inverse_transform: glam::Mat4,
 }
 
 impl SkinnedModel3D {
@@ -32,7 +32,7 @@ impl SkinnedModel3D {
             animations_idx_by_name: HashMap::new(),
             animation_names: HashMap::new(),
             animations: Animations::new(),
-            global_inverse_transform: glam::Mat4::IDENTITY,
+            //global_inverse_transform: glam::Mat4::IDENTITY,
         }
     }
 }

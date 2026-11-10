@@ -237,7 +237,7 @@ impl Scene3D {
             .terrain_bodies
             .insert(rigid_body_handle, mesh_to_recast_mesh(mesh));
 
-        let terrain_model = asset_mgr.load_terrain_3d_model_from_mem(
+        let terrain_model = asset_mgr.load_serialized_terrain_3d_model_from_mem(
             &mut serialized_model.unwrap(),
             &texture_filepath,
             device,

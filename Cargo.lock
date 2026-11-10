@@ -3197,12 +3197,13 @@ dependencies = [
  "glam 0.33.12",
  "image",
  "kira",
- "msgpacker",
+ "noobwerkz-proto",
  "noobwerkz-shared",
  "noobwerkz-skeletal-animation",
  "once_cell",
  "pollster",
  "polyanya",
+ "prost",
  "rapier3d",
  "rayon",
  "rerecast",
@@ -3238,8 +3239,8 @@ dependencies = [
  "clap",
  "glam 0.33.12",
  "gltf",
- "msgpacker",
  "noobwerkz-shared",
+ "prost",
 ]
 
 [[package]]

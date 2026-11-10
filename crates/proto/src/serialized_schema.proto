@@ -29,7 +29,7 @@ message Vec4uProtobuf {
 
 message Mat4fProtobuf {
   Vec4fProtobuf mat4f_a = 1;
-  Vec4fProtobuf ma4tf_b = 2;
+  Vec4fProtobuf mat4f_b = 2;
   Vec4fProtobuf mat4f_c = 3;
   Vec4fProtobuf mat4f_d = 4;
 }

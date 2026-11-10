@@ -2,11 +2,9 @@ use crate::bone::*;
 
 use std::collections::HashMap;
 
-use msgpacker::*;
 use noobwerkz_proto::{protobuf_schema::*};
 
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SerializedAnimation3D {
     pub channels: Vec<SerializedAnimation3DChannel>,
 }
@@ -35,8 +33,7 @@ impl SerializedAnimation3D {
     }
 }
 
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SerializedAnimation3DKeyframeTypes {
     Translations(Vec<[f32; 3]>),
     Rotations(Vec<[f32; 4]>),
@@ -107,8 +104,7 @@ impl SerializedAnimation3DKeyframeTypes {
     }
 }
 
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SerializedBone3D {
     pub parent: usize,
     pub scale: [f32; 3],
@@ -165,8 +161,7 @@ impl SerializedBone3D {
     }
 }
 
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SerializedAnimation3DChannel {
     pub bone: usize,
     pub data: SerializedAnimation3DKeyframeTypes,
@@ -186,10 +181,15 @@ impl SerializedAnimation3DChannel {
         if other.data.is_none() {
             return None;
         }
+        let data = SerializedAnimation3DKeyframeTypes::from_protobuf(other.data.unwrap());
+        if data == SerializedAnimation3DKeyframeTypes::Invalid {
+            println!("Invalid keyframes found while deserializing keyframes.");
+            return None;
+        }
         Some(Self {
             bone: other.bone as usize,
-            data: SerializedAnimation3DKeyframeTypes::from_protobuf(other.data.unwrap()),
-            times: other.times,
+            data,
+            times: other.times.clone(),
         })
     }
 
@@ -203,8 +203,7 @@ impl SerializedAnimation3DChannel {
     }
 }
 
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SerializedMesh3D {
     pub name: String,
     pub translation: [f32; 3],
@@ -252,6 +251,7 @@ impl SerializedMesh3D {
             || other.min_extents.is_none()
             || other.dimensions.is_none()
         {
+            println!("Could not deserialize mesh from protobuf");
             return None;
         }
 
@@ -259,6 +259,7 @@ impl SerializedMesh3D {
         for p in other.positions {
             positions.push([p.vec3f_x, p.vec3f_y, p.vec3f_z]);
         }
+        // println!("DEBUG: SerializedMesh3D - Positions {}", positions.len());
         let mut normals = Vec::new();
         for n in other.normals {
             normals.push([n.vec3f_x, n.vec3f_y, n.vec3f_z]);
@@ -276,7 +277,7 @@ impl SerializedMesh3D {
             bone_weights.push([bw.vec4f_x, bw.vec4f_y, bw.vec4f_z, bw.vec4f_w]);
         }
         Some(Self {
-            name: other.name,
+            name: other.name.clone(),
             translation: [
                 other.translation.unwrap().vec3f_x,
                 other.translation.unwrap().vec3f_y,
@@ -441,8 +442,7 @@ impl SerializedMesh3D {
     }
 }
 
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SerializedModelMaterial {
     pub name: String,
     pub base_colour: [f32; 4],
@@ -505,8 +505,7 @@ impl SerializedModelMaterial {
     }
 }
 
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SerializedModel3D {
     pub meshes: Vec<SerializedMesh3D>,
     pub materials: Vec<SerializedModelMaterial>,
@@ -563,16 +562,16 @@ impl SerializedModel3D {
         let mut inverse_bind_matrices = Vec::new();
         for ibm_proto in other.inverse_bind_matrices {
             if ibm_proto.mat4f_a.is_none()
-                || ibm_proto.ma4tf_b.is_none()
+                || ibm_proto.mat4f_b.is_none()
                 || ibm_proto.mat4f_c.is_none()
                 || ibm_proto.mat4f_d.is_none()
             {
                 return None;
             }
             let a = ibm_proto.mat4f_a.unwrap();
-            let b = ibm_proto.mat4f_a.unwrap();
-            let c = ibm_proto.mat4f_a.unwrap();
-            let d = ibm_proto.mat4f_a.unwrap();
+            let b = ibm_proto.mat4f_b.unwrap();
+            let c = ibm_proto.mat4f_c.unwrap();
+            let d = ibm_proto.mat4f_d.unwrap();
             inverse_bind_matrices.push([
                 [a.vec4f_x, a.vec4f_y, a.vec4f_z, a.vec4f_w],
                 [b.vec4f_x, b.vec4f_y, b.vec4f_z, b.vec4f_w],
@@ -635,7 +634,7 @@ impl SerializedModel3D {
                     vec4f_z: ibm[0][2],
                     vec4f_w: ibm[0][3],
                 }),
-                ma4tf_b: Some(Vec4fProtobuf {
+                mat4f_b: Some(Vec4fProtobuf {
                     vec4f_x: ibm[1][0],
                     vec4f_y: ibm[1][1],
                     vec4f_z: ibm[1][2],
@@ -668,8 +667,7 @@ impl SerializedModel3D {
     }
 }
 
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, MsgPacker)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SerializedTerrainModel3D {
     pub meshes: Vec<SerializedMesh3D>,
     pub materials: Vec<SerializedModelMaterial>,

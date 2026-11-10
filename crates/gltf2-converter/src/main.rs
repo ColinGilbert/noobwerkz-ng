@@ -1,6 +1,6 @@
 use clap::Parser;
 use gltf::Semantic;
-use msgpacker::*;
+// use msgpacker::*;
 use noobwerkz_shared::{bone::*, serialized_model3d::*};
 use std::{
     collections::{HashMap, HashSet},
@@ -8,6 +8,7 @@ use std::{
     io::*,
     str::FromStr,
 };
+use prost::Message;
 
 fn traverse_node_recursive(
     node: &gltf::Node,
@@ -478,8 +479,19 @@ fn run(input_path: &str, output_path: &str) {
     serialized_model.animations_by_name = animations_by_name;
     // serialized_model.global_inverse_transform = glam::Mat4::IDENTITY.to_cols_array_2d();
 
+    println!("Serialized model num meshes: {}", serialized_model.meshes.len());
+
+
+    let output_model = serialized_model.to_protobuf();
+    
     let mut buf = Vec::new();
-    let _n = serialized_model.pack(&mut buf);
+    buf.reserve(output_model.encoded_len());
+    //let _n = serialized_model.pack(&mut buf);
+    let results = output_model.encode(&mut buf);
+    if results.is_err() {
+        println!("Could not encode serialized protobuf payload.");
+        return
+    }
     let mut file = File::create(output_path).unwrap();
     let results = file.write_all(&buf);
     match results {

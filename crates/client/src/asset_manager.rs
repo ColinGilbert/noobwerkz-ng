@@ -6,6 +6,7 @@ use crate::{
 use anyhow::*;
 use kira::sound::static_sound::StaticSoundData;
 use noobwerkz_shared::serialized_model3d::{SerializedModel3D, SerializedTerrainModel3D};
+use noobwerkz_proto::protobuf_schema::*;
 use std::{collections::*, path::*, result::Result::*};
 
 pub struct AssetManager {
@@ -48,7 +49,7 @@ impl AssetManager {
         }
     }
 
-    pub fn load_3d_model_from_file(
+    pub fn load_protobuf_3d_model_from_file(
         &mut self,
         filepath: &std::path::PathBuf,
         name: &str,
@@ -57,14 +58,14 @@ impl AssetManager {
         default_material: &ModelMaterial,
         texture_layout: &wgpu::BindGroupLayout,
     ) -> anyhow::Result<Model3DIndex> {
-        let serialized_opt = load_serialized_model(filepath.as_path());
+        let serialized_opt = load_protobuf_model(filepath.as_path());
 
         match serialized_opt {
-            Some(mut serialized) => {
+            Some(serialized) => {
                 let mut path = filepath.clone();
                 path.pop();
-                let model = load_3d_model_from_serialized(
-                    &mut serialized,
+                let model = load_3d_model_from_protobuf(
+                    serialized,
                     default_material,
                     &path.as_path(),
                     device,
@@ -88,6 +89,117 @@ impl AssetManager {
                 }
             }
             None => Err(anyhow!("AssetManager: Could not load serialized 3D model")),
+        }
+    }
+
+    pub fn load_protobuf_3d_model_from_mem(
+        &mut self,
+        serialized: SerializedModel3DProtobuf,
+        name: &str,
+        texture_filepath: &PathBuf,
+        device: &mut wgpu::Device,
+        queue: &mut wgpu::Queue,
+        default_material: &ModelMaterial,
+        texture_layout: &wgpu::BindGroupLayout,
+    ) -> anyhow::Result<Model3DIndex> {
+        let model = load_3d_model_from_protobuf(
+            serialized,
+            default_material,
+            &texture_filepath.as_path(),
+            device,
+            queue,
+            texture_layout,
+        );
+        match model {
+            Some(val) => {
+                self.models.push(val);
+                let idx = Model3DIndex::new(self.models.len() - 1);
+                self.model_names.insert(idx, name.to_owned());
+                self.models_by_name.insert(name.to_owned(), idx);
+                return anyhow::Result::Ok(idx);
+            }
+            None => {
+                return anyhow::Result::Err(anyhow!(format!(
+                    "Could not load model {} from memory",
+                    name
+                )));
+            }
+        }
+    }
+
+
+    pub fn load_protobuf_skinned_3d_model_from_file(
+        &mut self,
+        filepath: &std::path::PathBuf,
+        name: &str,
+        device: &mut wgpu::Device,
+        queue: &mut wgpu::Queue,
+        default_material: &ModelMaterial,
+        texture_layout: &wgpu::BindGroupLayout,
+    ) -> anyhow::Result<SkinnedModel3DIndex> {
+        let serialized_opt = load_protobuf_model(filepath.as_path());
+        match serialized_opt {
+            Some(serialized) => {
+                let mut path = filepath.clone();
+                path.pop();
+                let model = load_skinned_3d_model_from_protobuf(
+                    serialized,
+                    default_material,
+                    &path.as_path(),
+                    device,
+                    queue,
+                    texture_layout,
+                );
+                match model {
+                    Some(val) => {
+                        self.skinned_models.push(val);
+                        let idx = SkinnedModel3DIndex::new(self.skinned_models.len() - 1);
+                        self.skinned_model_names.insert(idx, name.to_owned());
+                        self.skinned_models_by_name.insert(name.to_owned(), idx);
+                        return anyhow::Result::Ok(idx);
+                    }
+                    None => {
+                        return anyhow::Result::Err(anyhow!(format!(
+                            "Skinned model {} refused to load properly from file.",
+                            name
+                        )));
+                    }
+                }
+            }
+            None => Err(anyhow!(
+                "AssetManager: Could not load serialized 3D skinned model from file."
+            )),
+        }
+    }
+
+    pub fn load_protobuf_terrain_3d_model_from_mem(
+        &mut self,
+        serialized: SerializedTerrainModel3DProtobuf,
+        texture_filepath: &PathBuf,
+        device: &mut wgpu::Device,
+        queue: &mut wgpu::Queue,
+        default_material: &ModelMaterial,
+        texture_layout: &wgpu::BindGroupLayout,
+    ) -> anyhow::Result<TerrainModel3DIndex> {
+        let model = load_3d_terrain_model_from_protobuf(
+            serialized,
+            default_material,
+            &texture_filepath.as_path(),
+            device,
+            queue,
+            texture_layout,
+        );
+        match model {
+            Some(val) => {
+                self.terrain_models.push(val);
+                let idx = TerrainModel3DIndex::new(self.terrain_models.len() - 1);
+                return anyhow::Result::Ok(idx);
+            }
+            None => {
+                return anyhow::Result::Err(anyhow!(format!(
+                    "Could not load terrain model from memory.",
+                )));
+            }
         }
     }
 
@@ -126,51 +238,7 @@ impl AssetManager {
         }
     }
 
-    pub fn load_skinned_3d_model_from_file(
-        &mut self,
-        filepath: &std::path::PathBuf,
-        name: &str,
-        device: &mut wgpu::Device,
-        queue: &mut wgpu::Queue,
-        default_material: &ModelMaterial,
-        texture_layout: &wgpu::BindGroupLayout,
-    ) -> anyhow::Result<SkinnedModel3DIndex> {
-        let serialized_opt = load_serialized_model(filepath.as_path());
-        match serialized_opt {
-            Some(mut serialized) => {
-                let mut path = filepath.clone();
-                path.pop();
-                let model = load_skinned_3d_model_from_serialized(
-                    &mut serialized,
-                    default_material,
-                    &path.as_path(),
-                    device,
-                    queue,
-                    texture_layout,
-                );
-                match model {
-                    Some(val) => {
-                        self.skinned_models.push(val);
-                        let idx = SkinnedModel3DIndex::new(self.skinned_models.len() - 1);
-                        self.skinned_model_names.insert(idx, name.to_owned());
-                        self.skinned_models_by_name.insert(name.to_owned(), idx);
-                        return anyhow::Result::Ok(idx);
-                    }
-                    None => {
-                        return anyhow::Result::Err(anyhow!(format!(
-                            "Skinned model {} refused to load properly from file.",
-                            name
-                        )));
-                    }
-                }
-            }
-            None => Err(anyhow!(
-                "AssetManager: Could not load serialized 3D skinned model from file."
-            )),
-        }
-    }
-
-    pub fn load_terrain_3d_model_from_mem(
+    pub fn load_serialized_terrain_3d_model_from_mem(
         &mut self,
         serialized: &mut SerializedTerrainModel3D,
         texture_filepath: &PathBuf,

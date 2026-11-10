@@ -55,7 +55,7 @@ impl ClientUserContext {
         texture_bind_group_layout: &wgpu::BindGroupLayout,
         bone_matrices_bind_group_layout: &wgpu::BindGroupLayout,
     ) {
-        let character = self.asset_mgr.load_skinned_3d_model_from_file(
+        let character = self.asset_mgr.load_protobuf_skinned_3d_model_from_file(
             &path,
             name,
             device,

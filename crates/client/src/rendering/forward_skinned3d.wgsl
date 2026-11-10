@@ -96,7 +96,7 @@ fn vs_main(
     var out: VertexOutput;
     out.clip_position = camera.view_proj * world_position;
     out.tex_coords = model.tex_coords;
-        out.surface_to_light = light.position.xyz - world_position.xyz;
+    out.surface_to_light = light.position.xyz - world_position.xyz;
     out.surface_to_view = camera.view_pos.xyz - world_position.xyz;
     // out.tangent_position = tbn_matrix * world_position.xyz;
     // out.tangent_view_position = tbn_matrix * camera.view_pos.xyz;
@@ -159,7 +159,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     // let specular_strength = pow(max(dot(tangent_normal, half_dir), 0.0), 32.0);
     // let specular_color = specular_strength * light.color;
 
-    let result = (ambient_light + specular_light) * object_color.xyz;
+    let result = (ambient_light + directional_light + specular_light) * object_color.xyz;
 
     return vec4<f32>(result, object_color.a);
 }
