@@ -7,6 +7,7 @@ use crate::operation_result::LocalToLocalResults;
 use crate::operation_result::LocalToModelResults;
 use anyhow::anyhow;
 use noobwerkz_shared::skeleton::*;
+use petgraph::algo::astar;
 use petgraph::graph::{EdgeIndex, Graph, NodeIndex};
 use std::collections::HashMap;
 use std::collections::VecDeque;
@@ -204,149 +205,149 @@ impl AnimationGraph {
         self.duration += dt;
         self.output_locals = LocalToLocalResults::new();
         // Handle the transition case
-            if self.on_a_transition {
-                println!("On a transition!");
-                match self.current_edge_idx {
-                    Some(edge_idx) => {
-                        let transition_idx = self.graph.edge_weight(edge_idx).unwrap();
-                        // Calculate the time taken and check whether or not the transition is finished.
-                        self.transitions[*transition_idx].seek += self.duration;
-                        let finished: bool;
-                        if self.transitions[*transition_idx].seek
-                            >= self.transitions[*transition_idx].duration
-                        {
-                            finished = true;
-                        } else {
-                            finished = false;
-                        }
-                        // If finished, move onto the next node.
-                        if finished {
-                            self.transitions[*transition_idx].reset();
-                            let front = self.path.front();
-                            match front {
-                                Some(val) => {
-                                    self.current_edge_idx = Some(*val);
-                                    self.path.pop_front();
-                                    self.on_a_transition = false;
-                                }
-                                None => {}
-                            }
-                        } else {
-                            // We need to evaluate the
-                            let edge = self
-                                .graph
-                                .edge_endpoints(self.current_edge_idx.unwrap())
-                                .unwrap();
-                            let from = self.graph.node_weight(edge.0).unwrap();
-                            // Otherwise, evaluate the transition
-                            let from_results = LocalToLocalResults::new(); // TODO: Init inside match clause
-                            match from {
-                                GenericNode::Sampler(val) => {
-                                    self.animations[self.samplers[*val].index]
-                                        .seek(self.duration.as_secs_f32());
-                                    let mut from_results = LocalToLocalResults::new();
-                                        self.animations[self.samplers[*val].index].playback(self.skeleton.clone(), &mut from_results);
-                                }
-                                GenericNode::BlendTreeOneDim(_) => {
-                                    // self.blend_trees_one_dim[*val].update(dt);
-                                    // TODO
-                                }
-                            }
-                            let to = self.graph.node_weight(edge.1).unwrap();
-                            let to_results = LocalToLocalResults::new(); // TODO: Init inside match clause
-                            match to {
-                                GenericNode::Sampler(val) => {
-                                    self.animations[self.samplers[*val].index]
-                                        .seek(self.duration.as_secs_f32());
-                                    let mut to_results = LocalToLocalResults::new();
-                                        self.animations[self.samplers[*val].index].playback(self.skeleton.clone(), &mut to_results);
-                                }
-                                GenericNode::BlendTreeOneDim(_) => {
-                                    // self.blend_trees_one_dim[*val].update(dt);
-                                    // TODO
-                                }
-                            }
-                            // Set the blend layer weights based on time elapsed.
-                            self.transitions[*transition_idx].seek =
-                                self.transitions[*transition_idx].seek + dt;
-                            let ratio = (self.transitions[*transition_idx].duration.as_millis()
-                                as f32
-                                / self.transitions[*transition_idx].seek.as_millis() as f32)
-                                .clamp(0.0, 1.0);
-                            self.output_locals = blend_multiplicative(
-                                &from_results,
-                                &to_results,
-                                ratio,
-                                &self.skeleton.valid,
-                            );
-                        }
+        if self.on_a_transition {
+            println!("On a transition!");
+            match self.current_edge_idx {
+                Some(edge_idx) => {
+                    let transition_idx = self.graph.edge_weight(edge_idx).unwrap();
+                    // Calculate the time taken and check whether or not the transition is finished.
+                    self.transitions[*transition_idx].seek += self.duration;
+                    let finished: bool;
+                    if self.transitions[*transition_idx].seek
+                        >= self.transitions[*transition_idx].duration
+                    {
+                        finished = true;
+                    } else {
+                        finished = false;
                     }
-                    None => return Err(anyhow! {"Invalid current transition during evaluation."}),
-                }
-
-                let last_transition_idx = self
-                    .graph
-                    .edge_weight(self.current_edge_idx.unwrap())
-                    .unwrap();
-                let last_transition = &self.transitions[*last_transition_idx];
-
-                if last_transition.seek >= last_transition.duration {
-                    self.transitions[*last_transition_idx].reset();
-                    match self.path.front() {
-                        Some(val) => {
-                            self.current_edge_idx = Some(*val);
-                            self.current_node_idx = None;
-                            self.path.pop_front();
-                            // first_time_on_transition = true;
-                        }
-                        None => {
-                            // The path is empty. We now set the current node/edge as the "to" node of the current edge
-                            let t = self
-                                .graph
-                                .edge_endpoints(self.current_edge_idx.unwrap())
-                                .unwrap()
-                                .1;
-                            if t != self.target {
-                                return Err(anyhow! {"Path ended on a non-target node"});
+                    // If finished, move onto the next node.
+                    if finished {
+                        self.transitions[*transition_idx].reset();
+                        let front = self.path.front();
+                        match front {
+                            Some(val) => {
+                                self.current_edge_idx = Some(*val);
+                                self.path.pop_front();
+                                self.on_a_transition = false;
                             }
-                            self.current_node_idx = Some(t);
-                            self.current_edge_idx = None;
-                            // first_time_on_node = true;
+                            None => {}
                         }
+                    } else {
+                        // We need to evaluate the
+                        let edge = self
+                            .graph
+                            .edge_endpoints(self.current_edge_idx.unwrap())
+                            .unwrap();
+                        let from = self.graph.node_weight(edge.0).unwrap();
+                        // Otherwise, evaluate the transition
+                        let from_results = LocalToLocalResults::new(); // TODO: Init inside match clause
+                        match from {
+                            GenericNode::Sampler(val) => {
+                                self.animations[self.samplers[*val].index]
+                                    .seek(self.duration.as_secs_f32());
+                                let mut from_results = LocalToLocalResults::new();
+                                self.animations[self.samplers[*val].index]
+                                    .playback(self.skeleton.clone(), &mut from_results);
+                            }
+                            GenericNode::BlendTreeOneDim(_) => {
+                                // self.blend_trees_one_dim[*val].update(dt);
+                                // TODO
+                            }
+                        }
+                        let to = self.graph.node_weight(edge.1).unwrap();
+                        let to_results = LocalToLocalResults::new(); // TODO: Init inside match clause
+                        match to {
+                            GenericNode::Sampler(val) => {
+                                self.animations[self.samplers[*val].index]
+                                    .seek(self.duration.as_secs_f32());
+                                let mut to_results = LocalToLocalResults::new();
+                                self.animations[self.samplers[*val].index]
+                                    .playback(self.skeleton.clone(), &mut to_results);
+                            }
+                            GenericNode::BlendTreeOneDim(_) => {
+                                // self.blend_trees_one_dim[*val].update(dt);
+                                // TODO
+                            }
+                        }
+                        // Set the blend layer weights based on time elapsed.
+                        self.transitions[*transition_idx].seek =
+                            self.transitions[*transition_idx].seek + dt;
+                        let ratio = (self.transitions[*transition_idx].duration.as_millis() as f32
+                            / self.transitions[*transition_idx].seek.as_millis() as f32)
+                            .clamp(0.0, 1.0);
+                        self.output_locals = blend_multiplicative(
+                            &from_results,
+                            &to_results,
+                            ratio,
+                            &self.skeleton.valid,
+                        );
                     }
                 }
-            } 
-                else {
-                    // If we are on a node. Far simpler to evaluate
-                    // println!("On a node!");
-                    match self.current_node_idx {
-                        Some(val) => {
-                            let node = self.graph.node_weight(val).unwrap();
-                            match node {
-                                GenericNode::Sampler(val) => {
-                                    self.animations[self.samplers[*val].index]
-                                        .seek(self.duration.as_secs_f32());
-                                    // self.output_locals.rotations.clear();
-                                    // self.output_locals.translations.clear();
-                                    // self.output_locals.scales.clear();
-                                        self.animations[self.samplers[*val].index].playback(self.skeleton.clone(), &mut self.output_locals);
-                                }
-                                GenericNode::BlendTreeOneDim(_) => {
-                                    // TODO
-                                }
-                            }
+                None => return Err(anyhow! {"Invalid current transition during evaluation."}),
+            }
+
+            let last_transition_idx = self
+                .graph
+                .edge_weight(self.current_edge_idx.unwrap())
+                .unwrap();
+            let last_transition = &self.transitions[*last_transition_idx];
+
+            if last_transition.seek >= last_transition.duration {
+                self.transitions[*last_transition_idx].reset();
+                match self.path.front() {
+                    Some(val) => {
+                        self.current_edge_idx = Some(*val);
+                        self.current_node_idx = None;
+                        self.path.pop_front();
+                        // first_time_on_transition = true;
+                    }
+                    None => {
+                        // The path is empty. We now set the current node/edge as the "to" node of the current edge
+                        let t = self
+                            .graph
+                            .edge_endpoints(self.current_edge_idx.unwrap())
+                            .unwrap()
+                            .1;
+                        if t != self.target {
+                            return Err(anyhow! {"Path ended on a non-target node"});
                         }
-                        None => return Err(anyhow! {"Invalid current node during evaluation."}),
+                        self.current_node_idx = Some(t);
+                        self.current_edge_idx = None;
+                        // first_time_on_node = true;
                     }
                 }
-                self.output_model = local_to_model(self.skeleton.clone(), &self.output_locals);
-            // println!("{:?}, {:?}. {:?}", &self.output_locals.translations, &self.output_locals.rotations, &self.output_locals.scales );
+            }
+        } else {
+            // If we are on a node. Far simpler to evaluate
+            // println!("On a node!");
+            match self.current_node_idx {
+                Some(val) => {
+                    let node = self.graph.node_weight(val).unwrap();
+                    match node {
+                        GenericNode::Sampler(val) => {
+                            self.animations[self.samplers[*val].index]
+                                .seek(self.duration.as_secs_f32());
+                            // self.output_locals.rotations.clear();
+                            // self.output_locals.translations.clear();
+                            // self.output_locals.scales.clear();
+                            self.animations[self.samplers[*val].index]
+                                .playback(self.skeleton.clone(), &mut self.output_locals);
+                        }
+                        GenericNode::BlendTreeOneDim(_) => {
+                            // TODO
+                        }
+                    }
+                }
+                None => return Err(anyhow! {"Invalid current node during evaluation."}),
+            }
+        }
+        self.output_model = local_to_model(self.skeleton.clone(), &self.output_locals);
+        // println!("{:?}, {:?}. {:?}", &self.output_locals.translations, &self.output_locals.rotations, &self.output_locals.scales );
 
-            // Now we check whether or not we are in need of transitioning through the path list
-            // let mut first_time_on_transition = false;
-            // let mut first_time_on_node = false;
+        // Now we check whether or not we are in need of transitioning through the path list
+        // let mut first_time_on_transition = false;
+        // let mut first_time_on_node = false;
 
-        
         Ok(())
     }
 
@@ -359,8 +360,54 @@ impl AnimationGraph {
     }
 
     // TODO
-    pub fn set_target_node_by_idx(&mut self, _node_idx: NodeIndex) {
-        //self.dfs(node_idx);
+    pub fn set_target_node_by_idx(&mut self, target_node: NodeIndex) {
+        let n;
+        if self.current_node_idx.is_none() {
+            if self.current_edge_idx.is_none() {
+                println!(
+                    "[AnimGraph] While setting target node, both current node and current edge are undefined..."
+                );
+                return;
+            }
+            let endpoints = self.graph.edge_endpoints(self.current_edge_idx.unwrap());
+            match endpoints {
+                Some(val) => {
+                    n = val.1;
+                }
+                None => {
+                    println!(
+                        "[AnimGraph] While setting target node, we could not find the edge endpoints."
+                    );
+                    return;
+                }
+            }
+        } else {
+            n = self.current_node_idx.unwrap();
+        }
+        let res = astar(
+            &self.graph,
+            n,
+            |finish| finish == target_node,
+            |_| 1,
+            |_| 0,
+        );
+        if res.is_none() {
+            println!("[Animgraph] While setting target node, could not find path.");
+            return;
+        }
+        self.path.clear();
+        let mut previous_node = n;
+        for i in res.unwrap().1 {
+            if i == previous_node {
+                continue;
+            }
+            let e = self.graph.find_edge(previous_node, i);
+            if e.is_none() {
+                println!("[AnimGraph] While setting target node, could not find edge between nodes in path.");
+            }
+            self.path.push_back(e.unwrap());
+            previous_node = n;
+        }
     }
 
     pub fn set_target_node_by_name(&mut self, node_name: String) {
