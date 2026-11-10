@@ -412,8 +412,8 @@ impl AnimationGraph {
 
     pub fn set_target_node_by_name(&mut self, node_name: String) {
         if self.node_names.contains_key(&node_name) {
-            let _node_idx = self.node_names[&node_name];
-            //self.dfs(node_idx);
+            let node_idx = self.node_names[&node_name];
+            self.set_target_node_by_idx(node_idx);
         }
     }
 
