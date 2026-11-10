@@ -1,9 +1,11 @@
 use crate::{csg::*, serialized_model3d::*};
-use rapier3d::prelude::*;
+use rapier3d::{parry::{self, *}, prelude::*};
 
 use binary_greedy_meshing as bgm;
 use rerecast::AreaType;
 use std::collections::BTreeSet;
+
+pub const HEIGHTMAP_SIZE: usize = 1024;
 
 pub enum Shape3D {
     Cube(f32),
@@ -13,6 +15,7 @@ pub enum Shape3D {
     CapsuleY(f32, f32),
     Trimesh(SerializedMesh3D),
     Voxels(glam::Vec3, Vec<glam::IVec3>),
+    HeightMap(Vec<f32>, usize, glam::Vec3)
 }
 
 pub fn shape_to_collider(shape: &Shape3D) -> Option<Collider> {
@@ -72,6 +75,10 @@ pub fn shape_to_collider(shape: &Shape3D) -> Option<Collider> {
             return Some(
                 ColliderBuilder::new(SharedShape::voxels(*voxel_size, &grid_coords)).build(),
             );
+        }
+        Shape3D::HeightMap(data, size, scale) => {
+            let heights = Array2::new(*size, *size, data.to_vec());
+            Some(ColliderBuilder::new(SharedShape::heightfield(heights, *scale)).build())
         }
     }
 }
@@ -198,6 +205,24 @@ pub fn shape_to_serialized_model(shape: &Shape3D) -> Option<SerializedModel3D> {
 
             results.meshes.push(mesh);
 
+            Some(results)
+        }
+        Shape3D::HeightMap(data, size, scale) => {
+            let heights = Array2::new(*size, *size, data.to_vec());
+            let heightfield = parry::shape::HeightField::new(heights, *scale);
+            let trimesh = heightfield.to_trimesh();
+            let mut results = SerializedModel3D::new();
+            let mut mesh = SerializedMesh3D::new();
+            for p in trimesh.0 {
+                mesh.positions.push([p.x, p.y, p.z]);
+            }
+            for t in trimesh.1 {
+                mesh.indices.push(t[0]);
+                mesh.indices.push(t[1]);
+                mesh.indices.push(t[2]);
+            }
+            mesh.recalculate_normals();
+            results.meshes.push(mesh);
             Some(results)
         }
     }
