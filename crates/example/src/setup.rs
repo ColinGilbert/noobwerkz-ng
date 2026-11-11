@@ -1,3 +1,5 @@
+use std::fs;
+
 use noobwerkz_client::camera3d::*;
 use noobwerkz_client::client_user_context::ClientUserContext;
 use noobwerkz_client::glam;
@@ -9,8 +11,10 @@ use noobwerkz_client::light3d::Light3DUniform;
 use noobwerkz_client::model3d_node::*;
 use noobwerkz_client::scene3d::*;
 use noobwerkz_client::simple_particles::ParticleEffect;
+use noobwerkz_shared::noise::*;
 use noobwerkz_shared::shapes::*;
 use noobwerkz_skeletal_animation::animation_graph_definition::*;
+
 // use noobwerkz::simple_animgraph::edge_definitions::TransitionDefinition;
 use crate::user_data::*;
 use quick_noise::*;
@@ -287,35 +291,40 @@ pub fn user_setup(
         &gfx_ctx.texture_bind_group_layout,
     );
 
-    let grid = Grid::<2>::new(1024, 1024)
-        .grid_position(0.0, 0.0) // Position of the grid region in sample space.
-        .seed(102); // Seed for deterministic random results.
+    // let grid_2d = Grid::<2>::new(1024, 1024)
+    //     .grid_position(0.0, 0.0) // Position of the grid region in sample space.
+    //     .sample_position(x, y)
+    //     .seed(102); // Seed for deterministic random results.
 
-    let mut result = vec![0.0; 1024 * 1024];
+    const HEIGHTFIELD_SIZE: usize = 1024;
 
-    // FBM Grid noise with all parameters.
-    let _noise = grid
-        .builder::<Fbm, Perlin>()
-        .seed(0) // Acts a second seed in combination with the grid's seed.
-        .octaves(1) // Number of noise passes.
-        .frequency(0.03125) // How fast the noise changes across sample space.
-        .lacunarity(2.0) // Multiplier to the frequency after each subsequent octave.
-        .persistence(0.5) // Multiplier to the weight after each subsequent octave.
-        .amplitude(1.0) // The maximum absolute value the noise can produce (For Fbm).
-        .normalization(true) // Whether or not to normalize the output.
-        .scaling(1.0, 1.0) // How much is the noise stretched in each dimension.
-        .initialize(true) // Setting to false adds noise to current values.
-        .finalize(true) // Some combiners have a finalization stage.
-        .fill(result.as_mut_slice());
+    let mut noise = vec![0.0f32; HEIGHTFIELD_SIZE * HEIGHTFIELD_SIZE];
+
+    let mut noise_params_path = path.clone();
+    noise_params_path.push("noise_params.json");
+
+    let noise_params = Noise2DParameters::from_json(fs::read_to_string(noise_params_path).unwrap());
+    // Create noise offsets to warp by with fast grid noise.
+    // let noise1 = grid.builder::<Fbm, Perlin>().octaves(6).seed(0).into_iter();
+    // let noise2 = grid.builder::<Fbm, Perlin>().octaves(2).seed(1).into_iter();
+
+    // grid.warp_builder::<Fbm, Perlin>(50.0, noise1, noise2)
+    //     .octaves(2) // Cheap two octaves for expensive batch noise call.
+    //     .frequency(1. / 32.0)
+    //     .fill(&mut result);
+
+    make_fbm_perlin_noise_2d(&noise_params, 0.0, 0.0, HEIGHTFIELD_SIZE, 128, &mut noise);
+
+    make_terraces(&mut noise, 5.0);
 
     u.scenes[current_scene].add_terrain(
         Shape3D::HeightMap(
-            result,
-            1024,
+            noise,
+            HEIGHTFIELD_SIZE,
             glam::Vec3 {
-                x: 50.0,
+                x: 25.0,
                 y: 1.0,
-                z: 50.0,
+                z: 25.0,
             },
         ),
         glam::Vec3::ZERO,

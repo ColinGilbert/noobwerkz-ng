@@ -3256,6 +3256,7 @@ dependencies = [
  "prost",
  "prost-build",
  "prost-types",
+ "quick-noise",
  "rapier3d",
  "rerecast",
  "safe_index",
