@@ -45,6 +45,7 @@ impl Pass for ForwardRenderer3D {
         skinned_models: &SkinnedModels3D<SkinnedModel3D>,
         terrain_models: &TerrainModels3D<TerrainModel3D>,
         model_nodes: &Model3DNodes<Model3DNode>,
+        navmesh_model_node: &Option<Model3DNode>,
         terrain_nodes: &TerrainModel3DNodes<TerrainModel3DNode>,
         characters_contexts: &Vec<Characters3DContext>,
         particles_ctx: &Rc<RefCell<Particle3DContext>>,
@@ -143,6 +144,53 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
+            if navmesh_model_node.is_some() {
+                // We can draw the navmesh now...
+                let navmesh_model = &models[navmesh_model_node.as_ref().unwrap().model_idx];
+                let mut count = 0;
+                let mut navmesh_model_instance_data = Vec::<Instance3DRaw>::new();
+                for i in &navmesh_model_node.as_ref().unwrap().instances {
+                    navmesh_model_instance_data.push(i.to_raw());
+                    count += 1;
+                }
+                for m in &navmesh_model.meshes {
+                    let mut mesh_instance_data = Vec::<Instance3DRaw>::new();
+
+                    let mesh_m_mat = glam::Mat4::from_scale_rotation_translation(
+                        m.scale,
+                        m.rotation,
+                        m.translation,
+                    );
+
+                    for instance in &navmesh_model_instance_data {
+                        let mesh_n_mat = glam::Mat3::from_quat(m.rotation);
+                        let model_m_mat = glam::Mat4::from_cols_array_2d(&instance.model);
+                        let model_n_mat = glam::Mat3::from_cols_array_2d(&instance.normal);
+                        let temp = Instance3DRaw {
+                            model: (model_m_mat * mesh_m_mat).to_cols_array_2d(),
+                            normal: (model_n_mat * mesh_n_mat).to_cols_array_2d(),
+                        };
+                        mesh_instance_data.push(temp);
+                    }
+
+                    let instance_buffer =
+                        device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                            label: Some("Instance Buffer"),
+                            contents: bytemuck::cast_slice(&mesh_instance_data),
+                            usage: wgpu::BufferUsages::VERTEX,
+                        });
+
+                    render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
+
+                    render_pass.draw_mesh_instanced(
+                        &m,
+                        &navmesh_model.materials[m.material],
+                        0..count,
+                        &self.camera_bind_group,
+                        &self.light_bind_group,
+                    );
+                }
+            }
             render_pass.set_pipeline(&self.skinned_render_pipeline);
 
             for c in characters_contexts.iter() {
@@ -167,7 +215,8 @@ impl Pass for ForwardRenderer3D {
                     for instance_raw in &model_instances {
                         let instance_model_mat =
                             glam::Mat4::from_cols_array_2d(&instance_raw.model);
-                        let instance_normal_mat = glam::Mat3::from_cols_array_2d(&instance_raw.normal);
+                        let instance_normal_mat =
+                            glam::Mat3::from_cols_array_2d(&instance_raw.normal);
                         let temp = SkinnedInstance3DRaw {
                             model: (instance_model_mat * mesh_mat).to_cols_array_2d(),
                             normal: instance_normal_mat.to_cols_array_2d(),

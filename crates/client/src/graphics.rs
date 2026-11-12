@@ -14,6 +14,7 @@ pub struct GraphicsContext {
     pub texture_bind_group_layout: wgpu::BindGroupLayout,
     pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
     pub debug_material: ModelMaterial,
+    pub navmesh_material: ModelMaterial,
     pub particles_ctx: Rc<RefCell<Particle3DContext>>,
 }
 
@@ -113,7 +114,6 @@ impl GraphicsContext {
                 label: Some("Materials bind group layout"),
             });
 
-
         let bone_matrices_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 entries: &[
@@ -157,10 +157,9 @@ impl GraphicsContext {
 
         let depth_texture = Texture::create_depth_texture(&device, &config, "depth_texture");
 
+        let diffuse_bytes = include_bytes!("default-diffuse.png");
+        let normal_bytes = include_bytes!("default-normal.png");
         let debug_material = {
-            let diffuse_bytes = include_bytes!("default-diffuse.png");
-            let normal_bytes = include_bytes!("default-normal.png");
-
             let diffuse_texture = Texture::from_bytes(
                 &device,
                 &queue,
@@ -194,6 +193,40 @@ impl GraphicsContext {
             )
         };
 
+        let navmesh_material = {
+            let diffuse_texture = Texture::from_bytes(
+                &device,
+                &queue,
+                diffuse_bytes,
+                "default-diffuse",
+                false,
+                &texture_bind_group_layout,
+                None,
+            )
+            .unwrap();
+            let normal_texture = Texture::from_bytes(
+                &device,
+                &queue,
+                normal_bytes,
+                "default-normal",
+                true,
+                &texture_bind_group_layout,
+                None,
+            )
+            .unwrap();
+
+            ModelMaterial::new(
+                &device,
+                "navmesh-material",
+                diffuse_texture,
+                normal_texture,
+                &texture_bind_group_layout,
+                [0.5, 0.5, 0.5, 0.5],
+                1.0,
+                1.0,
+            )
+        };
+
         let particles_instance_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Particles instance buffer"),
             size: 1024 * std::mem::size_of::<Particle3DInstance>() as u64,
@@ -216,6 +249,7 @@ impl GraphicsContext {
             texture_bind_group_layout,
             bone_matrices_bind_group_layout,
             debug_material,
+            navmesh_material,
             particles_ctx,
         }
     }

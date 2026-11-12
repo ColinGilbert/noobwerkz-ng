@@ -1,11 +1,12 @@
 use crate::terrain_model_node::TerrainModel3DNode;
-use crate::{asset_manager::AssetManager};
+use crate::{asset_manager::AssetManager, resource::load_3d_model_from_serialized};
 // This is where our game world resides.
 use crate::ecs::*;
 #[allow(unused)]
 use crate::ecs_components_common::*;
 use crate::model_material::*;
 
+use noobwerkz_shared::serialized_model3d::SerializedModel3D;
 use rerecast::{DetailNavmesh, HeightfieldBuilder};
 
 use std::{
@@ -17,7 +18,8 @@ use std::{
 };
 
 use noobwerkz_shared::{
-    navmesh_context::NavMeshContext, physics3d_context::*, shapes::*, skeleton::*,
+    navmesh_context::NavMeshContext, physics3d_context::*, serialized_model3d::SerializedMesh3D,
+    shapes::*, skeleton::*,
 };
 use noobwerkz_skeletal_animation::{
     animation::Animation,
@@ -53,6 +55,7 @@ pub struct Scene3D {
     pub particle_system: Rc<RefCell<ParticleSystem>>,
     pub ecs: World,
     pub navmesh_context: NavMeshContext,
+    pub navmesh_model_node: Option<Model3DNode>,
 }
 
 impl Scene3D {
@@ -70,6 +73,7 @@ impl Scene3D {
             particle_system: Rc::new(RefCell::new(ParticleSystem::new())),
             ecs: World::default(),
             navmesh_context,
+            navmesh_model_node: None,
         }
     }
 
@@ -82,7 +86,14 @@ impl Scene3D {
         // println!("Particle system empty? {}", self.particle_system.borrow().is_empty());
     }
 
-    pub fn build_navmesh(&mut self) {
+    pub fn build_navmesh(
+        &mut self,
+        asset_mgr: &mut AssetManager,
+        device: &mut wgpu::Device,
+        queue: &mut wgpu::Queue,
+        default_material: &ModelMaterial,
+        texture_layout: &wgpu::BindGroupLayout,
+    ) {
         self.navmesh_context.navmesh = polyanya::Mesh::default();
         let mut trimesh = rerecast::TriMesh::default();
         for (rigid_body_handle, _rigid_body) in self.physics_context.rigid_world.rigid_bodies() {
@@ -191,6 +202,69 @@ impl Scene3D {
             .unwrap();
 
         self.navmesh_context.navmesh.bake();
+        let mut serialized_navmesh_model = SerializedModel3D::new();
+        
+        for l in &self.navmesh_context.navmesh.layers {
+            let mut navmesh_representation = SerializedMesh3D::new();
+            for (i, v) in l.vertices.iter().enumerate() {
+                let h = l.heights().unwrap()[i];
+                navmesh_representation
+                    .positions
+                    .push([v.coords.x, h, v.coords.y])
+            }
+            for p in &l.polygons {
+                if p.vertices.len() > 3 {
+                    println!("Invalid polygon verts count. Will need to triangulate.")
+                }
+                navmesh_representation.indices.push(p.vertices[2]);
+                navmesh_representation.indices.push(p.vertices[1]);
+                navmesh_representation.indices.push(p.vertices[0]);
+
+                // for v in &p.vertices {
+                // }
+            }
+            navmesh_representation.recalculate_normals();
+            navmesh_representation.material_index = 0;
+            serialized_navmesh_model.meshes.push(navmesh_representation);
+        }
+
+        let navmesh_material = ModelMaterial::new(
+            device,
+            "navmesh-material",
+            default_material.diffuse_texture.clone(),
+            default_material.normal_texture.clone(),
+            texture_layout,
+            [0.5, 0.5, 0.0, 1.0],
+            1.0,
+            1.0,
+        );
+        //navmesh_model.materials.push(navmesh_material);
+
+        let path = PathBuf::new();
+        let model = load_3d_model_from_serialized(
+            &mut serialized_navmesh_model,
+            &navmesh_material,
+            &path,
+            device,
+            queue,
+            texture_layout,
+        );
+
+        if model.is_none() {
+            println!("Could not load model for navmesh...")
+        }
+
+        asset_mgr.models.push(model.unwrap());
+        let mut instances = Instances::new();
+        instances.push(Instance3D {
+            position: glam::Vec3::ZERO,
+            orientation: glam::Quat::IDENTITY,
+            scale: glam::Vec3::splat(1.0),
+        });
+        self.navmesh_model_node = Some(Model3DNode::new(
+            Model3DIndex::new(asset_mgr.models.len() - 1),
+            instances,
+        ));
     }
 
     pub fn add_terrain(
@@ -212,7 +286,7 @@ impl Scene3D {
         let collider = shape_to_collider(&shape);
         if collider.is_none() {
             println!("Could not add nonexistent collider to scene terrain.");
-            return
+            return;
         }
         let mut collider = collider.unwrap();
         let groups = InteractionGroups::new(
@@ -229,13 +303,22 @@ impl Scene3D {
         let serialized_model = shape_to_serialized_terrain_model(&shape);
         if serialized_model.is_none() {
             println!("Could not create serialized model for scene terrain.");
-            return
+            return;
         }
 
         let mesh = &serialized_model.as_ref().unwrap().meshes[0];
+        
+        let mut recast_mesh = mesh_to_recast_mesh(mesh);
+        let transform_matrix = glam::Mat4::from_scale_rotation_translation(Vec3::splat(1.0), orientation, translation);
+        for v in recast_mesh.vertices.iter_mut() {
+            let vv = transform_matrix * glam::Vec4::new(v.x, v.y, v.z, 1.0);
+            v.x = vv.x;
+            v.y = vv.y;
+            v.z = vv.z;
+        }
         self.navmesh_context
             .terrain_bodies
-            .insert(rigid_body_handle, mesh_to_recast_mesh(mesh));
+            .insert(rigid_body_handle, recast_mesh);
 
         let terrain_model = asset_mgr.load_serialized_terrain_3d_model_from_mem(
             &mut serialized_model.unwrap(),
@@ -259,7 +342,7 @@ impl Scene3D {
             }
             Err(err) => {
                 println!("Could not add terrain model: {}", err);
-                return
+                return;
             }
         }
     }

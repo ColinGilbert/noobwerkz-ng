@@ -11,6 +11,7 @@ use noobwerkz_client::model3d_node::*;
 use noobwerkz_client::scene3d::*;
 use noobwerkz_client::simple_particles::ParticleEffect;
 use noobwerkz_shared::noise::*;
+// use noobwerkz_shared::serialized_model3d::SerializedMesh3D;
 use noobwerkz_shared::shapes::*;
 use noobwerkz_skeletal_animation::animation_graph_definition::*;
 
@@ -258,14 +259,14 @@ pub fn user_setup(
             ),
         );
 
-    // for x in 0..10 {
-    //     for z in 0..10 {
-    //         u.scenes[current_scene].particle_system.borrow_mut().spawn(
-    //             "yellow-spark",
-    //             [SPACE_BETWEEN * x as f32, 1.0, SPACE_BETWEEN * z as f32],
-    //         );
-    //     }
-    // }
+    for x in 0..10 {
+        for z in 0..10 {
+            u.scenes[current_scene].particle_system.borrow_mut().spawn(
+                "yellow-spark",
+                [SPACE_BETWEEN * x as f32, 1.0, SPACE_BETWEEN * z as f32],
+            );
+        }
+    }
     let mut voxels = Vec::new();
     voxels.push(glam::IVec3::new(0, 0, 0));
     voxels.push(glam::IVec3::new(0, 1, 0));
@@ -275,10 +276,10 @@ pub fn user_setup(
     voxels.push(glam::IVec3::new(0, 0, 2));
 
     let terrain_texture_path = path.clone();
-    //terrain_texture_path.push("");
+    // terrain_texture_path.push("");
     u.scenes[current_scene].add_terrain(
         Shape3D::Voxels(glam::Vec3::new(1.0, 1.0, 1.0), voxels),
-        glam::Vec3::new(0.0, -2.0, 0.0),
+        glam::Vec3::new(0.0, -5.0, 0.0),
         glam::Quat::IDENTITY,
         &mut u.asset_mgr,
         &mut gfx_ctx.device,
@@ -297,21 +298,21 @@ pub fn user_setup(
 
     let noise_params = Noise2DParameters::from_json(fs::read_to_string(noise_params_path).unwrap());
 
-    make_ridged_perlin_noise_2d(&noise_params, 0.0, 0.0, HEIGHTFIELD_SIZE, 128, &mut noise);
+    make_fbm_perlin_noise_2d(&noise_params, 0.0, 0.0, HEIGHTFIELD_SIZE, 128, &mut noise);
 
+    make_noise_terraces(&mut noise, 3.0);
+    // make_noise_raised_to_power(&mut noise, 2.0);
     make_noise_zero_or_above(&mut noise);
 
-    make_noise_raised_to_power(&mut noise, 5.0);
-    // make_noise_terraces(&mut noise, 15.0);
 
     u.scenes[current_scene].add_terrain(
         Shape3D::HeightMap(
             noise,
             HEIGHTFIELD_SIZE,
             glam::Vec3 {
-                x: 50.0,
-                y: 1.0,
-                z: 50.0,
+                x: 100.0,
+                y: 0.5,
+                z: 100.0,
             },
         ),
         glam::Vec3::ZERO,
@@ -324,5 +325,5 @@ pub fn user_setup(
         &gfx_ctx.texture_bind_group_layout,
     );
 
-    u.scenes[current_scene].build_navmesh();
+    u.scenes[current_scene].build_navmesh(&mut u.asset_mgr, &mut gfx_ctx.device, &mut gfx_ctx.queue, &gfx_ctx.debug_material, &gfx_ctx.texture_bind_group_layout);
 }

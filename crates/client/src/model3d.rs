@@ -80,6 +80,7 @@ pub struct TexturedMesh3D {
     pub dimensions: glam::Vec3,
 }
 
+
 pub struct Model3D {
     pub meshes: TexturedMeshes<TexturedMesh3D>,
     pub materials: ModelMaterials<ModelMaterial>,
