@@ -5,19 +5,36 @@ use noobwerkz_shared::skeleton::Skeleton;
 use crate::animation_channel::*;
 use crate::operation_result::*;
 
+pub struct AnimationSeek {
+    pub current_time: f32,
+}
+
+impl AnimationSeek {
+    pub fn reset(&mut self, animation: Arc<Animation>) {
+        self.seek(animation, 0.0);
+    }
+    
+    pub fn seek(&mut self, animation: Arc<Animation>, time: f32) {
+        if animation.looping {
+            self.current_time = time % animation.length;
+        } else {
+            self.current_time = time
+        }
+    }
+}
+
 #[derive(Clone)]
 
 pub struct Animation {
     pub length: f32,
     pub channels: Vec<AnimationChannel>,
-    pub current_time: f32,
     pub looping: bool,
 }
 
 impl Animation {
-    pub fn new(anim_channels: Vec<AnimationChannel>, looping: bool) -> Self {
+    pub fn new(anim_channels: &Vec<AnimationChannel>, looping: bool) -> Self {
         let mut latest_time: f32 = 0.0;
-        for c in &anim_channels {
+        for c in anim_channels {
             let mut last_t = 0.0;
             for (i, k) in c.keyframes.iter().enumerate() {
                 if k.time < last_t {
@@ -31,25 +48,17 @@ impl Animation {
 
         Self {
             length: latest_time,
-            channels: anim_channels,
-            current_time: 0.0,
+            channels: anim_channels.clone(),
             looping,
         }
     }
 
-    pub fn seek(&mut self, time: f32) {
-        if self.looping {
-            self.current_time = time % self.length;
-        } else {
-            self.current_time = time
-        }
-
-        // for c in self.channels.iter_mut() {
-        //     c.seek(new_time, self.looping);
-        // }
-    }
-
-    pub fn playback(&mut self, skeleton: Arc<Skeleton>, results: &mut LocalToLocalResults) {
+    pub fn playback(
+        &self,
+        skeleton: Arc<Skeleton>,
+        results: &mut LocalToLocalResults,
+        current_time: f32,
+    ) {
         results.translations.clear();
         results.rotations.clear();
         results.scales.clear();
@@ -62,14 +71,10 @@ impl Animation {
         }
         // Here we do the actual playback
         for c in &self.channels {
-            let k = c.seek(self.current_time);
+            let k = c.seek(current_time);
             results.translations[c.bone_index] = k.translation;
             results.rotations[c.bone_index] = k.orientation;
             results.scales[c.bone_index] = k.scale;
         }
-    }
-
-    pub fn reset(&mut self) {
-        self.seek(0.0);
     }
 }

@@ -78,7 +78,8 @@ impl SamplerNode {
 pub struct AnimationGraph {
     skeleton: Arc<Skeleton>,
     graph: Graph<GenericNode, TransitionIndex>,
-    animations: Animations<Animation>,
+    animations: Animations<Arc<Animation>>,
+    seeker: AnimationSeek,
     samplers: SamplerNodesContainer<SamplerNode>,
     transitions: TransitionsContainer<Transition>,
     root_node_idx: NodeIndex,
@@ -96,7 +97,7 @@ pub struct AnimationGraph {
 impl AnimationGraph {
     pub fn new(
         skeleton: Arc<Skeleton>,
-        animations: Animations<Animation>,
+        animations: Animations<Arc<Animation>>,
         animgraph_definition: &AnimationGraphDefinition,
         animations_by_name: &HashMap<String, AnimationIndex>,
     ) -> Result<Self, anyhow::Error> {
@@ -104,6 +105,7 @@ impl AnimationGraph {
             animgraph_definition.graph.node_count(),
             animgraph_definition.graph.edge_count(),
         );
+        let seeker = AnimationSeek { current_time: 0.0 };
         let mut samplers = SamplerNodesContainer::<SamplerNode>::new();
         // Go over each node in the animgraph's definition and add it to the final graph, saving its definition node/final node pair in a map
         let mut node_definitions_to_node_mappings = HashMap::<NodeIndex, NodeIndex>::new();
@@ -183,7 +185,8 @@ impl AnimationGraph {
 
         Ok(AnimationGraph {
             skeleton: skeleton.clone(),
-            animations,
+            animations: animations.clone(),
+            seeker,
             graph,
             samplers,
             transitions,
@@ -244,11 +247,10 @@ impl AnimationGraph {
                         let from_results = LocalToLocalResults::new(); // TODO: Init inside match clause
                         match from {
                             GenericNode::Sampler(val) => {
-                                self.animations[self.samplers[*val].index]
-                                    .seek(self.duration.as_secs_f32());
+                               self.seeker.seek( self.animations[self.samplers[*val].index].clone(), self.duration.as_secs_f32());
                                 let mut from_results = LocalToLocalResults::new();
                                 self.animations[self.samplers[*val].index]
-                                    .playback(self.skeleton.clone(), &mut from_results);
+                                    .playback(self.skeleton.clone(), &mut from_results,self.seeker.current_time);
                             }
                             GenericNode::BlendTreeOneDim(_) => {
                                 // self.blend_trees_one_dim[*val].update(dt);
@@ -259,11 +261,10 @@ impl AnimationGraph {
                         let to_results = LocalToLocalResults::new(); // TODO: Init inside match clause
                         match to {
                             GenericNode::Sampler(val) => {
-                                self.animations[self.samplers[*val].index]
-                                    .seek(self.duration.as_secs_f32());
+                                self.seeker.seek(self.animations[self.samplers[*val].index].clone(), self.duration.as_secs_f32());
                                 let mut to_results = LocalToLocalResults::new();
                                 self.animations[self.samplers[*val].index]
-                                    .playback(self.skeleton.clone(), &mut to_results);
+                                    .playback(self.skeleton.clone(), &mut to_results, self.seeker.current_time);
                             }
                             GenericNode::BlendTreeOneDim(_) => {
                                 // self.blend_trees_one_dim[*val].update(dt);
@@ -330,13 +331,12 @@ impl AnimationGraph {
                     let node = self.graph.node_weight(val).unwrap();
                     match node {
                         GenericNode::Sampler(val) => {
-                            self.animations[self.samplers[*val].index]
-                                .seek(self.duration.as_secs_f32());
+                            self.seeker.seek(self.animations[self.samplers[*val].index].clone(),self.duration.as_secs_f32());
                             // self.output_locals.rotations.clear();
                             // self.output_locals.translations.clear();
                             // self.output_locals.scales.clear();
                             self.animations[self.samplers[*val].index]
-                                .playback(self.skeleton.clone(), &mut self.output_locals);
+                                .playback(self.skeleton.clone(), &mut self.output_locals,  self.seeker.current_time);
                         }
                         GenericNode::BlendTreeOneDim(_) => {
                             // TODO

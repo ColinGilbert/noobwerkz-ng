@@ -280,9 +280,9 @@ pub fn load_skinned_3d_model_from_protobuf(
                 }
             }
         }
-        let animation = Animation::new(anim_channels.clone(), true);
+        let animation = Animation::new(&anim_channels, true);
 
-        model_results.animations.push(animation.clone());
+        model_results.animations.push(Arc::new(animation.clone()));
     }
 
     for (n, i) in &model.animations_by_name {

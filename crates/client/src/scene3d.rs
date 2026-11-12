@@ -350,7 +350,7 @@ impl Scene3D {
         skinned_model_idx: SkinnedModel3DIndex,
         instances: &Vec<Instance3D>,
         animgraph_definition: &AnimationGraphDefinition,
-        animations: Animations<Animation>,
+        animations: &Animations<Arc<Animation>>,
         skeleton: Arc<Skeleton>,
         animations_by_name: &HashMap<String, AnimationIndex>,
         name: String,
@@ -426,7 +426,7 @@ impl Scene3D {
         character_type_idx: Characters3DContextIndex,
         definition: &AnimationGraphDefinition,
         skeleton: Arc<Skeleton>,
-        animations: Animations<Animation>,
+        animations: Animations<Arc<Animation>>,
         animations_by_name: &HashMap<String, AnimationIndex>,
     ) -> bool {
         for c in self.characters_contexts[character_type_idx.get()]

@@ -72,7 +72,7 @@ impl ClientUserContext {
                     val,
                     instances,
                     animgraph_definition,
-                    self.asset_mgr.skinned_models[val].animations.clone(),
+                    &self.asset_mgr.skinned_models[val].animations,
                     self.asset_mgr.skinned_models[val].skeleton.clone(),
                     &self.asset_mgr.skinned_models[val].animations_idx_by_name,
                     name.to_owned(),

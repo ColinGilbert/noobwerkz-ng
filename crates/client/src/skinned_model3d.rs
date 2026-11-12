@@ -18,7 +18,7 @@ pub struct SkinnedModel3D {
     pub skeleton: Arc<Skeleton>,
     pub animations_idx_by_name: HashMap<String, AnimationIndex>,
     pub animation_names: HashMap<AnimationIndex, String>,
-    pub animations: Animations<Animation>,
+    pub animations: Animations<Arc<Animation>>,
     //pub global_inverse_transform: glam::Mat4,
 }
 

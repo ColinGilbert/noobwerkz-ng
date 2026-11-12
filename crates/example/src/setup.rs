@@ -258,14 +258,14 @@ pub fn user_setup(
             ),
         );
 
-    for x in 0..10 {
-        for z in 0..10 {
-            u.scenes[current_scene].particle_system.borrow_mut().spawn(
-                "yellow-spark",
-                [SPACE_BETWEEN * x as f32, 1.0, SPACE_BETWEEN * z as f32],
-            );
-        }
-    }
+    // for x in 0..10 {
+    //     for z in 0..10 {
+    //         u.scenes[current_scene].particle_system.borrow_mut().spawn(
+    //             "yellow-spark",
+    //             [SPACE_BETWEEN * x as f32, 1.0, SPACE_BETWEEN * z as f32],
+    //         );
+    //     }
+    // }
     let mut voxels = Vec::new();
     voxels.push(glam::IVec3::new(0, 0, 0));
     voxels.push(glam::IVec3::new(0, 1, 0));
@@ -301,6 +301,7 @@ pub fn user_setup(
 
     make_noise_zero_or_above(&mut noise);
 
+    make_noise_raised_to_power(&mut noise, 5.0);
     // make_noise_terraces(&mut noise, 15.0);
 
     u.scenes[current_scene].add_terrain(

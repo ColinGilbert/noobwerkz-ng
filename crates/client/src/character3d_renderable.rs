@@ -17,7 +17,7 @@ impl Character3DRenderable {
         position: glam::Vec3,
         orientation: glam::Quat,
         animgraph_definition: &AnimationGraphDefinition,
-        animations: Animations<Animation>,
+        animations: Animations<Arc<Animation>>,
         animations_by_name: &HashMap<String, AnimationIndex>,
     ) -> Option<Self> {
         let common = Character3DCommon::new(position, orientation, 1.0);
