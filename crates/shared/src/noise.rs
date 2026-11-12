@@ -1,4 +1,4 @@
-use quick_noise::simd::{Simd, dispatch_simd};
+use quick_noise::simd::{dispatch_simd};
 use quick_noise::*;
 use serde::Deserialize;
 #[derive(Debug, Deserialize, Clone)]
@@ -73,6 +73,134 @@ pub fn make_fbm_simplex_noise_2d(
 
     // // FBM Grid noise with all parameters.
     BatchNoise::<2, Fbm, Simplex>::builder(grid_2d.x_iter(), grid_2d.y_iter())
+        .seed(params.seed) // Acts a second seed in combination with the grid's seed.
+        .octaves(params.octaves) // Number of noise passes.
+        .frequency(params.frequency) // How fast the noise changes across sample space.
+        .lacunarity(params.lacunarity) // Multiplier to the frequency after each subsequent octave.
+        .persistence(params.persistence) // Multiplier to the weight after each subsequent octave.
+        .amplitude(params.amplitude) // The maximum absolute value the noise can produce (For Fbm).
+        .normalization(params.normalization) // Whether or not to normalize the output.
+        .scaling(params.scaling_x, params.scaling_y) // How much is the noise stretched in each dimension.
+        .initialize(true) // Setting to false adds noise to current values.
+        .finalize(true) // Some combiners have a finalization stage.
+        .fill(results.as_mut_slice());
+}
+
+
+
+#[dispatch_simd(A)]
+pub fn make_ridged_perlin_noise_2d(
+    params: &Noise2DParameters,
+    x: f64,
+    y: f64,
+    heightfield_size: usize,
+    grid_seed: i64,
+    results: &mut Vec<f32>,
+) {
+    let grid_2d = Grid::<2>::new(heightfield_size, heightfield_size)
+        .grid_position(0.0, 0.0) // Position of the grid region in sample space.
+        .sample_position(x, y)
+        .seed(grid_seed); // Seed for deterministic random results.
+
+    results.resize(heightfield_size * heightfield_size, 0.0);
+
+    // // FBM Grid noise with all parameters.
+    BatchNoise::<2, Ridged, Perlin>::builder(grid_2d.x_iter(), grid_2d.y_iter())
+        .seed(params.seed) // Acts a second seed in combination with the grid's seed.
+        .octaves(params.octaves) // Number of noise passes.
+        .frequency(params.frequency) // How fast the noise changes across sample space.
+        .lacunarity(params.lacunarity) // Multiplier to the frequency after each subsequent octave.
+        .persistence(params.persistence) // Multiplier to the weight after each subsequent octave.
+        .amplitude(params.amplitude) // The maximum absolute value the noise can produce (For Fbm).
+        .normalization(params.normalization) // Whether or not to normalize the output.
+        .scaling(params.scaling_x, params.scaling_y) // How much is the noise stretched in each dimension.
+        .initialize(true) // Setting to false adds noise to current values.
+        .finalize(true) // Some combiners have a finalization stage.
+        .fill(results.as_mut_slice());
+
+}
+
+#[dispatch_simd(A)]
+pub fn make_billow_perlin_noise_2d(
+    params: &Noise2DParameters,
+    x: f64,
+    y: f64,
+    heightfield_size: usize,
+    grid_seed: i64,
+    results: &mut Vec<f32>,
+) {
+    let grid_2d = Grid::<2>::new(heightfield_size, heightfield_size)
+        .grid_position(0.0, 0.0) // Position of the grid region in sample space.
+        .sample_position(x, y)
+        .seed(grid_seed); // Seed for deterministic random results.
+
+    results.resize(heightfield_size * heightfield_size, 0.0);
+
+    // // FBM Grid noise with all parameters.
+    BatchNoise::<2, Billow, Perlin>::builder(grid_2d.x_iter(), grid_2d.y_iter())
+        .seed(params.seed) // Acts a second seed in combination with the grid's seed.
+        .octaves(params.octaves) // Number of noise passes.
+        .frequency(params.frequency) // How fast the noise changes across sample space.
+        .lacunarity(params.lacunarity) // Multiplier to the frequency after each subsequent octave.
+        .persistence(params.persistence) // Multiplier to the weight after each subsequent octave.
+        .amplitude(params.amplitude) // The maximum absolute value the noise can produce (For Fbm).
+        .normalization(params.normalization) // Whether or not to normalize the output.
+        .scaling(params.scaling_x, params.scaling_y) // How much is the noise stretched in each dimension.
+        .initialize(true) // Setting to false adds noise to current values.
+        .finalize(true) // Some combiners have a finalization stage.
+        .fill(results.as_mut_slice());
+}
+
+#[dispatch_simd(A)]
+pub fn make_fbm_cellular_noise_2d(
+    params: &Noise2DParameters,
+    x: f64,
+    y: f64,
+    heightfield_size: usize,
+    grid_seed: i64,
+    results: &mut Vec<f32>,
+) {
+    let grid_2d = Grid::<2>::new(heightfield_size, heightfield_size)
+        .grid_position(0.0, 0.0) // Position of the grid region in sample space.
+        .sample_position(x, y)
+        .seed(grid_seed); // Seed for deterministic random results.
+
+    results.resize(heightfield_size * heightfield_size, 0.0);
+
+    // // FBM Grid noise with all parameters.
+    BatchNoise::<2, Fbm, Cellular>::builder(grid_2d.x_iter(), grid_2d.y_iter())
+        .seed(params.seed) // Acts a second seed in combination with the grid's seed.
+        .octaves(params.octaves) // Number of noise passes.
+        .frequency(params.frequency) // How fast the noise changes across sample space.
+        .lacunarity(params.lacunarity) // Multiplier to the frequency after each subsequent octave.
+        .persistence(params.persistence) // Multiplier to the weight after each subsequent octave.
+        .amplitude(params.amplitude) // The maximum absolute value the noise can produce (For Fbm).
+        .normalization(params.normalization) // Whether or not to normalize the output.
+        .scaling(params.scaling_x, params.scaling_y) // How much is the noise stretched in each dimension.
+        .initialize(true) // Setting to false adds noise to current values.
+        .finalize(true) // Some combiners have a finalization stage.
+        .fill(results.as_mut_slice());
+
+}
+
+#[dispatch_simd(A)]
+pub fn make_pingpong_cellular_noise_2d(
+    params: &Noise2DParameters,
+    x: f64,
+    y: f64,
+    heightfield_size: usize,
+    grid_seed: i64,
+    results: &mut Vec<f32>,
+) {
+    let grid_2d = Grid::<2>::new(heightfield_size, heightfield_size)
+        .grid_position(0.0, 0.0) // Position of the grid region in sample space.
+        .sample_position(x, y)
+        .seed(grid_seed); // Seed for deterministic random results.
+
+    results.resize(heightfield_size * heightfield_size, 0.0);
+
+    // // FBM Grid noise with all parameters.
+    BatchNoise::<2, PingPong, Cellular>::builder(grid_2d.x_iter(), grid_2d.y_iter())
         .seed(params.seed) // Acts a second seed in combination with the grid's seed.
         .octaves(params.octaves) // Number of noise passes.
         .frequency(params.frequency) // How fast the noise changes across sample space.
