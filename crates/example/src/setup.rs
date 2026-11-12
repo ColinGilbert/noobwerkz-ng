@@ -315,16 +315,18 @@ pub fn user_setup(
 
     make_fbm_perlin_noise_2d(&noise_params, 0.0, 0.0, HEIGHTFIELD_SIZE, 128, &mut noise);
 
-    make_terraces(&mut noise, 5.0);
+    make_noise_zero_or_above(&mut noise);
+
+    make_noise_terraces(&mut noise, 5.0);
 
     u.scenes[current_scene].add_terrain(
         Shape3D::HeightMap(
             noise,
             HEIGHTFIELD_SIZE,
             glam::Vec3 {
-                x: 25.0,
+                x: 100.0,
                 y: 1.0,
-                z: 25.0,
+                z: 100.0,
             },
         ),
         glam::Vec3::ZERO,

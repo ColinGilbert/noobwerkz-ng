@@ -86,7 +86,13 @@ pub fn make_fbm_simplex_noise_2d(
         .fill(results.as_mut_slice());
 }
 
-pub fn make_terraces(noise: &mut Vec<f32>, step: f32) {
+pub fn make_noise_zero_or_above(noise: &mut Vec<f32>) {
+    for n in noise.iter_mut() {
+        *n = (*n + 1.0) * 0.5;
+    }
+}
+
+pub fn make_noise_terraces(noise: &mut Vec<f32>, step: f32) {
     let step = step.round();
     for n in noise.iter_mut() {
         *n = (*n * step).round() / step;
