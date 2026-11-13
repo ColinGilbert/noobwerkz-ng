@@ -30,6 +30,7 @@ pub struct ForwardRenderer3D {
     pub render_pipeline: wgpu::RenderPipeline,
     pub skinned_render_pipeline: wgpu::RenderPipeline,
     pub terrain_render_pipeline: wgpu::RenderPipeline,
+    pub transparent_render_pipeline: wgpu::RenderPipeline,
     pub light_render_pipeline: wgpu::RenderPipeline,
     pub cpu_particles_render_pipeline_alpha: wgpu::RenderPipeline,
     pub cpu_particles_render_pipeline_additive: wgpu::RenderPipeline,
@@ -144,53 +145,6 @@ impl Pass for ForwardRenderer3D {
                 }
             }
 
-            if navmesh_model_node.is_some() {
-                // We can draw the navmesh now...
-                let navmesh_model = &models[navmesh_model_node.as_ref().unwrap().model_idx];
-                let mut count = 0;
-                let mut navmesh_model_instance_data = Vec::<Instance3DRaw>::new();
-                for i in &navmesh_model_node.as_ref().unwrap().instances {
-                    navmesh_model_instance_data.push(i.to_raw());
-                    count += 1;
-                }
-                for m in &navmesh_model.meshes {
-                    let mut mesh_instance_data = Vec::<Instance3DRaw>::new();
-
-                    let mesh_m_mat = glam::Mat4::from_scale_rotation_translation(
-                        m.scale,
-                        m.rotation,
-                        m.translation,
-                    );
-
-                    for instance in &navmesh_model_instance_data {
-                        let mesh_n_mat = glam::Mat3::from_quat(m.rotation);
-                        let model_m_mat = glam::Mat4::from_cols_array_2d(&instance.model);
-                        let model_n_mat = glam::Mat3::from_cols_array_2d(&instance.normal);
-                        let temp = Instance3DRaw {
-                            model: (model_m_mat * mesh_m_mat).to_cols_array_2d(),
-                            normal: (model_n_mat * mesh_n_mat).to_cols_array_2d(),
-                        };
-                        mesh_instance_data.push(temp);
-                    }
-
-                    let instance_buffer =
-                        device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                            label: Some("Instance Buffer"),
-                            contents: bytemuck::cast_slice(&mesh_instance_data),
-                            usage: wgpu::BufferUsages::VERTEX,
-                        });
-
-                    render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
-
-                    render_pass.draw_mesh_instanced(
-                        &m,
-                        &navmesh_model.materials[m.material],
-                        0..count,
-                        &self.camera_bind_group,
-                        &self.light_bind_group,
-                    );
-                }
-            }
             render_pass.set_pipeline(&self.skinned_render_pipeline);
 
             for c in characters_contexts.iter() {
@@ -317,6 +271,56 @@ impl Pass for ForwardRenderer3D {
                 }
                 render_pass.draw(0..6, batch.start..batch.start + batch.count);
             }
+
+            if navmesh_model_node.is_some() {
+                render_pass.set_pipeline(&self.transparent_render_pipeline);
+
+                // We can draw the navmesh now...
+                let navmesh_model = &models[navmesh_model_node.as_ref().unwrap().model_idx];
+                let mut count = 0;
+                let mut navmesh_model_instance_data = Vec::<Instance3DRaw>::new();
+                for i in &navmesh_model_node.as_ref().unwrap().instances {
+                    navmesh_model_instance_data.push(i.to_raw());
+                    count += 1;
+                }
+                for m in &navmesh_model.meshes {
+                    let mut mesh_instance_data = Vec::<Instance3DRaw>::new();
+
+                    let mesh_m_mat = glam::Mat4::from_scale_rotation_translation(
+                        m.scale,
+                        m.rotation,
+                        m.translation,
+                    );
+                    let mesh_n_mat = glam::Mat3::from_quat(m.rotation);
+
+                    for instance in &navmesh_model_instance_data {
+                        let model_m_mat = glam::Mat4::from_cols_array_2d(&instance.model);
+                        let model_n_mat = glam::Mat3::from_cols_array_2d(&instance.normal);
+                        let temp = Instance3DRaw {
+                            model: (model_m_mat * mesh_m_mat).to_cols_array_2d(),
+                            normal: (model_n_mat * mesh_n_mat).to_cols_array_2d(),
+                        };
+                        mesh_instance_data.push(temp);
+                    }
+
+                    let instance_buffer =
+                        device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                            label: Some("Navmesh Instance Buffer"),
+                            contents: bytemuck::cast_slice(&mesh_instance_data),
+                            usage: wgpu::BufferUsages::VERTEX,
+                        });
+
+                    render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
+
+                    render_pass.draw_mesh_instanced(
+                        &m,
+                        &navmesh_model.materials[m.material],
+                        0..count,
+                        &self.camera_bind_group,
+                        &self.light_bind_group,
+                    );
+                }
+            }
         }
 
         queue.submit([encoder.finish()]);
@@ -370,6 +374,17 @@ impl ForwardRenderer3D {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
+                bind_group_layouts: &[
+                    Some(texture_bind_group_layout),
+                    Some(camera_bind_group_layout),
+                    Some(light_bind_group_layout),
+                ],
+                immediate_size: 0,
+            });
+
+        let transparent_pipeline_layout =
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("Transparent render Pipeline Layout"),
                 bind_group_layouts: &[
                     Some(texture_bind_group_layout),
                     Some(camera_bind_group_layout),
@@ -448,6 +463,25 @@ impl ForwardRenderer3D {
                 &[
                     Some(TerrainModel3DVertex::desc()),
                     Some(TerrainInstance3DRaw::desc()),
+                ],
+                shader,
+            )
+        };
+
+        let transparent_render_pipeline = {
+              let shader = wgpu::ShaderModuleDescriptor {
+                label: Some("Transparent Shader"),
+                source: wgpu::ShaderSource::Wgsl(include_str!("forward_shader3d.wgsl").into()),
+            };
+
+            create_transparent_indexed_mesh_render_pipeline(
+                &device,
+                &transparent_pipeline_layout,
+                config.format,
+                Some(Texture::DEPTH_FORMAT),
+                &[
+                    Some(Model3DVertex::desc()),
+                    Some(Instance3DRaw::desc()),
                 ],
                 shader,
             )
@@ -536,6 +570,7 @@ impl ForwardRenderer3D {
             camera_bind_group,
             render_pipeline,
             skinned_render_pipeline,
+            transparent_render_pipeline,
             terrain_render_pipeline,
             light_render_pipeline,
             cpu_particles_render_pipeline_alpha,

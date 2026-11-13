@@ -14,7 +14,6 @@ pub struct GraphicsContext {
     pub texture_bind_group_layout: wgpu::BindGroupLayout,
     pub bone_matrices_bind_group_layout: wgpu::BindGroupLayout,
     pub debug_material: ModelMaterial,
-    pub navmesh_material: ModelMaterial,
     pub particles_ctx: Rc<RefCell<Particle3DContext>>,
 }
 
@@ -193,40 +192,6 @@ impl GraphicsContext {
             )
         };
 
-        let navmesh_material = {
-            let diffuse_texture = Texture::from_bytes(
-                &device,
-                &queue,
-                diffuse_bytes,
-                "default-diffuse",
-                false,
-                &texture_bind_group_layout,
-                None,
-            )
-            .unwrap();
-            let normal_texture = Texture::from_bytes(
-                &device,
-                &queue,
-                normal_bytes,
-                "default-normal",
-                true,
-                &texture_bind_group_layout,
-                None,
-            )
-            .unwrap();
-
-            ModelMaterial::new(
-                &device,
-                "navmesh-material",
-                diffuse_texture,
-                normal_texture,
-                &texture_bind_group_layout,
-                [0.5, 0.5, 0.5, 0.5],
-                1.0,
-                1.0,
-            )
-        };
-
         let particles_instance_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Particles instance buffer"),
             size: 1024 * std::mem::size_of::<Particle3DInstance>() as u64,
@@ -249,11 +214,11 @@ impl GraphicsContext {
             texture_bind_group_layout,
             bone_matrices_bind_group_layout,
             debug_material,
-            navmesh_material,
             particles_ctx,
         }
     }
 }
+
 pub fn create_indexed_mesh_render_pipeline(
     device: &wgpu::Device,
     layout: &wgpu::PipelineLayout,
@@ -301,6 +266,66 @@ pub fn create_indexed_mesh_render_pipeline(
         depth_stencil: depth_format.map(|format| wgpu::DepthStencilState {
             format,
             depth_write_enabled: Some(true),
+            depth_compare: Some(wgpu::CompareFunction::Less),
+            stencil: wgpu::StencilState::default(),
+            bias: wgpu::DepthBiasState::default(),
+        }),
+
+        multisample: wgpu::MultisampleState {
+            count: 1,
+            mask: !0,
+            alpha_to_coverage_enabled: false,
+        },
+        multiview_mask: None,
+        cache: None,
+    })
+}
+
+
+pub fn create_transparent_indexed_mesh_render_pipeline(
+    device: &wgpu::Device,
+    layout: &wgpu::PipelineLayout,
+    color_format: wgpu::TextureFormat,
+    depth_format: Option<wgpu::TextureFormat>,
+    vertex_layouts: &[Option<wgpu::VertexBufferLayout>],
+    shader: wgpu::ShaderModuleDescriptor,
+) -> wgpu::RenderPipeline {
+    let shader = device.create_shader_module(shader);
+
+    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some(&format!("{:?}", shader)),
+        layout: Some(layout),
+        vertex: wgpu::VertexState {
+            module: &shader,
+            entry_point: Some("vs_main"),
+            buffers: vertex_layouts,
+            compilation_options: Default::default(),
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: &shader,
+            entry_point: Some("fs_main"),
+            targets: &[Some(wgpu::ColorTargetState {
+                format: color_format,
+                blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+                write_mask: wgpu::ColorWrites::ALL,
+            })],
+            compilation_options: Default::default(),
+        }),
+        primitive: wgpu::PrimitiveState {
+            topology: wgpu::PrimitiveTopology::TriangleList,
+            strip_index_format: None,
+            front_face: wgpu::FrontFace::Ccw,
+            cull_mode: Some(wgpu::Face::Back),
+            // Setting this to anything other than Fill requires Features::NON_FILL_POLYGON_MODE
+            polygon_mode: wgpu::PolygonMode::Fill,
+            // Requires Features::DEPTH_CLIP_CONTROL
+            unclipped_depth: false,
+            // Requires Features::CONSERVATIVE_RASTERIZATION
+            conservative: false,
+        },
+        depth_stencil: depth_format.map(|format| wgpu::DepthStencilState {
+            format,
+            depth_write_enabled: Some(false),
             depth_compare: Some(wgpu::CompareFunction::Less),
             stencil: wgpu::StencilState::default(),
             bias: wgpu::DepthBiasState::default(),

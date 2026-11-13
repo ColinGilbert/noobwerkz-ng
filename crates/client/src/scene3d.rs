@@ -6,7 +6,7 @@ use crate::ecs::*;
 use crate::ecs_components_common::*;
 use crate::model_material::*;
 
-use noobwerkz_shared::serialized_model3d::SerializedModel3D;
+use noobwerkz_shared::serialized_model3d::{SerializedModel3D, SerializedModelMaterial};
 use rerecast::{DetailNavmesh, HeightfieldBuilder};
 
 use std::{
@@ -224,26 +224,29 @@ impl Scene3D {
                 // }
             }
             navmesh_representation.recalculate_normals();
+            navmesh_representation.uvs.resize(navmesh_representation.positions.len(), [0.0, 0.0]);
             navmesh_representation.material_index = 0;
             serialized_navmesh_model.meshes.push(navmesh_representation);
         }
 
-        let navmesh_material = ModelMaterial::new(
-            device,
-            "navmesh-material",
-            default_material.diffuse_texture.clone(),
-            default_material.normal_texture.clone(),
-            texture_layout,
-            [0.5, 0.5, 0.0, 1.0],
-            1.0,
-            1.0,
-        );
-        //navmesh_model.materials.push(navmesh_material);
-
+        // let navmesh_material = ModelMaterial::new(
+        //     device,
+        //     "navmesh-material",
+        //     default_material.diffuse_texture.clone(),
+        //     default_material.normal_texture.clone(),
+        //     texture_layout,
+        //     [0.5, 0.5, 0.0, 1.0],
+        //     1.0,
+        //     1.0,
+        // );
+        let mut serialized_navmesh_material = SerializedModelMaterial::new();
+        serialized_navmesh_material.base_colour = [0.5, 0.5, 0.0, 0.5];
+        serialized_navmesh_material.name = "navmesh-material".to_owned();
+        serialized_navmesh_model.materials.push(serialized_navmesh_material);
         let path = PathBuf::new();
         let model = load_3d_model_from_serialized(
             &mut serialized_navmesh_model,
-            &navmesh_material,
+            &default_material,
             &path,
             device,
             queue,
@@ -261,6 +264,7 @@ impl Scene3D {
             orientation: glam::Quat::IDENTITY,
             scale: glam::Vec3::splat(1.0),
         });
+
         self.navmesh_model_node = Some(Model3DNode::new(
             Model3DIndex::new(asset_mgr.models.len() - 1),
             instances,
@@ -316,6 +320,7 @@ impl Scene3D {
             v.y = vv.y;
             v.z = vv.z;
         }
+
         self.navmesh_context
             .terrain_bodies
             .insert(rigid_body_handle, recast_mesh);
