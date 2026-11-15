@@ -3,7 +3,7 @@ use serde::{Deserialize};
 use std::collections::HashMap;
 pub struct NavMeshContext {
     pub recast_config: rerecast::Config,
-    pub navmesh: polyanya::Mesh,
+    pub navmesh: Option<polyanya::Mesh>,
     pub terrain_bodies: HashMap<rapier3d::dynamics::RigidBodyHandle, rerecast::TriMesh>,
 }
 
@@ -38,7 +38,7 @@ impl NavMeshContext {
         };
         Self {
             recast_config,
-            navmesh: polyanya::Mesh::default(),
+            navmesh: None,
             terrain_bodies: HashMap::new(),
         }
     }

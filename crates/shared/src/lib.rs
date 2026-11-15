@@ -14,5 +14,6 @@ pub mod shapes;
 pub mod csg;
 pub mod navmesh_context;
 pub mod noise;
+pub mod grid2d;
 
 mod ecs_components_common;

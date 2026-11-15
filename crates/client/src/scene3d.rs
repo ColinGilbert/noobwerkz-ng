@@ -7,6 +7,7 @@ use crate::ecs_components_common::*;
 use crate::model_material::*;
 
 use noobwerkz_shared::serialized_model3d::{SerializedModel3D, SerializedModelMaterial};
+use polyanya::{Mesh, RecastError};
 use rerecast::{DetailNavmesh, HeightfieldBuilder};
 
 use std::{
@@ -47,7 +48,7 @@ pub struct Characters3DContext {
 pub struct Scene3D {
     pub cameras: Cameras3D<Camera3D>,
     pub model_nodes: Model3DNodes<Model3DNode>,
-    pub terrain_nodes: TerrainModel3DNodes<TerrainModel3DNode>,
+    pub terrain_model_nodes: TerrainModel3DNodes<TerrainModel3DNode>,
     pub active_camera: Camera3DIndex,
     pub physics_context: Physics3DContext,
     pub characters_contexts: Vec<Characters3DContext>,
@@ -65,7 +66,7 @@ impl Scene3D {
         Self {
             cameras: Cameras3D::new(),
             model_nodes: Model3DNodes::new(),
-            terrain_nodes: TerrainModel3DNodes::new(),
+            terrain_model_nodes: TerrainModel3DNodes::new(),
             active_camera: Camera3DIndex::new(0),
             physics_context: Physics3DContext::new(gravity),
             characters_contexts: Vec::new(),
@@ -94,7 +95,7 @@ impl Scene3D {
         default_material: &ModelMaterial,
         texture_layout: &wgpu::BindGroupLayout,
     ) {
-        self.navmesh_context.navmesh = polyanya::Mesh::default();
+        self.navmesh_context.navmesh = None;
         let mut trimesh = rerecast::TriMesh::default();
         for (rigid_body_handle, _rigid_body) in self.physics_context.rigid_world.rigid_bodies() {
             if self
@@ -185,26 +186,54 @@ impl Scene3D {
         );
         // compact_heightfield.assert_eq(project, "compact_heightfield_contours");
 
-        let poly_mesh = contours
-            .into_polygon_mesh(self.navmesh_context.recast_config.max_vertices_per_polygon)
-            .unwrap();
+        let poly_mesh =
+            contours.into_polygon_mesh(self.navmesh_context.recast_config.max_vertices_per_polygon);
+
+        if poly_mesh.is_err() {
+            println!(
+                "Could not build polymesh from contours: {:?}",
+                poly_mesh.err()
+            );
+            return;
+        }
+
+        let poly_mesh = poly_mesh.unwrap();
 
         let detail_mesh = DetailNavmesh::new(
             &poly_mesh,
             &compact_heightfield,
             self.navmesh_context.recast_config.detail_sample_dist,
             self.navmesh_context.recast_config.detail_sample_max_error,
-        )
-        .unwrap();
+        );
 
-        self.navmesh_context.navmesh = polyanya::RecastFullMesh::new(poly_mesh, detail_mesh)
-            .try_into()
-            .unwrap();
+        if detail_mesh.is_err() {
+            println!(
+                "Could not build detail mesh from polymesh and compact heightfield: {:?}",
+                detail_mesh.err()
+            );
+            return;
+        }
 
-        self.navmesh_context.navmesh.bake();
+        let detail_mesh = detail_mesh.unwrap();
+
+        let navmesh: Result<Mesh, RecastError> =
+            polyanya::RecastFullMesh::new(poly_mesh, detail_mesh).try_into();
+        if navmesh.is_err() {
+            println!(
+                "Could not create polynanya mesh from recast full mesh: {:?}",
+                navmesh.err()
+            );
+            return;
+        }
+
+        let mut navmesh = navmesh.unwrap();
+        navmesh.bake();
+        self.navmesh_context.navmesh = Some(navmesh);
+
+        // self.navmesh_context.navmesh.bake();
         let mut serialized_navmesh_model = SerializedModel3D::new();
-        
-        for l in &self.navmesh_context.navmesh.layers {
+
+        for l in &self.navmesh_context.navmesh.as_ref().unwrap().layers {
             let mut navmesh_representation = SerializedMesh3D::new();
             for (i, v) in l.vertices.iter().enumerate() {
                 let h = l.heights().unwrap()[i];
@@ -219,30 +248,21 @@ impl Scene3D {
                 navmesh_representation.indices.push(p.vertices[2]);
                 navmesh_representation.indices.push(p.vertices[1]);
                 navmesh_representation.indices.push(p.vertices[0]);
-
-                // for v in &p.vertices {
-                // }
             }
             navmesh_representation.recalculate_normals();
-            navmesh_representation.uvs.resize(navmesh_representation.positions.len(), [0.0, 0.0]);
+            navmesh_representation
+                .uvs
+                .resize(navmesh_representation.positions.len(), [0.0, 0.0]);
             navmesh_representation.material_index = 0;
             serialized_navmesh_model.meshes.push(navmesh_representation);
         }
 
-        // let navmesh_material = ModelMaterial::new(
-        //     device,
-        //     "navmesh-material",
-        //     default_material.diffuse_texture.clone(),
-        //     default_material.normal_texture.clone(),
-        //     texture_layout,
-        //     [0.5, 0.5, 0.0, 1.0],
-        //     1.0,
-        //     1.0,
-        // );
         let mut serialized_navmesh_material = SerializedModelMaterial::new();
-        serialized_navmesh_material.base_colour = [0.5, 0.5, 0.0, 0.5];
+        serialized_navmesh_material.base_colour = [0.5, 0.5, 0.0, 0.33];
         serialized_navmesh_material.name = "navmesh-material".to_owned();
-        serialized_navmesh_model.materials.push(serialized_navmesh_material);
+        serialized_navmesh_model
+            .materials
+            .push(serialized_navmesh_material);
         let path = PathBuf::new();
         let model = load_3d_model_from_serialized(
             &mut serialized_navmesh_model,
@@ -311,9 +331,10 @@ impl Scene3D {
         }
 
         let mesh = &serialized_model.as_ref().unwrap().meshes[0];
-        
+
         let mut recast_mesh = mesh_to_recast_mesh(mesh);
-        let transform_matrix = glam::Mat4::from_scale_rotation_translation(Vec3::splat(1.0), orientation, translation);
+        let transform_matrix =
+            glam::Mat4::from_scale_rotation_translation(Vec3::splat(1.0), orientation, translation);
         for v in recast_mesh.vertices.iter_mut() {
             let vv = transform_matrix * glam::Vec4::new(v.x, v.y, v.z, 1.0);
             v.x = vv.x;
@@ -343,7 +364,7 @@ impl Scene3D {
                         scale: glam::Vec3::splat(1.0),
                     },
                 );
-                self.terrain_nodes.push(model_node);
+                self.terrain_model_nodes.push(model_node);
             }
             Err(err) => {
                 println!("Could not add terrain model: {}", err);
@@ -418,16 +439,25 @@ impl Scene3D {
     }
 
     pub fn find_path(&self, from: glam::Vec3, to: glam::Vec3) -> Option<VecDeque<glam::Vec3>> {
-        let path = self.navmesh_context.navmesh.path_3d(from, to);
-        let mut results = VecDeque::new();
-        match path {
-            Some(val) => {
-                for v in val {
-                    results.push_back(v);
+        if self.navmesh_context.navmesh.is_some() {
+            let path = self
+                .navmesh_context
+                .navmesh
+                .as_ref()
+                .unwrap()
+                .path_3d(from, to);
+            let mut results = VecDeque::new();
+            match path {
+                Some(val) => {
+                    for v in val {
+                        results.push_back(v);
+                    }
+                    Some(results)
                 }
-                Some(results)
+                None => None,
             }
-            None => None,
+        } else {
+            None
         }
     }
 
@@ -484,7 +514,7 @@ impl Scene3D {
                             val: instance.position,
                         },
                         velocity: VelocityComponent {
-                            val: glam::Vec3::ZERO,
+                            val: glam::Vec3::new(0.0, 0.0, 1.0),
                         },
                         orientation: OrientationComponent {
                             val: instance.orientation,

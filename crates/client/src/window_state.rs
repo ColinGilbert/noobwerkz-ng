@@ -285,7 +285,7 @@ impl WindowState {
             &u.asset_mgr.terrain_models,
             &s.model_nodes,
             &s.navmesh_model_node,
-            &s.terrain_nodes,
+            &s.terrain_model_nodes,
             &s.characters_contexts,
             &self.gfx_ctx.particles_ctx,
             // &particle_effects,

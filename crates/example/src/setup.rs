@@ -267,55 +267,87 @@ pub fn user_setup(
             );
         }
     }
-    let mut voxels = Vec::new();
-    voxels.push(glam::IVec3::new(0, 0, 0));
-    voxels.push(glam::IVec3::new(0, 1, 0));
-    voxels.push(glam::IVec3::new(0, -1, 0));
-    voxels.push(glam::IVec3::new(1, 0, 0));
-    voxels.push(glam::IVec3::new(0, 0, 1));
-    voxels.push(glam::IVec3::new(0, 0, 2));
+    // let mut voxels = Vec::new();
+    // voxels.push(glam::IVec3::new(0, 0, 0));
+    // voxels.push(glam::IVec3::new(0, 1, 0));
+    // voxels.push(glam::IVec3::new(0, -1, 0));
+    // voxels.push(glam::IVec3::new(1, 0, 0));
+    // voxels.push(glam::IVec3::new(0, 0, 1));
+    // voxels.push(glam::IVec3::new(0, 0, 2));
+
+    // // terrain_texture_path.push("");
+    // u.scenes[current_scene].add_terrain(
+    //     Shape3D::Voxels(glam::Vec3::new(1.0, 1.0, 1.0), voxels),
+    //     glam::Vec3::new(0.0, -5.0, 0.0),
+    //     glam::Quat::IDENTITY,
+    //     &mut u.asset_mgr,
+    //     &mut gfx_ctx.device,
+    //     &mut gfx_ctx.queue,
+    //     &gfx_ctx.debug_material,
+    //     &terrain_texture_path,
+    //     &gfx_ctx.texture_bind_group_layout,
+    // );
 
     let terrain_texture_path = path.clone();
-    // terrain_texture_path.push("");
-    u.scenes[current_scene].add_terrain(
-        Shape3D::Voxels(glam::Vec3::new(1.0, 1.0, 1.0), voxels),
-        glam::Vec3::new(0.0, -5.0, 0.0),
-        glam::Quat::IDENTITY,
-        &mut u.asset_mgr,
-        &mut gfx_ctx.device,
-        &mut gfx_ctx.queue,
-        &gfx_ctx.debug_material,
-        &terrain_texture_path,
-        &gfx_ctx.texture_bind_group_layout,
-    );
-
     const HEIGHTFIELD_SIZE: usize = 1024;
+
+    let mut noise_1 = vec![0.0f32; HEIGHTFIELD_SIZE * HEIGHTFIELD_SIZE];
+    let mut noise_2 = vec![0.0f32; HEIGHTFIELD_SIZE * HEIGHTFIELD_SIZE];
+    let mut noise_params_path = path.clone();
+    noise_params_path.push("noise_params_1.json");
+
+    let noise_params_1 =
+        Noise2DParameters::from_json(fs::read_to_string(noise_params_path).unwrap());
+
+    let mut noise_params_path = path.clone();
+    noise_params_path.push("noise_params_2.json");
+    let noise_params_2 =
+        Noise2DParameters::from_json(fs::read_to_string(noise_params_path).unwrap());
+
+    make_fbm_perlin_noise_2d(&noise_params_1, 0.0, 0.0, HEIGHTFIELD_SIZE, 0, &mut noise_1);
+    make_fbm_perlin_noise_2d(&noise_params_2, 0.0, 0.0, HEIGHTFIELD_SIZE, 0, &mut noise_2);
 
     let mut noise = vec![0.0f32; HEIGHTFIELD_SIZE * HEIGHTFIELD_SIZE];
 
-    let mut noise_params_path = path.clone();
-    noise_params_path.push("noise_params.json");
+    for ((i, n1), n2) in noise_1.iter().enumerate().zip(noise_2.iter()) {
+        noise[i] = 0.50 * n1 + 0.50 * n2;
+        noise[i] *= 1.0 / 100.0;
+    }
 
-    let noise_params = Noise2DParameters::from_json(fs::read_to_string(noise_params_path).unwrap());
+    let mut heightmap_path = path.clone();
+    heightmap_path.push("terrain.png");
+    let heightmap = fs::read(heightmap_path).unwrap();
 
-    make_fbm_perlin_noise_2d(&noise_params, 0.0, 0.0, HEIGHTFIELD_SIZE, 128, &mut noise);
+    let pixels = image::load_from_memory(&heightmap).unwrap();
+    println!(
+        "Heightmap height: {}, width: {}",
+        pixels.height(),
+        pixels.width()
+    );
 
-    make_noise_terraces(&mut noise, 3.0);
+    let pixels = pixels.grayscale();
+
+    let pixels = pixels.to_luma32f();
+
+    noise.clear();
+    for p in pixels.iter() {
+        noise.push(*p);
+    }
+    //make_noise_terraces(&mut noise, 5.0);
     // make_noise_raised_to_power(&mut noise, 2.0);
     make_noise_zero_or_above(&mut noise);
-
 
     u.scenes[current_scene].add_terrain(
         Shape3D::HeightMap(
             noise,
             HEIGHTFIELD_SIZE,
             glam::Vec3 {
-                x: 100.0,
-                y: 0.5,
-                z: 100.0,
+                x: 128 as f32,
+                y: 128 as f32,
+                z: 128 as f32,
             },
         ),
-        glam::Vec3::ZERO,
+        glam::Vec3::new(0.0, -32.0, 0.0),
         glam::Quat::IDENTITY,
         &mut u.asset_mgr,
         &mut gfx_ctx.device,
@@ -325,5 +357,11 @@ pub fn user_setup(
         &gfx_ctx.texture_bind_group_layout,
     );
 
-    u.scenes[current_scene].build_navmesh(&mut u.asset_mgr, &mut gfx_ctx.device, &mut gfx_ctx.queue, &gfx_ctx.debug_material, &gfx_ctx.texture_bind_group_layout);
+    u.scenes[current_scene].build_navmesh(
+        &mut u.asset_mgr,
+        &mut gfx_ctx.device,
+        &mut gfx_ctx.queue,
+        &gfx_ctx.debug_material,
+        &gfx_ctx.texture_bind_group_layout,
+    );
 }
