@@ -32,7 +32,7 @@ use rapier3d::geometry::{Group, InteractionGroups};
 use simple_particles::ParticleSystem;
 
 use crate::{
-    camera3d::*, character3d_renderable::Character3DRenderable, index_types::*,
+    camera3d::*, character3d::Character3D, index_types::*,
     instance3d::Instance3D, model3d_node::Model3DNode, skinned_model3d::SkinnedModel3D,
     skinned_model3d_node::SkinnedModel3DNode,
 };
@@ -41,7 +41,7 @@ use rapier3d::prelude::*;
 use rayon::prelude::*;
 
 pub struct Characters3DContext {
-    pub characters: Characters3D<Character3DRenderable>,
+    pub characters: Characters3D<Character3D>,
     pub skinned_model_node: SkinnedModel3DNode,
 }
 
@@ -486,7 +486,7 @@ impl Scene3D {
         println!("ADDING CHARACTERS: Instance count: {}", instances.len());
         let characters_ctx_idx = Characters3DContextIndex::new(self.characters_contexts.len() - 1);
         for instance in instances {
-            let character = Character3DRenderable::new(
+            let character = Character3D::new(
                 skeleton.clone(),
                 instance.position.into(),
                 instance.orientation,

@@ -1,5 +1,5 @@
 use noobwerkz_client::camera3d::CameraContext;
-use noobwerkz_client::client_user_context::ClientUserContext;
+use noobwerkz_client::user_context::UserContext;
 use noobwerkz_client::glam;
 use noobwerkz_client::graphics::*;
 use noobwerkz_client::light3d::*;
@@ -13,7 +13,7 @@ pub fn user_update(
     gfx_ctx: &mut GraphicsContext,
     cam_ctx: &mut CameraContext,
     light_ctx: &mut Light3DContext,
-    user_ctx: &mut ClientUserContext,
+    user_ctx: &mut UserContext,
     dt: Duration,
 ) {
     let u = user_ctx;

@@ -4,18 +4,23 @@ use crate::{
     asset_manager::*, index_types::*, instance3d::Instance3D, model_material::ModelMaterial,
     scene3d::*,
 };
+
+use noobwerkz_shared::index_types::*;
+
 use kira::{AudioManager, AudioManagerSettings, DefaultBackend};
 use noobwerkz_skeletal_animation::animation_graph_definition::AnimationGraphDefinition;
+use rapier3d::geometry::SharedShape;
 
-pub struct ClientUserContext {
+pub struct UserContext {
     pub asset_mgr: AssetManager,
     pub scenes: Scenes3D<Scene3D>,
     pub active_scene: Scene3DIndex,
     pub audio_mgr: Option<AudioManager>,
+    pub shapes: SharedShapes<SharedShape>,
     pub time_elapsed: u128, // TODO: Replace with web_time::Duration??
 }
 
-impl ClientUserContext {
+impl UserContext {
     pub fn new() -> Self {
         let asset_mgr = AssetManager::new();
         let scenes = Scenes3D::new();
@@ -32,6 +37,7 @@ impl ClientUserContext {
             asset_mgr,
             scenes,
             active_scene: Scene3DIndex::new(0),
+            shapes: SharedShapes::new(),
             audio_mgr,
             time_elapsed: 0,
         }

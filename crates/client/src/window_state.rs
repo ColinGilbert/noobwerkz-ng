@@ -1,6 +1,6 @@
 use crate::callbacks::*;
 use crate::camera3d::*;
-use crate::client_user_context::*;
+use crate::user_context::*;
 use crate::egui_renderer::EguiRenderer;
 use crate::graphics::*;
 use crate::light3d::*;
@@ -24,7 +24,7 @@ pub struct WindowState {
     pub gfx_ctx: GraphicsContext,
     pub light_ctx: Light3DContext,
     pub cam_ctx: CameraContext,
-    pub user_ctx: ClientUserContext,
+    pub user_ctx: UserContext,
     pub forward_renderer: ForwardRenderer3D,
     pub egui_renderer: EguiRenderer,
     #[allow(dead_code)]
@@ -51,7 +51,7 @@ impl WindowState {
         gfx_ctx.particles_ctx.borrow_mut().init(&gfx_ctx.device, &gfx_ctx.queue, &gfx_ctx.texture_bind_group_layout);
 
         let mut lights = Vec::<Light3DUniform>::new();
-        let mut user_ctx = ClientUserContext::new();
+        let mut user_ctx = UserContext::new();
 
         if let Some(cb) = *USER_SETUP_CALLBACK.lock().unwrap() {
             cb(&mut gfx_ctx, &mut user_ctx, &mut lights);

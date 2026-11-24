@@ -39,7 +39,9 @@ pub struct CharacterEntity {
     pub character_component: CharacterComponent, // SOmetimes we need to filter on this
 }
 
+
 ecs_world!(CharacterEntity);
+
 
 #[system_for_each(World)]
 fn update_positions(

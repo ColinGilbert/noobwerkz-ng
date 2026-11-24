@@ -27,3 +27,8 @@ safe_index::new!(
     Item3DTypeUIDIndex,
     btree map: Item3DTypeUIDsMap,
 );
+
+safe_index::new!(
+    SharedShapeIndex,
+    map: SharedShapes,
+);

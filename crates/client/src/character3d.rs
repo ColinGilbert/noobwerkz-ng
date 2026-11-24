@@ -5,13 +5,13 @@ use noobwerkz_shared::{character3d_common::*, skeleton::*};
 use noobwerkz_skeletal_animation::{animation::Animation, animation_graph::{AnimationGraph, AnimationIndex, Animations}, animation_graph_definition::AnimationGraphDefinition};
 
 
-pub struct Character3DRenderable {
+pub struct Character3D {
     //pub instance_idx: usize,
     pub common: Character3DCommon,
     pub anim_graph: AnimationGraph,
 }
 
-impl Character3DRenderable {
+impl Character3D {
     pub fn new(
         skeleton: Arc<Skeleton>,
         position: glam::Vec3,

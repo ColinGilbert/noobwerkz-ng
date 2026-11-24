@@ -1,6 +1,7 @@
 #![allow(unused)]
-use std::collections::VecDeque;
+use std::{collections::VecDeque, sync::Arc};
 
+use rapier3d::geometry::SharedShape;
 use zero_ecs::*;
 
 #[derive(Default)]
@@ -31,6 +32,9 @@ pub struct PathComponent {
 
 #[derive(Default)]
 pub struct CharacterComponent;
+
+#[derive(Default)]
+pub struct PropComponent;
 
 pub struct DeltaTimeResource {
     pub val: f32,

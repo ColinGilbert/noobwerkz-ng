@@ -1,8 +1,8 @@
-use noobwerkz_client::{egui_renderer::EguiRenderer, client_user_context::ClientUserContext};
+use noobwerkz_client::{egui_renderer::EguiRenderer, user_context::UserContext};
 
 // MODIFY ME!
 #[allow(unused)]
-pub fn user_gui(egui_renderer: &mut EguiRenderer, user_ctx: &mut ClientUserContext) {
+pub fn user_gui(egui_renderer: &mut EguiRenderer, user_ctx: &mut UserContext) {
     noobwerkz_client::egui::Window::new("Noobwerkz engine!")
         .resizable(true)
         .min_height(120.0)

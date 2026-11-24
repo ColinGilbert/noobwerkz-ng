@@ -1,7 +1,7 @@
 use std::fs;
 
 use noobwerkz_client::camera3d::*;
-use noobwerkz_client::client_user_context::ClientUserContext;
+use noobwerkz_client::user_context::UserContext;
 use noobwerkz_client::glam;
 use noobwerkz_client::graphics::*;
 use noobwerkz_client::index_types::*;
@@ -20,7 +20,7 @@ use crate::user_data::*;
 // MODIFY ME!
 pub fn user_setup(
     gfx_ctx: &mut GraphicsContext,
-    user_ctx: &mut ClientUserContext,
+    user_ctx: &mut UserContext,
     lights: &mut Vec<Light3DUniform>,
 ) {
     let u = user_ctx;
