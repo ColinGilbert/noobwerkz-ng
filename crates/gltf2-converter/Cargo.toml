@@ -10,3 +10,4 @@ glam = { workspace = true }
 clap = { workspace = true }
 prost = { workspace = true }
 gltf = {version = "1.4.1", features = ["utils"] }
+coacd = { workspace = true}

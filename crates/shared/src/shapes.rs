@@ -15,7 +15,65 @@ pub enum Shape3D {
     CapsuleY(f32, f32),
     Trimesh(SerializedMesh3D),
     Voxels(glam::Vec3, Vec<glam::IVec3>),
-    HeightMap(Vec<f32>, usize, glam::Vec3)
+    HeightMap(Vec<f32>, usize, glam::Vec3),
+}
+
+pub fn to_shared_shape(shape: &Shape3D) -> Option<SharedShape> {
+    match shape {
+        Shape3D::Cube(scale) => {
+            return Some(SharedShape::cuboid(scale / 2.0, scale / 2.0, scale / 2.0));
+        }
+        Shape3D::Cuboid(x, y, z) => {
+            return Some(SharedShape::cuboid(*x, *y, *z));
+        }
+        Shape3D::Sphere(radius) => {
+            return Some(SharedShape::ball(*radius));
+        }
+        Shape3D::CapsuleX(length, radius) => {
+            return Some(SharedShape::capsule_x(length / 2.0, *radius));
+        }
+        Shape3D::CapsuleY(length, radius) => {
+            return Some(SharedShape::capsule_y(length / 2.0, *radius));
+        }
+        Shape3D::Trimesh(mesh) => {
+            let indices = Vec::new();
+            let mut counter = 0;
+            let mut accum = [0, 0, 0];
+            for i in &mesh.indices {
+                accum[counter] = *i;
+                if counter > 2 {
+                    counter = 0;
+                }
+                counter += 1;
+            }
+            let shape = SharedShape::trimesh(
+                mesh.clone()
+                    .positions
+                    .into_iter()
+                    .map(glam::Vec3::from_array)
+                    .collect(),
+                indices,
+            );
+            match shape {
+                Ok(val) => {
+                    return Some(val);
+                }
+                Err(err) => {
+                    println!("Error creating trimesh: {}", err);
+                    return None;
+                }
+            }
+        }
+        Shape3D::Voxels(voxel_size, grid_coords) => {
+            return Some(SharedShape::voxels(*voxel_size, &grid_coords));
+        }
+        Shape3D::HeightMap(data, size, scale) => {
+            let heights = Array2::new(*size, *size, data.to_vec());
+            Some(SharedShape::heightfield(heights, *scale));
+        }
+    }
+
+    None
 }
 
 pub fn shape_to_collider(shape: &Shape3D) -> Option<Collider> {

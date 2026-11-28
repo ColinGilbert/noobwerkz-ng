@@ -45,7 +45,7 @@ fn main() {
     server_base_path.push("src");
 
     if !fs::exists(server_base_path.clone()).expect("Could not check existence of server code path") {
-        let server_path_string = server_base_path.into_string().expect("Could not stringify sever base path");
+        let server_path_string = server_base_path.into_string().expect("Could not stringify server base path");
         println!("Could not find server code path at {}", server_path_string);
         return;
     }

@@ -32,3 +32,31 @@ safe_index::new!(
     SharedShapeIndex,
     map: SharedShapes,
 );
+
+safe_index::new!(
+    CuboidShapeIndex,
+);
+
+safe_index::new!(
+    SphereShapeIndex,
+);
+
+safe_index::new!(
+    CapsuleYShapeIndex,
+);
+
+safe_index::new!(
+  CapsuleXShapeIndex,
+);
+
+safe_index::new!(
+  TrimeshShapeIndex,
+);
+
+safe_index::new!(
+    VoxelsShapeIndex,
+);
+
+safe_index::new!(
+    HeightMapShapeIndex,
+);

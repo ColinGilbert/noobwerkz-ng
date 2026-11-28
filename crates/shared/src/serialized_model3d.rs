@@ -2,7 +2,7 @@ use crate::bone::*;
 
 use std::collections::HashMap;
 
-use noobwerkz_proto::{protobuf_schema::*};
+use noobwerkz_proto::protobuf_schema::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SerializedAnimation3D {
@@ -514,6 +514,7 @@ pub struct SerializedModel3D {
     pub inverse_bind_matrices: Vec<[[f32; 4]; 4]>,
     pub animations: Vec<SerializedAnimation3D>,
     pub animations_by_name: HashMap<String, usize>,
+    pub hulls: HashMap<usize, Vec<SerializedMesh3D>>,
     // pub global_inverse_transform: [[f32; 4]; 4],
 }
 
@@ -527,6 +528,7 @@ impl SerializedModel3D {
             inverse_bind_matrices: Vec::new(),
             animations: Vec::new(),
             animations_by_name: HashMap::new(),
+            hulls: HashMap::new(),
             // global_inverse_transform: glam::Mat4::IDENTITY.to_cols_array_2d(),
         }
     }
@@ -597,6 +599,20 @@ impl SerializedModel3D {
             animations_by_name.insert(name, i);
         }
 
+        let mut hulls = HashMap::new();
+
+        for hull_container in other.hulls {
+            let mut hulls_temp = Vec::new();
+            for h in hull_container.hulls {
+                let hullmesh = SerializedMesh3D::from_protobuf(h);
+                if hullmesh.is_none() {
+                    return None;
+                }
+                hulls_temp.push(hullmesh.unwrap());
+            }
+            hulls.insert(hull_container.mesh_index as usize, hulls_temp);
+        }
+
         Some(Self {
             meshes,
             materials,
@@ -605,6 +621,7 @@ impl SerializedModel3D {
             inverse_bind_matrices,
             animations,
             animations_by_name,
+            hulls,
         })
     }
 
@@ -615,10 +632,20 @@ impl SerializedModel3D {
             results.meshes.push(m.to_protobuf());
         }
 
+        for (i, mesh_hulls) in &self.hulls {
+            let mut hulls = Vec::new();
+            for h in mesh_hulls {
+                hulls.push(h.to_protobuf());
+            }
+            let hull_container = SerializedHull3DProtobuf {
+                mesh_index: *i as u64,
+                hulls,
+            };
+            results.hulls.push(hull_container);
+        }
+
         for m in &self.materials {
-            results
-                .materials
-                .push(m.to_protobuf());
+            results.materials.push(m.to_protobuf());
         }
 
         for b in &self.bones {
@@ -660,7 +687,12 @@ impl SerializedModel3D {
         }
 
         for (name, index) in &self.animations_by_name {
-            results.animations_by_name.push(AnimationByNameValuesProtobuf { name: name.clone(), index: *index as u64 })
+            results
+                .animations_by_name
+                .push(AnimationByNameValuesProtobuf {
+                    name: name.clone(),
+                    index: *index as u64,
+                })
         }
 
         results
@@ -681,22 +713,24 @@ impl SerializedTerrainModel3D {
         }
     }
     pub fn from_protobuf(other: SerializedTerrainModel3DProtobuf) -> Option<Self> {
-
         let mut results = SerializedTerrainModel3D::new();
         for mesh_proto in other.meshes {
             let m = SerializedMesh3D::from_protobuf(mesh_proto);
-            if m.is_none() { return None; }
+            if m.is_none() {
+                return None;
+            }
             results.meshes.push(m.unwrap());
         }
         for mat_proto in other.materials {
             let m = SerializedModelMaterial::from_protobuf(mat_proto);
-            if m.is_none() { return None; }
+            if m.is_none() {
+                return None;
+            }
             results.materials.push(m.unwrap());
         }
 
         Some(results)
     }
-
 
     pub fn to_protobuf(&self) -> SerializedTerrainModel3DProtobuf {
         let mut results = SerializedTerrainModel3DProtobuf::default();

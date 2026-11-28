@@ -1,8 +1,7 @@
-use std::fs;
-
+use std::path::PathBuf;
 use noobwerkz_client::camera3d::*;
-use noobwerkz_client::user_context::UserContext;
 use noobwerkz_client::glam;
+use noobwerkz_client::glam::Vec3;
 use noobwerkz_client::graphics::*;
 use noobwerkz_client::index_types::*;
 use noobwerkz_client::instance3d::*;
@@ -10,7 +9,8 @@ use noobwerkz_client::light3d::Light3DUniform;
 use noobwerkz_client::model3d_node::*;
 use noobwerkz_client::scene3d::*;
 use noobwerkz_client::simple_particles::ParticleEffect;
-use noobwerkz_shared::noise::*;
+use noobwerkz_client::user_context::UserContext;
+// use noobwerkz_shared::noise::*;
 // use noobwerkz_shared::serialized_model3d::SerializedMesh3D;
 use noobwerkz_shared::shapes::*;
 use noobwerkz_skeletal_animation::animation_graph_definition::*;
@@ -288,74 +288,99 @@ pub fn user_setup(
     //     &gfx_ctx.texture_bind_group_layout,
     // );
 
-    let terrain_texture_path = path.clone();
-    const HEIGHTFIELD_SIZE: usize = 1024;
+    // let terrain_texture_path = path.clone();
+    // const HEIGHTFIELD_SIZE: usize = 1024;
 
-    let mut noise_1 = vec![0.0f32; HEIGHTFIELD_SIZE * HEIGHTFIELD_SIZE];
-    let mut noise_2 = vec![0.0f32; HEIGHTFIELD_SIZE * HEIGHTFIELD_SIZE];
-    let mut noise_params_path = path.clone();
-    noise_params_path.push("noise_params_1.json");
+    // let mut noise_1 = vec![0.0f32; HEIGHTFIELD_SIZE * HEIGHTFIELD_SIZE];
+    // let mut noise_2 = vec![0.0f32; HEIGHTFIELD_SIZE * HEIGHTFIELD_SIZE];
+    // let mut noise_params_path = path.clone();
+    // noise_params_path.push("noise_params_1.json");
 
-    let noise_params_1 =
-        Noise2DParameters::from_json(fs::read_to_string(noise_params_path).unwrap());
+    // let noise_params_1 =
+    //     Noise2DParameters::from_json(fs::read_to_string(noise_params_path).unwrap());
 
-    let mut noise_params_path = path.clone();
-    noise_params_path.push("noise_params_2.json");
-    let noise_params_2 =
-        Noise2DParameters::from_json(fs::read_to_string(noise_params_path).unwrap());
+    // let mut noise_params_path = path.clone();
+    // noise_params_path.push("noise_params_2.json");
+    // let noise_params_2 =
+    //     Noise2DParameters::from_json(fs::read_to_string(noise_params_path).unwrap());
 
-    make_fbm_perlin_noise_2d(&noise_params_1, 0.0, 0.0, HEIGHTFIELD_SIZE, 0, &mut noise_1);
-    make_fbm_perlin_noise_2d(&noise_params_2, 0.0, 0.0, HEIGHTFIELD_SIZE, 0, &mut noise_2);
+    // make_fbm_perlin_noise_2d(&noise_params_1, 0.0, 0.0, HEIGHTFIELD_SIZE, 0, &mut noise_1);
+    // make_fbm_perlin_noise_2d(&noise_params_2, 0.0, 0.0, HEIGHTFIELD_SIZE, 0, &mut noise_2);
 
-    let mut noise = vec![0.0f32; HEIGHTFIELD_SIZE * HEIGHTFIELD_SIZE];
+    // let mut noise = vec![0.0f32; HEIGHTFIELD_SIZE * HEIGHTFIELD_SIZE];
 
-    for ((i, n1), n2) in noise_1.iter().enumerate().zip(noise_2.iter()) {
-        noise[i] = 0.50 * n1 + 0.50 * n2;
-        noise[i] *= 1.0 / 100.0;
-    }
+    // for ((i, n1), n2) in noise_1.iter().enumerate().zip(noise_2.iter()) {
+    //     noise[i] = 0.50 * n1 + 0.50 * n2;
+    //     noise[i] *= 1.0 / 100.0;
+    // }
 
-    let mut heightmap_path = path.clone();
-    heightmap_path.push("terrain.png");
-    let heightmap = fs::read(heightmap_path).unwrap();
+    // let mut heightmap_path = path.clone();
+    // heightmap_path.push("terrain.png");
+    // let heightmap = fs::read(heightmap_path).unwrap();
 
-    let pixels = image::load_from_memory(&heightmap).unwrap();
-    println!(
-        "Heightmap height: {}, width: {}",
-        pixels.height(),
-        pixels.width()
-    );
+    // let pixels = image::load_from_memory(&heightmap).unwrap();
+    // println!(
+    //     "Heightmap height: {}, width: {}",
+    //     pixels.height(),
+    //     pixels.width()
+    // );
 
-    let pixels = pixels.grayscale();
+    // let pixels = pixels.grayscale();
 
-    let pixels = pixels.to_luma32f();
+    // let pixels = pixels.to_luma32f();
 
-    noise.clear();
-    for p in pixels.iter() {
-        noise.push(*p);
-    }
-    //make_noise_terraces(&mut noise, 5.0);
-    // make_noise_raised_to_power(&mut noise, 2.0);
-    make_noise_zero_or_above(&mut noise);
+    // noise.clear();
+    // for p in pixels.iter() {
+    //     noise.push(*p);
+    // }
+    // //make_noise_terraces(&mut noise, 5.0);
+    // // make_noise_raised_to_power(&mut noise, 2.0);
+    // make_noise_zero_or_above(&mut noise);
+
+    // u.scenes[current_scene].add_terrain(
+    //     Shape3D::HeightMap(
+    //         noise,
+    //         HEIGHTFIELD_SIZE,
+    //         glam::Vec3 {
+    //             x: 128 as f32,
+    //             y: 128 as f32,
+    //             z: 128 as f32,
+    //         },
+    //     ),
+    //     glam::Vec3::new(0.0, -32.0, 0.0),
+    //     glam::Quat::IDENTITY,
+    //     &mut u.asset_mgr,
+    //     &mut gfx_ctx.device,
+    //     &mut gfx_ctx.queue,
+    //     &gfx_ctx.debug_material,
+    //     &terrain_texture_path,
+    //     &gfx_ctx.texture_bind_group_layout,
+    // );
 
     u.scenes[current_scene].add_terrain(
-        Shape3D::HeightMap(
-            noise,
-            HEIGHTFIELD_SIZE,
-            glam::Vec3 {
-                x: 128 as f32,
-                y: 128 as f32,
-                z: 128 as f32,
-            },
-        ),
-        glam::Vec3::new(0.0, -32.0, 0.0),
+        Shape3D::Cuboid(100.0, 0.0, 100.0),
+        Vec3::ZERO,
         glam::Quat::IDENTITY,
         &mut u.asset_mgr,
         &mut gfx_ctx.device,
         &mut gfx_ctx.queue,
         &gfx_ctx.debug_material,
-        &terrain_texture_path,
+        &PathBuf::new(),
         &gfx_ctx.texture_bind_group_layout,
     );
+
+        u.scenes[current_scene].add_terrain(
+        Shape3D::Cuboid(10.0, 5.0, 10.0),
+        Vec3::ZERO,
+        glam::Quat::IDENTITY,
+        &mut u.asset_mgr,
+        &mut gfx_ctx.device,
+        &mut gfx_ctx.queue,
+        &gfx_ctx.debug_material,
+        &PathBuf::new(),
+        &gfx_ctx.texture_bind_group_layout,
+    );
+
 
     u.scenes[current_scene].build_navmesh(
         &mut u.asset_mgr,

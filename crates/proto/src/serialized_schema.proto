@@ -92,15 +92,21 @@ message AnimationByNameValuesProtobuf {
 
 message SerializedModel3DProtobuf {
   repeated SerializedMesh3DProtobuf meshes = 1;
-  repeated SerializedModelMaterialProtobuf materials = 2;
-  repeated SerializedBone3DProtobuf bones = 3;
-  repeated string bone_names = 4;
-  repeated Mat4fProtobuf inverse_bind_matrices = 5;
-  repeated SerializedAnimation3DProtobuf animations = 6;
-  repeated AnimationByNameValuesProtobuf animations_by_name = 7;
+  repeated SerializedHull3DProtobuf hulls = 2;
+  repeated SerializedModelMaterialProtobuf materials = 3;
+  repeated SerializedBone3DProtobuf bones = 4;
+  repeated string bone_names = 5;
+  repeated Mat4fProtobuf inverse_bind_matrices = 6;
+  repeated SerializedAnimation3DProtobuf animations = 7;
+  repeated AnimationByNameValuesProtobuf animations_by_name = 8;
 }
 
 message SerializedTerrainModel3DProtobuf {
   repeated SerializedMesh3DProtobuf meshes = 1;
   repeated SerializedModelMaterialProtobuf materials = 2;
+}
+
+message SerializedHull3DProtobuf {
+  uint64 mesh_index = 1;
+  repeated SerializedMesh3DProtobuf hulls = 2;
 }

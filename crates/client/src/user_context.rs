@@ -1,11 +1,14 @@
-use std::path::PathBuf;
+use std::{path::PathBuf};
 
 use crate::{
     asset_manager::*, index_types::*, instance3d::Instance3D, model_material::ModelMaterial,
     scene3d::*,
 };
 
-use noobwerkz_shared::index_types::*;
+use noobwerkz_shared::{
+    index_types::*,
+    shapes::{Shape3D, to_shared_shape},
+};
 
 use kira::{AudioManager, AudioManagerSettings, DefaultBackend};
 use noobwerkz_skeletal_animation::animation_graph_definition::AnimationGraphDefinition;
@@ -89,6 +92,20 @@ impl UserContext {
                     "Could not load skinned mode for character {}. Error: {}",
                     name, err
                 );
+            }
+        }
+    }
+
+    pub fn add_shape(&mut self, shape: &Shape3D) -> Option<SharedShapeIndex> {
+        let new_index = SharedShapeIndex::new(self.shapes.len());
+        let shared = to_shared_shape(shape);
+        match shared {
+            Some(val) => {
+                self.shapes.push(val);
+                return Some(new_index);
+            }
+            None => {
+                return None;
             }
         }
     }

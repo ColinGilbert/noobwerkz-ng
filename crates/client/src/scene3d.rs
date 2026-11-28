@@ -444,7 +444,7 @@ impl Scene3D {
                 .navmesh_context
                 .navmesh
                 .as_ref()
-                .unwrap()
+                ?
                 .path_3d(from, to);
             let mut results = VecDeque::new();
             match path {

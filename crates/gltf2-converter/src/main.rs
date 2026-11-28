@@ -1,14 +1,15 @@
 use clap::Parser;
 use gltf::Semantic;
 // use msgpacker::*;
+use coacd::{Coacd, mesh::IndexedMesh, parameters::CoacdParaneters};
 use noobwerkz_shared::{bone::*, serialized_model3d::*};
+use prost::Message;
 use std::{
     collections::{HashMap, HashSet},
     fs::*,
     io::*,
     str::FromStr,
 };
-use prost::Message;
 
 fn traverse_node_recursive(
     node: &gltf::Node,
@@ -193,7 +194,15 @@ fn run(input_path: &str, output_path: &str) {
                     };
 
                     let mut truncated_path = std::path::PathBuf::from_str(&output_path).unwrap();
-                    let file_name = format!("{}-texture_diffuse.{}", truncated_path.clone().file_stem().unwrap().to_string_lossy(), ext);
+                    let file_name = format!(
+                        "{}-texture_diffuse.{}",
+                        truncated_path
+                            .clone()
+                            .file_stem()
+                            .unwrap()
+                            .to_string_lossy(),
+                        ext
+                    );
                     truncated_path.pop();
                     truncated_path.push(file_name);
                     let mut file = std::fs::File::create(truncated_path.clone()).unwrap();
@@ -203,8 +212,12 @@ fn run(input_path: &str, output_path: &str) {
                         truncated_path.clone().display()
                     );
 
-                    serialized_material.diffuse_texture_path =
-                        truncated_path.clone().file_name().unwrap().to_string_lossy().to_string();
+                    serialized_material.diffuse_texture_path = truncated_path
+                        .clone()
+                        .file_name()
+                        .unwrap()
+                        .to_string_lossy()
+                        .to_string();
                 }
                 gltf::image::Source::Uri { uri, mime_type } => {
                     println!(
@@ -236,7 +249,15 @@ fn run(input_path: &str, output_path: &str) {
                     };
 
                     let mut truncated_path = std::path::PathBuf::from_str(&output_path).unwrap();
-                    let file_name = format!("{}-texture_normal.{}", truncated_path.clone().file_stem().unwrap().to_string_lossy(), ext);
+                    let file_name = format!(
+                        "{}-texture_normal.{}",
+                        truncated_path
+                            .clone()
+                            .file_stem()
+                            .unwrap()
+                            .to_string_lossy(),
+                        ext
+                    );
                     truncated_path.pop();
                     truncated_path.push(file_name);
                     let mut file = std::fs::File::create(truncated_path.clone()).unwrap();
@@ -245,8 +266,12 @@ fn run(input_path: &str, output_path: &str) {
                         "Saved normal texture to {}",
                         truncated_path.clone().display()
                     );
-                    serialized_material.normals_texture_path =
-                        truncated_path.clone().file_name().unwrap().to_string_lossy().to_string();
+                    serialized_material.normals_texture_path = truncated_path
+                        .clone()
+                        .file_name()
+                        .unwrap()
+                        .to_string_lossy()
+                        .to_string();
                 }
                 gltf::image::Source::Uri { uri, mime_type } => {
                     println!(
@@ -469,6 +494,49 @@ fn run(input_path: &str, output_path: &str) {
         });
     }
 
+    // We now put in the hulls
+    let coacd = Coacd {
+        parameters: CoacdParaneters::new(0.03),
+    };
+
+
+    let mut serialized_hulls = HashMap::new();
+
+    for (mesh_index, m) in serialized_meshes.iter_mut().enumerate() {
+        let mut vertices = Vec::new();
+        let mut indices = Vec::new();
+        for p in m.positions.iter() {
+            vertices.push(glam::Vec3A::new(p[0], p[1], p[2]));
+        }
+
+        for i in m.indices.chunks(3) {
+            indices.push([i[0], i[1], i[2]]);
+        }
+
+        let indexed_mesh = IndexedMesh { vertices, indices};
+        
+        let parts = coacd.decompose(&indexed_mesh);
+        
+        let mut hulls = Vec::new();
+
+        for part in parts {
+            let mut serialized_hull = SerializedMesh3D::new();
+            for v in part.vertices {
+                serialized_hull.positions.push([v.x, v.y, v.z]);
+            }
+            for i in part.indices {
+                serialized_hull.indices.push(i[0]);
+                serialized_hull.indices.push(i[1]);
+                serialized_hull.indices.push(i[2]);
+            }
+            serialized_hull.recalculate_normals();
+            hulls.push(serialized_hull);
+        }
+
+        serialized_hulls.insert(mesh_index, hulls);
+
+    }
+
     let mut serialized_model = SerializedModel3D::new();
     serialized_model.meshes = serialized_meshes;
     serialized_model.materials = serialized_materials;
@@ -477,20 +545,23 @@ fn run(input_path: &str, output_path: &str) {
     serialized_model.inverse_bind_matrices = inverse_bind_matrices;
     serialized_model.animations = serialized_animations;
     serialized_model.animations_by_name = animations_by_name;
+    serialized_model.hulls = serialized_hulls;
     // serialized_model.global_inverse_transform = glam::Mat4::IDENTITY.to_cols_array_2d();
 
-    println!("Serialized model num meshes: {}", serialized_model.meshes.len());
-
+    println!(
+        "Serialized model num meshes: {}",
+        serialized_model.meshes.len()
+    );
 
     let output_model = serialized_model.to_protobuf();
-    
+
     let mut buf = Vec::new();
     buf.reserve(output_model.encoded_len());
     //let _n = serialized_model.pack(&mut buf);
     let results = output_model.encode(&mut buf);
     if results.is_err() {
         println!("Could not encode serialized protobuf payload.");
-        return
+        return;
     }
     let mut file = File::create(output_path).unwrap();
     let results = file.write_all(&buf);
